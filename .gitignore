@@ -1,0 +1,8 @@
+node_modules/
+.data-cache/
+*.tif
+*.osm
+.env*
+!.env.example
+coverage/
+.DS_Store

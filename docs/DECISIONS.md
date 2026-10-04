@@ -1,0 +1,110 @@
+# Decision log
+
+Running log. Each entry: the decision, options considered, why, and whether it needs Richard. Newest decisions are appended; superseded ones are marked, never deleted.
+
+Status key: **Decided** (reversible, logged per "high autonomy"), **Proposed** (needs Richard's sign-off before work depends on it), **Open**.
+
+---
+
+## D-001 Repository shape: TypeScript monorepo, pnpm workspaces
+
+**Decided.** 2026-10-04.
+
+- `packages/graph`: schema, attribute/confidence model, OSM ingest, terrain enrichment, snapshots.
+- `packages/profile`: user profile and presets.
+- `packages/router`: cost model, routing, summaries, explanations, trade-offs.
+- `scripts/`: data builds and the spike. `db/migrations/`: PostGIS source of truth.
+- App packages (`apps/mobile`, `apps/web`) arrive after D-004 is signed off.
+
+The core packages have no DOM, Node-only or React dependencies on their hot path, so the same router can run on a server, in a worker, or on the phone (see D-003, D-004). Node 22, TypeScript strict, Vitest.
+
+## D-002 Graph model: OpenSidewalks-style footway graph, with an explicit stand-in for unmapped pavements
+
+**Decided.** 2026-10-04. Spec: [DATA_MODEL.md](DATA_MODEL.md).
+
+- Footways, sidewalks (one edge per side), crossings, steps, ramps, lifts, escalators and corridors are edges. Kerbs, crossings, lifts and entrances are nodes. Lifts between levels become explicit vertical edges with their own state.
+- Every attribute is `{ value, state, source, observedAt, method }`. No bare values.
+- **Where OSM has no separately mapped pavement, we route on the road centreline as a `street_proxy` edge.** The alternative (refuse to route) leaves 28% of the Edinburgh spike network unreachable. The proxy is never presented as known: the router marks it `unknown` (pavement existence, width, side-road kerbs) and charges the uncertainty penalty. Phase 1 replaces proxies with synthesised per-side edges from OS MasterMap / NGD pavement polygons where licensed, and from `sidewalk:*` tags otherwise.
+
+## D-003 Routing engine
+
+**Proposed** (reversible, but it shapes Phase 2, so flagging it). 2026-10-04.
+
+Hard requirements from the brief, scored:
+
+| Requirement | Valhalla | openrouteservice (wheelchair) | GraphHopper custom models | pgRouting over PostGIS | Own router (TS, spike) |
+|---|---|---|---|---|---|
+| Per-request user thresholds | Partial: pedestrian `type=wheelchair`, `max_grade`, step penalty. No kerb height, cross-slope, width | Yes for incline, kerb height, surface, smoothness. No cross-slope, width minimum is coarse | Yes, on any encoded value, via request-time expressions | Yes, cost is SQL per request | Yes, any attribute |
+| Hard exclusions vs soft penalties | Partial | Partial | Yes (priority 0 vs multipliers) | Yes | Yes |
+| Custom attributes (cross-slope, confidence, kerb cm) | Fork the C++ tile builder | Fork the Java build | Java import plugin + new encoded values | Native (columns) | Native |
+| Live state without rebuild | Traffic tiles are speed-only; closures need per-request exclude polygons | Per-request `avoid_polygons` | Per-request areas in the custom model | Native (update a row) | Native (overlay map) |
+| Uncertainty penalty | No | No | Expressible if confidence is encoded, coarse | Yes | Yes |
+| Alternatives | Yes | Yes | Yes | Weak (`pgr_KSP`) | Yes (penalty method), plus profile trade-offs |
+| Elevation profile | Yes | Yes | Yes | Build ourselves | Yes |
+| "Why this way?" explanation | No | No | Partial (path details) | Build ourselves | Yes, native |
+| Runs on device offline | Yes (mobile builds, heavy) | No | Android only | No | Yes, same code |
+| Transit | No | No | Limited | No | No: OpenTripPlanner 2 for transit legs |
+| Maturity | High | High | High | High | New (about 600 lines) |
+
+**Proposal:**
+
+1. **PostGIS is the source of truth** for the enriched graph (boring, proven, as the brief asks).
+2. **Walking and wheeling legs use our own router** (`packages/router`): per-city compact graph exported from PostGIS, held in memory on the server and on the device. It is the only option that does all of: per-user cost over our own attributes, an uncertainty penalty, explanation, and offline on the phone with the *same* cost function. The spike routes Waverley to the Grassmarket in about 5.5 ms on a 3,000-edge graph. A whole city (estimated 300k to 500k edges) is the Phase 1 performance gate. If it misses (target: p95 under 150 ms on the server), we add contraction or landmarks (ALT) rather than switch engines.
+3. **OpenTripPlanner 2 for transit legs.** Our router plans station entrance to street; OTP plans between stops, with its wheelchair-accessible trip filtering. Station interiors (step-free paths, lifts) live in our graph, so lift outages hit our edges directly.
+4. **GraphHopper custom models are the fallback** if the own-router performance gate fails. Its request-time expressions are the closest match to our cost model.
+5. **openrouteservice's wheelchair profile is the external benchmark.** Phase 2 runs every acceptance journey through it and records where we differ and why.
+
+**Risk:** owning a router is novelty on the infrastructure side, which the brief warns against. The mitigation is that it is small, pure and heavily tested, its storage underneath is PostGIS, and the fallback is named. **Needs Richard:** no, unless he wants a mainstream engine for credibility reasons.
+
+## D-004 Platform
+
+**Proposed. Needs Richard's sign-off before building past the spike.** Full write-up: [PLATFORM.md](PLATFORM.md).
+
+Recommendation: a **shared TypeScript core** (graph, profile, router) used by **an Expo (React Native) app as the primary product** and **a Next.js web app** for share links, place pages, desktop planning and the debug map. The deciding criteria are background location, Live Activities on the lock screen, haptics and offline storage. A PWA cannot meet the brief's navigation bar on iOS. The cost: shadcn survives fully on web, and on native only through react-native-reusables (the shadcn port for NativeWind). That is a partial deviation from "shadcn for all UI chrome" and Richard needs to accept it.
+
+## D-005 Terrain: LiDAR for Scotland Phase 5 + OSTN15
+
+**Decided.** 2026-10-04.
+
+- Phase 3 NT27SE does **not** cover central Edinburgh (checked: data only in the south-east corner of the tile). Phase 5 NT27SE and NT27SW (50 cm DTM, Open Government Licence) cover the spike area. Read with HTTP range requests from the public bucket, so there are no multi-hundred-MB downloads.
+- WGS84 to British National Grid uses the **OSTN15** grid (PROJ CDN GeoTIFF), not the 7-parameter Helmert. Helmert is out by up to about 5 m, which at 0.5 m resolution samples the wrong side of a retaining wall.
+- Incline is sampled every 1 m along the footway line; the router excludes on the steepest 10 m window; edges under 5 m use a centred 5 m baseline.
+- **Bridges, levels other than 0, indoor and covered edges never sample the DTM**: bare earth under North Bridge is Waverley's tracks. They interpolate between abutments, or stay unknown.
+- **Discontinuity rule:** a jump of over 0.6 m between 1 m samples, or any gradient over 35%, means the line crosses a wall or an unmapped structure. The edge becomes `unknown` with that reason; we never trust it. 138 edges in the spike area.
+- England: Environment Agency National LiDAR Programme 1 m DTM (Phase 3 cities).
+
+## D-006 Geocoder: self-hosted Photon, plus OS Open Names and postcodes
+
+**Decided** (not built yet). The public Nominatim service forbids autocomplete and limits use to 1 request per second; Photon is designed for type-ahead. Index OSM + OS Open Names + Overture places (with a per-record licence). Postcodes from the ONS Postcode Directory (three attribution lines; excludes BT postcodes).
+
+## D-007 Map tiles: Protomaps PMTiles self-hosted, our own style
+
+**Decided** (not built yet). One PMTiles file per pilot region on object storage behind a CDN. No per-request vendor cost and no vendor lock-in, and it works offline as a single downloadable file per city, which matters for D-004. OpenFreeMap is the zero-effort fallback for development. Accessibility overlay as a separate vector source generated from our graph (ODbL produced work, attributed). Terrain/hillshade from DEM tiles derived from the same LiDAR (Open Government Licence).
+
+## D-008 ODbL strategy: the enriched graph is an ODbL derivative database, and we publish it
+
+**Proposed** (licensing strategy; touches Q4). 2026-10-04.
+
+Attaching LiDAR gradients and our surveys to OSM-derived footway geometry makes the enriched graph a derivative database under ODbL (the Collective Database Guideline only keeps layers separate if they never cross-reference). Trying to avoid that would mean keying our attributes to non-OSM geometry everywhere, which costs a lot and gains little.
+
+Proposal: **accept it, and publish the enriched footway graph under ODbL.** It fits an accessibility mission, it makes crowd verification feed back into OSM (via the OSM editing route Mapillary explicitly permits), and it is a credible open-data story. Licensed or partner data (OS NGD widths, AccessAble, Euan's Guide, Mapillary-derived attributes if their terms don't allow it) stays in **separate layers keyed by our own location IDs**, joined only at query time, and is never written back into the ODbL graph. **Needs Richard:** yes, because it depends on whether this is a product, a charity tool or an open-data project (Q4).
+
+## D-009 Profile data stays on the device
+
+**Decided** (it is the brief's default). The profile is sent with each routing request and never persisted or logged server-side. No analytics on profile contents. Server-side sync only with explicit consent and after a DPIA, and that is a stop-and-ask item for Richard. Routing requests are logged without the profile, and with origin and destination truncated to 3 decimal places (about 100 m).
+
+## D-010 Heavy jobs: GitHub Actions for Phase 0 and 1, then Fly.io or Cloud Run workers
+
+**Decided.** Graph builds, LiDAR sampling and imagery inference do not run in Vercel functions. Phase 0 and Phase 1 run builds as scheduled GitHub Actions jobs, which is enough for three cities rebuilt nightly. Minutely OSM diffs and Mapillary inference move to a container worker (Fly.io Machines or Cloud Run jobs) writing to Supabase PostGIS. Reconsider at Phase 3.
+
+## D-011 Weather: Open-Meteo in development, Met Office DataHub for production
+
+**Decided.** Open-Meteo's free API is non-commercial only. If Causewayside is a product (Q4), production uses Met Office DataHub (site-specific) or a paid Open-Meteo plan. The cost model already takes `wet` and `ice` conditions.
+
+## D-012 Phase 0 snapshot data source: OSM API `/map`
+
+**Decided**, temporary. Overpass and Geofabrik were unreachable from the build container. The OSM API is fine for a small bbox but must not be used for city builds (OSMF API usage policy). Phase 1 ingests Geofabrik Scotland PBF plus minutely diffs from a worker with normal network access.
+
+## D-013 Unknown-risk weights and preset thresholds are placeholders
+
+**Decided**, explicitly provisional. The presets cite Inclusive Mobility (2021) where it applies (5% preferred, 8% absolute over short distances; cross-fall 2.5%) and are otherwise judgement. The unknown-risk weights (60 s per 100 m for unknown gradient, 120 s per unmapped kerb at a crossing) are guesses. Both are calibrated in Phase 2 with disabled testers in each city. Every number lives in one place (`packages/profile`, `packages/router/src/cost.ts`).

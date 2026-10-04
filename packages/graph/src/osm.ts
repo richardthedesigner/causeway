@@ -1,0 +1,541 @@
+/**
+ * OSM XML → pedestrian graph. Tagging follows the OSM wiki conventions that
+ * OpenSidewalks maps onto: footway=sidewalk|crossing, sidewalk:*=separate,
+ * kerb=*, kerb:height, incline, surface, smoothness, width, step_count,
+ * handrail, level, layer, bridge.
+ *
+ * Phase 0 reads the XML from the OSM API (/api/0.6/map). Phase 1 swaps this
+ * for Geofabrik PBF + minutely diffs into PostGIS; the tag interpretation
+ * here is the part that carries over.
+ */
+import { XMLParser } from "fast-xml-parser";
+import { attr, unknownAttr, type Attr } from "./attribute.js";
+import type {
+  EdgeAttrs,
+  EdgeKind,
+  Graph,
+  GraphEdge,
+  GraphNode,
+  KerbInfo,
+  KerbType,
+  Smoothness,
+  Surface,
+} from "./schema.js";
+import { haversine, lineLength } from "./geo.js";
+
+type Tags = Record<string, string>;
+
+export interface OsmNode {
+  id: number;
+  lat: number;
+  lon: number;
+  tags: Tags;
+  timestamp: string;
+}
+export interface OsmWay {
+  id: number;
+  nodes: number[];
+  tags: Tags;
+  timestamp: string;
+}
+export interface OsmData {
+  nodes: Map<number, OsmNode>;
+  ways: Map<number, OsmWay>;
+}
+
+const asArray = <T>(v: T | T[] | undefined): T[] => (v === undefined ? [] : Array.isArray(v) ? v : [v]);
+
+export function parseOsmXml(xml: string, into?: OsmData): OsmData {
+  const parser = new XMLParser({
+    ignoreAttributes: false,
+    attributeNamePrefix: "",
+    parseAttributeValue: false,
+    isArray: (name) => ["node", "way", "nd", "tag", "relation", "member"].includes(name),
+  });
+  const doc = parser.parse(xml) as {
+    osm: {
+      node?: { id: string; lat: string; lon: string; timestamp: string; tag?: { k: string; v: string }[] }[];
+      way?: { id: string; timestamp: string; nd?: { ref: string }[]; tag?: { k: string; v: string }[] }[];
+    };
+  };
+  const out: OsmData = into ?? { nodes: new Map(), ways: new Map() };
+  const tagsOf = (t?: { k: string; v: string }[]): Tags =>
+    Object.fromEntries(asArray(t).map((x) => [x.k, String(x.v)]));
+  for (const n of asArray(doc.osm.node)) {
+    out.nodes.set(Number(n.id), {
+      id: Number(n.id),
+      lat: Number(n.lat),
+      lon: Number(n.lon),
+      tags: tagsOf(n.tag),
+      timestamp: n.timestamp,
+    });
+  }
+  for (const w of asArray(doc.osm.way)) {
+    out.ways.set(Number(w.id), {
+      id: Number(w.id),
+      nodes: asArray(w.nd).map((x) => Number(x.ref)),
+      tags: tagsOf(w.tag),
+      timestamp: w.timestamp,
+    });
+  }
+  return out;
+}
+
+const ROAD_HIGHWAYS = new Set([
+  "trunk",
+  "trunk_link",
+  "primary",
+  "primary_link",
+  "secondary",
+  "secondary_link",
+  "tertiary",
+  "tertiary_link",
+  "unclassified",
+  "residential",
+  "service",
+  "living_street",
+]);
+
+const NO_ACCESS = new Set(["no", "private"]);
+
+/** Does this road have its pavements mapped as separate ways? Then the centreline is not for walking. */
+function sidewalksSeparate(t: Tags): boolean {
+  const s = [t["sidewalk"], t["sidewalk:both"], t["sidewalk:left"], t["sidewalk:right"]];
+  return s.some((v) => v === "separate");
+}
+
+/** Classify an OSM way for pedestrian routing, or null if not routable. */
+export function classifyWay(t: Tags): EdgeKind | null {
+  if (NO_ACCESS.has(t["foot"] ?? "") || (NO_ACCESS.has(t["access"] ?? "") && !["yes", "designated", "permissive"].includes(t["foot"] ?? ""))) {
+    return null;
+  }
+  if (t["railway"] === "platform" || t["public_transport"] === "platform") {
+    return t["highway"] === "steps" ? "steps" : "footway";
+  }
+  const hw = t["highway"];
+  if (!hw) return null;
+  switch (hw) {
+    case "steps":
+      return "steps";
+    case "elevator":
+      return "elevator";
+    case "corridor":
+      return "corridor";
+    case "pedestrian":
+      return "pedestrian";
+    case "footway":
+      if (t["footway"] === "sidewalk") return "sidewalk";
+      if (t["footway"] === "crossing") return "crossing";
+      if (t["conveying"] && t["conveying"] !== "no") return "escalator";
+      if (t["ramp"] === "yes") return "ramp";
+      return "footway";
+    case "path":
+    case "cycleway":
+    case "bridleway":
+    case "track":
+      if (hw !== "path" && !["yes", "designated", "permissive"].includes(t["foot"] ?? "")) {
+        // cycleways in the UK are commonly shared; treat untagged as walkable but unknown
+        if (hw === "cycleway" && t["foot"] === undefined) return "footway";
+        if (hw === "track") return "footway";
+        return null;
+      }
+      return "footway";
+    case "living_street":
+      return "pedestrian";
+  }
+  if (ROAD_HIGHWAYS.has(hw)) {
+    if (sidewalksSeparate(t)) return null;
+    if ((t["sidewalk"] === "no" || t["sidewalk"] === "none") && ["trunk", "primary", "secondary"].includes(hw)) return null;
+    return "street_proxy";
+  }
+  return null;
+}
+
+const SURFACES: Record<string, Surface> = {
+  asphalt: "asphalt",
+  concrete: "concrete",
+  "concrete:plates": "concrete",
+  "concrete:lanes": "concrete",
+  paved: "paving_stones",
+  paving_stones: "paving_stones",
+  "paving_stones:30": "paving_stones",
+  sett: "sett",
+  unhewn_cobblestone: "cobblestone",
+  cobblestone: "cobblestone",
+  "cobblestone:flattened": "sett",
+  compacted: "compacted",
+  fine_gravel: "fine_gravel",
+  gravel: "gravel",
+  pebblestone: "gravel",
+  unpaved: "gravel",
+  dirt: "grass",
+  ground: "grass",
+  earth: "grass",
+  grass: "grass",
+  wood: "wood",
+  metal: "metal",
+  rubber: "asphalt",
+  tartan: "asphalt",
+  bricks: "paving_stones",
+  brick: "paving_stones",
+  stone: "paving_stones",
+};
+
+const SMOOTHNESS: ReadonlySet<string> = new Set(["excellent", "good", "intermediate", "bad", "very_bad", "horrible"]);
+
+export function parseIncline(v: string | undefined): number | null {
+  if (!v) return null;
+  const m = /^\s*(-?\d+(?:\.\d+)?)\s*(%|°)?\s*$/.exec(v);
+  if (!m) return null;
+  const n = Number(m[1]);
+  if (m[2] === "°") return Math.tan((n * Math.PI) / 180) * 100;
+  return n;
+}
+
+export function parseMetres(v: string | undefined): number | null {
+  if (!v) return null;
+  const m = /^\s*(\d+(?:\.\d+)?)\s*(m|cm)?\s*$/.exec(v);
+  if (!m) return null;
+  const n = Number(m[1]);
+  return m[2] === "cm" ? n / 100 : n;
+}
+
+export function parseKerbHeightCm(v: string | undefined): number | null {
+  if (!v) return null;
+  const m = /^\s*(\d+(?:\.\d+)?)\s*(m|cm|mm)?\s*$/.exec(v);
+  if (!m) return null;
+  const n = Number(m[1]);
+  if (m[2] === "cm") return n;
+  if (m[2] === "mm") return n / 10;
+  // Bare numbers: OSM default unit is metres, but kerb:height=3 clearly means cm.
+  return n < 1 ? n * 100 : n;
+}
+
+const yesNo = (v: string | undefined): boolean | null =>
+  v === undefined ? null : ["yes", "true", "1"].includes(v) ? true : ["no", "false", "0"].includes(v) ? false : null;
+
+function osmAttr<T>(v: T | null, ts: string, method: string): Attr<T> {
+  return v === null ? unknownAttr<T>() : attr(v, "reported", "osm", ts, method);
+}
+
+export function edgeAttrsFromTags(t: Tags, ts: string, kind: EdgeKind): EdgeAttrs {
+  const inc = parseIncline(t["incline"]);
+  const surface = t["surface"] ? (SURFACES[t["surface"]] ?? "other") : null;
+  const smooth = t["smoothness"] && SMOOTHNESS.has(t["smoothness"]) ? (t["smoothness"] as Smoothness) : null;
+  const width = parseMetres(t["width"] ?? t["est_width"]);
+  const steps = t["step_count"] ? Number(t["step_count"]) : null;
+  const handrail =
+    yesNo(t["handrail"]) ??
+    (["handrail:left", "handrail:right", "handrail:center"].some((k) => t[k] === "yes") ? true : null);
+  const wc = t["wheelchair"];
+  return {
+    incline: osmAttr(inc, ts, "OSM incline tag"),
+    inclineMax: osmAttr(inc, ts, "OSM incline tag"),
+    crossSlope: unknownAttr(),
+    surface: osmAttr(surface, ts, "OSM surface tag"),
+    smoothness: osmAttr(smooth, ts, "OSM smoothness tag"),
+    width: osmAttr(width, ts, "OSM width tag"),
+    stepCount: kind === "steps" ? osmAttr(Number.isFinite(steps) ? steps : null, ts, "OSM step_count") : attr(0, "inferred", "derived", null, "not steps"),
+    handrail: osmAttr(handrail, ts, "OSM handrail tag"),
+    lit: osmAttr(yesNo(t["lit"]), ts, "OSM lit tag"),
+    covered: osmAttr(yesNo(t["covered"]) ?? (t["indoor"] === "yes" || t["tunnel"] === "building_passage" ? true : null), ts, "OSM covered/indoor"),
+    wheelchair: osmAttr(wc === "yes" || wc === "limited" || wc === "no" ? wc : null, ts, "OSM wheelchair tag"),
+  };
+}
+
+function kerbFromTags(t: Tags, ts: string): KerbInfo | undefined {
+  const k = t["kerb"];
+  const isKerb = t["barrier"] === "kerb" || k !== undefined || t["kerb:height"] !== undefined;
+  if (!isKerb) return undefined;
+  const type: KerbType | null =
+    k === "raised" || k === "lowered" || k === "flush" || k === "rolled" ? k : k === "no" ? "flush" : null;
+  let h = parseKerbHeightCm(t["kerb:height"]);
+  // Where only the type is known we leave height unknown rather than guess a number;
+  // the cost model reasons about type directly.
+  if (h === null && type === "flush") h = 0;
+  return {
+    type: osmAttr(type, ts, "OSM kerb tag"),
+    heightCm: osmAttr(h, ts, "OSM kerb:height tag"),
+    tactilePaving: osmAttr(yesNo(t["tactile_paving"]), ts, "OSM tactile_paving tag"),
+  };
+}
+
+const levelOf = (t: Tags): number => {
+  const l = t["level"];
+  if (!l) return 0;
+  const n = Number(l.split(";")[0]);
+  return Number.isFinite(n) ? n : 0;
+};
+
+export interface BuildOptions {
+  name: string;
+  bbox: [number, number, number, number];
+  snapshot: string;
+}
+
+/**
+ * Build the pedestrian graph. Ways are split at every shared node and at
+ * every node that carries pedestrian meaning (kerbs, crossings, lifts,
+ * entrances) so the router can reason about them individually.
+ */
+export function buildGraphFromOsm(osm: OsmData, opts: BuildOptions): Graph {
+  const routable: { way: OsmWay; kind: EdgeKind }[] = [];
+  for (const way of osm.ways.values()) {
+    const kind = classifyWay(way.tags);
+    if (!kind) continue;
+    if (way.nodes.some((n) => !osm.nodes.has(n))) {
+      // Clipped at the bbox edge: keep the part we have.
+      way.nodes = way.nodes.filter((n) => osm.nodes.has(n));
+    }
+    if (way.nodes.length < 2) continue;
+    routable.push({ way, kind });
+  }
+
+  const use = new Map<number, number>();
+  for (const { way } of routable) {
+    // A closed way visits its first node twice; count distinct visits only.
+    const seen = new Set<number>();
+    for (const n of way.nodes) {
+      if (seen.has(n)) continue;
+      seen.add(n);
+      use.set(n, (use.get(n) ?? 0) + 1);
+    }
+  }
+  const meaningful = (n: OsmNode) =>
+    !!n.tags["barrier"] ||
+    !!n.tags["kerb"] ||
+    n.tags["highway"] === "crossing" ||
+    n.tags["highway"] === "elevator" ||
+    !!n.tags["entrance"] ||
+    n.tags["railway"] === "subway_entrance";
+
+  const nodes = new Map<number, GraphNode>();
+  const nodeFor = (osmId: number, level: number): number => {
+    // Same OSM node at different levels becomes distinct graph nodes only for lifts (see below).
+    const existing = nodes.get(osmId);
+    if (existing) return existing.id;
+    const n = osm.nodes.get(osmId)!;
+    const kerb = kerbFromTags(n.tags, n.timestamp);
+    const kind: GraphNode["kind"] =
+      n.tags["highway"] === "elevator"
+        ? "elevator"
+        : kerb
+          ? "kerb"
+          : n.tags["highway"] === "crossing"
+            ? "crossing"
+            : n.tags["entrance"] || n.tags["railway"] === "subway_entrance"
+              ? "entrance"
+              : "junction";
+    nodes.set(osmId, {
+      id: osmId,
+      lon: n.lon,
+      lat: n.lat,
+      ele: unknownAttr(),
+      level,
+      kind,
+      ...(kerb ? { kerb } : {}),
+      osmId,
+    });
+    return osmId;
+  };
+
+  const edges: GraphEdge[] = [];
+  let edgeId = 1;
+  for (const { way, kind } of routable) {
+    const t = way.tags;
+    const level = levelOf(t);
+    const layer = Number(t["layer"] ?? 0) || 0;
+    const bridge = !!t["bridge"] && t["bridge"] !== "no";
+    const attrs = edgeAttrsFromTags(t, way.timestamp, kind);
+    const oneway = kind === "escalator" || t["oneway:foot"] === "yes" || (kind !== "street_proxy" && t["oneway"] === "yes" && kind !== "steps");
+    // A crossing way tagged kerb=lowered applies to both ends.
+    const crossingKerb = kind === "crossing" ? kerbFromTags({ kerb: t["kerb"] ?? "", "kerb:height": t["kerb:height"] ?? "", tactile_paving: t["tactile_paving"] ?? "" }, way.timestamp) : undefined;
+
+    let start = 0;
+    for (let i = 1; i < way.nodes.length; i++) {
+      const id = way.nodes[i]!;
+      const n = osm.nodes.get(id)!;
+      const last = i === way.nodes.length - 1;
+      if (!last && (use.get(id) ?? 0) < 2 && !meaningful(n)) continue;
+      const slice = way.nodes.slice(start, i + 1);
+      const geometry = slice.map((nid) => {
+        const nn = osm.nodes.get(nid)!;
+        return [nn.lon, nn.lat] as [number, number];
+      });
+      const from = nodeFor(slice[0]!, level);
+      const to = nodeFor(slice[slice.length - 1]!, level);
+      if (from !== to || geometry.length > 2) {
+        edges.push({
+          id: edgeId++,
+          from,
+          to,
+          kind,
+          geometry,
+          lengthM: lineLength(geometry),
+          name: t["name"] ?? null,
+          level,
+          layer,
+          bridge,
+          bidirectional: !oneway,
+          attrs: structuredClone(attrs),
+          osmWayId: way.id,
+        });
+      }
+      start = i;
+    }
+    if (crossingKerb && crossingKerb.type.state !== "unknown") {
+      for (const end of [way.nodes[0]!, way.nodes[way.nodes.length - 1]!]) {
+        const gn = nodes.get(end);
+        if (gn && !gn.kerb) gn.kerb = crossingKerb;
+      }
+    }
+  }
+
+  splitLiftsByLevel(nodes, edges, () => edgeId++);
+  inferNames(edges, osm);
+
+  return {
+    meta: {
+      name: opts.name,
+      bbox: opts.bbox,
+      builtAt: new Date().toISOString(),
+      sources: [
+        {
+          id: "osm",
+          licence: "ODbL-1.0",
+          attribution: "© OpenStreetMap contributors",
+          snapshot: opts.snapshot,
+        },
+      ],
+    },
+    nodes: [...nodes.values()],
+    edges,
+  };
+}
+
+/**
+ * OSM maps a lift as a single node shared by ways on different levels. We
+ * turn it into explicit vertical edges between per-level copies of the node
+ * so a lift can carry its own state (in service / out of service) and cost.
+ * Where every connected way is on the same level (common tagging shortcut),
+ * the node stays as is with kind "elevator" and the router treats passing
+ * through it as using the lift.
+ */
+function splitLiftsByLevel(nodes: Map<number, GraphNode>, edges: GraphEdge[], nextId: () => number) {
+  for (const node of [...nodes.values()]) {
+    if (node.kind !== "elevator") continue;
+    const incident = edges.filter((e) => e.from === node.id || e.to === node.id);
+    const levels = [...new Set(incident.map((e) => e.level))].sort((a, b) => a - b);
+    if (levels.length < 2) continue;
+    const perLevel = new Map<number, number>();
+    for (const lvl of levels) {
+      const id = -(node.id * 10 + (levels.indexOf(lvl) + 1));
+      nodes.set(id, { ...node, id, level: lvl, kind: "elevator" });
+      perLevel.set(lvl, id);
+    }
+    for (const e of incident) {
+      const nid = perLevel.get(e.level)!;
+      if (e.from === node.id) e.from = nid;
+      if (e.to === node.id) e.to = nid;
+    }
+    for (let i = 0; i < levels.length; i++) {
+      for (let j = i + 1; j < levels.length; j++) {
+        edges.push({
+          id: nextId(),
+          from: perLevel.get(levels[i]!)!,
+          to: perLevel.get(levels[j]!)!,
+          kind: "elevator",
+          geometry: [
+            [node.lon, node.lat],
+            [node.lon, node.lat],
+          ],
+          lengthM: 0,
+          name: null,
+          level: levels[i]!,
+          layer: 0,
+          bridge: false,
+          bidirectional: true,
+          attrs: {
+            incline: attr(0, "inferred", "derived", null, "lift"),
+            inclineMax: attr(0, "inferred", "derived", null, "lift"),
+            crossSlope: attr(0, "inferred", "derived", null, "lift"),
+            surface: unknownAttr(),
+            smoothness: unknownAttr(),
+            width: unknownAttr(),
+            stepCount: attr(0, "inferred", "derived", null, "lift"),
+            handrail: unknownAttr(),
+            lit: unknownAttr(),
+            covered: attr(true, "inferred", "derived", null, "lift"),
+            wheelchair: unknownAttr(),
+          },
+          osmWayId: node.osmId,
+        });
+      }
+    }
+    nodes.delete(node.id);
+  }
+}
+
+/**
+ * Sidewalks and crossings are rarely named in OSM. Borrow the name of the
+ * nearest roughly parallel named street so explanations can say
+ * "Cockburn Street" rather than "an unnamed footway".
+ */
+function inferNames(edges: GraphEdge[], osm: OsmData) {
+  const named: { name: string; a: [number, number]; b: [number, number] }[] = [];
+  for (const w of osm.ways.values()) {
+    const name = w.tags["name"];
+    // Only streets lend their names: a footway borrowing "Granny's Green Steps" would be a lie.
+    const hw = w.tags["highway"] ?? "";
+    if (!name || !(ROAD_HIGHWAYS.has(hw) || hw === "pedestrian")) continue;
+    for (let i = 1; i < w.nodes.length; i++) {
+      const a = osm.nodes.get(w.nodes[i - 1]!);
+      const b = osm.nodes.get(w.nodes[i]!);
+      if (a && b) named.push({ name, a: [a.lon, a.lat], b: [b.lon, b.lat] });
+    }
+  }
+  const CELL = 0.0005;
+  const grid = new Map<string, number[]>();
+  const key = (x: number, y: number) => `${Math.floor(x / CELL)}:${Math.floor(y / CELL)}`;
+  named.forEach((s, i) => {
+    const mx = (s.a[0] + s.b[0]) / 2;
+    const my = (s.a[1] + s.b[1]) / 2;
+    const k = key(mx, my);
+    (grid.get(k) ?? grid.set(k, []).get(k)!).push(i);
+  });
+  for (const e of edges) {
+    if (e.name || e.kind === "elevator") continue;
+    const mid = e.geometry[Math.floor(e.geometry.length / 2)]!;
+    const cx = Math.floor(mid[0] / CELL);
+    const cy = Math.floor(mid[1] / CELL);
+    let best: { name: string; d: number } | null = null;
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dy = -1; dy <= 1; dy++) {
+        for (const i of grid.get(`${cx + dx}:${cy + dy}`) ?? []) {
+          const s = named[i]!;
+          const d = distToSegment(mid, s.a, s.b);
+          if (d < 20 && (!best || d < best.d)) best = { name: s.name, d };
+        }
+      }
+    }
+    if (best) {
+      e.name = best.name;
+      e.nameInferred = true;
+    }
+  }
+}
+
+function distToSegment(p: [number, number], a: [number, number], b: [number, number]): number {
+  const kx = Math.cos((p[1] * Math.PI) / 180);
+  const ax = (a[0] - p[0]) * kx,
+    ay = a[1] - p[1],
+    bx = (b[0] - p[0]) * kx,
+    by = b[1] - p[1];
+  const dx = bx - ax,
+    dy = by - ay;
+  const len2 = dx * dx + dy * dy;
+  const t = len2 === 0 ? 0 : Math.max(0, Math.min(1, -(ax * dx + ay * dy) / len2));
+  const x = ax + t * dx,
+    y = ay + t * dy;
+  return haversine([p[0], p[1]], [p[0] + x / kx, p[1] + y]);
+}
