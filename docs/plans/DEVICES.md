@@ -73,7 +73,7 @@ Each step is one pull request that can go live on its own.
 - Picking closes the list, re-plans (already reactive on `routeProfile`) and announces "Now using Lulu" in a polite live region, with a short toast.
 - "Edit Cherry" opens step 4's screen. "+ Add a device" opens step 5's flow.
 
-**3. Search bar layout** (`PlaceSearch.tsx`)
+**3. Search bar layout** (`SearchBar.tsx`, used by `PlaceSearch.tsx` and `RoutePanel.tsx`). Done. The bar splits when the field or destination would get narrower than 150 px beside the button.
 - Hide the magnifier when the bar shows a destination.
 - Two-line layout using a container query on the bar: when the bar is narrower than the destination's minimum (about 12 characters) plus the button, wrap. Check it at 320 px, at 200% text and with the longest preset label ("Manual chair + help").
 - Padding review: one inner padding for the bar, and the button inset to match the bar's corner radius.
