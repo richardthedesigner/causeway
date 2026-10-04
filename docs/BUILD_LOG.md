@@ -2,6 +2,14 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map.
 
+## 2026-10-04 (night)
+
+**Powerchairs and scooters in two classes each, and named devices** (D-034, [plan](plans/DEVICES.md))
+- From tester feedback: a lightweight powerchair manages far less than a heavy duty one, and road scooters differ from pavement scooters.
+- New presets: "Powerchair, lightweight" (8% uphill, 3 cm kerbs, never cobbles) and "Mobility scooter, road" (class 3: uses streets without a pavement, no buses).
+- Saved, named devices with favourites. The app starts with Cherry (lightweight powerchair, no setts or cobbles) and Lulu (pavement scooter) as a demo seed.
+- The device switcher and naming screens wait for the UI update; the spec is in the plan.
+
 ## 2026-10-04 (evening)
 
 **Accessible toilets on the way**

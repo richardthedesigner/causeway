@@ -8,7 +8,7 @@
  * the unknown, an adventurous one barely notices it.
  */
 import { confidence, isKnown, type EntranceInfo, type GraphEdge, type GraphNode, type NoteSignal, type Surface } from "@causeway/graph";
-import type { Profile } from "@causeway/profile";
+import { isPowerchair, isScooter, type Profile } from "@causeway/profile";
 
 export interface Conditions {
   now: Date;
@@ -73,7 +73,7 @@ export function busWait(perHour: { wd: number[]; sa: number[]; su: number[] } | 
 }
 
 /** Uses the bus's wheelchair space: one per bus, first come. */
-const needsWheelchairSpace = (p: Profile) => p.preset === "manual-wheelchair" || p.preset === "manual-wheelchair-companion" || p.preset === "powerchair";
+const needsWheelchairSpace = (p: Profile) => p.preset === "manual-wheelchair" || p.preset === "manual-wheelchair-companion" || isPowerchair(p);
 
 function evaluateBus(e: GraphEdge, forward: boolean, p: Profile, c: Conditions, reasons: Reason[], unknownCritical: boolean): Evaluation {
   const s = e.service!;
@@ -87,13 +87,14 @@ function evaluateBus(e: GraphEdge, forward: boolean, p: Profile, c: Conditions, 
   }
   if (e.kind !== "board") return { passable, seconds: 0, cost: 0, reasons };
   if (!forward) return { passable, seconds: BUS_ALIGHT_S, cost: BUS_ALIGHT_S, reasons };
+  if (s.mode === "bus" && p.preset === "mobility-scooter-road") return exclude("road scooters are too big for buses");
   if (s.mode === "bus" && p.preset === "mobility-scooter" && !p.busScooterPermit) return exclude("most buses only take small scooters, with a permit from the operator");
   const wait = busWait(s.perHour, c.now);
   if (!wait || wait.seconds > BUS_MAX_WAIT_S) return exclude(`no ${s.mode === "bus" ? `${s.route} bus` : vehicle} from here at this time`);
   const out: Reason[] = [...reasons, { kind: "penalty", attr: "bus-wait", detail: `about ${wait.perHour} an hour`, seconds: 0 }];
   let cost = wait.seconds;
   let passableHere: Evaluation["passable"] = passable;
-  if (s.mode !== "bus" && p.preset === "mobility-scooter") {
+  if (s.mode !== "bus" && isScooter(p)) {
     const pen = Math.round(UNKNOWN_STATION_S * 0.5 * (1 - p.uncertaintyTolerance));
     out.push({ kind: "unknown", attr: "scooter", detail: `check the operator's size rules for scooters on the ${vehicle}`, seconds: pen });
     cost += pen;
@@ -321,10 +322,11 @@ export function evaluateEdge(e: GraphEdge, forward: boolean, p: Profile, c: Cond
   if (e.kind === "street_proxy") {
     const pav = a.pavement?.value ?? null;
     if (pav === "no") {
-      const s = seconds * (WHEELED(p) ? 0.6 : 0.2);
+      // A road scooter belongs on the carriageway; for everyone else it means sharing with traffic.
+      const s = seconds * (p.roadLegal ? 0.1 : WHEELED(p) ? 0.6 : 0.2);
       penalty += s;
       reasons.push({ kind: "penalty", attr: "pavement", detail: "no pavement: shared with traffic", seconds: s });
-    } else if (WHEELED(p)) {
+    } else if (WHEELED(p) && !p.roadLegal) {
       const s = (pav ? 12 : 30) * (1 - p.uncertaintyTolerance);
       penalty += s;
       unknownCritical = true;

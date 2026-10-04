@@ -170,3 +170,27 @@ describe("notes in the cost model", () => {
     expect(evaluateEdge(steep, true, manual, DRY, { note: { score: 2, count: 9 } }).cost).toBe(Infinity);
   });
 });
+
+describe("powerchair and scooter classes", () => {
+  const light = PRESETS["powerchair-light"];
+  const heavy = PRESETS.powerchair;
+  const road = PRESETS["mobility-scooter-road"];
+  const pavementScooter = PRESETS["mobility-scooter"];
+
+  it("a lightweight powerchair manages less than a heavy duty one", () => {
+    const cobbles = edge({}, { surface: attr("cobblestone", "reported", "osm", null) });
+    expect(evaluateEdge(cobbles, true, light, DRY).passable).toBe("no");
+    expect(evaluateEdge(cobbles, true, heavy, DRY).passable).toBe("yes");
+    const hill = edge({}, { incline: attr(10, "inferred", "lidar-scotland", null), inclineMax: attr(10, "inferred", "lidar-scotland", null) });
+    expect(evaluateEdge(hill, true, light, DRY).passable).toBe("no");
+    expect(evaluateEdge(hill, true, heavy, DRY).passable).toBe("yes");
+  });
+
+  it("a road scooter takes a street with no pavement, or an unmapped one, in its stride", () => {
+    const noPavement = edge({ kind: "street_proxy" }, { pavement: attr("no", "reported", "osm", null) });
+    expect(evaluateEdge(noPavement, true, road, DRY).cost).toBeLessThan(evaluateEdge(noPavement, true, pavementScooter, DRY).cost);
+    const unmapped = edge({ kind: "street_proxy" });
+    expect(evaluateEdge(unmapped, true, road, DRY).reasons.some((r) => r.attr === "pavement")).toBe(false);
+    expect(evaluateEdge(unmapped, true, pavementScooter, DRY).reasons.some((r) => r.attr === "pavement")).toBe(true);
+  });
+});
