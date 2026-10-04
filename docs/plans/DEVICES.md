@@ -59,7 +59,6 @@ Accessibility for all of it: 48 px targets, names read by screen readers, the sw
 
 ## Follow-ups from the same feedback
 
-- **Search flicker.** In `PlaceSearch.tsx`, every keystroke runs `setLive(null)`, so live results vanish and come back 350 ms later. Keep the previous results until the new ones arrive. "grass market" with a space should also match "Grassmarket" in the local index.
 - **Unmapped stretches.** Check the tester's route (their home to the Grassmarket) in the inspector: which street proxies were unmapped and why the alternative was poor. Candidates: map the pavements in OSM, or let a cautious user see "the only way is unmapped for 200 m" rather than a long detour.
 - **Battery range.** Lightweight chairs have small batteries. A `maxRangeKm` per device, with a warning on long routes, fits the device model.
 - **Speeds.** Road scooters do 8 mph on the road but 4 mph on pavements. The router uses one pace; split it if the pace learning shows it matters.
