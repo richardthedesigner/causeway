@@ -33,3 +33,13 @@ describe("council footways (DATA-06, D-008)", () => {
     expect(c!.attrs.surface.value).toBeNull();
   });
 });
+
+describe("gritting routes (DATA-07)", () => {
+  it("marks every pavement on or off a gritting route when the layer has gritting data", () => {
+    const g = { edges: [{ ...edge(10, 1, 2), kind: "sidewalk" }, { ...edge(13, 4, 5), kind: "footway" }, { ...edge(14, 5, 6), kind: "steps" }] } as unknown as Graph;
+    applyCouncilFootways(g, { ...layer, gritting: "Pavement gritting routes", edges: { "10:1:2": [null, null, 0, 1] } });
+    expect(g.edges[0]!.attrs.gritted).toMatchObject({ value: true, source: "council" });
+    expect(g.edges[1]!.attrs.gritted).toMatchObject({ value: false });
+    expect(g.edges[2]!.attrs.gritted).toBeUndefined();
+  });
+});

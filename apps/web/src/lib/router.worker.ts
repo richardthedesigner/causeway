@@ -4,7 +4,7 @@
  * leaves the phone: it arrives here with each request and is not stored.
  */
 import { addBus, applyCouncilFootways, applyStationAccess, isKnown, refRides, mobilityLabelFor, noteSignals, type Graph, type GraphEdge, type Stretch, type TransitNetwork, type BusNetwork, type CouncilFootways } from "@causeway/graph";
-import { applyEdgeStates, applyLiveStates, liftOutageStates, mergeLiveStates, railDisruptionStates, worksStates, type WorksObservation } from "@causeway/live";
+import { applyEdgeStates, applyKeyedStates, applyLiveStates, floodsHere, floodStates, liftOutageStates, mergeLiveStates, railDisruptionStates, worksStates, type FloodAreas, type WorksObservation } from "@causeway/live";
 import { PRESETS, type Profile } from "@causeway/profile";
 import {
   buildNavPlan,
@@ -31,6 +31,8 @@ declare const self: DedicatedWorkerGlobalScope;
 let router: Router | null = null;
 let graph: Graph | null = null;
 let network: TransitNetwork | null = null;
+/** Environment Agency flood areas over this city's paths (DATA-07). */
+let floodAreas: FloodAreas | null = null;
 /** Works from the area's built file and from live feeds, kept apart so a refresh replaces only its own. */
 let fileWorks: { works: WorksObservation[]; source: string; builtAt: string } | null = null;
 let liveWorks: { works: WorksObservation[]; fetchedAt: string } | null = null;
@@ -58,7 +60,7 @@ function applyWorks() {
 
 const post = (m: WorkerResponse) => self.postMessage(m);
 
-async function load(url: string, networkUrl: string | undefined, worksUrl: string | undefined, busUrl: string | undefined, footwaysUrl: string | undefined, demo: Place[]) {
+async function load(url: string, networkUrl: string | undefined, worksUrl: string | undefined, busUrl: string | undefined, footwaysUrl: string | undefined, floodsUrl: string | undefined, demo: Place[]) {
   const res = await fetch(url);
   if (!res.ok || !res.body) throw new Error(`graph: HTTP ${res.status}`);
   // Hosts that won't serve .gz get the same bytes as base64 text (the private preview build).
@@ -81,6 +83,14 @@ async function load(url: string, networkUrl: string | undefined, worksUrl: strin
       applyCouncilFootways(graph, (await (await fetch(footwaysUrl)).json()) as CouncilFootways);
     } catch {
       /* the layer is a bonus */
+    }
+  }
+  floodAreas = null;
+  if (floodsUrl) {
+    try {
+      floodAreas = (await (await fetch(floodsUrl)).json()) as FloodAreas;
+    } catch {
+      /* no flood areas: warnings can't be placed, and the panel says nothing */
     }
   }
   network = networkUrl ? ((await (await fetch(networkUrl)).json()) as TransitNetwork) : null;
@@ -396,7 +406,14 @@ function fits(req: Extract<WorkerRequest, { type: "fits" }>): { key: string; min
 self.onmessage = async (ev: MessageEvent<WorkerRequest>) => {
   const m = ev.data;
   try {
-    if (m.type === "init") await load(m.graphUrl, m.networkUrl, m.worksUrl, m.busUrl, m.footwaysUrl, m.places);
+    if (m.type === "init") await load(m.graphUrl, m.networkUrl, m.worksUrl, m.busUrl, m.footwaysUrl, m.floodsUrl, m.places);
+    else if (m.type === "floods") {
+      if (!graph || !floodAreas) return;
+      // Each refresh replaces the last: a lifted warning lifts here too.
+      for (const e of graph.edges) if (e.live?.source === "Environment Agency flood warnings") delete e.live;
+      applyKeyedStates(graph, floodStates(m.warnings, floodAreas, m.fetchedAt));
+      post({ type: "floods", here: floodsHere(m.warnings, floodAreas), fetchedAt: m.fetchedAt });
+    }
     else if (m.type === "toilets") router?.addToilets(m.points);
     else if (m.type === "works-live") {
       liveWorks = { works: m.works, fetchedAt: m.fetchedAt };

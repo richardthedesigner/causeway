@@ -17,7 +17,7 @@ import { compareLine } from "@/lib/devices";
 import type { NoteAbout } from "@/components/NoteSheet";
 import { RouteStrip, VerdictPill } from "@/components/RouteStrip";
 import { Button } from "@/components/ui/button";
-import type { Place, PlannedRoute, PlanResult, WorksSummary } from "@/lib/plan-types";
+import type { FloodHere, Place, PlannedRoute, PlanResult, WorksSummary } from "@/lib/plan-types";
 import { departure, type Conditions, type LiveLifts } from "@/lib/use-planner";
 import type { FlagReason } from "@/lib/sync";
 import { cn } from "@/lib/utils";
@@ -49,6 +49,8 @@ interface Props {
   lifts: LiveLifts;
   /** Street works on pavements in this area; null where there is no feed (Scotland for now). */
   works: WorksSummary | null;
+  /** Environment Agency flood warnings over this city's paths; null where we don't check (DATA-07). */
+  floods?: { here: FloodHere[]; at: string } | null;
   /** The city has a works feed at all. */
   worksCovered: boolean;
   /** Accessible toilets along the chosen route, from the search index. */
@@ -140,8 +142,10 @@ export function RoutePanel(props: Props) {
   ];
 
   const worksClosed = props.works && props.works.closedNow > 0;
-  const liveLine =
-    props.lifts.state === "failed"
+  const flood = props.floods?.here.find((f) => f.severity <= 2);
+  const liveLine = flood
+    ? `${flood.name}: ${flood.label}. ${flood.severity === 1 ? "Paths there are closed." : "Paths there may be flooded, so they count as unknown."} (Environment Agency)`
+    : props.lifts.state === "failed"
       ? "Couldn't get live lift status from TfL. Check before you travel."
       : props.lifts.state === "ok" && props.lifts.lines.length > 0
         ? `${props.lifts.lines[0]} Routed around (TfL, ${props.lifts.at.slice(11, 16)} UTC).`
@@ -396,6 +400,11 @@ export function RoutePanel(props: Props) {
                   <li>Line closures from TfL, routed around: {props.lifts.lines.join(" ")}</li>
                 ) : props.lifts.state === "loading" ? (
                   <li>Checking lifts with TfL…</li>
+                ) : null}
+                {props.floods ? (
+                  <li>
+                    Flood warnings from the Environment Agency at {props.floods.at.slice(11, 16)} UTC: {props.floods.here.length ? props.floods.here.map((f) => `${f.name}, ${f.label}`).join("; ") : "none over these paths"}.
+                  </li>
                 ) : null}
                 {props.works ? (
                   <li>

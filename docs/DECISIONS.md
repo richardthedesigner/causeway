@@ -393,7 +393,7 @@ The visual-impairment preset sets 60 s per 100 m; anyone can turn it on with "Af
 
 **Decided.** 2026-10-04. A static export can't set response headers, so they go in `apps/web/vercel.json` (the Vercel project's root directory is `apps/web`).
 
-**What we send.** A Content Security Policy that allows only our own origin plus what the app really calls: Supabase (`*.supabase.co`, for sharing and review photos), Open-Meteo, postcodes.io, Photon and TfL, and Google Fonts for the typeface. No framing (`frame-ancestors 'none'`), no plugins, forms only to ourselves. Also HSTS, `nosniff`, a strict referrer policy, `Cross-Origin-Opener-Policy`, and a permissions policy that allows location for this site only and turns off camera, microphone and payment.
+**What we send.** A Content Security Policy that allows only our own origin plus what the app really calls: Supabase (`*.supabase.co`, for sharing and review photos), Open-Meteo, postcodes.io, Photon, TfL and the Environment Agency, and Google Fonts for the typeface. No framing (`frame-ancestors 'none'`), no plugins, forms only to ourselves. Also HSTS, `nosniff`, a strict referrer policy, `Cross-Origin-Opener-Policy`, and a permissions policy that allows location for this site only and turns off camera, microphone and payment.
 
 **Two compromises.** `script-src` keeps `'unsafe-inline'`: Next's static export writes inline scripts whose hashes change every build (SEC-13 is the follow-up). `style-src` keeps `'unsafe-inline'`: MapLibre, Radix and our own components set inline styles.
 
@@ -441,3 +441,17 @@ When there is nothing to compare with, it builds. Once DEP-01 makes `main` the p
 - Widths outside 0.5 to 10 m are ignored; a few large polygons carry area-like figures.
 - Credit: "Pavement surfaces and widths: City of Edinburgh Council, Open Government Licence v3.0", in the city credit line.
 
+
+## D-047 Ice, gritting and floods
+
+**Decided.** 2026-10-04 (DATA-07). Two kinds of weather danger the ground itself can't show: an icy pavement nobody has gritted, and a riverside path under a flood warning.
+
+**Gritting (Edinburgh).** The council's priority-1 pavement gritting routes (OGL, 55 km in the central area) go into the council layer (D-046): 1,130 pavement edges are on a route. With that data, every pavement is known to be on a route or not (`gritted`). In ice, a pavement off the routes costs 100% more time for wheelchair users and 50% more for everyone else, and a route on them says "on a gritting route". The steep and sett exclusions in ice stay as they were. Both figures are guesses for testing (RES-01). Newcastle and London have no open pavement gritting data yet, so nothing changes there.
+
+**Floods (England).** `pnpm build:floods` maps each Environment Agency flood area (OGL) to the walking edges inside it: 4 areas over our Newcastle paths, 9 in London, where the tidal Thames areas cover whole districts. The app fetches the warnings in force every 10 minutes (`/flood-monitoring/id/floods`, keyless):
+- **Severe Flood Warning:** the paths inside are closed.
+- **Flood Warning:** they count as unknown ("may be flooded").
+- **Flood Alert:** named in the route panel only. Alerts are common on the tidal Thames, and flagging whole districts would bury the routes in unknowns.
+- A flood state never weakens one already there (works closing a pavement stay closed), and each refresh replaces the last, so a lifted warning lifts.
+
+**Not yet.** Met Office weather warnings need a key (DATA-17). Scotland's flood warnings come from SEPA, which has no matching open feed we've found (DATA-25).

@@ -158,6 +158,8 @@ export interface EdgeAttrs {
   wheelchair: Attr<"yes" | "limited" | "no">;
   /** For street_proxy edges: which sides have a pavement (OSM sidewalk=*). */
   pavement?: Attr<"both" | "left" | "right" | "no">;
+  /** On a council priority gritting route for pavements. Absent where we have no gritting data (DATA-07). */
+  gritted?: Attr<boolean>;
 }
 
 export type LiveStatus = "open" | "closed" | "restricted" | "degraded";

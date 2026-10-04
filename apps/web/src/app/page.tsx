@@ -462,6 +462,7 @@ export default function Home() {
           }}
           lifts={planner.lifts}
           works={planner.works}
+          floods={planner.floods}
           worksCovered={!!city.works}
           liveBuses={city.liveLifts}
           onStart={() => setNavigating(true)}

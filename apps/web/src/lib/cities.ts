@@ -18,6 +18,8 @@ export interface City {
   network?: string;
   /** Council footway surfaces and widths, a separate layer joined at load (DATA-06, D-008). Edinburgh only. */
   footways?: string;
+  /** Environment Agency flood areas over our paths, for live flood warnings (DATA-07). England only. */
+  floods?: string;
   liveLifts: boolean;
   weatherAt: [number, number];
   start: Place;
@@ -59,6 +61,7 @@ export const CITIES: City[] = [
     index: "places/newcastle-gateshead.json.gz",
     bus: "graph/newcastle-gateshead-bus.json",
     works: "live/newcastle-gateshead.works.json",
+    floods: "live/newcastle-gateshead.flood-areas.json",
     liveLifts: false,
     weatherAt: [54.97, -1.607],
     start: { id: "grey-street", name: "Grey Street", kind: "City centre", lon: -1.6123, lat: 54.9722 },
@@ -79,6 +82,7 @@ export const CITIES: City[] = [
     index: "places/london-jubilee.json.gz",
     bus: "graph/london-jubilee-bus.json",
     works: "live/london-jubilee.works.json",
+    floods: "live/london-jubilee.flood-areas.json",
     network: "graph/london-network.json",
     liveLifts: true,
     weatherAt: [51.502, -0.07],
