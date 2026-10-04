@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { fetchLiftOutages } from "@causeway/live";
+import type { UserNote } from "@causeway/graph";
 import type { Profile } from "@causeway/profile";
 import type { City } from "./cities";
 import type { Place, PlanResult, WorkerRequest, WorkerResponse } from "./plan-types";
@@ -72,12 +73,12 @@ export function usePlanner(city: City) {
     };
   }, [city]);
 
-  const plan = useCallback((from: Place, to: Place, profile: Profile, c: Conditions) => {
+  const plan = useCallback((from: Place, to: Place, profile: Profile, c: Conditions, notes: UserNote[] = []) => {
     if (!worker.current) return;
     setPlanning(true);
     setError(null);
     const id = ++seq.current;
-    worker.current.postMessage({ type: "plan", id, from, to, profile, conditions: { wet: c.wet, ice: c.ice, now: new Date().toISOString() } } satisfies WorkerRequest);
+    worker.current.postMessage({ type: "plan", id, from, to, profile, conditions: { wet: c.wet, ice: c.ice, now: new Date().toISOString() }, notes: notes.map((n) => ({ ...n, photo: null })) } satisfies WorkerRequest);
   }, []);
 
   return { ready, error, result, planning, plan, lifts, clear: () => setResult(null) };

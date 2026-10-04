@@ -82,3 +82,18 @@ The navigation and report screens were added after the first assessment and chec
 | Reports | Two taps (what's wrong, Save). Kept on the device; no profile attached. |
 
 Open: lock-screen progress (Live Activities) and background location need the native app (D-004). Haptics work on Android only (the web has no vibration on iOS).
+
+## Follow-up: user notes (2026-10-04)
+
+Notes (D-026) were checked the same way, in headless Chromium with axe-core 4.10: no violations on the note sheet (from "Getting in", from a street on the route, and from navigation), the route screen with notes in light and dark mode, or "What we don't know" opened with a note under a street.
+
+| Check | Result |
+|---|---|
+| Taps | Three plus typing on every path: open (a "Getting in" button, a street button under "Why this way?", or "Add a note" while navigating), Good / Mixed / Bad, Save note. Measured in the run. |
+| One primary action | Save note. The mobility label and photo are optional and off by default. |
+| Not colour alone | Each note shows an icon and the word Good, Mixed or Bad. |
+| Honesty | Every note shows the date and "A Causewayside user" (or "You"), with "Their own experience, not checked by us." Notes over a year old say things may have changed. Notes never change a verdict. |
+| Targets | Street buttons, the switch row and "Delete my note" are at least 48 px. |
+| Screen readers | Street buttons read "Add a note about Victoria Street"; delete buttons name the place. The switch's description says exactly what others will see. |
+
+Open: on a phone at half height, "Getting in" and the street buttons are below the fold until the sheet is pulled up (as for the rest of the route detail). Real-device VoiceOver and TalkBack checks are still to do.

@@ -7,7 +7,7 @@
  * scaled by (1 - uncertaintyTolerance): a cautious user pays more to avoid
  * the unknown, an adventurous one barely notices it.
  */
-import { confidence, isKnown, type EntranceInfo, type GraphEdge, type GraphNode, type Surface } from "@causeway/graph";
+import { confidence, isKnown, type EntranceInfo, type GraphEdge, type GraphNode, type NoteSignal, type Surface } from "@causeway/graph";
 import type { Profile } from "@causeway/profile";
 
 export interface Conditions {
@@ -79,7 +79,17 @@ const signed = (v: number, forward: boolean) => (forward ? v : -v);
 export interface EdgeContext {
   /** Straight-line distance from the edge's midpoint to the nearest mapped bench, metres. */
   benchM?: number;
+  /** What people's notes say about this edge (a separate layer, joined here at request time; never part of the graph). */
+  note?: NoteSignal;
 }
+
+/**
+ * Notes are soft signals only. Bad experience adds up to half the edge's
+ * travel time as a penalty; good experience takes up to half off the
+ * unknown-risk penalty, never off travel time, and never changes the
+ * verdict: a note can't make an unknown known.
+ */
+const NOTE_MAX_FACTOR = 0.5;
 
 export function evaluateEdge(e: GraphEdge, forward: boolean, p: Profile, c: Conditions, ctx: EdgeContext = {}): Evaluation {
   const reasons: Reason[] = [];
@@ -231,6 +241,22 @@ export function evaluateEdge(e: GraphEdge, forward: boolean, p: Profile, c: Cond
     const s = seconds * Math.min(1, 300 / p.maxRestIntervalM) * 0.6;
     penalty += s;
     reasons.push({ kind: "penalty", attr: "rest", detail: "no bench nearby", seconds: s });
+  }
+
+  if (ctx.note && ctx.note.count > 0 && !RAIL_KINDS.has(e.kind)) {
+    const { score } = ctx.note;
+    if (score < 0) {
+      const s = seconds * Math.min(NOTE_MAX_FACTOR, -score * NOTE_MAX_FACTOR);
+      penalty += s;
+      reasons.push({ kind: "penalty", attr: "note", detail: "people's notes say it's hard going", seconds: s });
+    } else if (score > 0) {
+      const risk = reasons.filter((r) => r.kind === "unknown").reduce((t, r) => t + r.seconds, 0);
+      const s = risk * Math.min(NOTE_MAX_FACTOR, score * NOTE_MAX_FACTOR);
+      if (s > 0) {
+        penalty -= s;
+        reasons.push({ kind: "penalty", attr: "note", detail: "people's notes say it went well", seconds: -s });
+      }
+    }
   }
 
   return {
