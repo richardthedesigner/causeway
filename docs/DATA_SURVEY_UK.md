@@ -2,7 +2,7 @@
 
 Research date: 2026-10-04. Scope: the whole UK, not only the three pilot areas, so Causewayside can expand from them. This is a survey of what else we could consume or connect to. The catalogue of record stays [DATA_SOURCES.md](DATA_SOURCES.md). Items move there when we decide to use them.
 
-**Roadmap.** What we'll do with these findings, and when, is in [ROADMAP.md](ROADMAP.md) ([pull request #34](https://github.com/richardthedesigner/causeway/pull/34), not merged yet). It refers back to this survey by section number (§).
+**Roadmap.** What we'll do with these findings, and when, is in [ROADMAP.md](ROADMAP.md). It refers back to this survey by section number (§).
 
 **How it was done.** Two rounds of research, with 14 research passes in all.
 - **Round 1:** eight topic and city passes (street assets, transit, venues, live conditions, imagery, standards and community, Edinburgh plus Newcastle/Gateshead, London).
