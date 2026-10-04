@@ -1,10 +1,10 @@
 @import "tailwindcss";
 
 /*
-  Causewayside tokens. The map is the hero; chrome is a calm, warm-neutral
-  sheet. One accent (Forth slate blue). Semantic colours are separate from it.
-  Type: Atkinson Hyperlegible, designed by the Braille Institute for low-vision
-  legibility; its mono for figures.
+  Causewayside tokens. The map is the hero; one sheet at the bottom answers
+  "can I get there?". Verdict colours (ok / caution / stop) carry meaning and
+  always come with a word and an icon. Type: Atkinson Hyperlegible, designed
+  by the Braille Institute for low-vision legibility; its mono for figures.
 */
 :root {
   --ground: #e8ebe5;
@@ -23,7 +23,13 @@
   --route: #1d5b86;
   --route-alt: #8fa6b6;
   --focus: #1d5b86;
-  --radius: 18px;
+  --ok-soft: #dcefe4;
+  --caution-soft: #f6ead0;
+  --stop-soft: #f6dde3;
+  --glass: rgb(251 251 248 / 0.9);
+  --nav: #123a56;
+  --nav-ink: #ffffff;
+  --radius: 22px;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -31,6 +37,7 @@
     --accent: #86bce2; --accent-ink: #0d1a23; --ok: #57c194; --caution: #e9b44c; --stop: #f07a92; --unknown: #8b938d;
     --g0: #45b58a; --g1: #a6c95d; --g2: #f0bd3e; --g3: #ee7a44; --g4: #e0507a;
     --route: #86bce2; --route-alt: #5d7383; --focus: #86bce2;
+    --ok-soft: #1d3a2c; --caution-soft: #3d3018; --stop-soft: #43202a; --glass: rgb(28 33 31 / 0.92); --nav: #0e2e45; --nav-ink: #ffffff;
     color-scheme: dark;
   }
 }
@@ -39,6 +46,7 @@
   --accent: #86bce2; --accent-ink: #0d1a23; --ok: #57c194; --caution: #e9b44c; --stop: #f07a92; --unknown: #8b938d;
   --g0: #45b58a; --g1: #a6c95d; --g2: #f0bd3e; --g3: #ee7a44; --g4: #e0507a;
   --route: #86bce2; --route-alt: #5d7383; --focus: #86bce2;
+  --ok-soft: #1d3a2c; --caution-soft: #3d3018; --stop-soft: #43202a; --glass: rgb(28 33 31 / 0.92); --nav: #0e2e45; --nav-ink: #ffffff;
   color-scheme: dark;
 }
 
@@ -55,6 +63,12 @@
   --color-caution: var(--caution);
   --color-stop: var(--stop);
   --color-unknown: var(--unknown);
+  --color-ok-soft: var(--ok-soft);
+  --color-caution-soft: var(--caution-soft);
+  --color-stop-soft: var(--stop-soft);
+  --color-glass: var(--glass);
+  --color-nav: var(--nav);
+  --color-nav-ink: var(--nav-ink);
   --font-sans: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
   --font-mono: "Atkinson Hyperlegible Mono", ui-monospace, Menlo, monospace;
   --radius-sheet: var(--radius);

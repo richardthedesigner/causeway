@@ -11,7 +11,7 @@ Command.displayName = "Command";
 export const CommandInput = React.forwardRef<React.ElementRef<typeof Cmdk.Input>, React.ComponentPropsWithoutRef<typeof Cmdk.Input>>(({ className, ...props }, ref) => (
   <Cmdk.Input
     ref={ref}
-    className={cn("min-h-14 w-full rounded-2xl border border-line bg-surface-2 px-4 text-lg text-ink placeholder:text-muted outline-none focus-visible:border-accent", className)}
+    className={cn("min-h-14 w-full rounded-2xl border border-line bg-surface-2 px-4 text-lg text-ink placeholder:text-muted outline-none focus-visible:outline-none", className)}
     {...props}
   />
 ));

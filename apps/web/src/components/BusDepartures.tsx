@@ -33,7 +33,7 @@ export function BusDepartures({ legs, live }: { legs: PlannedRoute["busLegs"]; l
   }, [key, live]); // eslint-disable-line react-hooks/exhaustive-deps
   if (!legs.length) return null;
   return (
-    <section aria-labelledby="bus-h" className="grid gap-2">
+    <section aria-labelledby="bus-h" className="grid min-w-0 gap-2 [overflow-wrap:anywhere]">
       <h2 id="bus-h" className="m-0 flex items-center gap-2 text-lg font-bold">
         <Bus aria-hidden className="size-5" /> Buses
       </h2>

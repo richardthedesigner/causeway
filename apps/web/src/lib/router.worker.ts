@@ -10,7 +10,9 @@ import {
   buildNavPlan,
   busWait,
   describeSegments,
+  diagnose,
   elevationProfile,
+  hazardText,
   entrancesNear,
   explain,
   placeName,
@@ -18,9 +20,10 @@ import {
   summarise,
   toGeoJSON,
   tradeoffs,
+  type NavPlan,
   type Route,
 } from "@causeway/router";
-import type { Place, PlannedRoute, PlanResult, WorkerRequest, WorkerResponse } from "./plan-types";
+import type { Check, Place, PlannedRoute, PlanResult, RouteStrip, WorkerRequest, WorkerResponse } from "./plan-types";
 
 declare const self: DedicatedWorkerGlobalScope;
 let router: Router | null = null;
@@ -144,8 +147,10 @@ function toPlanned(r: Route, start: Parameters<typeof elevationProfile>[1], id: 
       const w = busWait(sv.perHour, now);
       return { stopId: sv.stopId ?? "", stopName: (s.edge.name ?? "").split(", ")[0]!, route: sv.route, headsign: sv.headsign, perHour: w?.perHour ?? 0 };
     });
+  const nav = buildNavPlan(r, p);
   return {
-    nav: buildNavPlan(r, p),
+    nav,
+    ...stripOf(r, nav),
     unknowns,
     busLegs,
     stretches: stretchesOf(r),
@@ -161,6 +166,62 @@ function toPlanned(r: Route, start: Parameters<typeof elevationProfile>[1], id: 
 }
 
 const RAIL_KINDS = new Set(["transit", "board", "interchange", "station_link", "elevator"]);
+const RIDE_KINDS = new Set(["transit", "board", "interchange"]);
+
+/** Slope band for one step of a route: the same bins as the map's slope layer, plus steps and rides. */
+function binOf(s: Route["steps"][number]): number {
+  const e = s.edge;
+  if (RIDE_KINDS.has(e.kind)) return 6;
+  if (e.kind === "steps") return 5;
+  if (e.kind === "elevator" || e.kind === "station_link") return 0;
+  const a = e.attrs;
+  const v = isKnown(a.inclineMax) ? Math.abs(a.inclineMax.value) : isKnown(a.incline) ? Math.abs(a.incline.value) : null;
+  if (v === null) return -1;
+  return v < 3 ? 0 : v < 5 ? 1 : v < 8 ? 2 : v < 12 ? 3 : 4;
+}
+
+/**
+ * The route strip and the matching coloured line. Distances along the strip
+ * use edge lengths, as the nav plan's hazards do; rides are shortened so a
+ * train journey doesn't swallow the bar.
+ */
+function stripOf(r: Route, nav: NavPlan): { strip: RouteStrip; bands: PlannedRoute["bands"] } {
+  const walkM = r.steps.filter((s) => !RIDE_KINDS.has(s.edge.kind)).reduce((t, s) => t + s.edge.lengthM, 0);
+  const parts: RouteStrip["parts"] = [];
+  const bands: PlannedRoute["bands"] = [];
+  let t = 0;
+  for (const s of r.steps) {
+    const bin = binOf(s);
+    const L = s.edge.lengthM;
+    const last = parts[parts.length - 1];
+    if (last && last.bin === bin) last.t1 = t + L;
+    else parts.push({ t0: t, t1: t + L, d0: 0, d1: 0, bin });
+    t += L;
+    const g = s.forward ? s.edge.geometry : [...s.edge.geometry].reverse();
+    const lb = bands[bands.length - 1];
+    if (lb && lb.bin === bin) lb.coords.push(...g.slice(1));
+    else bands.push({ bin, coords: [...g] });
+  }
+  let d = 0;
+  for (const pt of parts) {
+    const len = pt.t1 - pt.t0;
+    pt.d0 = d;
+    d += pt.bin === 6 ? Math.max(walkM * 0.06, Math.min(len, walkM * 0.15)) : len;
+    pt.d1 = d;
+  }
+  const marks: RouteStrip["marks"] = [];
+  for (const h of nav.hazards) {
+    // Sideways slope is common and spoken during navigation; on the strip it would crowd out what decides the route.
+    if (h.kind === "unknown" || h.kind === "camber" || (h.kind === "kerb" && !/not mapped/.test(h.title))) continue;
+    marks.push({ at: h.at, kind: h.kind, text: hazardText(h) });
+  }
+  for (const m of nav.maneuvers) {
+    if (m.type === "lift") marks.push({ at: m.at, kind: "lift", text: "Lift" });
+    if (m.type === "board") marks.push({ at: m.at, kind: "ride", text: m.text });
+  }
+  marks.sort((a, b) => a.at - b.at);
+  return { strip: { length: d, parts, marks }, bands };
+}
 
 /** The route's named stretches in the order you reach them (a street you come back to joins its first visit). */
 function stretchesOf(r: Route): (Stretch & { m: number })[] {
@@ -201,11 +262,16 @@ function plan(req: Extract<WorkerRequest, { type: "plan" }>): PlanResult {
   }
   if (!alts.length) alts = router.alternatives(a, b, p, c, 3);
   if (!alts.length) {
-    const w = router.route(router.snap(req.from.lon, req.from.lat, PRESETS.walking, c), router.snap(req.to.lon, req.to.lat, PRESETS.walking, c), PRESETS.walking, c);
+    const bw = router.snap(req.to.lon, req.to.lat, PRESETS.walking, c);
+    const d = diagnose(router, a, bw, p, PRESETS.walking, c);
+    const cl = d.closest;
+    const planned = cl ? toPlanned(cl.route, a, "closest", "As close as you can get", cl.route.seconds, c.now, p) : null;
     return {
       status: "none",
-      message: "No way there fits your settings.",
-      walkingHeadline: w ? `The walking route has ${summarise(w, c.now).steps ? "steps" : "slopes"} your settings rule out.` : null,
+      message: d.blockers.length ? "No way there fits your limits" : "We couldn't find a way there",
+      blockers: d.blockers,
+      closest: cl && planned ? { ...planned, name: cl.name, leftM: cl.leftM, end: planned.coords[planned.coords.length - 1]! } : null,
+      relax: d.relax ? { patch: d.relax.patch, what: d.relax.what, minutes: Math.round(d.relax.route.seconds / 60) } : null,
     };
   }
   const best = alts[0]!;
@@ -256,6 +322,23 @@ function plan(req: Extract<WorkerRequest, { type: "plan" }>): PlanResult {
   };
 }
 
+/** Quick verdicts for places you've been before: one search each, no alternatives or explanations. */
+function check(req: Extract<WorkerRequest, { type: "check" }>): Check[] {
+  if (!router) return [];
+  const c = { ...req.conditions, now: new Date(req.conditions.now) };
+  const a = router.snap(req.from.lon, req.from.lat, req.profile, c);
+  return req.to.map((pl) => {
+    try {
+      const r = router!.route(a, router!.snap(pl.lon, pl.lat, req.profile, c), req.profile, c);
+      if (!r) return { placeId: pl.id, verdict: "none", minutes: null };
+      const s = summarise(r, c.now);
+      return { placeId: pl.id, verdict: s.verdict === "passable" ? "passable" : "passable-with-unknowns", minutes: Math.round(s.minutes) };
+    } catch {
+      return { placeId: pl.id, verdict: "none", minutes: null };
+    }
+  });
+}
+
 self.onmessage = async (ev: MessageEvent<WorkerRequest>) => {
   const m = ev.data;
   try {
@@ -272,6 +355,7 @@ self.onmessage = async (ev: MessageEvent<WorkerRequest>) => {
       post({ type: "live", applied, fetchedAt: m.outages[0]?.fetchedAt ?? new Date().toISOString() });
     }
     else if (m.type === "plan") post({ type: "plan", id: m.id, result: plan(m) });
+    else if (m.type === "check") post({ type: "check", id: m.id, checks: check(m) });
   } catch (err) {
     post({ type: "error", message: err instanceof Error ? err.message : String(err) });
   }

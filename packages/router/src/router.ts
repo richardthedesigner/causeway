@@ -265,6 +265,23 @@ export class Router {
     }
     return routes.sort((a, b) => a.cost - b.cost);
   }
+
+  /** Every node this person can reach from `from` (one flood, no target). For "how close can I get?". */
+  reach(from: GraphNode, p: Profile, c: Conditions = DRY): Set<number> {
+    const seen = new Set<number>([from.id]);
+    const queue = [from.id];
+    while (queue.length) {
+      const u = queue.pop()!;
+      for (const a of this.out.get(u) ?? []) {
+        if (seen.has(a.to)) continue;
+        if (evaluateEdge(a.edge, a.forward, p, c, this.edgeContext(a.edge.id)).cost === Infinity) continue;
+        if (evaluateNode(this.nodes.get(a.to)!, a.edge.kind === "crossing", p, c).cost === Infinity) continue;
+        seen.add(a.to);
+        queue.push(a.to);
+      }
+    }
+    return seen;
+  }
 }
 
 class MinHeap {
@@ -780,4 +797,123 @@ export function restStats(g: Graph, r: Route): RestStats {
     .filter((t): t is { at: number; wheelchair: "yes" | "limited" | "no" | null; changingPlaces: boolean } => t.at !== null)
     .sort((a, b) => a.at - b.at);
   return { longestWithoutBenchM: Math.round(gap), benches: benchAt.length, toilets };
+}
+
+// ------------------------------------------------------------- no route
+
+export interface Blocker {
+  /** Where, as we'd say it: "Castle Wynd South". */
+  name: string;
+  attr: string;
+  /** "14 steps", "9.6% uphill", "6 cm kerb". */
+  detail: string;
+  lon: number;
+  lat: number;
+}
+
+export interface Diagnosis {
+  /** What stops this person on the way someone with no limits would go, in route order. */
+  blockers: Blocker[];
+  /** The point on that way nearest the destination that this person can reach, and how far short it is. */
+  closest: { route: Route; name: string; leftM: number } | null;
+  /** The smallest change to the limits, for this journey only, that finds a way; null when none would (a closure, a one-way). */
+  relax: { patch: Partial<Profile>; what: string[]; route: Route } | null;
+}
+
+/** Limits a person can choose to stretch for one journey; closures, one-ways and "not wheelchair accessible" are not theirs to stretch. */
+const RELAXABLE = new Set(["steps", "escalator", "incline", "kerb", "surface", "width"]);
+
+/**
+ * When nothing fits: say what is in the way, how close you can get, and
+ * what one-off change would find a way. Never a dead end (D-032).
+ *
+ * "In the way" means on the way someone with no limits would go, past the
+ * last point this person can reach: earlier obstacles already have a way round.
+ */
+export function diagnose(router: Router, from: GraphNode, to: GraphNode, p: Profile, unconstrained: Profile, c: Conditions = DRY): Diagnosis {
+  const base = router.route(from, to, unconstrained, c);
+  if (!base) return { blockers: [], closest: null, relax: null };
+
+  // How close: the last node along that way you can reach.
+  const reach = router.reach(from, p, c);
+  let closest: Diagnosis["closest"] = null;
+  let past = -1;
+  for (let i = base.steps.length - 1; i >= 0; i--) {
+    const n = base.steps[i]!.node;
+    if (!reach.has(n.id)) continue;
+    past = i;
+    const leftM = haversine([n.lon, n.lat], [to.lon, to.lat]);
+    const r = n.id === from.id ? null : router.route(from, n, p, c);
+    if (r && leftM >= 10) closest = { route: r, name: placeName(base.steps[i]!.edge), leftM: Math.round(leftM) };
+    break;
+  }
+
+  const found: { b: Blocker; r: Reason; s: Step }[] = [];
+  base.steps.forEach((s, i) => {
+    if (i <= past) return;
+    const ev = evaluateEdge(s.edge, s.forward, p, c, router.edgeContext(s.edge.id));
+    const nv = evaluateNode(s.node, s.edge.kind === "crossing", p, c);
+    const mid = s.edge.geometry[Math.floor(s.edge.geometry.length / 2)]!;
+    for (const [r, at] of [
+      [ev.reasons.find((x) => x.kind === "excluded"), mid],
+      [nv.reasons.find((x) => x.kind === "excluded"), [s.node.lon, s.node.lat]],
+    ] as [Reason | undefined, [number, number]][]) {
+      if (r) found.push({ b: { name: placeName(s.edge), attr: r.attr, detail: r.detail, lon: at[0], lat: at[1] }, r, s });
+    }
+  });
+  // One entry per street and kind of obstacle.
+  const blockers = found.map((f) => f.b).filter((b, i, all) => i === 0 || all[i - 1]!.name !== b.name || all[i - 1]!.attr !== b.attr);
+
+  const patch: Partial<Profile> = {};
+  /** One phrase per limit, overwritten as it grows ("slopes up to 8%", then "up to 10%"). */
+  const what = new Map<string, string>();
+  let relaxable = found.length > 0;
+  for (const { r, s } of found) {
+    if (!RELAXABLE.has(r.attr) || / in ice$/.test(r.detail)) {
+      relaxable = false;
+      break;
+    }
+    const a = s.edge.attrs;
+    if (r.attr === "steps") {
+      patch.maxSteps = Math.max(patch.maxSteps ?? 0, isKnown(a.stepCount) ? a.stepCount.value : Infinity);
+      what.set("steps", "steps");
+    } else if (r.attr === "escalator") {
+      patch.escalators = true;
+      what.set("escalator", "escalators");
+    } else if (r.attr === "incline") {
+      const v = Math.ceil(parseFloat(r.detail));
+      if (/uphill/.test(r.detail)) patch.maxInclineUpPct = Math.max(patch.maxInclineUpPct ?? p.maxInclineUpPct, v);
+      else patch.maxInclineDownPct = Math.max(patch.maxInclineDownPct ?? p.maxInclineDownPct, v);
+      what.set("incline", `slopes up to ${Math.max(patch.maxInclineUpPct ?? 0, patch.maxInclineDownPct ?? 0)}%`);
+    } else if (r.attr === "kerb") {
+      const cm = /(\d+(\.\d+)?) cm/.exec(r.detail);
+      patch.maxKerbCm = Math.max(patch.maxKerbCm ?? p.maxKerbCm, cm ? Math.ceil(parseFloat(cm[1]!)) : 13);
+      what.set("kerb", `kerbs up to ${patch.maxKerbCm} cm`);
+    } else if (r.attr === "surface" && isKnown(a.surface)) {
+      patch.surfaces = { ...(patch.surfaces ?? p.surfaces), [a.surface.value]: 1 };
+      what.set(`surface:${a.surface.value}`, surfaceLabel(a.surface.value));
+    } else if (r.attr === "width" && isKnown(a.width)) {
+      patch.minWidthM = Math.min(patch.minWidthM ?? p.minWidthM, Math.floor(a.width.value * 10) / 10);
+      what.set("width", `paths ${patch.minWidthM} m wide`);
+    }
+  }
+  // Smallest change first: one limit on its own, then all of them together.
+  let relax: Diagnosis["relax"] = null;
+  if (relaxable && what.size) {
+    const groups: [Partial<Profile>, string[]][] = [];
+    for (const [k, w] of what) {
+      const key = k.startsWith("surface:") ? "surfaces" : ({ steps: "maxSteps", escalator: "escalators", kerb: "maxKerbCm", width: "minWidthM" } as Record<string, keyof Profile>)[k];
+      const only: Partial<Profile> = key ? { [key]: patch[key] } : { maxInclineUpPct: patch.maxInclineUpPct, maxInclineDownPct: patch.maxInclineDownPct };
+      groups.push([Object.fromEntries(Object.entries(only).filter(([, v]) => v !== undefined)), [w]]);
+    }
+    if (groups.length > 1) groups.push([patch, [...what.values()]]);
+    for (const [q, words] of groups) {
+      const r = router.route(from, to, { ...p, ...q }, c);
+      if (r) {
+        relax = { patch: q, what: words, route: r };
+        break;
+      }
+    }
+  }
+  return { blockers, closest, relax };
 }

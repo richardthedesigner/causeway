@@ -1,12 +1,14 @@
 "use client";
-import { ArrowUpDown, ChevronDown, CircleAlert, CircleCheck, CircleHelp, CircleX, DoorOpen, MessageSquarePlus, Share2, SlidersHorizontal } from "lucide-react";
+import { ArrowUpDown, ChevronDown, CircleAlert, CircleCheck, CircleHelp, CircleX, DoorOpen, MapPin, MessageSquarePlus, Share2, SlidersHorizontal, Undo2 } from "lucide-react";
 import { entranceRef, notesForEntrance, notesForPlace, notesForStretch, type UserNote } from "@causeway/graph";
 import type { Profile } from "@causeway/profile";
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { BusDepartures } from "@/components/BusDepartures";
 import { ElevationChart } from "@/components/ElevationChart";
 import { NoteList } from "@/components/NoteList";
 import type { NoteAbout } from "@/components/NoteSheet";
+import { RouteStrip, VerdictPill } from "@/components/RouteStrip";
 import { Button } from "@/components/ui/button";
 import type { Place, PlannedRoute, PlanResult, WorksSummary } from "@/lib/plan-types";
 import type { Conditions, LiveLifts } from "@/lib/use-planner";
@@ -26,7 +28,6 @@ interface Props {
   onChangeTo: () => void;
   onSwap: () => void;
   onOpenMode: () => void;
-  onConditions: (c: "dry" | "wet" | "ice") => void;
   lifts: LiveLifts;
   /** Street works on pavements in this area; null where there is no feed (Scotland for now). */
   works: WorksSummary | null;
@@ -44,39 +45,44 @@ interface Props {
   onDeleteNote: (id: string) => void;
   /** Present when notes are shared: flag someone else's note. */
   onFlagNote?: (id: string, reason: FlagReason) => Promise<boolean>;
+  /** A limit stretched for this journey only (never saved), and how to undo it. */
+  once: { what: string[] } | null;
+  onAllowOnce: (patch: Partial<Profile>, what: string[]) => void;
+  onUndoOnce: () => void;
+  /** Go as close as you can get instead. */
+  onGoClosest: (p: Place) => void;
+  /** Phones: Start sits in a bar pinned to the bottom of the screen, in reach at any sheet height. */
+  pinActions?: boolean;
 }
 
-const dist = (m: number) => (m >= 1000 ? `${(m / 1000).toFixed(1)} km` : `${m} m`);
+const dist = (m: number) => (m >= 1000 ? `${(m / 1000).toFixed(1)} km` : `${Math.round(m / 10) * 10} m`);
+const groundWord = (c: Conditions) => (c.ice ? "icy ground" : c.wet ? "wet ground" : "dry ground");
 
 export const meta = (r: PlannedRoute) => {
   const s = r.summary;
   // With a train in the middle, the distance that matters is the bit you push, wheel or walk.
   const d = s.rides.length ? s.walkM : s.distanceM;
-  const steep = s.worstInclinePct === null ? "slope unknown" : `max ${Math.abs(s.worstInclinePct)}%`;
-  return `${Math.round(s.minutes)} min / ${dist(d)} / ${steep}`;
+  const steep = s.worstInclinePct === null ? "slope not known" : `max ${Math.abs(s.worstInclinePct)}%`;
+  return `${dist(d)} · ${steep}`;
 };
 
-/** Plain-language verdict. Never "step-free" while anything is unknown (the trust contract). */
-function Verdict({ r }: { r: PlannedRoute }) {
+/** What else is on the way, in a few words: rides, lifts, steps, setts. */
+function extras(r: PlannedRoute): string[] {
   const s = r.summary;
-  if (s.verdict === "passable")
-    return (
-      <span className="inline-flex items-center gap-1.5 text-ok">
-        <CircleCheck aria-hidden className="size-5" /> Fits your limits
-      </span>
-    );
-  return (
-    <span className="inline-flex items-center gap-1.5 text-caution">
-      <CircleHelp aria-hidden className="size-5" /> Missing data for {dist(s.unknownM)}
-    </span>
-  );
+  return [
+    s.rides.length ? s.rides.map((x) => `${x.line.replace(/ towards .*/, "")} to ${x.to}`).join(", then ") : null,
+    s.movableBridges.length ? `${s.movableBridges.map((b) => b.name).join(", ")} (moving bridge)` : null,
+    s.lifts ? `${s.lifts} lift${s.lifts > 1 ? "s" : ""}` : null,
+    s.steps ? `${s.steps} flight${s.steps > 1 ? "s" : ""} of steps` : null,
+    (s.surfaceMix["setts"] ?? 0) > 20 ? `${s.surfaceMix["setts"]} m of setts` : null,
+    s.unknownM >= 10 ? `${dist(s.unknownM)} not fully mapped` : null,
+  ].filter((x): x is string => !!x);
 }
 
 export function RoutePanel(props: Props) {
   const { from, to, profile, conditions, result, planning, selectedId, onSelect } = props;
   const all: PlannedRoute[] = result?.status === "ok" ? [...result.routes, ...result.tradeoffs.flatMap((t) => (t.route ? [t.route] : []))] : [];
   const sel = all.find((r) => r.id === selectedId) ?? (result?.status === "ok" ? result.routes[0] : undefined);
-  const weather = conditions.ice ? "ice" : conditions.wet ? "wet" : "dry";
   const { notes, author, builtAt } = props;
   const stretches = sel?.stretches ?? [];
   const unknownNames = new Set(sel?.unknowns.map((u) => u.name) ?? []);
@@ -86,10 +92,12 @@ export function RoutePanel(props: Props) {
   };
   // Notes on stretches we lack data for show under "What we don't know"; the rest under "Why this way?".
   const routeNotes = stretches.filter((st) => !unknownNames.has(st.name)).flatMap((st) => notesForStretch(notes, st, builtAt));
-  const others =
+  const titled =
     result?.status === "ok"
-      ? [...result.routes.map((r) => ({ r, title: r.label })), ...result.tradeoffs.flatMap((t) => (t.route ? [{ r: t.route, title: t.label }] : []))].filter((o) => o.r.id !== sel?.id)
+      ? [...result.routes.map((r) => ({ r, title: r.label, why: null as string | null })), ...result.tradeoffs.flatMap((t) => (t.route ? [{ r: t.route, title: t.label, why: t.message }] : []))]
       : [];
+  const others = titled.filter((o) => o.r.id !== sel?.id);
+  const selTitle = titled.find((o) => o.r.id === sel?.id);
   const tradeoffMessages = result?.status === "ok" ? result.tradeoffs.filter((t) => !t.route) : [];
   const isVenue = !!to.venue || to.id.startsWith("pin:");
   const placeNotes = notesForPlace(notes, to);
@@ -120,26 +128,23 @@ export function RoutePanel(props: Props) {
         : worksClosed
           ? `${props.works!.closedNow} pavement closure${props.works!.closedNow === 1 ? "" : "s"} nearby, avoided.`
           : null;
+  // The sentence that says why this route: the explanation for the best route, the trade-off for the others.
+  const why = !sel ? null : result?.status === "ok" && sel.id === result.routes[0]?.id ? result.headline : (selTitle?.why ?? null);
 
   return (
-    <div className="grid grid-cols-1 gap-4">
-      {/* Journey: one card, two rows, swap on the side. */}
-      <section aria-label="Journey" className="flex items-stretch gap-1 rounded-2xl bg-surface-2">
+    <div className="grid grid-cols-1 gap-3 [&>*]:min-w-0">
+      {/* Journey: two rows, swap on the side. Tap either to change it. */}
+      <section aria-label="Journey" className="flex items-stretch gap-1">
         <div className="grid min-w-0 flex-1">
-          <button type="button" onClick={props.onChangeFrom} className="flex min-h-12 min-w-0 items-center gap-2 px-4 text-left">
+          <button type="button" onClick={props.onChangeFrom} className="flex min-h-11 min-w-0 items-center gap-3 rounded-xl px-1 text-left hover:bg-surface-2">
+            <span aria-hidden className="ml-1 size-3 shrink-0 rounded-full border-[3px] border-ink" />
             <span className="sr-only">Change start: </span>
-            <span aria-hidden className="w-10 shrink-0 text-sm text-muted">
-              From
-            </span>
             <span className="truncate">{from.name}</span>
           </button>
-          <span aria-hidden className="mx-4 border-t border-line" />
-          <button type="button" onClick={props.onChangeTo} className="flex min-h-12 min-w-0 items-center gap-2 px-4 text-left">
+          <button type="button" onClick={props.onChangeTo} className="flex min-h-11 min-w-0 items-center gap-3 rounded-xl px-1 text-left hover:bg-surface-2">
+            <MapPin aria-hidden className="size-5 shrink-0 text-accent" strokeWidth={2.6} />
             <span className="sr-only">Change destination: </span>
-            <span aria-hidden className="w-10 shrink-0 text-sm text-muted">
-              To
-            </span>
-            <span className="truncate font-bold">{to.name}</span>
+            <span className="truncate text-lg font-bold">{to.name}</span>
           </button>
         </div>
         <Button variant="ghost" size="icon" onClick={props.onSwap} aria-label="Swap start and destination" className="self-center">
@@ -147,56 +152,113 @@ export function RoutePanel(props: Props) {
         </Button>
       </section>
 
-      {planning && !result ? <p className="m-0 text-muted" aria-live="polite">Working out routes for your limits…</p> : null}
+      {/* Who and what ground: what every route here was worked out for. */}
+      <button
+        type="button"
+        onClick={props.onOpenMode}
+        aria-label={`Routes are for ${profile.label} on ${groundWord(conditions)}. Change how you get around`}
+        className="flex min-h-12 items-center gap-2 rounded-2xl bg-surface-2 px-4 text-left"
+      >
+        <SlidersHorizontal aria-hidden className="size-5 shrink-0" />
+        <span className="min-w-0 flex-1">
+          <span className="font-bold">{profile.label}</span> <span className="text-muted whitespace-nowrap">· {groundWord(conditions)}</span>
+        </span>
+        <span className="font-bold text-accent">Change</span>
+      </button>
 
-      {result?.status !== "ok" ? <Settings {...props} weather={weather} /> : null}
-
-      {result?.status === "none" ? (
-        <section aria-live="polite" className="grid gap-2 rounded-2xl border border-stop/40 p-4">
-          <p className="m-0 flex items-center gap-2 font-bold">
-            <CircleX aria-hidden className="size-5 text-stop" /> {result.message}
+      {props.once ? (
+        <div role="status" className="flex items-start gap-3 rounded-2xl border-2 border-caution bg-caution-soft p-3">
+          <p className="m-0 min-w-0 flex-1 text-sm">
+            <span className="font-bold">Allowing {props.once.what.join(" and ")} for this journey only.</span> Your saved limits haven&apos;t changed.
           </p>
-          {result.walkingHeadline ? <p className="m-0 text-muted">{result.walkingHeadline}</p> : null}
-          <Button onClick={props.onOpenMode}>Check your limits</Button>
-        </section>
+          <Button size="md" onClick={props.onUndoOnce} className="min-h-11 shrink-0 px-3 text-sm">
+            <Undo2 aria-hidden className="size-4" /> Undo
+          </Button>
+        </div>
       ) : null}
+
+      {planning && !result ? (
+        <p className="m-0 py-6 text-center text-muted" aria-live="polite">
+          Working out routes for your limits…
+        </p>
+      ) : null}
+
+      {result?.status === "none" ? <NoFit result={result} to={to} onAllowOnce={props.onAllowOnce} onGoClosest={props.onGoClosest} onOpenMode={props.onOpenMode} /> : null}
 
       {result?.status === "ok" && sel ? (
         <>
-          <section aria-labelledby="routes-h" className="grid gap-2">
-            <h2 id="routes-h" className="sr-only">
-              Routes
+          <section aria-labelledby="route-h" aria-live="polite" className="grid gap-3 rounded-[20px] border-2 border-ink p-4">
+            <h2 id="route-h" className="sr-only">
+              {selTitle?.title || "Best for you"}
             </h2>
-            <RouteSummary r={sel} title={result.tradeoffs.find((t) => t.route?.id === sel.id)?.label} />
-            {planning ? <p className="m-0 text-sm text-muted" aria-live="polite">Updating…</p> : null}
-          </section>
-
-          <div className="grid gap-2">
-            <Button variant="primary" size="lg" onClick={props.onStart}>
-              Start
-            </Button>
-            <div className="grid grid-cols-2 gap-2">
-              <Button onClick={() => props.onAddNote(choices)} disabled={!choices.length}>
-                <MessageSquarePlus aria-hidden className="size-5 shrink-0" /> Add a note
-              </Button>
-              <ShareButton to={to.name} minutes={sel.summary.minutes} />
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <VerdictPill v={sel.summary.verdict} />
+              <span className="tabular text-[28px] leading-none font-bold">{Math.round(sel.summary.minutes)} min</span>
+              <span className="tabular text-sm text-muted">{meta(sel)}</span>
             </div>
-          </div>
-
-          <div className="grid gap-1">
-            <p className="m-0">{result.headline}</p>
+            <RouteStrip strip={sel.strip} />
+            {why ? <p className="m-0">{why}</p> : null}
+            {extras(sel).length ? <p className="m-0 -mt-1 text-sm text-muted">{extras(sel).join(" · ")}</p> : null}
             {result.door ? (
-              <p className="m-0 flex items-start gap-1.5 text-sm text-muted">
+              <p className="m-0 flex items-start gap-1.5 text-sm">
                 <DoorOpen aria-hidden className="mt-0.5 size-4 shrink-0" />
-                Takes you to {result.door.name ? `the ${result.door.name} entrance` : "an entrance"} that fits your settings ({result.door.detail}).
+                Ends at {result.door.name ? `the ${result.door.name} entrance` : "an entrance"} that fits you ({result.door.detail}).
               </p>
             ) : null}
             {liveLine ? <p className={cn("m-0 text-sm", props.lifts.state === "failed" ? "text-caution" : "text-muted")}>{liveLine}</p> : null}
-          </div>
+            {planning ? <p className="m-0 text-sm text-muted">Updating…</p> : null}
+          </section>
 
-          <Settings {...props} weather={weather} />
+          {others.length ? (
+            <ul aria-label="Other ways" className="m-0 grid list-none gap-2 p-0">
+              {others.map((o) => (
+                <li key={o.r.id}>
+                  <button
+                    type="button"
+                    onClick={() => onSelect(o.r.id)}
+                    className="flex min-h-14 w-full flex-wrap items-center gap-x-3 gap-y-1 rounded-2xl border border-line px-4 py-2 text-left hover:border-ink"
+                  >
+                    <span className="sr-only">Switch to </span>
+                    <span className="tabular text-lg font-bold">{Math.round(o.r.summary.minutes)} min</span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block font-bold">{o.title || "Another way"}</span>
+                      <span className="tabular block text-sm text-muted">{meta(o.r)}</span>
+                    </span>
+                    <VerdictPill v={o.r.summary.verdict} />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          {tradeoffMessages.map((t) => (
+            <p key={t.id} className="m-0 flex items-start gap-2 text-sm text-muted">
+              <CircleAlert aria-hidden className="mt-0.5 size-4 shrink-0" />
+              {t.message}
+            </p>
+          ))}
 
-          <div className="grid gap-2">
+          {(() => {
+            const actions = (
+              <div className="flex gap-2">
+                <Button variant="primary" size="lg" onClick={props.onStart} className="flex-1 rounded-2xl">
+                  Start
+                </Button>
+                <Button size="lg" onClick={() => props.onAddNote(choices)} disabled={!choices.length} aria-label="Add a note about this route" className="w-14 rounded-2xl px-0">
+                  <MessageSquarePlus aria-hidden className="size-6" />
+                </Button>
+                <ShareButton to={to.name} minutes={sel.summary.minutes} />
+              </div>
+            );
+            // The sheet is transformed while it snaps, so a fixed bar has to live outside it.
+            return props.pinActions && typeof document !== "undefined"
+              ? createPortal(
+                  <div className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-surface px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] shadow-[0_-4px_20px_rgb(0_0_0/0.08)]">{actions}</div>,
+                  document.body,
+                )
+              : actions;
+          })()}
+
+          <div className="grid gap-2 [&>*]:min-w-0">
             {isVenue ? (
               <More
                 title="Getting in"
@@ -258,26 +320,6 @@ export function RoutePanel(props: Props) {
               <PeopleSay notes={routeNotes} all={notes} author={author} onDelete={props.onDeleteNote} onFlag={props.onFlagNote} title="Notes from people on this route" hint="Their own experience, not checked by us. Notes nudge your routes but never rule a street in or out." />
             </More>
 
-            {others.length || tradeoffMessages.length ? (
-              <More title="Other ways" aside={others.length ? `${others.length}` : undefined}>
-                {others.length ? (
-                  <ul className="m-0 grid list-none gap-2 p-0">
-                    {others.map((o) => (
-                      <li key={o.r.id}>
-                        <RouteCard r={o.r} title={o.title} onSelect={() => onSelect(o.r.id)} />
-                      </li>
-                    ))}
-                  </ul>
-                ) : null}
-                {tradeoffMessages.map((t) => (
-                  <p key={t.id} className="m-0 flex items-start gap-2 text-muted">
-                    <CircleAlert aria-hidden className="mt-0.5 size-5 shrink-0" />
-                    {t.message}
-                  </p>
-                ))}
-              </More>
-            ) : null}
-
             <BusDepartures legs={sel.busLegs} live={props.liveBuses} />
 
             {sel.unknowns.length ? (
@@ -336,29 +378,61 @@ export function RoutePanel(props: Props) {
   );
 }
 
-/** Who and what ground: the two things that change every route. */
-function Settings({ profile, onOpenMode, onConditions, weather }: Props & { weather: "dry" | "wet" | "ice" }) {
+/**
+ * Nothing fits. Say what's in the way, then what you can do: go as close as
+ * you can, or stretch a limit for this journey only. Never a dead end (D-032).
+ */
+function NoFit({ result, to, onAllowOnce, onGoClosest, onOpenMode }: { result: Extract<PlanResult, { status: "none" }>; to: Place; onAllowOnce: Props["onAllowOnce"]; onGoClosest: Props["onGoClosest"]; onOpenMode: () => void }) {
+  const b = result.blockers;
+  const named = b.slice(0, 2).map((x) => `${x.detail} on ${x.name}`);
+  const cl = result.closest;
   return (
-    // Sized to share one row on a 390 px phone; wraps at large text sizes rather than truncating.
-    <div className="flex flex-wrap items-center gap-1.5 text-sm">
-      <Button onClick={onOpenMode} aria-label={`Routes are for ${profile.label}. Change`} className="h-auto min-w-0 max-w-full gap-1.5 px-2.5 py-2 text-left text-sm">
-        <SlidersHorizontal aria-hidden className="size-4 shrink-0" /> <span>{profile.label}</span>
-      </Button>
-      <div role="radiogroup" aria-label="Ground" className="flex gap-0.5 rounded-full border border-line p-0.5">
-        {(["dry", "wet", "ice"] as const).map((k) => (
-          <button
-            key={k}
-            type="button"
-            role="radio"
-            aria-checked={weather === k}
-            onClick={() => onConditions(k)}
-            className={cn("min-h-12 min-w-12 rounded-full px-2.5 text-sm", weather === k ? "bg-ink text-surface" : "text-ink")}
-          >
-            {k === "dry" ? "Dry" : k === "wet" ? "Wet" : "Icy"}
-          </button>
-        ))}
+    <section aria-live="polite" aria-labelledby="nofit-h" className="grid gap-3">
+      <div className="grid gap-1 rounded-[20px] bg-stop-soft p-4">
+        <h2 id="nofit-h" className="m-0 flex items-center gap-2 text-lg font-bold text-stop">
+          <CircleX aria-hidden className="size-6 shrink-0" /> {result.message}
+        </h2>
+        {named.length ? (
+          <p className="m-0">
+            In the way: <span className="font-bold">{named.join(", then ")}</span>
+            {b.length > 2 ? ` and ${b.length - 2} more` : ""}. Marked on the map.
+          </p>
+        ) : (
+          <p className="m-0">Your start and {to.name} aren&apos;t joined up in our map data.</p>
+        )}
       </div>
-    </div>
+      <h3 className="m-0 font-mono text-xs tracking-[0.08em] text-muted uppercase">What you can do</h3>
+      {cl ? (
+        <button
+          type="button"
+          onClick={() => onGoClosest({ id: `closest:${cl.end[0].toFixed(5)},${cl.end[1].toFixed(5)}`, name: `${cl.name}, near ${to.name}`, kind: `As close as you can get: ${dist(cl.leftM)} short`, lon: cl.end[0], lat: cl.end[1] })}
+          className="grid gap-1 rounded-2xl border-2 border-line p-4 text-left hover:border-ink"
+        >
+          <span className="flex flex-wrap items-center gap-2">
+            <span className="font-bold">Get as close as you can</span>
+            <VerdictPill v={cl.summary.verdict} />
+          </span>
+          <span className="text-sm text-muted">
+            {cl.name}, {dist(cl.leftM)} from {to.name}. {Math.round(cl.summary.minutes)} min.
+          </span>
+          <RouteStrip strip={cl.strip} className="my-1" />
+          <span className="font-bold text-accent">Show this route</span>
+        </button>
+      ) : null}
+      {result.relax ? (
+        <button type="button" onClick={() => onAllowOnce(result.relax!.patch, result.relax!.what)} className="grid gap-1 rounded-2xl border-2 border-line p-4 text-left hover:border-ink">
+          <span className="font-bold">I&apos;ll manage {result.relax.what.join(" and ")} today</span>
+          <span className="text-sm text-muted">
+            Plans with {result.relax.what.join(" and ")} allowed, for this journey only (about {result.relax.minutes} min). Your saved limits stay the same.
+          </span>
+          <span className="font-bold text-accent">Allow for this journey</span>
+        </button>
+      ) : null}
+      <button type="button" onClick={onOpenMode} className="grid gap-1 rounded-2xl border-2 border-line p-4 text-left hover:border-ink">
+        <span className="font-bold">Check your limits</span>
+        <span className="text-sm text-muted">If they&apos;re stricter than you need, a change here applies to every route.</span>
+      </button>
+    </section>
   );
 }
 
@@ -412,51 +486,6 @@ function PeopleSay({
   );
 }
 
-/** The chosen route, as a plain summary (not a control: other ways are under "Other ways"). */
-function RouteSummary({ r, title }: { r: PlannedRoute; title?: string }) {
-  const s = r.summary;
-  const extras = [
-    s.rides.length ? s.rides.map((x) => `${x.line.replace(/ towards .*/, "")} to ${x.to}`).join(", then ") : null,
-    s.movableBridges.length ? `${s.movableBridges.map((b) => b.name).join(", ")} (moving bridge)` : null,
-    s.lifts ? `${s.lifts} lift${s.lifts > 1 ? "s" : ""}` : null,
-    s.steps ? `${s.steps} flight${s.steps > 1 ? "s" : ""} of steps` : null,
-    (s.surfaceMix["setts"] ?? 0) > 20 ? `${s.surfaceMix["setts"]} m of setts` : null,
-  ].filter(Boolean);
-  return (
-    <div className="grid gap-0.5 rounded-2xl border-2 border-accent bg-surface-2 px-4 py-3">
-      <h3 className="m-0 flex flex-wrap items-baseline justify-between gap-x-3 text-base">
-        <span className="font-bold">{title ?? (r.label || "This way")}</span>
-        {r.minutesExtra > 0 ? <span className="tabular text-sm font-normal text-muted">+{r.minutesExtra} min</span> : null}
-      </h3>
-      <span className="tabular font-mono text-[15px]">{meta(r)}</span>
-      {extras.length ? <span className="text-sm text-muted">{extras.join(" / ")}</span> : null}
-      <span className="text-sm">
-        <Verdict r={r} />
-      </span>
-    </div>
-  );
-}
-
-/** Another way there, one row: tap to make it the chosen route. */
-function RouteCard({ r, onSelect, title }: { r: PlannedRoute; onSelect: () => void; title?: string }) {
-  const s = r.summary;
-  return (
-    <button
-      type="button"
-      onClick={onSelect}
-      className="flex min-h-12 w-full flex-wrap items-center justify-between gap-x-3 rounded-2xl border border-line bg-surface px-4 py-2 text-left hover:border-ink"
-    >
-      <span className="font-bold whitespace-nowrap">
-        <span className="sr-only">Switch to </span>
-        {title ?? r.label}
-      </span>
-      <span className="tabular text-sm text-muted">
-        {Math.round(s.minutes)} min{r.minutesExtra > 0 ? ` (+${r.minutesExtra})` : ""} / {s.verdict === "passable" ? "fits your limits" : `missing data for ${dist(s.unknownM)}`}
-      </span>
-    </button>
-  );
-}
-
 /**
  * Share where you're going and when you'll arrive. Never includes the
  * profile: someone's mobility settings are theirs alone.
@@ -483,8 +512,11 @@ function ShareButton({ to, minutes }: { to: string; minutes: number }) {
     }
   };
   return (
-    <Button onClick={share} aria-label={copied ? "Copied" : "Share your arrival time"}>
-      <Share2 aria-hidden className="size-5 shrink-0" /> <span aria-live="polite">{copied ? "Copied" : "Share"}</span>
+    <Button size="lg" onClick={share} aria-label={copied ? "Copied your arrival time" : "Share your arrival time"} className="w-14 rounded-2xl px-0">
+      <Share2 aria-hidden className="size-6 shrink-0" />
+      <span aria-live="polite" className="sr-only">
+        {copied ? "Copied" : ""}
+      </span>
     </Button>
   );
 }
