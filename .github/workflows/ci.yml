@@ -20,9 +20,11 @@ jobs:
       - run: pnpm test
       - run: pnpm --filter @causeway/web typecheck
       - run: pnpm web:build
-      # Accessibility: axe-core WCAG 2.2 AA on the built app, light and dark (scripts/a11y-check.mjs).
+      # Accessibility: axe-core WCAG 2.2 AA on the built app, light and dark, under the real security headers (scripts/a11y-check.mjs).
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm a11y
+      # End to end: search, route, start, arrive and end in each city, under the real security headers (scripts/e2e.mjs).
+      - run: pnpm e2e
 
   migrations:
     runs-on: ubuntu-latest

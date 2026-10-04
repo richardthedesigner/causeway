@@ -58,7 +58,12 @@ export default function Home() {
   useEffect(() => {
     try {
       const saved = localStorage.getItem(CITY_KEY);
-      if (saved) setCity(cityById(saved));
+      if (saved) {
+        const c = cityById(saved);
+        setCity(c);
+        // Start in the saved city too, not at the first city's default start.
+        setFrom(c.start);
+      }
     } catch {
       /* no storage: default city */
     }
