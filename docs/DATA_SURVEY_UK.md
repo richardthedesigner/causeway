@@ -326,7 +326,7 @@ OSM-mapped `changing_places=yes` toilets are fine to keep.
 ## 10. Looked for and not found
 
 - **Dropped kerbs and tactile paving:**
-  - a dropped-kerb register anywhere in the UK (Leeds publishes counts only);
+  - an openly licensed dropped-kerb register anywhere in the UK (Leeds publishes counts only; RBKC's is public but unlicensed, see section 11);
   - tactile paving data outside Edinburgh and Glasgow signal crossings.
 - **Live status:**
   - live lift status for Metrolink, Merseyrail, Supertram, West Midlands Metro, NET, Glasgow Subway, shopping centres, Barbican highwalks or Canary Wharf;
@@ -345,3 +345,65 @@ OSM-mapped `changing_places=yes` toilets are fine to keep.
   - an open UK sub-metre aerial imagery source;
   - open 3D city models;
   - open indoor maps of UK stations.
+
+## 11. Look again: what the first passes missed
+
+A final pass hunted for whole categories nobody had searched. New finds, best first:
+
+| Source | Licence | Coverage | Adds | Verdict | V/S |
+|---|---|---|---|---|---|
+| **OS NGD Building Access Location** | OS Premium / PSGA | GB | One point per building entrance with `access_obstruction` (none / ramp / step) and level. Step-free entrances nationally | trial; add to the OS ask | V (schema) |
+| OS NGD Path Link and Pavement Link extra fields | OS Premium | GB | Elevation gain per direction, street-light coverage, surface type, minimum pavement width | trial; add to the OS ask | V (schema) |
+| **Camden parking tickets, street-level, daily** | OGL v3 | Camden | Code 62 (wheels on the footway) 2,413 tickets this year; code 27 (beside a dropped kerb) 94. A direct "pavement often blocked" signal, and a pattern to ask other boroughs for | keep | V |
+| **The Gazette linked-data API** | OGL | UK | Traffic orders and footpath stopping-up and diversion orders, including Wales | trial | V |
+| TrafficwatchNI roadworks RSS | OGL | NI | 1,744 works (text only; geocode by road) | keep for NI | V |
+| **RBKC Highways MapServer** | Not stated | Kensington and Chelsea | 4,040 dropped kerbs, crossings, raised tables, guardrails, benches, York stone pavements | ask | V |
+| GLA Cool Spaces 2025, Camden heat resources | London Datastore | London | 250 heat refuges with wheelchair access, toilets, seating, water | keep | V |
+| UK public GBFS (54 systems: Beryl, Dott, Bolt, Donkey) | Beryl CDLA-Permissive-2.0; others per feed | Leeds, Manchester, Bristol, West Midlands and more (none in the pilots) | Dockless vehicles on pavements; Dott parking zones | trial (expansion) | V |
+| East Renfrewshire pavement-parking layer | Not stated | East Renfrewshire | Second council pattern after Glasgow | ask | V |
+| police.uk street crime API | OGL | England, Wales, NI (not Scotland) | Opt-in personal-safety signal at night | trial | V |
+| DfT STATS19, DfT road traffic counts | OGL | GB | Pedestrian casualty sites; traffic volume as a "hard to cross" proxy | trial | V |
+| Geograph | CC BY-SA 2.0 | UK | Rural photos for desk checks where Mapillary and Panoramax are thin | trial | V |
+| Tower Bridge lift times | None stated | London | Footway closes about 800 times a year | ask | V |
+| Met Office climate data portal (frost days, wet days) | OGL | UK | Seasonal ice and wet risk by area | trial | V |
+| ADMIRALTY tidal API | UKHO terms | British Isles | Tidal causeways and promenades | trial | S |
+| Warm Spaces, Safe Places schemes | Mostly not stated | Local | Winter rest places; places to go if lost or frightened (cognitive and autism profiles) | trial / partner | V/S |
+| GoodMaps, NaviLens | Commercial | UK stations (GoodMaps names Network Rail and LNER) | Indoor station maps; codes for low-vision users | partner | S |
+| TfGM traffic signals, GM Local Link (demand-responsive transport) | OGL | Greater Manchester | Crossings by type; accessible fallback | keep (expansion) | V |
+| Footfall counters (York hourly since 2009, Leeds, Leicester, Stirling) | OGL / not stated | Local | Quiet-time routing | trial | S |
+| Wheelchair-accessible taxi lists (York, Leicester, Middlesbrough) | OGL / not stated | Local | Taxi fallback | trial | V |
+| NHS PLACE disability scores, EA beach ramps and slipways, school crossing patrols, DWP Stat-Xplore | OGL | England / GB | Hospital quality; coastal access; staffed crossings; rollout planning | trial (low) | S/V |
+| Robson & Ford (Newcastle University) GB pavement-width analysis | Paper CC BY 4.0, data not attached | GB | National widths | partner: ask the authors | S |
+| Wayfindr / ITU-T F.921 | Standard | — | How to word audio directions for vision-impaired users | keep as reference | N |
+
+**OSM coverage in GB** (taginfo, data to 2026-10-03). This is why so much has to come from elsewhere:
+
+| Well tagged | Count | Barely tagged | Count |
+|---|---|---|---|
+| `tactile_paving` | 377,997 | `kerb:height` | 345 |
+| `entrance` | 242,047 | `hearing_loop` | 32 |
+| `crossing:island` | 235,136 | `door:width` | 1 |
+| `kerb` | 154,597 | `changing_places` | 1 |
+| `smoothness` | 142,150 | `automatic_door` | 669 |
+| `wheelchair` | 128,510 | `ramp:wheelchair` | 1,465 |
+| `width` | 120,538 | `highway=elevator` | 2,656 |
+| `incline` | 82,153 | | |
+| `step_count` | 39,143 | | |
+| `traffic_signals:sound` | 18,726 | | |
+| `toilets:wheelchair` | 6,503 | | |
+
+**Corrections from this pass:**
+- **Dropped kerbs are published in one London borough.** RBKC has 4,040 dropped kerbs, with no licence stated, which corrects section 10. The "London borough kerb data not found" note in DATA_SOURCES.md is out of date.
+- **OSM can't stand in for Changing Places.** The `changing_places` key is used once in GB, so section 9's "OSM-mapped Changing Places are fine" holds but covers almost nothing.
+
+**Checked and empty:**
+- Welsh street works.
+- Pedestrian signal timings.
+- Street-level parking tickets outside Camden.
+- Network Rail platform heights.
+- Open indoor station maps.
+- A Swing Bridge lift feed.
+- Tidal crossing-time feeds.
+- Hearing loops, quiet hours and Sunflower scheme locations.
+- Scooter charging.
+- GBFS in the pilot cities.
