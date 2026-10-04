@@ -1,7 +1,6 @@
 "use client";
 import { Check, ChevronDown, CloudRain, Layers, LocateFixed, Snowflake, Sun } from "lucide-react";
 import type { City } from "@/lib/cities";
-import type { Conditions } from "@/lib/use-planner";
 import { useMenu } from "@/lib/use-menu";
 import { cn } from "@/lib/utils";
 
@@ -11,9 +10,6 @@ interface Props {
   city: City;
   cities: City[];
   onCity: (c: City) => void;
-  ground: Ground;
-  conditions: Conditions;
-  onGround: (g: Ground) => void;
   showSlopes: boolean;
   onSlopes: (v: boolean) => void;
   onLocate: () => void;
@@ -23,7 +19,7 @@ interface Props {
   minimal?: boolean;
 }
 
-const GROUND = {
+export const GROUND = {
   dry: { icon: Sun, label: "Dry", long: "Dry ground" },
   wet: { icon: CloudRain, label: "Wet", long: "Wet ground" },
   ice: { icon: Snowflake, label: "Icy", long: "Icy ground" },
@@ -43,12 +39,12 @@ function Option({ on, onClick, children }: { on: boolean; onClick: () => void; c
 }
 
 /**
- * What floats over the map: where you are (city), what the ground is like
- * today, and the map's own controls. Everything else lives in the sheet.
+ * What floats over the map: where you are (city) and the map's own
+ * controls. Everything you set for a trip, the ground included, lives in the
+ * sheet at the bottom, in reach (D-036 step 8).
  */
 export function MapChrome(props: Props) {
   const { open, setOpen, toggle, root } = useMenu();
-  const G = GROUND[props.ground];
   return (
     <div ref={root} className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start gap-2 px-3 pt-[calc(0.75rem+env(safe-area-inset-top,0px))] md:left-[452px]">
       {!props.minimal ? (
@@ -74,37 +70,6 @@ export function MapChrome(props: Props) {
                   </Option>
                 ))}
                 <p className="m-0 px-3 pt-1 pb-2 text-sm text-muted">{props.city.coverage}</p>
-              </div>
-            ) : null}
-          </div>
-          <div className="relative max-w-full">
-            <button type="button" data-menu="ground" aria-haspopup="menu" aria-expanded={open === "ground"} onClick={() => toggle("ground")} className={chip}>
-              <G.icon aria-hidden className="size-5" />
-              <span className="sr-only">Ground today: </span>
-              {G.label}
-            </button>
-            {open === "ground" ? (
-              <div role="menu" aria-label="Ground today" className={cn(panel, "left-0 w-72 max-w-[calc(100vw-2rem)]")}>
-                {(Object.keys(GROUND) as Ground[]).map((k) => {
-                  const I = GROUND[k].icon;
-                  return (
-                    <Option
-                      key={k}
-                      on={k === props.ground}
-                      onClick={() => {
-                        setOpen(null);
-                        props.onGround(k);
-                      }}
-                    >
-                      <span className="flex items-center gap-2">
-                        <I aria-hidden className="size-5" /> {GROUND[k].long}
-                      </span>
-                    </Option>
-                  );
-                })}
-                <p className="m-0 px-3 pt-1 pb-2 text-sm text-muted">
-                  {props.conditions.summary}. {props.conditions.source}.
-                </p>
               </div>
             ) : null}
           </div>

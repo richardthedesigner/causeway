@@ -4,6 +4,16 @@ A running record of what was built, newest first. Each entry links the decision 
 
 ## 2026-10-04 (late night)
 
+**"This trip" at the bottom; the ground leaves the top of the map** (D-036 step 8)
+- Swiping the sheet up shows "This trip": getting around as, ground (Dry / Wet / Icy with the weather source), use buses, and accessible toilet spacing.
+- The ground chip is gone from the top of the map; the route has the same three chips beside "Worked out for wet ground". Only the city picker and the map's own buttons stay at the top.
+- That completes the device switcher plan.
+
+**Switching device while navigating** (D-036 step 7)
+- With more than one device, the navigation bar has a device button beside the arrival time. It asks "Switch device mid-journey?" (Switch to Lulu / Keep Cherry) rather than opening the list, so a mis-tap doesn't re-plan.
+- Switching re-plans the rest of the journey from your location and keeps navigating.
+- Fixed: pace learned on a journey went to the active device even when the route was for a device borrowed for this trip.
+
 **Routes say who they're for, and offer another device** (D-036 step 6)
 - Routes carry a "For Cherry" tag once there's more than one device (or the device is named).
 - After switching device with a route on screen, the route says what changed: "9 min quicker than Cherry's route", or "Cherry had no route here."

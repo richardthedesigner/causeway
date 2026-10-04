@@ -124,15 +124,20 @@ export function activeDevice(state: DeviceState): SavedDevice {
   return state.devices.find((d) => d.id === state.activeId) ?? state.devices[0]!;
 }
 
+/** Change one device's limits, whichever is active (pace learned on a borrowed-for-this-trip device goes to that device). */
+export function withDeviceProfile(state: DeviceState, id: string, profile: Profile): DeviceState {
+  return {
+    ...state,
+    devices: state.devices.map((d) => (d.id === id ? { ...d, profile: d.name.trim() ? { ...profile, label: d.name.trim() } : profile } : d)),
+  };
+}
+
 /**
  * Change the active device's limits. A named device keeps its name as the
  * profile label, so picking a different starting type never renames Cherry.
  */
 export function withActiveProfile(state: DeviceState, profile: Profile): DeviceState {
-  return {
-    ...state,
-    devices: state.devices.map((d) => (d.id === state.activeId ? { ...d, profile: d.name.trim() ? { ...profile, label: d.name.trim() } : profile } : d)),
-  };
+  return withDeviceProfile(state, state.activeId, profile);
 }
 
 export function withActive(state: DeviceState, id: string): DeviceState {
