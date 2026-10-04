@@ -121,6 +121,7 @@ Today there are no accounts: profiles and devices stay on the phone (D-009), and
 | DEP-06 | Graph builds on a worker (Fly.io or Cloud Run), not a laptop | M | later | todo | Richard, Claude | D-010, "reconsider at Phase 3" |
 | DEP-07 | Privacy-safe error reporting (no locations, no profile) | M | next | todo | Richard, Claude | Choose a tool, decide what's sent, write it in DECISIONS |
 | DEP-08 | Production Supabase set up and checked against BACKEND.md | S | next | todo | Richard | Confirm it's live, migrations 0001 to 0005 applied |
+| DEP-09 | Stay under Vercel's free limit of 100 deployments a day: skip builds for docs-only changes and the mirror branch | S | next | todo | Claude | Hit on 2026-10-04 (PR #31 preview refused). An `ignoreCommand` in `vercel.json`, or fewer branch pushes |
 
 ## Security and privacy
 
@@ -219,4 +220,5 @@ Decisions and accounts only Richard can give. Each one unblocks rows above.
 
 Newest first. One line per change: date, ID, what happened, link.
 
+- 2026-10-04: DEP-09 added after Vercel refused a preview for hitting the daily deployment limit.
 - 2026-10-04: Roadmap created from the build log, decisions, plans and open issues.
