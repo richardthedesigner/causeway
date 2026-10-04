@@ -201,12 +201,19 @@ export function evaluateEdge(e: GraphEdge, forward: boolean, p: Profile, c: Cond
     reasons.push({ kind: "unknown", attr: "width", detail: "width not known", seconds: s });
   }
 
-  // Street proxies: we are guessing that a pavement exists alongside and that side-road crossings are dropped.
-  if (e.kind === "street_proxy" && WHEELED(p)) {
-    const s = 30 * (1 - p.uncertaintyTolerance);
-    penalty += s;
-    unknownCritical = true;
-    reasons.push({ kind: "unknown", attr: "pavement", detail: "pavement not mapped separately", seconds: s });
+  // Street proxies: the pavement isn't its own path, so side-road kerbs (and maybe the pavement itself) are unknown.
+  if (e.kind === "street_proxy") {
+    const pav = a.pavement?.value ?? null;
+    if (pav === "no") {
+      const s = seconds * (WHEELED(p) ? 0.6 : 0.2);
+      penalty += s;
+      reasons.push({ kind: "penalty", attr: "pavement", detail: "no pavement: shared with traffic", seconds: s });
+    } else if (WHEELED(p)) {
+      const s = (pav ? 12 : 30) * (1 - p.uncertaintyTolerance);
+      penalty += s;
+      unknownCritical = true;
+      reasons.push({ kind: "unknown", attr: "pavement", detail: pav ? "kerbs at side roads not mapped" : "pavement not mapped", seconds: s });
+    }
   }
 
   // Crossings: kerbs live on the end nodes; an unmapped kerb is an unknown.

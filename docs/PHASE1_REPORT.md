@@ -1,6 +1,6 @@
 # Phase 1 report: the honest graph (central Edinburgh)
 
-Date: 2026-10-04. Full numbers: [PHASE1_COVERAGE.md](PHASE1_COVERAGE.md). Inspector map: published as a private Claude artifact (source in `docs/debug/`).
+Date: 2026-10-04. Full numbers: [coverage/edinburgh-central.md](coverage/edinburgh-central.md). Inspector map: published as a private Claude artifact (source in `docs/debug/`).
 
 ## What shipped
 

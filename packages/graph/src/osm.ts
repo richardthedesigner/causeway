@@ -233,6 +233,7 @@ export function edgeAttrsFromTags(t: Tags, ts: string, kind: EdgeKind): EdgeAttr
     yesNo(t["handrail"]) ??
     (["handrail:left", "handrail:right", "handrail:center"].some((k) => t[k] === "yes") ? true : null);
   const wc = t["wheelchair"];
+  if (kind === "street_proxy") return streetProxyAttrs(t, ts, inc, smooth, steps, handrail, wc);
   return {
     incline: osmAttr(inc, ts, "OSM incline tag"),
     inclineMax: osmAttr(inc, ts, "OSM incline tag"),
@@ -245,6 +246,48 @@ export function edgeAttrsFromTags(t: Tags, ts: string, kind: EdgeKind): EdgeAttr
     lit: osmAttr(yesNo(t["lit"]), ts, "OSM lit tag"),
     covered: osmAttr(yesNo(t["covered"]) ?? (t["indoor"] === "yes" || t["tunnel"] === "building_passage" ? true : null), ts, "OSM covered/indoor"),
     wheelchair: osmAttr(wc === "yes" || wc === "limited" || wc === "no" ? wc : null, ts, "OSM wheelchair tag"),
+  };
+}
+
+/**
+ * A road standing in for its pavements. The road's own surface and width
+ * describe the carriageway, not the pavement, so they are never reported as
+ * pavement facts: OSM sidewalk:* tags are used where present, and the road
+ * surface otherwise, marked inferred.
+ */
+function streetProxyAttrs(
+  t: Tags,
+  ts: string,
+  inc: number | null,
+  smooth: Smoothness | null,
+  _steps: number | null,
+  handrail: boolean | null,
+  wc: string | undefined,
+): EdgeAttrs {
+  const sw = t["sidewalk"] ?? t["sidewalk:both"] ?? (t["sidewalk:left"] && t["sidewalk:left"] !== "no" ? "left" : t["sidewalk:right"] && t["sidewalk:right"] !== "no" ? "right" : undefined);
+  const pav = sw === "both" || sw === "yes" ? "both" : sw === "left" || sw === "right" ? sw : sw === "no" || sw === "none" ? "no" : null;
+  const side = pav === "left" ? "left" : pav === "right" ? "right" : "both";
+  const pick = (k: string) => t[`sidewalk:${side}:${k}`] ?? t[`sidewalk:${k}`] ?? (side === "both" ? (t[`sidewalk:left:${k}`] ?? t[`sidewalk:right:${k}`]) : undefined);
+  const swSurface = pick("surface");
+  const surfaceAttr: Attr<Surface> = swSurface
+    ? attr(SURFACES[swSurface] ?? "other", "reported", "osm", ts, `OSM sidewalk:${side}:surface`)
+    : t["surface"]
+      ? attr(SURFACES[t["surface"]] ?? "other", "inferred", "osm", ts, "carriageway surface (OSM surface); the pavement may differ")
+      : unknownAttr();
+  const width = parseMetres(pick("width"));
+  return {
+    incline: osmAttr(inc, ts, "OSM incline tag"),
+    inclineMax: osmAttr(inc, ts, "OSM incline tag"),
+    crossSlope: unknownAttr(),
+    surface: surfaceAttr,
+    smoothness: osmAttr(smooth, ts, "OSM smoothness tag"),
+    width: osmAttr(width, ts, `OSM sidewalk:${side}:width`),
+    stepCount: attr(0, "inferred", "derived", null, "not steps"),
+    handrail: osmAttr(handrail, ts, "OSM handrail tag"),
+    lit: osmAttr(yesNo(t["lit"]), ts, "OSM lit tag"),
+    covered: osmAttr(yesNo(t["covered"]), ts, "OSM covered"),
+    wheelchair: osmAttr(wc === "yes" || wc === "limited" || wc === "no" ? wc : null, ts, "OSM wheelchair tag"),
+    pavement: osmAttr(pav, ts, "OSM sidewalk tag"),
   };
 }
 

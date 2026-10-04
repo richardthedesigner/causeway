@@ -140,6 +140,8 @@ export interface EdgeAttrs {
   covered: Attr<boolean>;
   /** OSM wheelchair=yes|limited|no on the way itself. */
   wheelchair: Attr<"yes" | "limited" | "no">;
+  /** For street_proxy edges: which sides have a pavement (OSM sidewalk=*). */
+  pavement?: Attr<"both" | "left" | "right" | "no">;
 }
 
 export type LiveStatus = "open" | "closed" | "restricted" | "degraded";
