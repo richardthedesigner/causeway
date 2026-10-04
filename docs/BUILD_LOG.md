@@ -29,6 +29,11 @@ A running record of what was built, newest first. Each entry links the decision 
 
 ## 2026-10-04 (evening)
 
+**Offline keeps up with the data** (D-023 update)
+- The service worker used to cache city data permanently on first fetch, so timetables would never update. It also re-downloaded the search index and base map on every visit.
+- City data is now stale-while-revalidate.
+- Checked in a browser: graph, timetables, search, base map and fonts cached, then a route planned with the network off.
+
 **Accessibility check in CI**
 - `pnpm a11y` (`scripts/a11y-check.mjs`) runs axe-core against WCAG 2.2 AA in light and dark on four screens: start, search results, a route with every section open (buses, toilets, notes), and the settings sheet.
 - No violations today. CI runs it on every push and pull request, so a regression fails the build.
