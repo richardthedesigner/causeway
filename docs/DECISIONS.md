@@ -350,7 +350,31 @@ The visual-impairment preset sets 60 s per 100 m; anyone can turn it on with "Af
 
 **To revisit.** The 60 s figure is a guess, like the crossing weights (#12). Ask low-vision users in Phase 2. Planning a trip for later tonight needs a departure time, which the app doesn't have yet.
 
-## D-039 Battery range is a warning, set by the user
+## D-039 Open when you get there
+
+**Decided.** 2026-10-04. 2,757 places in our three cities have OpenStreetMap `opening_hours`. We showed the raw string at best ("Hours: Mo-Sa 10:00-18:00; Su 11:00-17:00"), which is hard to read and harder to work out against the clock.
+
+**What we do.** `apps/web/src/lib/opening-hours.ts` reads the common forms (day ranges, several time spans, past midnight, "off", "24/7", later rules overriding earlier ones) in UK local time. It reads 2,665 of the 2,757 (97%).
+- **Destination:** under the route time, "When you arrive: closed, opens tomorrow 09:00", in bold when shut. Arrival is now plus the route's time.
+- **Accessible toilets on the route:** each says whether it's open when you'd pass it ("Open until 17:00 when you pass", "Shut when you pass, opens tomorrow 09:00"). A shut toilet doesn't count toward the longest stretch without one, and venues shut now aren't offered to "Past more toilets".
+
+**Honesty.** Anything we can't read fully (months, sunrise, comments, "open end") shows the hours as mapped, never a guess. We don't know bank holidays, so a rule for them adds "(may differ on bank holidays)". Hours are volunteer-mapped and can be stale; the line says they're from OpenStreetMap.
+
+**Later.** With a departure time (not built yet), "when you arrive" should use it.
+
+## D-040 Leaving later
+
+**Decided.** 2026-10-04. Routes assumed you leave now. Bus waits, the after-dark check (D-038), opening hours (D-039), works and lift closures all depend on the time, so planning tonight's trip in the afternoon gave the afternoon's answer.
+
+**What we do.** A "Leaving" row in This trip: Now, In 30 min, In 1 hour, or At a time (the next time the clock reads it, so 08:30 in the evening means tomorrow). The chosen time becomes the router's clock (`Conditions.now`), so everything time-dependent follows it.
+- **Weather:** more than 45 minutes ahead, the ground comes from Open-Meteo's hourly forecast (same request, now asking 48 hours ahead), using the same rules as now over the hours before you leave. It says "Forecast wet at 19:30". Beyond the forecast, it falls back to now. Setting the ground by hand still wins until the time changes.
+- **Route panel:** "Leaving 18:30, arriving about 18:52", and opening hours for that arrival.
+- **Toilets:** open or shut when you'd pass, from the leaving time.
+- **Live bus times** are hidden when leaving later: they're for now. The timetable frequency is for the leaving time.
+
+**Not stored.** The leaving time lasts for the visit; it isn't saved, so a stale "tomorrow 08:30" can't surprise anyone next week. A time that has passed counts as now.
+
+## D-041 Battery range is a warning, set by the user
 
 **Decided.** 2026-10-04. From tester feedback: lightweight chairs have small batteries.
 - A device can carry `maxRangeKm`, its range on one charge on the flat. It is unset by default, and with no range there is no warning: we never guess someone's battery. The demo Cherry (`?demo=devices`) has 12 km.

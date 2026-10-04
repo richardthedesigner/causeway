@@ -194,6 +194,7 @@ export function buildIndex(file: PlacesFile | null, extra: Place[]): Index {
         venue: p.c !== "highway=bus_stop",
         facts: facts.length ? facts : undefined,
         factsSource: facts.length ? `OpenStreetMap, ${p.dk ? "checked" : "edited"} ${monthYear(p.d) ?? "date unknown"}` : undefined,
+        hours: p.a?.opening_hours,
       };
       // OSM first when names tie: it is the source with access tags.
       add(place, p.c === "highway=bus_stop" ? 3 : p.src === "overture" ? 2.5 : 2, p.ad ?? "", p.c, p.a);

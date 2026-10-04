@@ -11,7 +11,12 @@ export interface Conditions {
   ice: boolean;
   summary: string;
   source: string;
+  /** Leaving later: the router's clock (bus waits, after dark, works). Absent or past: now. */
+  leaveAt?: Date | null;
 }
+
+/** The time this trip starts: the chosen time if it's still ahead, else now. */
+export const departure = (c: Pick<Conditions, "leaveAt">): Date => (c.leaveAt && c.leaveAt.getTime() > Date.now() ? c.leaveAt : new Date());
 
 type Ready = Extract<WorkerResponse, { type: "ready" }>;
 
@@ -105,14 +110,14 @@ export function usePlanner(city: City) {
     setPlanning(true);
     setError(null);
     const id = ++seq.current;
-    worker.current.postMessage({ type: "plan", id, from, to, profile, conditions: { wet: c.wet, ice: c.ice, now: new Date().toISOString() }, notes: notes.map((n) => ({ ...n, photo: null })) } satisfies WorkerRequest);
+    worker.current.postMessage({ type: "plan", id, from, to, profile, conditions: { wet: c.wet, ice: c.ice, now: departure(c).toISOString() }, notes: notes.map((n) => ({ ...n, photo: null })) } satisfies WorkerRequest);
   }, []);
 
   /** Verdicts for a short list of places (recents), from one start. */
   const check = useCallback((from: Place, to: Place[], profile: Profile, c: Conditions) => {
     if (!worker.current || !to.length) return;
     const id = ++checkSeq.current;
-    worker.current.postMessage({ type: "check", id, from, to, profile, conditions: { wet: c.wet, ice: c.ice, now: new Date().toISOString() } } satisfies WorkerRequest);
+    worker.current.postMessage({ type: "check", id, from, to, profile, conditions: { wet: c.wet, ice: c.ice, now: departure(c).toISOString() } } satisfies WorkerRequest);
   }, []);
 
   /** Ask whether each of these devices could make the journey (latest request wins). */
@@ -120,7 +125,7 @@ export function usePlanner(city: City) {
     const id = ++fitsSeq.current;
     setFits(null);
     if (!worker.current || !profiles.length) return;
-    worker.current.postMessage({ type: "fits", id, from, to, profiles, conditions: { wet: c.wet, ice: c.ice, now: new Date().toISOString() } } satisfies WorkerRequest);
+    worker.current.postMessage({ type: "fits", id, from, to, profiles, conditions: { wet: c.wet, ice: c.ice, now: departure(c).toISOString() } } satisfies WorkerRequest);
   }, []);
 
   return { ready, error, result, planning, plan, lifts, works, checks, check, fits, fitsResult, sendToilets, clear: () => setResult(null) };

@@ -16,6 +16,8 @@ export interface Place {
   facts?: string[];
   /** Where the facts come from and how old they are: "OpenStreetMap, checked Mar 2025". */
   factsSource?: string;
+  /** OpenStreetMap opening_hours, as mapped. */
+  hours?: string;
 }
 
 export interface PlannedRoute {

@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { conditionsFromOpenMeteo, parseLiftDisruptions, toLiveStates, type OpenMeteoResponse } from "@causeway/live";
+import { conditionsFromOpenMeteo, forecastConditions, parseLiftDisruptions, toLiveStates, type OpenMeteoResponse } from "@causeway/live";
 
 describe("TfL lift disruptions", () => {
   // Real response recorded 2026-10-04.
@@ -59,5 +59,25 @@ describe("weather to conditions", () => {
   });
   it("treats snow as ice", () => {
     expect(conditionsFromOpenMeteo(base({ weather_code: 73 }), now).ice).toBe(true);
+  });
+
+  // Hours from 12:00 to 21:00 UTC: dry now, rain from 17:00.
+  const ahead = (): OpenMeteoResponse => {
+    const t = Array.from({ length: 10 }, (_, i) => new Date(now.getTime() + i * 3_600_000).toISOString());
+    return {
+      current: { time: now.toISOString(), temperature_2m: 12, precipitation: 0, weather_code: 1 },
+      hourly: { time: t, precipitation: t.map((_, i) => (i >= 5 ? 1.2 : 0)), temperature_2m: t.map(() => 11), weather_code: t.map((_, i) => (i >= 5 ? 61 : 1)), snowfall: t.map(() => 0) },
+    };
+  };
+  it("ignores forecast hours when working out the ground now", () => {
+    expect(conditionsFromOpenMeteo(ahead(), now).wet).toBe(false);
+  });
+  it("uses the forecast for a later trip, and says it's a forecast", () => {
+    const later = forecastConditions(ahead(), new Date("2026-10-04T18:30:00Z"), now);
+    expect(later.wet).toBe(true);
+    expect(later.summary).toBe("Forecast wet at 19:30: 2.4 mm of rain in the 3 hours before");
+    expect(forecastConditions(ahead(), new Date("2026-10-04T14:00:00Z"), now).summary).toBe("Forecast dry at 15:00");
+    // Beyond the forecast: what we know now.
+    expect(forecastConditions(ahead(), new Date("2026-10-06T14:00:00Z"), now).summary).toBe("Dry");
   });
 });

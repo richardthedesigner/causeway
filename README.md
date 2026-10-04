@@ -10,6 +10,10 @@ Accessibility-first wayfinding. It gets a wheelchair user from A to B on a route
 - Where the data comes from: [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md)
 - What's open, including actions for Richard: [GitHub issues](https://github.com/richardthedesigner/causeway/issues)
 
+## What's outstanding
+
+[docs/OPEN_ITEMS.md](docs/OPEN_ITEMS.md): what's waiting on Richard, what's blocked, and the guesses to check with users. What was built and why: [docs/BUILD_LOG.md](docs/BUILD_LOG.md) and [docs/DECISIONS.md](docs/DECISIONS.md).
+
 ## Layout
 
 | Path | What |
