@@ -411,12 +411,12 @@ export function learnPace(p: Profile, observedMps: number): Profile {
  */
 export interface SavedDevice {
   id: string;
-  /** The user's name for it. Also written to profile.label, which the app shows. */
+  /** The user's name for it, or "" if they never named it. A name is also written to profile.label. */
   name: string;
   favourite: boolean;
   profile: Profile;
 }
 
 export function savedDevice(id: string, name: string, preset: MobilityPreset, overrides: Partial<Profile> = {}, favourite = false): SavedDevice {
-  return { id, name, favourite, profile: profileFrom(preset, { ...overrides, label: name }) };
+  return { id, name, favourite, profile: profileFrom(preset, name ? { ...overrides, label: name } : overrides) };
 }

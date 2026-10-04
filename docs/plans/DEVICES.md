@@ -62,7 +62,7 @@ Status: designed and agreed, ready to build on the new UI (D-035). Storyboard: t
 
 Each step is one pull request that can go live on its own.
 
-**1. Devices behind the profile** (`apps/web/src/lib/devices.ts`, `profile-store.ts`, `app/page.tsx`)
+**1. Devices behind the profile** (`apps/web/src/lib/devices.ts`, `app/page.tsx`). Done.
 - Page state holds `devices` and `activeId`; `profile` is the active device's profile. Every profile change writes back to that device.
 - Migration: someone with a saved profile and no devices gets it as one unnamed device. Nobody loses settings.
 - Unit tests: migration, favourites-first ordering, the label rule.

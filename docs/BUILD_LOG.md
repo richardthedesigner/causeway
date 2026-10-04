@@ -4,6 +4,11 @@ A running record of what was built, newest first. Each entry links the decision 
 
 ## 2026-10-04 (late night)
 
+**Devices behind the profile** (D-036 step 1)
+- The app now routes for the active saved device; changing limits changes that device. A named device keeps its name when its type or limits change.
+- Someone with settings from before devices keeps them as one unnamed device. The old profile key is still written, so an older build reads the active device.
+- No visible change yet, except that the chip now says "Manual chair + help" correctly (it missed the pushed preset's new label).
+
 **Device switcher designed and planned** (D-036, [plan](plans/DEVICES.md#build-plan-the-device-switcher-d-036))
 - Search and the device button share one bar at the bottom. A named device shows its name; an unnamed type keeps its icon.
 - Eight steps, each its own pull request, from devices behind the profile to a "This trip" section in the drawer. The demo seed goes when first-visit setup ships.
