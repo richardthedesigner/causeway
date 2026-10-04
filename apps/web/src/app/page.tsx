@@ -14,6 +14,7 @@ import { Drawer, DrawerContent, DrawerDescription, DrawerTitle } from "@/compone
 import type { Place } from "@/lib/plan-types";
 import { loadProfile, saveProfile } from "@/lib/profile-store";
 import { CITIES, cityById, type City } from "@/lib/cities";
+import { usePlaces } from "@/lib/use-places";
 import { usePlanner, type Conditions } from "@/lib/use-planner";
 
 const PRESET_CONDITIONS: Record<"dry" | "wet" | "ice", Conditions> = {
@@ -37,6 +38,7 @@ export default function Home() {
     }
   }, []);
   const planner = usePlanner(city);
+  const index = usePlaces(city, planner.ready?.places ?? null);
   const [profile, setProfile] = useState<Profile>(PRESETS["manual-wheelchair"]);
   const [modeOpen, setModeOpen] = useState(false);
   const [from, setFrom] = useState<Place>(CITIES[0]!.start);
@@ -184,8 +186,14 @@ export default function Home() {
             ))}
           </div>
           <PlaceSearch
+            key={`${city.id}-${view.target}`}
             label={view.target === "to" ? "Where to?" : "Starting from?"}
-            places={planner.ready.places.filter((p) => p.id !== (view.target === "to" ? from.id : to?.id))}
+            index={index}
+            suggestions={planner.ready.places.filter((p) => p.kind !== "Street").slice(0, 8)}
+            near={view.target === "to" ? from : (to ?? from)}
+            bbox={planner.ready.bbox}
+            cityName={city.name}
+            excludeId={view.target === "to" ? from.id : to?.id}
             onPick={pick}
             onUseLocation={view.target === "from" ? useLocation : undefined}
           />

@@ -304,3 +304,11 @@ Partnership items for Richard:
 |---|---|---|---|---|
 | **Protomaps daily planet build** (`build.protomaps.com/20261004.pmtiles`) | Vector base map cut per city (`data/basemap/*.pmtiles`) | Data ODbL (OpenStreetMap); schema and styles BSD-3 | V (range-read extracts, 2026-10-04) | **keep** (D-024) |
 | **Protomaps basemaps-assets fonts** (Noto Sans) | Map labels, bundled as `data/basemap/fonts/glyphs.json` | OFL | V (2026-10-04) | **keep** |
+
+## Search (2026-10-04)
+
+| Source | Use | Licence | Verified | Verdict |
+|---|---|---|---|---|
+| **OpenStreetMap** (BBBike Edinburgh PBF; OSM API tiles elsewhere) | Bundled search index: places, access tags, addresses, postcodes (`data/places/`) | ODbL | V (2026-10-04): Edinburgh 9,944 places (1,264 with a wheelchair tag), 50,746 addresses, 2,011 postcodes | **keep** (D-025) |
+| **Photon** (`photon.komoot.io/api`) | Live name search when the bundled index has fewer than 5 matches. Bounded to the city | OSM data, ODbL; public instance has a fair-use limit, so self-host before launch | Reachable from the container, 2026-10-04 | **keep**; self-host for scale |
+| **postcodes.io** (`api.postcodes.io/postcodes/{pc}`) | Full postcodes missing from OSM | OGL v3 (ONS Postcode Directory, contains Royal Mail and OS data) | Not reachable from the container; documented API | **keep**; self-hostable |

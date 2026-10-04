@@ -8,6 +8,8 @@ export interface City {
   graph: string;
   /** Protomaps extract for the base map. */
   basemap: string;
+  /** Search index: places with access tags, addresses, postcodes (scripts/build-places.ts). */
+  index: string;
   /** Rail network for live lift outages (London only for now). */
   network?: string;
   liveLifts: boolean;
@@ -26,6 +28,7 @@ export const CITIES: City[] = [
     coverage: "Central Edinburgh: Old and New Town, Southside, Stockbridge, Bruntsfield.",
     graph: "graph/edinburgh-central.graph.json.gz",
     basemap: "basemap/edinburgh-central.pmtiles",
+    index: "places/edinburgh-central.json.gz",
     liveLifts: false,
     weatherAt: [55.9486, -3.1999],
     start: { id: "causewayside", name: "Causewayside", kind: "Southside / demo address", lon: -3.1812, lat: 55.9385 },
@@ -45,6 +48,7 @@ export const CITIES: City[] = [
     coverage: "Grey Street and the Monument down to the Quayside, across to Gateshead and BALTIC.",
     graph: "graph/newcastle-gateshead.graph.json.gz",
     basemap: "basemap/newcastle-gateshead.pmtiles",
+    index: "places/newcastle-gateshead.json.gz",
     liveLifts: false,
     weatherAt: [54.97, -1.607],
     start: { id: "grey-street", name: "Grey Street", kind: "City centre", lon: -1.6123, lat: 54.9722 },
@@ -62,6 +66,7 @@ export const CITIES: City[] = [
     coverage: "Westminster and Canary Wharf, joined by the Jubilee line and DLR. More of London later.",
     graph: "graph/london-jubilee.graph.json.gz",
     basemap: "basemap/london-jubilee.pmtiles",
+    index: "places/london-jubilee.json.gz",
     network: "graph/london-network.json",
     liveLifts: true,
     weatherAt: [51.502, -0.07],

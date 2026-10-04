@@ -15,7 +15,8 @@
     "web:build": "pnpm --filter @causeway/web build",
     "web:dev": "pnpm --filter @causeway/web dev",
     "build:area": "tsx scripts/build-area.ts",
-    "report:area": "tsx scripts/report-area.ts"
+    "report:area": "tsx scripts/report-area.ts",
+    "build:places": "tsx scripts/build-places.ts"
   },
   "devDependencies": {
     "@types/node": "^26.6.4",

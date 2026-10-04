@@ -13,6 +13,8 @@ cp out/graph/london-network.json "$OUT/graph/"
 mkdir -p "$OUT/basemap" "$OUT/fonts"
 for f in out/basemap/*.pmtiles; do base64 -w0 "$f" > "$OUT/basemap/$(basename "$f" .pmtiles).b64.txt"; done
 cp out/fonts/glyphs.json "$OUT/fonts/"
+mkdir -p "$OUT/places"
+for f in out/places/*.json.gz; do base64 -w0 "$f" > "$OUT/places/$(basename "$f" .json.gz).b64.txt"; done
 python3 - out/index.html "$OUT/causewayside.html" <<'PY'
 import re, sys
 html = open(sys.argv[1]).read()

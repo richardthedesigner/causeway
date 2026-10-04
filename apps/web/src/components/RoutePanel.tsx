@@ -189,6 +189,16 @@ export function RoutePanel(props: Props) {
             <h2 id="in-h" className="m-0 flex items-center gap-2 text-lg font-bold">
               <DoorOpen aria-hidden className="size-5" /> Getting in
             </h2>
+            {to.facts ? (
+              <div className="grid gap-0.5">
+                <ul className="m-0 grid list-none gap-0.5 p-0">
+                  {to.facts.map((f) => (
+                    <li key={f}>{f}</li>
+                  ))}
+                </ul>
+                <span className="text-sm text-muted">{to.factsSource}. Mapped by volunteers; check with the venue if it matters.</span>
+              </div>
+            ) : null}
             {result.entrances.length ? (
               <ul className="m-0 grid list-none gap-2 p-0">
                 {result.entrances.map((e, i) => (
