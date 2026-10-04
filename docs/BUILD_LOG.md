@@ -24,6 +24,11 @@ A running record of what was built, newest first. Each entry links the decision 
 
 ## 2026-10-04 (evening)
 
+**Accessibility check in CI**
+- `pnpm a11y` (`scripts/a11y-check.mjs`) runs axe-core against WCAG 2.2 AA in light and dark on four screens: start, search results, a route with every section open (buses, toilets, notes), and the settings sheet.
+- No violations today. CI runs it on every push and pull request, so a regression fails the build.
+- Axe catches about a third of WCAG issues. Screen reader and switch-access testing with real users is still needed (Phase 2 research).
+
 **Accessible toilets on the way**
 - The route lists accessible toilets within about 80 m: public toilets mapped as wheelchair accessible, and venues mapped with an accessible toilet (marked "Customers").
 - Each shows Changing Places, RADAR key, fee and opening hours where mapped, and they appear as WC labels on the map.
