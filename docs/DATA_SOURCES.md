@@ -297,3 +297,9 @@ Partnership items for Richard:
 | **TfL StopPoint** (`/StopPoint/{ids}`) | Station positions, hubs and `Accessibility` properties (`AccessViaLift`, `LimitedCapacityLift`, interchange notes). Batch requests return the hub record for interchange stations, whose children carry the accessibility. Some Underground platforms in hubs (Canning Town Jubilee) have none | As above | V (2026-10-04) | **keep**. `AccessViaLift = No` is not "has steps". |
 | **TfL lift disruptions v2** | Live lift outages, placed on platforms by line name in the message | As above | V (2026-10-04): 18 outages including Canary Wharf (Jubilee) | **keep**. Integrated (D-020). |
 | **Gateshead Millennium Bridge tilt times** | Closures of the tilting bridge | Unknown | Not found as open data | **partnership-only** (request to Gateshead Council) |
+
+## User notes (2026-10-04)
+
+| Source | Use | Licence | Verified | Verdict |
+|---|---|---|---|---|
+| **Causewayside user notes** (`notes`) | People's own experience of a place or a stretch of footway: good, mixed or bad, a few words, a date, optionally a photo and a coarse mobility label. Shown with date and attribution; soft signal in routing | Our own content, **not ODbL**. Kept as a separate layer keyed by OSM way id and our place refs, never written into the graph (D-008, D-024) | n/a (on the device only, D-022) | **keep** |

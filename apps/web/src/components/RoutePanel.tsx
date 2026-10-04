@@ -1,8 +1,11 @@
 "use client";
-import { ArrowUpDown, CircleAlert, CircleCheck, CircleHelp, CircleX, DoorOpen, SlidersHorizontal } from "lucide-react";
+import { ArrowUpDown, CircleAlert, CircleCheck, CircleHelp, CircleX, DoorOpen, MessageSquarePlus, SlidersHorizontal } from "lucide-react";
+import { notesForPlace, notesForStretch, type UserNote } from "@causeway/graph";
 import type { Profile } from "@causeway/profile";
 import { useState } from "react";
 import { ElevationChart } from "@/components/ElevationChart";
+import { NoteList } from "@/components/NoteList";
+import type { NoteAbout } from "@/components/NoteSheet";
 import { Button } from "@/components/ui/button";
 import type { Place, PlannedRoute, PlanResult } from "@/lib/plan-types";
 import type { Conditions, LiveLifts } from "@/lib/use-planner";
@@ -24,6 +27,12 @@ interface Props {
   onConditions: (c: "dry" | "wet" | "ice") => void;
   lifts: LiveLifts;
   onStart: () => void;
+  /** Notes on this device (separate from the graph), this device's author id, and the graph build the route came from. */
+  notes: UserNote[];
+  author: string;
+  builtAt: string;
+  onAddNote: (about: NoteAbout) => void;
+  onDeleteNote: (id: string) => void;
 }
 
 export const meta = (r: PlannedRoute) => {
@@ -56,6 +65,22 @@ export function RoutePanel(props: Props) {
   const all: PlannedRoute[] = result?.status === "ok" ? [...result.routes, ...result.tradeoffs.flatMap((t) => (t.route ? [t.route] : []))] : [];
   const sel = all.find((r) => r.id === selectedId) ?? (result?.status === "ok" ? result.routes[0] : undefined);
   const weather = conditions.ice ? "ice" : conditions.wet ? "wet" : "dry";
+  const { notes, author, builtAt } = props;
+  const stretches = sel?.stretches ?? [];
+  const unknownNames = new Set(sel?.unknowns.map((u) => u.name) ?? []);
+  const stretchNotes = (name: string) => {
+    const st = stretches.find((x) => x.name === name);
+    return st ? notesForStretch(notes, st, builtAt) : [];
+  };
+  // Notes on stretches we lack data for show under "What we don't know"; the rest under "Why this way?".
+  const routeNotes = stretches.filter((st) => !unknownNames.has(st.name)).flatMap((st) => notesForStretch(notes, st, builtAt));
+  const notedUnknowns = stretches.filter((st) => unknownNames.has(st.name) && notesForStretch(notes, st, builtAt).length).length;
+  const noteable = stretches.filter((st) => st.m >= 20 && !st.name.startsWith("a path") && !st.name.startsWith("unnamed")).slice(0, 8);
+  const placeNotes = notesForPlace(notes, to);
+  const aboutStretch = (st: (typeof stretches)[number]): NoteAbout => {
+    const [lon, lat] = st.points[Math.floor(st.points.length / 2)]!;
+    return { target: { kind: "way", name: st.name, osmWayIds: st.osmWayIds, edgeIds: st.edgeIds, graphBuiltAt: builtAt }, lon, lat };
+  };
 
   return (
     <div className="grid grid-cols-1 gap-5">
@@ -143,6 +168,36 @@ export function RoutePanel(props: Props) {
                 ))}
               </ul>
             ) : null}
+            {routeNotes.length || notedUnknowns ? (
+              <div className="grid gap-2 pt-2">
+                <h3 className="m-0 text-base font-bold">Notes from people on this route</h3>
+                <p className="m-0 text-sm text-muted">Their own experience, not checked by us. Notes nudge your routes but never rule a street in or out.</p>
+                <NoteList notes={routeNotes} all={notes} author={author} onDelete={props.onDeleteNote} />
+                {notedUnknowns ? (
+                  <p className="m-0 text-sm text-muted">
+                    Notes on {notedUnknowns} {notedUnknowns === 1 ? "street" : "streets"} we&apos;re missing data for are under &ldquo;What we don&apos;t know&rdquo;.
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
+            {noteable.length ? (
+              <div className="grid gap-2 pt-2">
+                <h3 id="add-note-h" className="m-0 text-base font-bold">
+                  Add a note about a street on this route
+                </h3>
+                <ul aria-labelledby="add-note-h" className="m-0 flex list-none flex-wrap gap-2 p-0">
+                  {noteable.map((st) => (
+                    <li key={st.name}>
+                      <button type="button" onClick={() => props.onAddNote(aboutStretch(st))} className="inline-flex min-h-12 items-center gap-2 rounded-full border border-line px-4 text-left">
+                        <MessageSquarePlus aria-hidden className="size-5 shrink-0" />
+                        <span className="sr-only">Add a note about </span>
+                        {st.name}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
           </section>
 
           {result.tradeoffs.length ? (
@@ -176,6 +231,12 @@ export function RoutePanel(props: Props) {
                       {u.name} <span className="tabular text-muted">/ {u.m} m</span>
                     </span>
                     <span className="text-sm text-muted">{u.what}</span>
+                    {stretchNotes(u.name).length ? (
+                      <div className="mt-2 grid gap-1">
+                        <span className="text-sm font-bold">What people say (not checked by us)</span>
+                        <NoteList notes={stretchNotes(u.name)} all={notes} author={author} onDelete={props.onDeleteNote} />
+                      </div>
+                    ) : null}
                   </li>
                 ))}
               </ul>
@@ -216,6 +277,19 @@ export function RoutePanel(props: Props) {
             ) : (
               <p className="m-0 text-muted">No entrances mapped near this point. Check with the venue before you go.</p>
             )}
+            {placeNotes.length ? (
+              <div className="grid gap-2 pt-2">
+                <h3 className="m-0 text-base font-bold">What people say</h3>
+                <p className="m-0 text-sm text-muted">Their own experience, not checked by us.</p>
+                <NoteList notes={placeNotes} all={notes} author={author} onDelete={props.onDeleteNote} />
+              </div>
+            ) : null}
+            <Button
+              className="justify-self-start"
+              onClick={() => props.onAddNote({ target: { kind: "place", ref: to.id, name: to.name }, lon: to.lon, lat: to.lat })}
+            >
+              <MessageSquarePlus aria-hidden className="size-5" /> Add a note about getting in
+            </Button>
           </section>
           ) : null}
 
