@@ -23,9 +23,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         {/* eslint-disable-next-line @next/next/no-page-custom-font */}
+        <link rel="manifest" href="manifest.webmanifest" />
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Atkinson+Hyperlegible+Mono:wght@400;600&display=swap" />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        {/* Offline support where the host allows service workers (not inside embedded previews). */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `if ("serviceWorker" in navigator && window.top === window.self && location.protocol === "https:") navigator.serviceWorker.register("sw.js").catch(function(){});`,
+          }}
+        />
+      </body>
     </html>
   );
 }

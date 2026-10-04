@@ -49,7 +49,6 @@ Severity: **critical** (blocks the task), **serious** (likely to cause errors or
 
 | Finding | Severity | Why open / next step |
 |---|---|---|
-| No turn-by-turn, live location dot or "Start". | Serious (parity) | Phase 4 per the brief. The route in words is the interim. |
 | "What we don't know" has no "Report what's there" action yet. | Moderate | Phase 4 report-an-issue loop. |
 | The map has no basemap (buildings, labels, water): it is drawn from our footway graph only. Legible, but not yet "a beautiful map". | Moderate | Protomaps basemap (D-007) in Phase 2b. |
 | The map colours don't switch live if the system theme changes mid-session. | Minor | Re-read tokens on `prefers-color-scheme` change. |
@@ -67,3 +66,19 @@ Severity: **critical** (blocks the task), **serious** (likely to cause errors or
 | Explain the route | Yes: "Why this way?" plus trade-offs ("Every way there that fits your settings has setts."). |
 | Reach and touch | Primary controls in the bottom sheet; 48 px or larger targets except slider thumbs (open item). |
 | Guest-facing quality | Works without an account or install; weather falls back gracefully; offline-capable once loaded. Real-device and real-user testing still to do. |
+
+## Follow-up: navigation and reporting (2026-10-04)
+
+The navigation and report screens were added after the first assessment and checked the same way: axe finds no violations on the route, navigation or report screens.
+
+| Check | Result |
+|---|---|
+| One primary action | Navigation: End (56 px, bottom third). Report: Save report. |
+| Screen readers | Each new instruction and hazard goes to an assertive live region. App speech is opt-in ("Speak"), so it never talks over VoiceOver or TalkBack. |
+| No location | Falls back to a clearly labelled preview that moves along the route. Never pretends to know where you are. |
+| Hazards | Said once, before you reach them ("Steep section in 60 metres: 7% downhill for 110 m. Setts for 110 m."). The banner stays while you're on the stretch. |
+| Off route | Two fixes beyond 25 m, or beyond the phone's own accuracy if that is worse, before replanning from where you are. One poor fix doesn't trigger it. |
+| Sharing | "Share arrival time" shares destination and arrival time only, never the mobility profile. |
+| Reports | Two taps (what's wrong, Save). Kept on the device; no profile attached. |
+
+Open: lock-screen progress (Live Activities) and background location need the native app (D-004). Haptics work on Android only (the web has no vibration on iOS).

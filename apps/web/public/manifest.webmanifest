@@ -1,0 +1,10 @@
+{
+  "name": "Causewayside",
+  "short_name": "Causewayside",
+  "description": "Routes you can actually complete, worked out for how you get around.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#e8ebe5",
+  "theme_color": "#1d5b86",
+  "lang": "en-GB"
+}

@@ -1,6 +1,7 @@
 "use client";
 import { ArrowUpDown, CircleAlert, CircleCheck, CircleHelp, CircleX, DoorOpen, SlidersHorizontal } from "lucide-react";
 import type { Profile } from "@causeway/profile";
+import { useState } from "react";
 import { ElevationChart } from "@/components/ElevationChart";
 import { Button } from "@/components/ui/button";
 import type { Place, PlannedRoute, PlanResult } from "@/lib/plan-types";
@@ -123,9 +124,12 @@ export function RoutePanel(props: Props) {
             ) : null}
           </section>
 
-          <Button variant="primary" size="lg" onClick={props.onStart}>
-            Start
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="primary" size="lg" onClick={props.onStart} className="flex-1">
+              Start
+            </Button>
+            <ShareButton to={to.name} minutes={sel.summary.minutes} />
+          </div>
 
           <section aria-labelledby="why-h" className="grid gap-2">
             <h2 id="why-h" className="m-0 text-lg font-bold">
@@ -280,5 +284,37 @@ function RouteCard({ r, on, onSelect, title, subtitle }: { r: PlannedRoute; on: 
         <Verdict r={r} />
       </span>
     </button>
+  );
+}
+
+/**
+ * Share where you're going and when you'll arrive. Never includes the
+ * profile: someone's mobility settings are theirs alone.
+ */
+function ShareButton({ to, minutes }: { to: string; minutes: number }) {
+  const [copied, setCopied] = useState(false);
+  const share = async () => {
+    const eta = new Date(Date.now() + minutes * 60_000).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+    const text = `I'm heading to ${to}. I should be there about ${eta}.`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ text });
+        return;
+      }
+    } catch {
+      /* cancelled or blocked: fall through to copying */
+    }
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch {
+      /* nothing more we can do without a share sheet or clipboard */
+    }
+  };
+  return (
+    <Button size="lg" onClick={share} aria-live="polite">
+      {copied ? "Copied" : "Share arrival time"}
+    </Button>
   );
 }

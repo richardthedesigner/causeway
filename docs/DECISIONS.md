@@ -149,3 +149,11 @@ Proposal: **accept it, and publish the enriched footway graph under ODbL.** It f
 ## D-021 Movable bridges
 
 **Decided.** 2026-10-04. OSM puts `bridge:movable` on the bridge outline (`man_made=bridge`), not on the decks. Decks inside a movable outline inherit it. Routes that cross one say so: "Crosses Millenium Bridge, a tilting bridge. It closes for a few minutes while it moves for boats. We don't have its timetable yet." (The deck's own OSM name is used as tagged, misspelling included.) Gateshead Millennium Bridge tilt times are not available as open data that we have found; adding them is a Richard-led request to Gateshead Council.
+
+## D-022 Reports stay on the device until there's a backend decision
+
+**Decided** (interim). 2026-10-04. Problem reports (kind, location, time, optional note and photo) are saved on the device. Sending them anywhere means storing location data from members of the public and running moderation and corroboration, so that waits for Richard's call on the backend (Supabase, D-009 privacy rules). Reports never include the mobility profile. The data shape (`apps/web/src/lib/reports.ts`) matches the `report` table in `db/migrations/0001_graph.sql`.
+
+## D-023 Offline on the web
+
+**Decided.** 2026-10-04. A service worker caches the app and every city graph it has loaded. Because routing runs on the device (D-017), a loaded city keeps working with no signal. It is registered only on https and not inside embedded previews. The native app (D-004) will ship city packs as downloads instead.
