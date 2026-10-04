@@ -160,6 +160,8 @@ export interface GraphEdge {
   /** OSM layer; >0 for bridges, <0 for tunnels. */
   layer: number;
   bridge: boolean;
+  /** Movable bridge type (tilt, swing, bascule...): it closes while it moves. */
+  movable?: string;
   /** Can it be traversed to → from? Escalators and some lifts cannot. */
   bidirectional: boolean;
   attrs: EdgeAttrs;
@@ -173,6 +175,8 @@ export interface Graph {
     bbox: [number, number, number, number];
     builtAt: string;
     sources: { id: string; licence: string; attribution: string; snapshot: string }[];
+    /** Live feeds that cover this area, e.g. "tfl-lifts". Absent means none: say so when it matters. */
+    liveFeeds?: string[];
   };
   nodes: GraphNode[];
   edges: GraphEdge[];

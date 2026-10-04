@@ -49,3 +49,16 @@ export const EDINBURGH_CENTRAL_JOURNEYS: Journey[] = [
     to: { label: "Edinburgh Waverley concourse", lon: -3.1893, lat: 55.952 },
   },
 ];
+
+/**
+ * The origin journey: a city-centre hotel to BALTIC (which is in Gateshead).
+ * "If Causewayside cannot do this one well, nothing else matters."
+ */
+export const NEWCASTLE_JOURNEYS: Journey[] = [
+  {
+    id: "grey-street-baltic",
+    title: "Grey Street to BALTIC Centre for Contemporary Art",
+    from: { label: "Grey Street (city-centre hotels)", lon: -1.6123, lat: 54.9722 },
+    to: { label: "BALTIC Centre for Contemporary Art, Gateshead", lon: -1.5977, lat: 54.969 },
+  },
+];

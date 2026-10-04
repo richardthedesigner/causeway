@@ -429,6 +429,7 @@ export function buildGraphFromOsm(osm: OsmData, opts: BuildOptions): Graph {
     const level = levelOf(t);
     const layer = Number(t["layer"] ?? 0) || 0;
     const bridge = !!t["bridge"] && t["bridge"] !== "no";
+    const movable = t["bridge:movable"] ?? (t["bridge"] === "movable" ? "movable" : undefined);
     const attrs = edgeAttrsFromTags(t, way.timestamp, kind);
     const oneway = kind === "escalator" || t["oneway:foot"] === "yes" || (kind !== "street_proxy" && t["oneway"] === "yes" && kind !== "steps");
     // A crossing way tagged kerb=lowered applies to both ends.
@@ -459,6 +460,7 @@ export function buildGraphFromOsm(osm: OsmData, opts: BuildOptions): Graph {
           level,
           layer,
           bridge,
+          ...(movable ? { movable } : {}),
           bidirectional: !oneway,
           attrs: structuredClone(attrs),
           osmWayId: way.id,
@@ -487,6 +489,7 @@ export function buildGraphFromOsm(osm: OsmData, opts: BuildOptions): Graph {
 
   splitLiftsByLevel(nodes, edges, () => edgeId++);
   inferNames(edges, osm);
+  applyBridgeOutlines(edges, osm);
 
   const [minLon, minLat, maxLon, maxLat] = opts.bbox;
   const inBox = (n: OsmNode) => n.lon >= minLon && n.lon <= maxLon && n.lat >= minLat && n.lat <= maxLat;
@@ -582,6 +585,43 @@ function splitLiftsByLevel(nodes: Map<number, GraphNode>, edges: GraphEdge[], ne
     }
     nodes.delete(node.id);
   }
+}
+
+/**
+ * OSM records a bridge's structure on its outline (man_made=bridge), not on
+ * the decks that cross it. Decks inside a movable outline inherit
+ * `movable`, and unnamed or misspelt decks get the structure's name.
+ */
+function applyBridgeOutlines(edges: GraphEdge[], osm: OsmData) {
+  const outlines: { ring: [number, number][]; name: string | null; movable: string | null }[] = [];
+  for (const w of osm.ways.values()) {
+    if (w.tags["man_made"] !== "bridge" || w.nodes[0] !== w.nodes[w.nodes.length - 1]) continue;
+    const ring = w.nodes.map((id) => osm.nodes.get(id)).filter((n): n is OsmNode => !!n).map((n) => [n.lon, n.lat] as [number, number]);
+    if (ring.length < 4) continue;
+    outlines.push({ ring, name: w.tags["name"] ?? null, movable: w.tags["bridge:movable"] ?? null });
+  }
+  if (!outlines.length) return;
+  for (const e of edges) {
+    if (!e.bridge) continue;
+    const mid = e.geometry[Math.floor(e.geometry.length / 2)]!;
+    const o = outlines.find((x) => pointInRing(mid, x.ring));
+    if (!o) continue;
+    if (o.movable && !e.movable) e.movable = o.movable;
+    if (o.name && (!e.name || e.nameInferred)) {
+      e.name = o.name;
+      e.nameInferred = false;
+    }
+  }
+}
+
+function pointInRing([x, y]: [number, number], ring: [number, number][]): boolean {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const [xi, yi] = ring[i]!,
+      [xj, yj] = ring[j]!;
+    if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
 }
 
 /**

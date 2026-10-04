@@ -11,10 +11,11 @@
     "test": "vitest run",
     "build:snapshot": "tsx scripts/build-snapshot.ts",
     "spike": "tsx scripts/spike-edinburgh.ts",
-    "build:central": "tsx scripts/build-edinburgh-central.ts",
+    "build:central": "tsx scripts/build-area.ts edinburgh-central",
     "report:central": "tsx scripts/report-edinburgh-central.ts",
     "web:build": "pnpm --filter @causeway/web build",
-    "web:dev": "pnpm --filter @causeway/web dev"
+    "web:dev": "pnpm --filter @causeway/web dev",
+    "build:area": "tsx scripts/build-area.ts"
   },
   "devDependencies": {
     "@types/node": "^26.6.4",

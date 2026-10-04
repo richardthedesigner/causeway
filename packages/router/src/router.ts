@@ -237,6 +237,8 @@ export interface RouteSummary {
   unknownM: number;
   /** Length-weighted confidence in [0, 1] across incline, surface and width. */
   confidence: number;
+  /** Names of movable bridges crossed (they close while they tilt or swing). */
+  movableBridges: { name: string; type: string }[];
   /** Plain-language passability verdict. Never "step-free" unless we know. */
   verdict: "passable" | "passable-with-unknowns" | "not-passable";
 }
@@ -278,6 +280,8 @@ export function summarise(r: Route, now: Date = DRY.now): RouteSummary {
     } else if (s.edge.kind === "crossing") kerbs.unknown++;
   }
   for (const k of Object.keys(surfaceMix)) surfaceMix[k] = Math.round(surfaceMix[k]!);
+  const movable = new Map<string, string>();
+  for (const s of r.steps) if (s.edge.movable) movable.set(s.edge.name ?? "a movable bridge", s.edge.movable);
   const blocked = r.steps.some((s) => s.eval.passable === "no" || s.nodeEval.passable === "no");
   return {
     minutes: Math.round((r.seconds / 60) * 10) / 10,
@@ -292,6 +296,7 @@ export function summarise(r: Route, now: Date = DRY.now): RouteSummary {
     lifts,
     unknownM: Math.round(unknownM),
     confidence: r.lengthM ? Math.round((confSum / r.lengthM) * 100) / 100 : 0,
+    movableBridges: [...movable].map(([name, type]) => ({ name, type })),
     verdict: blocked ? "not-passable" : unknownM > 0 ? "passable-with-unknowns" : "passable",
   };
 }
@@ -356,7 +361,14 @@ export function explain(router: Router, chosen: Route, from: GraphNode, to: Grap
 
   const notes: string[] = [];
   const sum = summarise(chosen, c.now);
-  if (sum.lifts) notes.push(`Uses ${sum.lifts === 1 ? "a lift" : `${sum.lifts} lifts`}.`);
+  if (sum.lifts) {
+    const live = router.graph.meta.liveFeeds?.some((f) => f.endsWith("lifts"));
+    notes.push(`Uses ${sum.lifts === 1 ? "a lift" : `${sum.lifts} lifts`}.${live ? "" : " We have no live lift status here, so check before you set off."}`);
+  }
+  for (const b of sum.movableBridges) {
+    const verb = b.type === "tilt" ? "tilting" : b.type === "swing" ? "swing" : "movable";
+    notes.push(`Crosses ${b.name}, a ${verb} bridge. It closes for a few minutes while it moves for boats. We don't have its timetable yet.`);
+  }
   const setts = (sum.surfaceMix["setts"] ?? 0) + (sum.surfaceMix["cobbles"] ?? 0);
   if (setts > 20) notes.push(`${setts} m on setts or cobbles.`);
   if (sum.worstInclinePct !== null && Math.abs(sum.worstInclinePct) >= p.comfortInclinePct)
