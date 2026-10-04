@@ -6,7 +6,7 @@ Last updated: 2026-10-04.
 
 - What's waiting on Richard, blocked, or a guess: [OPEN_ITEMS.md](OPEN_ITEMS.md)
 - What shipped and when: [BUILD_LOG.md](BUILD_LOG.md) and the phase reports
-- Every data source we could use, with verdicts: the UK data survey, `DATA_SURVEY_UK.md` ([pull request #32](https://github.com/richardthedesigner/causeway/pull/32), not merged yet). Section numbers below (§) refer to it.
+- Every data source we could use, with verdicts: the [UK data survey](DATA_SURVEY_UK.md). Section numbers below (§) refer to it.
 
 ## Where we are
 
