@@ -4,6 +4,13 @@ A running record of what was built, newest first. Each entry links the decision 
 
 ## 2026-10-04 (late night)
 
+**First visit and Add a device** (D-036 step 5)
+- With nothing saved, the device button reads "Set up" and one line above the bar says why. Routes still work meanwhile, as a manual wheelchair.
+- Setup is three screens, each skippable: what do you use (the six wheeled types with a line each, everything else one tap away), what do you call it (with favourite), and the key limits. "Add a device" uses the same screens.
+- After the first save, a one-time tip points at the button until "Got it".
+- Cherry and Lulu no longer load by default. `?demo=devices` still starts with them when nothing is saved.
+- The accessibility check now walks setup too: 0 violations, light and dark.
+
 **Edit a device** (D-036 step 4)
 - "Edit Cherry" opens a full-screen editor on a phone (a side panel on wide screens): name, favourite, type, limits, and remove.
 - A blank name goes back to calling the device by its type. Changing type keeps the name.

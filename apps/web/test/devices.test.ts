@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { PRESETS, savedDevice } from "@causeway/profile";
-import { activeDevice, defaultDevice, deviceLabel, loadDeviceState, orderDevices, saveDeviceState, SEED_DEVICES, withActive, withActiveName, withActiveProfile, withFavourite, withNewDevice, withoutDevice } from "../src/lib/devices";
+import { activeDevice, defaultDevice, deviceLabel, loadDeviceState, orderDevices, saveDeviceState, SEED_DEVICES, withActive, withActiveName, withActiveProfile, withFavourite, withoutDevice, withSetup } from "../src/lib/devices";
 
 /** An in-memory stand-in for localStorage. */
 function memory(init: Record<string, string> = {}) {
@@ -23,10 +23,21 @@ describe("saved devices seed", () => {
 });
 
 describe("loading devices", () => {
-  it("starts with the seed, Cherry active, when nothing is saved", () => {
+  it("starts fresh, as an unnamed manual wheelchair, when nothing is saved", () => {
     const s = loadDeviceState(memory());
+    expect(s.fresh).toBe(true);
+    expect(s.devices).toHaveLength(1);
+    expect(activeDevice(s)).toMatchObject({ name: "", profile: { preset: "manual-wheelchair" } });
+  });
+
+  it("starts as Cherry and Lulu with the demo link, but only when nothing is saved", () => {
+    const s = loadDeviceState(memory(), { demo: true });
     expect(s.devices.map((d) => d.name)).toEqual(["Cherry", "Lulu"]);
     expect(s.activeId).toBe("cherry");
+    expect(s.fresh).toBeFalsy();
+    const saved = memory();
+    saveDeviceState({ devices: [savedDevice("w", "", "walking")], activeId: "w" }, saved);
+    expect(loadDeviceState(saved, { demo: true }).devices.map((d) => d.id)).toEqual(["w"]);
   });
 
   it("keeps a profile from before devices as one unnamed device", () => {
@@ -52,7 +63,7 @@ describe("loading devices", () => {
   });
 
   it("falls back to the first favourite when the saved active id is gone", () => {
-    const store = memory({ "causewayside.device.active.v1": "deleted" });
+    const store = memory({ "causewayside.devices.v1": JSON.stringify(SEED_DEVICES), "causewayside.device.active.v1": "deleted" });
     expect(loadDeviceState(store).activeId).toBe("cherry");
   });
 
@@ -60,7 +71,7 @@ describe("loading devices", () => {
     const bad = memory({ "causewayside.devices.v1": JSON.stringify([{ id: "x", profile: { preset: "hovercraft" } }, SEED_DEVICES[1]]) });
     expect(loadDeviceState(bad).devices.map((d) => d.name)).toEqual(["Lulu"]);
     const throwing = { getItem: () => { throw new Error("blocked"); }, setItem: () => { throw new Error("blocked"); } };
-    expect(loadDeviceState(throwing).activeId).toBe("cherry");
+    expect(loadDeviceState(throwing).fresh).toBe(true);
     expect(() => saveDeviceState(loadDeviceState(throwing), throwing)).not.toThrow();
   });
 });
@@ -88,10 +99,15 @@ describe("device rules", () => {
     expect(next.devices[1]).toBe(SEED_DEVICES[1]);
   });
 
-  it("adds an unnamed device and switches to it", () => {
-    const next = withNewDevice({ devices: SEED_DEVICES, activeId: "cherry" }, "d9");
-    expect(next.devices.map((d) => d.id)).toEqual(["cherry", "lulu", "d9"]);
-    expect(activeDevice(next)).toMatchObject({ name: "", favourite: false, profile: { preset: "manual-wheelchair", label: "Manual wheelchair" } });
+  it("setup replaces the first-visit stand-in, then adds", () => {
+    const first = withSetup(loadDeviceState(memory()), { preset: "powerchair-light", name: " Cherry ", favourite: true }, "c");
+    expect(first.fresh).toBeFalsy();
+    expect(first.devices.map((d) => d.id)).toEqual(["c"]);
+    expect(activeDevice(first)).toMatchObject({ name: "Cherry", favourite: true, profile: { preset: "powerchair-light", label: "Cherry" } });
+    const second = withSetup(first, { preset: "mobility-scooter", name: "", favourite: false }, "l");
+    expect(second.devices.map((d) => d.id)).toEqual(["c", "l"]);
+    expect(second.activeId).toBe("l");
+    expect(deviceLabel(activeDevice(second))).toBe("Mobility scooter, pavement");
   });
 
   it("ignores a switch to a device that isn't saved", () => {

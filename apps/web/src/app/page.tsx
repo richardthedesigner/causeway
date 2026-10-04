@@ -8,6 +8,7 @@ import { MapChrome, type Ground } from "@/components/MapChrome";
 import { MapView } from "@/components/MapView";
 import { DeviceMenu } from "@/components/DeviceMenu";
 import { DeviceEditor } from "@/components/DeviceEditor";
+import { DeviceSetup } from "@/components/DeviceSetup";
 import { NavView, type Me } from "@/components/NavView";
 import { NoteSheet, type NoteAbout } from "@/components/NoteSheet";
 import { PlaceIcon, PlaceSearch } from "@/components/PlaceSearch";
@@ -19,7 +20,7 @@ import { CommandGroup, CommandItem } from "@/components/ui/command";
 import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
 import { CITIES, cityById, type City } from "@/lib/cities";
 import type { Place } from "@/lib/plan-types";
-import { activeDevice, loadDeviceState, saveDeviceState, SEED_DEVICES, withActive, withActiveName, withActiveProfile, withFavourite, withNewDevice, withoutDevice, type DeviceState } from "@/lib/devices";
+import { activeDevice, FIRST_VISIT, loadDeviceState, saveDeviceState, setTip, tipPending, withActive, withActiveName, withActiveProfile, withFavourite, withoutDevice, withSetup, type DeviceState } from "@/lib/devices";
 import { addRecent, loadRecents } from "@/lib/recents";
 import { useNotes } from "@/lib/use-notes";
 import { toiletsAlong } from "@/lib/toilets";
@@ -60,8 +61,10 @@ export default function Home() {
     if (!index) return;
     planner.sendToilets(index.entries.filter((e) => e.cat !== "amenity=toilets" && e.access?.["toilets:wheelchair"] === "yes").map((e) => ({ lon: e.place.lon, lat: e.place.lat, name: e.place.name })));
   }, [index]); // eslint-disable-line react-hooks/exhaustive-deps
-  // Server render and first paint use the seed; the saved devices load on mount.
-  const [devices, setDevices] = useState<DeviceState>({ devices: SEED_DEVICES, activeId: SEED_DEVICES[0]!.id });
+  // Server render and first paint use the first-visit default; the saved devices load on mount.
+  const [devices, setDevices] = useState<DeviceState>(FIRST_VISIT);
+  const [setup, setSetup] = useState<"first" | "add" | null>(null);
+  const [tip, setTipShown] = useState(false);
   const device = activeDevice(devices);
   const profile = device.profile;
   const [modeOpen, setModeOpen] = useState(false);
@@ -85,7 +88,10 @@ export default function Home() {
   const [recents, setRecents] = useState<Place[]>([]);
   const wide = useWide();
 
-  useEffect(() => setDevices(loadDeviceState()), []);
+  useEffect(() => {
+    setDevices(loadDeviceState(undefined, { demo: new URLSearchParams(location.search).get("demo") === "devices" }));
+    setTipShown(tipPending());
+  }, []);
   useEffect(() => setRecents(loadRecents(city.id)), [city]);
   const shared = useNotes(city.id);
   const cityNotes = shared.notes;
@@ -126,7 +132,8 @@ export default function Home() {
 
   const changeDevices = useCallback((f: (s: DeviceState) => DeviceState) => {
     setDevices((s) => {
-      const next = f(s);
+      // Any saved change ends the first visit.
+      const next = { ...f(s), fresh: false };
       saveDeviceState(next);
       return next;
     });
@@ -229,10 +236,12 @@ export default function Home() {
         changeDevices((s) => withActive(s, id));
       }}
       onEdit={() => setModeOpen(true)}
-      onAdd={() => {
-        setOnce(null);
-        changeDevices((s) => withNewDevice(s, `device-${Date.now().toString(36)}`));
-        setModeOpen(true);
+      onAdd={() => setSetup("add")}
+      onSetup={devices.fresh ? () => setSetup("first") : undefined}
+      tip={tip}
+      onTipSeen={() => {
+        setTipShown(false);
+        setTip("seen");
       }}
     />
   );
@@ -319,6 +328,7 @@ export default function Home() {
         </p>
       ) : view === "home" ? (
         <div className="grid gap-3 [&>*]:min-w-0">
+          {devices.fresh ? <p className="m-0 rounded-2xl bg-surface-2 px-4 py-3 text-sm">Tell us how you get around and we&apos;ll plan routes you can actually do.</p> : null}
           <PlaceSearch
             key={`${city.id}-to`}
             label="Where to?"
@@ -484,6 +494,25 @@ export default function Home() {
           </DrawerContent>
         </Drawer>
       )}
+      <DeviceSetup
+        open={setup !== null}
+        mode={setup ?? "first"}
+        onDone={(choice) => {
+          const first = !!devices.fresh;
+          setSetup(null);
+          setOnce(null);
+          changeDevices((s) => withSetup(s, choice, `device-${Date.now().toString(36)}`));
+          if (first) {
+            setTip("pending");
+            setTipShown(true);
+          }
+        }}
+        onSkip={() => {
+          // Skipping a first visit keeps today's default and stops asking.
+          if (setup === "first") changeDevices((s) => s);
+          setSetup(null);
+        }}
+      />
       <DeviceEditor
         open={modeOpen}
         onOpenChange={setModeOpen}

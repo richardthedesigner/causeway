@@ -83,11 +83,11 @@ Each step is one pull request that can go live on its own.
 - Changing type keeps the name (today `pick()` overwrites the label).
 - Type tiles get one line each for the powered classes (lightweight, heavy duty, pavement scooter, road scooter).
 
-**5. First visit and add a device** (new `DeviceSetup.tsx`)
+**5. First visit and add a device** (`DeviceSetup.tsx`). Done. `?demo=devices` still starts as Cherry and Lulu, for showing the tester's case, but only when nothing is saved.
 - Three steps with Skip on each: type, name with favourite switch, limits with Done. Skipping everything leaves an unnamed manual wheelchair, the current default.
 - With no devices, the button reads "Set up" and the drawer's peek state shows one line: "Tell us how you get around and we'll plan routes you can actually do."
 - One-time tip after the first save, remembered on the device.
-- **Remove the Cherry and Lulu demo seed** (`SEED_DEVICES`) in this step, because real first visits replace it.
+- **The Cherry and Lulu demo seed no longer loads by default**, because real first visits replace it.
 
 **6. Routes: who it's for and the switch offer** (`RoutePanel.tsx`, `RouteStrip.tsx`, `use-planner.ts`)
 - "For Cherry" tag on the route verdict.
