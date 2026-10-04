@@ -4,36 +4,22 @@
  * toilets (every section open), first-visit setup, the device list and the
  * device settings.
  *   pnpm web:build && pnpm a11y
- * Exits 1 on any violation. Runs in CI (.github/workflows/ci.yml).
+ * Exits 1 on any violation, or anything the Content Security Policy blocks. Runs in CI (.github/workflows/ci.yml).
  */
-import { createReadStream, existsSync, readFileSync, statSync } from "node:fs";
-import { createServer } from "node:http";
+import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
-import { extname, join, normalize } from "node:path";
-import { chromium } from "playwright";
+import { launchBrowser, serveOut, watchCsp } from "./serve-out.mjs";
 
 const require = createRequire(import.meta.url);
 const AXE = readFileSync(require.resolve("axe-core/axe.min.js"), "utf8");
-const OUT = join(import.meta.dirname, "../apps/web/out");
-if (!existsSync(OUT)) throw new Error("apps/web/out missing: run pnpm web:build first");
-
-const TYPES = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".json": "application/json", ".gz": "application/gzip", ".pmtiles": "application/octet-stream", ".webmanifest": "application/manifest+json" };
-const server = createServer((req, res) => {
-  let path = normalize(decodeURIComponent((req.url ?? "/").split("?")[0]));
-  if (path.endsWith("/")) path += "index.html";
-  const file = join(OUT, path);
-  if (!file.startsWith(OUT) || !existsSync(file) || !statSync(file).isFile()) return res.writeHead(404).end();
-  res.writeHead(200, { "content-type": TYPES[extname(file)] ?? "application/octet-stream" });
-  createReadStream(file).pipe(res);
-});
-await new Promise((r) => server.listen(0, "127.0.0.1", r));
-const url = `http://127.0.0.1:${server.address().port}/`;
-
-// Locally the pre-installed Chromium may not match Playwright's expected build; CI installs the right one.
-const browser = await chromium.launch(existsSync("/opt/pw-browsers/chromium") && !process.env.CI ? { executablePath: "/opt/pw-browsers/chromium" } : {});
+const server = await serveOut();
+const url = server.url;
+const browser = await launchBrowser();
+const csp = [];
 const failures = [];
 for (const scheme of ["light", "dark"]) {
   const page = await (await browser.newContext({ viewport: { width: 390, height: 844 }, colorScheme: scheme })).newPage();
+  watchCsp(page, csp);
   const check = async (name) => {
     await page.addScriptTag({ content: AXE });
     const violations = await page.evaluate(async () => (await window.axe.run(document, { runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"] } })).violations.map((v) => ({ id: v.id, impact: v.impact, help: v.help, targets: v.nodes.slice(0, 3).map((n) => n.target.join(" ")) })));
@@ -81,8 +67,10 @@ for (const scheme of ["light", "dark"]) {
 }
 await browser.close();
 server.close();
+// axe fetches the page's stylesheets itself to check them; the app never fetches the font CSS, it links it.
+for (const c of csp.filter((c) => !/Refused to connect to 'https:\/\/fonts\.googleapis\.com\//.test(c))) failures.push(`Content Security Policy: ${c}`), console.log(`  [csp] ${c}`);
 if (failures.length) {
-  console.error(`\n${failures.length} accessibility violation(s).`);
+  console.error(`\n${failures.length} accessibility or Content Security Policy problem(s).`);
   process.exit(1);
 }
 console.log("\nNo WCAG 2.2 AA violations found by axe.");
