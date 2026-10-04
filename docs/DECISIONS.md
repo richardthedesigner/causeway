@@ -225,6 +225,8 @@ The route panel lists each bus leg with how often it runs now (timetable) and, i
 - **Privacy.** No profile, ever (D-009). The mobility label is the only health-related fact: opt-in per note, explained on the switch, with a preview of exactly what others will see. That is explicit consent for special category data. A DPIA is still owed before wider launch. Notes keep exact points (they are about places); reports keep the device's accuracy.
 - **Your notes, your call.** "Delete my note" removes it from the server too.
 
+**Update 2026-10-04: review page.** `/review` lets invited reviewers work through flagged notes, photos and reports. They sign in as themselves with an email code; row-level security (`0005_review.sql`) decides what they can do, they can only change review fields, and `review_log` records every decision with who made it. The page never holds the service key.
+
 **Owed by people, not code:** a CAPTCHA (Cloudflare Turnstile) on anonymous sign-up before any publicity, someone named to check flags and photos weekly, and the DPIA.
 
 ## D-031 Trams and the Tyne and Wear Metro come in with the buses
