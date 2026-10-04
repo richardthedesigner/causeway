@@ -762,9 +762,11 @@ export function tradeoffs(router: Router, chosen: Route, from: GraphNode, to: Gr
     const gap = restStats(router.graph, chosen).longestWithoutBenchM;
     if (gap > p.maxRestIntervalM) {
       // Try the user's interval first, then relax: shorter worst gaps are still worth offering.
+      // Short intervals (Inclusive Mobility's 50 m) rarely fit mapped benches, so also try halfway to this route's gap.
       let best: { r: Route; gap: number } | null = null;
-      for (const f of [1, 1.5, 2, 3]) {
-        const r = router.routeWithRests(from, to, p, c, p.maxRestIntervalM * f);
+      const tries = [...new Set([p.maxRestIntervalM, p.maxRestIntervalM * 2, gap * 0.5, gap * 0.7].map(Math.round))].filter((m) => m < gap * 0.85).sort((x, y) => x - y);
+      for (const m of tries) {
+        const r = router.routeWithRests(from, to, p, c, m);
         if (r) {
           const g2 = restStats(router.graph, r).longestWithoutBenchM;
           if (g2 < gap * 0.85) best = { r, gap: g2 };

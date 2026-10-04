@@ -48,4 +48,18 @@ describe("rest stops", () => {
     expect(restStats(router.graph, more!.route!).longestWithoutBenchM).toBeLessThan(gap);
     expect(more!.message).toMatch(/bench/);
   });
+
+  it("still finds more benches with Inclusive Mobility's 50 m for a walking stick, which mapped benches rarely meet (DATA-10)", async () => {
+    const { restStats, tradeoffs } = await import("@causeway/router");
+    const p = PRESETS["walking-stick"];
+    expect(p.maxRestIntervalM).toBe(50);
+    const a = router.snap(-3.1812, 55.9385, p);
+    const b = router.snap(-3.1925, 55.9405, p);
+    const r = router.route(a, b, p)!;
+    const gap = restStats(router.graph, r).longestWithoutBenchM;
+    const more = tradeoffs(router, r, a, b, p).find((t) => t.id === "more-benches");
+    expect(more?.route).toBeTruthy();
+    expect(restStats(router.graph, more!.route!).longestWithoutBenchM).toBeLessThan(gap);
+    expect(more!.message).toMatch(/Longest stretch without a bench \d+ m instead of \d+ m/);
+  });
 });
