@@ -29,7 +29,13 @@ const now = new Date(g.meta.builtAt);
 await registerOsgb(toArrayBuffer(await cached(EDINBURGH_OLD_TOWN.ostn15.file, EDINBURGH_OLD_TOWN.ostn15.url)));
 const nodes = new Map<number, GraphNode>(g.nodes.map((n) => [n.id, n]));
 
-const walkable = g.edges.filter((e) => e.kind !== "elevator" && e.lengthM > 0);
+const [bx0, by0, bx1, by1] = g.meta.bbox;
+const inArea = (e: GraphEdge) => {
+  const [lon, lat] = e.geometry[Math.floor(e.geometry.length / 2)]!;
+  return lon >= bx0 && lon <= bx1 && lat >= by0 && lat <= by1;
+};
+// Ways crossing the boundary are kept whole in the graph; statistics count only segments whose midpoint is inside.
+const walkable = g.edges.filter((e) => e.kind !== "elevator" && e.lengthM > 0 && inArea(e));
 const pct = (num: number, den: number) => (den ? Math.round((num / den) * 1000) / 10 : 0);
 
 // ---------------------------------------------------------------- coverage
@@ -145,7 +151,9 @@ ${sqRows.map(([k, c]) => row(k, c)).join("\n")}
 
 ## Validation: OSM incline tags against LiDAR
 
-${checks.length} edges carry both a numeric OSM \`incline\` tag and a LiDAR gradient. Compared by magnitude against the closer of the LiDAR mean and steepest 10 m window (mappers usually tag the steepest part).
+${checks.length} edges carry both a numeric OSM \`incline\` tag and a LiDAR gradient. Compared by magnitude against the closer of the LiDAR mean and steepest 10 m window (mappers usually tag the steepest part).${checks.length < 50 ? `
+
+**${checks.length} is too few to validate the LiDAR gradients.** Numeric incline tags are rare in OSM (most are "up" or "down"). Validation needs measured ground truth: an inclinometer survey of a sample of segments in each city (Phase 1 field task).` : ""}
 
 - Median difference: ${Number.isNaN(median) ? "n/a" : median.toFixed(1)} percentage points.
 - Within 2 points: ${within2} of ${checks.length} (${pct(within2, checks.length)}%).

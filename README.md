@@ -2,7 +2,7 @@
 
 Accessibility-first wayfinding. It gets a wheelchair user from A to B on a route they can actually complete, by modelling every footway's gradient, camber, surface, width, kerbs, steps and live state, scoring it against the user's own limits, and saying so when it doesn't know.
 
-**Status: Phase 0 (foundations).** No product UI yet. Start with [docs/PHASE0_REPORT.md](docs/PHASE0_REPORT.md).
+**Status: Phase 1 (the honest graph, central Edinburgh).** No product UI yet. Start with [docs/PHASE1_REPORT.md](docs/PHASE1_REPORT.md), then [docs/PHASE0_REPORT.md](docs/PHASE0_REPORT.md).
 
 ## Layout
 
@@ -24,6 +24,12 @@ pnpm test                    # unit + acceptance tests on the committed snapshot
 CAUSEWAY_LIVE=1 pnpm test    # also rebuild from today's OSM and re-run the journeys
 pnpm build:snapshot          # rebuild data/snapshots/edinburgh-old-town.graph.json.gz
 pnpm spike                   # regenerate docs/spikes/phase0-edinburgh.{md,geojson}
+
+# Phase 1: central Edinburgh (needs pip install osmium)
+curl -o .data-cache/Edinburgh.osm.pbf https://download.bbbike.org/osm/bbbike/Edinburgh/Edinburgh.osm.pbf
+python3 scripts/osm-extract.py .data-cache/Edinburgh.osm.pbf .data-cache/edinburgh-central.osm -3.25 55.92 -3.15 55.975
+pnpm build:central           # OSM + LiDAR (range reads) -> data/snapshots/edinburgh-central.graph.json.gz
+pnpm report:central          # docs/PHASE1_COVERAGE.md + docs/debug/edinburgh-central.json (inspector data)
 ```
 
 ## Data and attribution
