@@ -5,8 +5,9 @@
  */
 import { isKnown, type Graph, type GraphEdge, type TransitNetwork } from "@causeway/graph";
 import { applyLiveStates, liftOutageStates } from "@causeway/live";
-import { PRESETS } from "@causeway/profile";
+import { PRESETS, type Profile } from "@causeway/profile";
 import {
+  buildNavPlan,
   describeSegments,
   elevationProfile,
   entrancesNear,
@@ -74,7 +75,7 @@ function networkLines(g: Graph) {
   return g.edges.filter((e) => !rail.has(e.kind)).map((e) => ({ coords: e.geometry, bin: bin(e) }));
 }
 
-function toPlanned(r: Route, start: Parameters<typeof elevationProfile>[1], id: string, label: string, baseSeconds: number, now: Date): PlannedRoute {
+function toPlanned(r: Route, start: Parameters<typeof elevationProfile>[1], id: string, label: string, baseSeconds: number, now: Date, p: Profile): PlannedRoute {
   const unknownCoords: [number, number][][] = [];
   for (const s of r.steps) {
     if (s.eval.passable !== "unknown" && s.nodeEval.passable !== "unknown") continue;
@@ -93,6 +94,7 @@ function toPlanned(r: Route, start: Parameters<typeof elevationProfile>[1], id: 
     .map(([name, v]) => ({ name, m: Math.round(v.m), what: [...v.what].join(", ") }))
     .sort((a, b) => b.m - a.m);
   return {
+    nav: buildNavPlan(r, p),
     unknowns,
     id,
     label,
@@ -122,7 +124,7 @@ function plan(req: Extract<WorkerRequest, { type: "plan" }>): PlanResult {
   }
   const best = alts[0]!;
   const ex = explain(router, best, a, b, p, PRESETS.walking, c);
-  const all = alts.map((r, i) => toPlanned(r, a, `r${i}`, i === 0 ? "Best for you" : "", best.seconds, c.now));
+  const all = alts.map((r, i) => toPlanned(r, a, `r${i}`, i === 0 ? "Best for you" : "", best.seconds, c.now, p));
   // Different paths can still be the same choice to a person: drop alternatives that match an earlier one on time, distance and steepness.
   const same = (x: PlannedRoute, y: PlannedRoute) =>
     Math.abs(x.summary.minutes - y.summary.minutes) < 1.5 &&
@@ -154,7 +156,7 @@ function plan(req: Extract<WorkerRequest, { type: "plan" }>): PlanResult {
     id: t.id,
     label: t.label,
     message: t.message,
-    route: t.route ? toPlanned(t.route, a, `t-${t.id}`, t.label, best.seconds, c.now) : null,
+    route: t.route ? toPlanned(t.route, a, `t-${t.id}`, t.label, best.seconds, c.now, p) : null,
   }));
   return {
     status: "ok",

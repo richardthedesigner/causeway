@@ -14,6 +14,8 @@ interface Props {
   showSlopes: boolean;
   entrances: { lon: number; lat: number; ok: "yes" | "no" | "unknown" }[];
   onMapClick: (lon: number, lat: number) => void;
+  /** Live (or preview) position while navigating; the map follows it. */
+  me?: { lon: number; lat: number; accuracyM: number } | null;
 }
 
 const css = (v: string) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
@@ -34,7 +36,7 @@ const point = (p: { lon: number; lat: number }, props: Record<string, unknown> =
  * attributed pavement or path. A full basemap (Protomaps, D-007) layers
  * underneath in Phase 2b.
  */
-export function MapView({ network, routes, selectedId, from, to, pin, showSlopes, entrances, onMapClick }: Props) {
+export function MapView({ network, routes, selectedId, from, to, pin, showSlopes, entrances, onMapClick, me }: Props) {
   const el = useRef<HTMLDivElement>(null);
   const map = useRef<MLMap | null>(null);
   const ready = useRef(false);
@@ -55,7 +57,7 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
     map.current = m;
     m.on("load", () => {
       const empty = fc([]);
-      for (const id of ["network", "route-alt", "route", "unknown", "markers", "entrances"]) m.addSource(id, { type: "geojson", data: empty });
+      for (const id of ["network", "route-alt", "route", "unknown", "markers", "entrances", "me"]) m.addSource(id, { type: "geojson", data: empty });
       m.addLayer({ id: "network", type: "line", source: "network", paint: { "line-color": ["get", "c"], "line-width": ["interpolate", ["linear"], ["zoom"], 12, 0.8, 17, 3.5], "line-opacity": 0.9 }, layout: { "line-cap": "round" } });
       m.addLayer({ id: "network-steps", type: "line", source: "network", filter: ["==", ["get", "bin"], 5], paint: { "line-color": css("--muted"), "line-width": ["interpolate", ["linear"], ["zoom"], 12, 1.5, 17, 6], "line-dasharray": [0.25, 0.5], "line-opacity": 0.8 } });
       m.addLayer({ id: "route-alt", type: "line", source: "route-alt", paint: { "line-color": css("--route-alt"), "line-width": 7 }, layout: { "line-cap": "round", "line-join": "round" } });
@@ -65,6 +67,9 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
       m.addLayer({ id: "unknown", type: "line", source: "unknown", paint: { "line-color": css("--surface"), "line-width": 3, "line-dasharray": [1, 1.5] } });
       m.addLayer({ id: "entrances", type: "circle", source: "entrances", paint: { "circle-radius": 7, "circle-color": ["get", "c"], "circle-stroke-color": css("--surface"), "circle-stroke-width": 2 } });
       m.addLayer({ id: "markers", type: "circle", source: "markers", paint: { "circle-radius": ["match", ["get", "end"], 1, 11, 2, 10, 8], "circle-color": ["match", ["get", "end"], 1, css("--stop"), 2, css("--surface"), css("--ink")], "circle-stroke-color": ["match", ["get", "end"], 2, css("--accent"), css("--surface")], "circle-stroke-width": ["match", ["get", "end"], 2, 4, 3] } });
+      // Location: accuracy halo (metres to pixels at this latitude) and a dot.
+      m.addLayer({ id: "me-halo", type: "circle", source: "me", paint: { "circle-color": css("--accent"), "circle-opacity": 0.15, "circle-radius": ["interpolate", ["exponential", 2], ["zoom"], 10, ["/", ["get", "acc"], 150], 20, ["*", ["get", "acc"], 6.6]] } });
+      m.addLayer({ id: "me", type: "circle", source: "me", paint: { "circle-radius": 9, "circle-color": css("--accent"), "circle-stroke-color": css("--surface"), "circle-stroke-width": 3 } });
       ready.current = true;
       m.fire("causeway:refresh");
     });
@@ -100,6 +105,14 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
       m.off("causeway:refresh", draw);
     };
   }, [network, routes, selectedId, from, to, pin, showSlopes, entrances]);
+
+  // Position and follow mode.
+  useEffect(() => {
+    const m = map.current;
+    if (!m || !ready.current) return;
+    (m.getSource("me") as GeoJSONSource | undefined)?.setData(fc(me ? [point(me, { acc: me.accuracyM })] : []));
+    if (me) m.easeTo({ center: [me.lon, me.lat], zoom: Math.max(m.getZoom(), 17), padding: { top: 0, bottom: Math.round(window.innerHeight * 0.35), left: 0, right: 0 }, duration: matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 400 });
+  }, [me]);
 
   // Frame the selected route above the sheet.
   useEffect(() => {

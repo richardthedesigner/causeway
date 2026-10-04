@@ -5,6 +5,8 @@ import { Mountain, SlidersHorizontal } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { MapView } from "@/components/MapView";
 import { ModeSheet } from "@/components/ModeSheet";
+import { NavView, type Me } from "@/components/NavView";
+import { ReportSheet } from "@/components/ReportSheet";
 import { PlaceSearch } from "@/components/PlaceSearch";
 import { RoutePanel } from "@/components/RoutePanel";
 import { Button } from "@/components/ui/button";
@@ -46,6 +48,9 @@ export default function Home() {
   const [snap, setSnap] = useState<number | string | null>(0.5);
   const [geoError, setGeoError] = useState<string | null>(null);
   const [pin, setPin] = useState<Place | null>(null);
+  const [navigating, setNavigating] = useState(false);
+  const [me, setMe] = useState<Me | null>(null);
+  const [reportAt, setReportAt] = useState<{ lon: number; lat: number; accuracyM: number | null; label: string } | null>(null);
   const wide = useWide();
 
   useEffect(() => setProfile(loadProfile()), []);
@@ -122,6 +127,7 @@ export default function Home() {
     const extra = r.tradeoffs.flatMap((t) => (t.route && t.route.id === selected ? [t.route] : []));
     return [...r.routes, ...extra];
   }, [planner.result, selected]);
+  const selectedRoute = routes.find((r) => r.id === selected) ?? routes[0] ?? null;
   const entrances =
     planner.result?.status === "ok" ? planner.result.entrances.map((e) => ({ lon: e.lon, lat: e.lat, ok: e.verdict.passable })) : [];
 
@@ -215,6 +221,7 @@ export default function Home() {
           onOpenMode={() => setModeOpen(true)}
           onConditions={(k) => setConditions(PRESET_CONDITIONS[k])}
           lifts={planner.lifts}
+          onStart={() => setNavigating(true)}
         />
       ) : null}
       <footer className="mt-8 grid gap-2 border-t border-line pt-4 text-sm text-muted">
@@ -251,7 +258,8 @@ export default function Home() {
         pin={pin}
         showSlopes={showSlopes}
         entrances={view.kind === "route" ? entrances : []}
-        onMapClick={onMapClick}
+        onMapClick={navigating ? () => {} : onMapClick}
+        me={me}
       />
       <div className="absolute top-[calc(1rem+env(safe-area-inset-top,0px))] right-4 z-10 flex flex-col gap-2">
         <Button
@@ -276,7 +284,19 @@ export default function Home() {
           </ul>
         ) : null}
       </div>
-      {wide ? (
+      {navigating && selectedRoute ? (
+        <NavView
+          route={selectedRoute}
+          speedMps={profile.speedMps}
+          onEnd={() => {
+            setNavigating(false);
+            setMe(null);
+          }}
+          onPosition={setMe}
+          onOffRoute={(m) => setFrom({ id: `me:${Date.now()}`, name: "Your location", kind: "Current location", lon: m.lon, lat: m.lat })}
+          onReport={(m) => setReportAt(m ? { lon: m.lon, lat: m.lat, accuracyM: m.accuracyM, label: "your location" } : to ? { lon: to.lon, lat: to.lat, accuracyM: null, label: to.name } : null)}
+        />
+      ) : wide ? (
         <aside aria-label="Directions" className="absolute top-4 bottom-4 left-4 z-10 flex w-[420px] flex-col rounded-[var(--radius)] border border-line bg-surface shadow-[0_8px_40px_rgb(0_0_0/0.16)]">
           <div className="pt-4">{header}</div>
           {body}
@@ -290,6 +310,7 @@ export default function Home() {
         </Drawer>
       )}
       <ModeSheet open={modeOpen} onOpenChange={setModeOpen} profile={profile} onChange={updateProfile} />
+      <ReportSheet open={reportAt !== null} onOpenChange={(v) => !v && setReportAt(null)} where={reportAt} city={city.id} />
     </main>
   );
 }

@@ -1,4 +1,4 @@
-import type { Conditions, EntranceOption, RouteSummary } from "@causeway/router";
+import type { Conditions, EntranceOption, NavPlan, RouteSummary } from "@causeway/router";
 import type { Profile } from "@causeway/profile";
 
 export interface Place {
@@ -22,6 +22,8 @@ export interface PlannedRoute {
   elevation: { d: number; z: number | null }[];
   segments: string[];
   minutesExtra: number;
+  /** Turn-by-turn plan for this route (manoeuvres, hazards, geometry). */
+  nav: NavPlan;
   /** Where the data is missing, by street, so the user can judge it. */
   unknowns: { name: string; m: number; what: string }[];
 }

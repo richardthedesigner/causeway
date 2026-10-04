@@ -141,6 +141,8 @@ export function buildNavPlan(r: Route, p: Profile): NavPlan {
       break;
     }
     // Merge continuing stretches of the same thing (a long steep street split into several edges).
+    // Both kerbs of one crossing are one warning.
+    if (h.kind === "kerb" && last && h.at - last.at < 15 && last.title === h.title) return;
     const head = (x: string) => x.replace(/(^| )?for \d+ m$/, "");
     if (last && last.kind === h.kind && h.length > 0 && h.at - (last.at + last.length) < 5 && head(last.detail) === head(h.detail)) {
       last.length = h.at + h.length - last.at;
@@ -241,7 +243,8 @@ export class Navigator {
       const group = this.plan.hazards.filter((h) => Math.abs(h.at - ahead.at) <= 10 && !this.said.has(`h:${this.plan.hazards.indexOf(h)}`));
       for (const h of group) this.said.add(`h:${this.plan.hazards.indexOf(h)}`);
       const inM = Math.max(0, Math.round((ahead.at - this.along) / 10) * 10);
-      const [first, ...rest] = group;
+      const [first, ...others] = group;
+      const rest = others.filter((h, i) => hazardText(h) !== hazardText(first!) && others.findIndex((o) => hazardText(o) === hazardText(h)) === i);
       const lead = inM > 5 ? `${first!.title} in ${inM} metres${first!.detail ? (first!.detail.startsWith("for ") ? `, ${first!.detail}` : `: ${first!.detail}`) : ""}.` : `${hazardText(first!)}.`;
       announce = [lead, ...rest.map((h) => `${hazardText(h)}.`)].join(" ");
     } else if (next && next.type !== "arrive" && distanceToNext <= MANEUVER_WARN_M && !this.said.has(`m:${next.at}`)) {

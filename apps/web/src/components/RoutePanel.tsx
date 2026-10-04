@@ -22,6 +22,7 @@ interface Props {
   onOpenMode: () => void;
   onConditions: (c: "dry" | "wet" | "ice") => void;
   lifts: LiveLifts;
+  onStart: () => void;
 }
 
 export const meta = (r: PlannedRoute) => {
@@ -121,6 +122,10 @@ export function RoutePanel(props: Props) {
               <p className="m-0 text-sm text-muted">Checking lifts with TfL…</p>
             ) : null}
           </section>
+
+          <Button variant="primary" size="lg" onClick={props.onStart}>
+            Start
+          </Button>
 
           <section aria-labelledby="why-h" className="grid gap-2">
             <h2 id="why-h" className="m-0 text-lg font-bold">
