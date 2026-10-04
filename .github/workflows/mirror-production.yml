@@ -1,0 +1,20 @@
+name: mirror-production
+# main is the working branch, but the repo's default branch (and so Vercel's
+# production branch) is still claude/sleepy-johnson-mavbrs. Keep it equal to
+# main so production always serves main. Fast-forward only: if the old branch
+# ever diverges, this fails instead of overwriting anything.
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: git push origin HEAD:refs/heads/claude/sleepy-johnson-mavbrs
