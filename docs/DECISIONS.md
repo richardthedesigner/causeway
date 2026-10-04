@@ -170,7 +170,23 @@ Questions like "accessible toilet" or "step-free café" become a category plus a
 
 **For Richard:** this repeats OSM's own published access tags for named venues, attributed and dated, in a private preview. It is not our assessment. If you read the brief's "publishing data about named venues' accessibility" as covering this too, it is one flag (`facts`) to switch off before any public launch.
 
-## D-026 Live and third-party data come in through adapters
+## D-026 User access notes: experience, not faults, in their own layer
+
+**Decided** (interim on storage, like D-022). 2026-10-04. Code: `packages/graph/src/notes.ts`, `apps/web/src/components/NoteSheet.tsx`, `db/migrations/0002_notes.sql`.
+
+Problem reports (D-022) are for faults. Notes are experience: "Step-free side entrance on Chambers Street, staff very helpful", "Setts are fine in the dry with a powerchair, lethal when wet".
+
+- **What a note is.** A place (the destination: venue, station or pin) or a named stretch of the route, a point, good / mixed / bad, up to 280 characters, an optional photo, the date, and, only if the person switches it on for that note, a coarse label such as "manual wheelchair". The label comes from the preset id, never from the profile's numbers or its user-chosen name, so no threshold can reach a note (D-009).
+- **Trust.** A note is always `reported` from source `notes`, and uses the same confidence function as any crowd report: 0.6 to start, a two-year half-life, plus 0.1 for each *different* author who said the same thing about the same place, capped at 0.9 so it never equals verified. Your own repeat notes don't corroborate each other.
+- **Shown as people's words.** On "Getting in", in "Why this way?", and under the matching street in "What we don't know", always with the date and "A Causewayside user, using a manual wheelchair" (or "You" for your own), and the line "Their own experience, not checked by us." Notes over a year old say things may have changed.
+- **Routing: soft signals only, through `evaluateEdge`.** Each edge gets a score from its notes, weighted by confidence and by how close the author's label is to this user (same 1, none 0.6, different 0.4). Bad experience adds a penalty of at most half the edge's travel time. Good experience takes at most half off the *unknown-risk* penalty, never off travel time, so cost never falls below travel time and A* stays admissible. Notes never exclude a street, never lift an exclusion, and never change a verdict: a good note can't make an unknown known (the trust contract). Place notes don't affect routing.
+- **Separate layer (D-008).** Notes point at OSM way ids (stable across rebuilds) plus edge ids for the build they were written on, and are joined to edges in the router per request (`Router.noteSignals`). They are never written into the graph, and the `note` table has no foreign keys into it. Licence: our own content, not ODbL.
+- **Storage.** On the device (`localStorage`, `causewayside.notes.v1`) with a random per-device author id that is only used to count different people. The `note` table matches the shape for when Richard decides on a backend (D-022): moderation, abuse handling and the public display of other people's notes all wait for that.
+- **Three taps plus typing.** From "Getting in", a street chip under "Why this way?", or "Add a note" while navigating (the nearest stretch of the route): open, how was it, Save.
+
+Open: whether notes should carry the conditions ("when wet") as a field rather than in the words; moderation before notes are shared; per-entrance notes once routing goes to a chosen entrance.
+
+## D-027 Live and third-party data come in through adapters
 
 **Decided.** 2026-10-04. Every outside feed gets a small adapter in `packages/live` that turns its records into one of our shapes (`LiftOutage`, `WorksObservation`, weather `Conditions`), and one function that puts those shapes on the graph as dated `LiveState`s (`liftOutageStates`, `worksStates`). The router never knows which feed a state came from, so adding a city or a source is an adapter plus a test, not a router change.
 

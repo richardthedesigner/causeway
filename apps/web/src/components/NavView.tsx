@@ -20,6 +20,8 @@ interface Props {
   onOffRoute: (me: Me) => void;
   onPosition: (me: Me | null) => void;
   onReport: (me: Me | null) => void;
+  /** Add a note about the stretch you're on. */
+  onNote: (me: Me | null) => void;
   /** Called at the end of a live journey with the person's moving speed, to calibrate their ETA. */
   onPace: (observedMps: number) => void;
 }
@@ -32,7 +34,7 @@ const fmt = (m: number) => (m >= 1000 ? `${(m / 1000).toFixed(1)} km` : `${Math.
  * everything in the bottom third, instructions also in a live region for
  * screen readers. Speech is opt-in so it never talks over a screen reader.
  */
-export function NavView({ route, speedMps, onEnd, onOffRoute, onPosition, onReport, onPace }: Props) {
+export function NavView({ route, speedMps, onEnd, onOffRoute, onPosition, onReport, onNote, onPace }: Props) {
   const nav = useRef(new Navigator(route.nav));
   const [p, setP] = useState<Progress | null>(null);
   const [mode, setMode] = useState<"locating" | "live" | "preview">("locating");
@@ -185,6 +187,9 @@ export function NavView({ route, speedMps, onEnd, onOffRoute, onPosition, onRepo
           </Button>
           <Button size="lg" onClick={() => onReport(me.current)}>
             Report
+          </Button>
+          <Button size="lg" onClick={() => onNote(me.current)}>
+            Add a note
           </Button>
         </div>
       </section>

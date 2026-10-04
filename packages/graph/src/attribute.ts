@@ -20,6 +20,8 @@ export type SourceId =
   | "tfl"
   | "street-manager"
   | "weather"
+  /** User notes: our own content, a separate layer from the ODbL graph (D-008). */
+  | "notes"
   | "none";
 
 export interface Attr<T> {

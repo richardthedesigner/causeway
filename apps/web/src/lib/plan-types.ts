@@ -1,6 +1,7 @@
 import type { Conditions, EntranceOption, NavPlan, RouteSummary } from "@causeway/router";
 import type { Profile } from "@causeway/profile";
 import type { WorksObservation } from "@causeway/live";
+import type { Stretch, UserNote } from "@causeway/graph";
 
 export interface Place {
   id: string;
@@ -31,6 +32,8 @@ export interface PlannedRoute {
   nav: NavPlan;
   /** Where the data is missing, by street, so the user can judge it. */
   unknowns: { name: string; m: number; what: string }[];
+  /** Named stretches in route order, for notes: which ones the route passes, and what to attach a new note to. */
+  stretches: (Stretch & { m: number })[];
 }
 
 export interface Tradeoff {
@@ -65,7 +68,16 @@ export type WorkerRequest =
   | { type: "init"; graphUrl: string; networkUrl?: string; worksUrl?: string; places: Place[] }
   | { type: "works-live"; works: WorksObservation[]; fetchedAt: string }
   | { type: "live"; outages: LiftOutageMsg[] }
-  | { type: "plan"; id: number; from: Place; to: Place; profile: Profile; conditions: Omit<Conditions, "now"> & { now: string } };
+  | {
+      type: "plan";
+      id: number;
+      from: Place;
+      to: Place;
+      profile: Profile;
+      conditions: Omit<Conditions, "now"> & { now: string };
+      /** Notes on this device, without photos. Soft signals for the cost model only. */
+      notes: UserNote[];
+    };
 
 export type WorkerResponse =
   | { type: "ready"; places: Place[]; network: { coords: [number, number][]; bin: number }[]; bbox: [number, number, number, number]; builtAt: string }

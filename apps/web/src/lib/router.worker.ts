@@ -3,7 +3,7 @@
  * Routing runs on the device, in a worker. The profile (health data) never
  * leaves the phone: it arrives here with each request and is not stored.
  */
-import { isKnown, type Graph, type GraphEdge, type TransitNetwork } from "@causeway/graph";
+import { isKnown, mobilityLabelFor, noteSignals, type Graph, type GraphEdge, type Stretch, type TransitNetwork } from "@causeway/graph";
 import { applyEdgeStates, applyLiveStates, liftOutageStates, worksStates, type WorksObservation } from "@causeway/live";
 import { PRESETS, type Profile } from "@causeway/profile";
 import {
@@ -12,6 +12,7 @@ import {
   elevationProfile,
   entrancesNear,
   explain,
+  placeName,
   Router,
   summarise,
   toGeoJSON,
@@ -128,6 +129,7 @@ function toPlanned(r: Route, start: Parameters<typeof elevationProfile>[1], id: 
   return {
     nav: buildNavPlan(r, p),
     unknowns,
+    stretches: stretchesOf(r),
     id,
     label,
     coords: toGeoJSON(r).geometry.coordinates,
@@ -139,10 +141,29 @@ function toPlanned(r: Route, start: Parameters<typeof elevationProfile>[1], id: 
   };
 }
 
+const RAIL_KINDS = new Set(["transit", "board", "interchange", "station_link", "elevator"]);
+
+/** The route's named stretches in the order you reach them (a street you come back to joins its first visit). */
+function stretchesOf(r: Route): (Stretch & { m: number })[] {
+  const by = new Map<string, Stretch & { m: number }>();
+  for (const s of r.steps) {
+    if (RAIL_KINDS.has(s.edge.kind)) continue;
+    const name = placeName(s.edge);
+    const cur = by.get(name) ?? by.set(name, { name, edgeIds: [], osmWayIds: [], points: [], m: 0 }).get(name)!;
+    cur.edgeIds.push(s.edge.id);
+    if (s.edge.osmWayId !== undefined && !cur.osmWayIds.includes(s.edge.osmWayId)) cur.osmWayIds.push(s.edge.osmWayId);
+    cur.points.push(s.edge.geometry[Math.floor(s.edge.geometry.length / 2)]!);
+    cur.m += s.edge.lengthM;
+  }
+  return [...by.values()].map((x) => ({ ...x, m: Math.round(x.m) }));
+}
+
 function plan(req: Extract<WorkerRequest, { type: "plan" }>): PlanResult {
   if (!router || !graph) throw new Error("graph not loaded");
   const p = req.profile;
   const c = { ...req.conditions, now: new Date(req.conditions.now) };
+  // Notes stay a separate layer: joined to edge ids here, per request, never written into the graph.
+  router.noteSignals = noteSignals(req.notes, graph, c.now, mobilityLabelFor(p.preset));
   const a = router.snap(req.from.lon, req.from.lat, p, c);
   const b = router.snap(req.to.lon, req.to.lat, p, c);
   const alts = router.alternatives(a, b, p, c, 3);

@@ -313,6 +313,12 @@ Partnership items for Richard:
 | **Photon** (`photon.komoot.io/api`) | Live name search when the bundled index has fewer than 5 matches. Bounded to the city | OSM data, ODbL; public instance has a fair-use limit, so self-host before launch | Reachable from the container, 2026-10-04 | **keep**; self-host for scale |
 | **postcodes.io** (`api.postcodes.io/postcodes/{pc}`) | Full postcodes missing from OSM | OGL v3 (ONS Postcode Directory, contains Royal Mail and OS data) | Not reachable from the container; documented API | **keep**; self-hostable |
 
+## User notes (2026-10-04)
+
+| Source | Use | Licence | Verified | Verdict |
+|---|---|---|---|---|
+| **Causewayside user notes** (`notes`) | People's own experience of a place or a stretch of footway: good, mixed or bad, a few words, a date, optionally a photo and a coarse mobility label. Shown with date and attribution; soft signal in routing | Our own content, **not ODbL**. Kept as a separate layer keyed by OSM way id and our place refs, never written into the graph (D-008, D-026) | n/a (on the device only, D-022) | **keep** |
+
 ## Roadworks (2026-10-04)
 
 | Source | Use | Licence | Verified | Verdict |
