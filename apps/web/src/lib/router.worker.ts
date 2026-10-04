@@ -27,7 +27,9 @@ const post = (m: WorkerResponse) => self.postMessage(m);
 async function load(url: string) {
   const res = await fetch(url);
   if (!res.ok || !res.body) throw new Error(`graph: HTTP ${res.status}`);
-  const text = await new Response(res.body.pipeThrough(new DecompressionStream("gzip"))).text();
+  // Hosts that won't serve .gz get the same bytes as base64 text (the private preview build).
+  const gz = url.endsWith(".b64.txt") ? new Blob([Uint8Array.from(atob((await res.text()).trim()), (c) => c.charCodeAt(0))]).stream() : res.body;
+  const text = await new Response(gz.pipeThrough(new DecompressionStream("gzip"))).text();
   graph = JSON.parse(text) as Graph;
   router = new Router(graph);
   post({ type: "ready", places: places(graph), network: network(graph), bbox: graph.meta.bbox, builtAt: graph.meta.builtAt });

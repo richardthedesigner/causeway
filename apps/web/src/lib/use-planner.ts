@@ -35,7 +35,8 @@ export function usePlanner() {
         setPlanning(false);
       }
     };
-    const graphUrl = new URL("graph/edinburgh-central.graph.json.gz", document.baseURI).toString();
+    const file = process.env.NEXT_PUBLIC_GRAPH_B64 ? "graph/edinburgh-central.graph.b64.txt" : "graph/edinburgh-central.graph.json.gz";
+    const graphUrl = new URL(file, document.baseURI).toString();
     w.postMessage({ type: "init", graphUrl } satisfies WorkerRequest);
     return () => w.terminate();
   }, []);
