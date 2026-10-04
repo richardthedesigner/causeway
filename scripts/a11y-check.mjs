@@ -68,7 +68,7 @@ for (const scheme of ["light", "dark"]) {
 await browser.close();
 server.close();
 // axe fetches the page's stylesheets itself to check them; the app never fetches the font CSS, it links it.
-for (const c of csp.filter((c) => !/Refused to connect to 'https:\/\/fonts\.googleapis\.com\//.test(c))) failures.push(`Content Security Policy: ${c}`), console.log(`  [csp] ${c}`);
+for (const c of csp.filter((c) => !(/'https:\/\/fonts\.googleapis\.com\//.test(c) && /connect-src/.test(c)))) failures.push(`Content Security Policy: ${c}`), console.log(`  [csp] ${c}`);
 if (failures.length) {
   console.error(`\n${failures.length} accessibility or Content Security Policy problem(s).`);
   process.exit(1);
