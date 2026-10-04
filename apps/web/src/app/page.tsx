@@ -384,6 +384,7 @@ export default function Home() {
             setTo(from);
           }}
           onOpenMode={() => setModeOpen(true)}
+          device={profileChip}
           lifts={planner.lifts}
           works={planner.works}
           worksCovered={!!city.works}

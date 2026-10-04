@@ -1,6 +1,7 @@
 "use client";
 import { Accessibility, Building2, Coffee, Hash, Home, MapPin, Navigation, Search, Signpost, Toilet, TrainFront } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { SearchBar } from "@/components/SearchBar";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import type { Place } from "@/lib/plan-types";
 import { formatPostcode, inZones, lookupPostcode, photon, search, type Hit, type Index } from "@/lib/search";
@@ -91,11 +92,15 @@ export function PlaceSearch({ label, index, suggestions, near, bbox, cityName, e
 
   return (
     <Command label={label} className="gap-2" shouldFilter={false}>
-      <div className="flex min-h-14 flex-wrap items-center gap-x-2 rounded-2xl border border-line bg-surface-2 py-1 pr-2 pl-4 focus-within:border-accent">
-        <Search aria-hidden className="size-5 shrink-0 text-muted" />
-        <CommandInput placeholder={label} autoFocus={autoFocus} aria-label={label} value={q} onValueChange={setQ} onFocus={onFocus} className="min-h-12 min-w-0 flex-1 basis-32 border-0 bg-transparent px-0" />
-        {trailing}
-      </div>
+      <SearchBar
+        main={
+          <>
+            <Search aria-hidden className="size-5 shrink-0 text-muted" />
+            <CommandInput placeholder={label} autoFocus={autoFocus} aria-label={label} value={q} onValueChange={setQ} onFocus={onFocus} className="min-h-12 min-w-0 flex-1 border-0 bg-transparent px-0" />
+          </>
+        }
+        trailing={trailing}
+      />
       {!q.trim() ? (
         <div className="flex flex-wrap gap-2" aria-label="Quick searches">
           {SHORTCUTS.map((s) => (

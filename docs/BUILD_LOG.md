@@ -4,6 +4,11 @@ A running record of what was built, newest first. Each entry links the decision 
 
 ## 2026-10-04 (late night)
 
+**One bar for search and route** (D-036 step 3)
+- With a route on screen, the destination and the device button share the same bar as search, with no magnifier. The separate "Routes are for … Change" row is gone; a quiet line says what ground the routes were worked out for.
+- When the field or destination would get narrower than 150 px beside the button, the bar splits: the field keeps the first line and the button goes full width under it. Checked at 320 px and 390 px with "Cherry" and with the longest label, "Manual chair + help".
+- Padding: a 4 px inset all round the button, so its 12 px corners sit inside the bar's 16 px ones.
+
 **Device button and list** (D-036 step 2)
 - The chip in the search bar opens a list of saved devices, upwards: favourites first, a tick on the one in use, then Edit and Add a device. One tap switches and re-plans; "Now using Lulu" shows briefly and is read out.
 - A named device's button shows its name only; an unnamed one keeps its icon and type.

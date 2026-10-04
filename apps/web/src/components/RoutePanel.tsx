@@ -1,5 +1,5 @@
 "use client";
-import { ArrowUpDown, ChevronDown, CircleAlert, CircleCheck, CircleHelp, CircleX, DoorOpen, MapPin, MessageSquarePlus, Share2, SlidersHorizontal, Undo2 } from "lucide-react";
+import { ArrowUpDown, ChevronDown, CircleAlert, CircleCheck, CircleHelp, CircleX, DoorOpen, MapPin, MessageSquarePlus, Share2, Undo2 } from "lucide-react";
 import { entranceRef, notesForEntrance, notesForPlace, notesForStretch, type UserNote } from "@causeway/graph";
 import type { Profile } from "@causeway/profile";
 import { useState } from "react";
@@ -8,6 +8,7 @@ import { BusDepartures } from "@/components/BusDepartures";
 import type { toiletsAlong } from "@/lib/toilets";
 import { ElevationChart } from "@/components/ElevationChart";
 import { NoteList } from "@/components/NoteList";
+import { SearchBar } from "@/components/SearchBar";
 import type { NoteAbout } from "@/components/NoteSheet";
 import { RouteStrip, VerdictPill } from "@/components/RouteStrip";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,8 @@ interface Props {
   onChangeTo: () => void;
   onSwap: () => void;
   onOpenMode: () => void;
+  /** Who the routes are for: the device button, shown in the destination bar. */
+  device?: React.ReactNode;
   lifts: LiveLifts;
   /** Street works on pavements in this area; null where there is no feed (Scotland for now). */
   works: WorksSummary | null;
@@ -144,30 +147,24 @@ export function RoutePanel(props: Props) {
             <span className="sr-only">Change start: </span>
             <span className="truncate">{from.name}</span>
           </button>
-          <button type="button" onClick={props.onChangeTo} className="flex min-h-11 min-w-0 items-center gap-3 rounded-xl px-1 text-left hover:bg-surface-2">
-            <MapPin aria-hidden className="size-5 shrink-0 text-accent" strokeWidth={2.6} />
-            <span className="sr-only">Change destination: </span>
-            <span className="truncate text-lg font-bold">{to.name}</span>
-          </button>
         </div>
         <Button variant="ghost" size="icon" onClick={props.onSwap} aria-label="Swap start and destination" className="self-center">
           <ArrowUpDown aria-hidden className="size-6" />
         </Button>
       </section>
 
-      {/* Who and what ground: what every route here was worked out for. */}
-      <button
-        type="button"
-        onClick={props.onOpenMode}
-        aria-label={`Routes are for ${profile.label} on ${groundWord(conditions)}. Change how you get around`}
-        className="flex min-h-12 items-center gap-2 rounded-2xl bg-surface-2 px-4 text-left"
-      >
-        <SlidersHorizontal aria-hidden className="size-5 shrink-0" />
-        <span className="min-w-0 flex-1">
-          <span className="font-bold">{profile.label}</span> <span className="text-muted whitespace-nowrap">· {groundWord(conditions)}</span>
-        </span>
-        <span className="font-bold text-accent">Change</span>
-      </button>
+      {/* The same bar as search: where to, and who the routes are for (D-036). No magnifier once there's a destination. */}
+      <SearchBar
+        main={
+          <button type="button" onClick={props.onChangeTo} className="flex min-h-12 min-w-0 flex-1 items-center gap-2 text-left">
+            <MapPin aria-hidden className="size-5 shrink-0 text-accent" strokeWidth={2.6} />
+            <span className="sr-only">Change destination: </span>
+            <span className="truncate text-lg font-bold">{to.name}</span>
+          </button>
+        }
+        trailing={props.device}
+      />
+      <p className="m-0 -mt-1 px-1 text-sm text-muted">Worked out for {groundWord(conditions)}.</p>
 
       {props.once ? (
         <div role="status" className="flex items-start gap-3 rounded-2xl border-2 border-caution bg-caution-soft p-3">
