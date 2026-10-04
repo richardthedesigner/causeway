@@ -2,6 +2,24 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map.
 
+## 2026-10-04 (late evening)
+
+From the roadmap's Now list.
+
+**Security headers** (D-041, SEC-01)
+- A Content Security Policy, HSTS, no framing, a strict referrer policy and a permissions policy, from `apps/web/vercel.json`.
+- The accessibility check and the new end-to-end test serve the build with the same headers and fail on anything the policy blocks.
+
+**End-to-end journeys** (STAB-01)
+- `pnpm e2e`, in CI: in each city, search, route, start, arrive and end in the built app.
+- Its first run found that a city opened from last time started from Causewayside in Edinburgh. Fixed (STAB-09).
+
+**Dependabot** (UPD-01): npm and GitHub Actions, weekly, minor and patch updates grouped.
+
+**Fewer Vercel builds** (D-042, DEP-09): `main` and docs-only changes no longer build.
+
+**Tidy** (BLOAT-01): the step 2 review screenshots moved from the repo root to `docs/ux/devices/`.
+
 ## 2026-10-04 (evening)
 
 **Roadmap** (`docs/ROADMAP.md`)

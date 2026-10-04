@@ -373,3 +373,21 @@ The visual-impairment preset sets 60 s per 100 m; anyone can turn it on with "Af
 - **Live bus times** are hidden when leaving later: they're for now. The timetable frequency is for the leaving time.
 
 **Not stored.** The leaving time lasts for the visit; it isn't saved, so a stale "tomorrow 08:30" can't surprise anyone next week. A time that has passed counts as now.
+
+## D-041 Security headers and a Content Security Policy
+
+**Decided.** 2026-10-04. A static export can't set response headers, so they go in `apps/web/vercel.json` (the Vercel project's root directory is `apps/web`).
+
+**What we send.** A Content Security Policy that allows only our own origin plus what the app really calls: Supabase (`*.supabase.co`, for sharing and review photos), Open-Meteo, postcodes.io, Photon and TfL, and Google Fonts for the typeface. No framing (`frame-ancestors 'none'`), no plugins, forms only to ourselves. Also HSTS, `nosniff`, a strict referrer policy, `Cross-Origin-Opener-Policy`, and a permissions policy that allows location for this site only and turns off camera, microphone and payment.
+
+**Two compromises.** `script-src` keeps `'unsafe-inline'`: Next's static export writes inline scripts whose hashes change every build (SEC-11 is the follow-up). `style-src` keeps `'unsafe-inline'`: MapLibre, Radix and our own components set inline styles.
+
+**How we know it doesn't break anything.** The accessibility check and the end-to-end journeys serve the build with the same headers (`scripts/serve-out.mjs`) and fail on anything the policy blocks. A new live data source has to be added to `connect-src`, or those checks fail.
+
+## D-042 Fewer Vercel builds
+
+**Decided.** 2026-10-04. The free plan allows 100 deployments a day, and on 2026-10-04 we hit it. `ignoreCommand` in `apps/web/vercel.json` runs `apps/web/scripts/vercel-ignore.sh`, which skips a build when:
+- the branch is `main`, which the mirror workflow keeps equal to the production branch, so the same commit was already built there; or
+- nothing changed since the last deployed commit except docs, Markdown, workflows or database migrations.
+
+When there is nothing to compare with, it builds. Once DEP-01 makes `main` the production branch, the `main` rule goes and the mirror branch gets it instead.
