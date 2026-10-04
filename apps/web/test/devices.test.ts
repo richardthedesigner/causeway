@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { PRESETS, savedDevice } from "@causeway/profile";
-import { activeDevice, defaultDevice, deviceLabel, loadDeviceState, orderDevices, saveDeviceState, SEED_DEVICES, withActive, withActiveName, withActiveProfile, withFavourite, withoutDevice, withSetup } from "../src/lib/devices";
+import { activeDevice, compareLine, defaultDevice, deviceLabel, loadDeviceState, orderDevices, saveDeviceState, SEED_DEVICES, withActive, withActiveName, withActiveProfile, withFavourite, withoutDevice, withSetup } from "../src/lib/devices";
 
 /** An in-memory stand-in for localStorage. */
 function memory(init: Record<string, string> = {}) {
@@ -136,5 +136,12 @@ describe("device rules", () => {
     expect(s.devices.map((d) => d.id)).toEqual(["lulu"]);
     expect(s.activeId).toBe("lulu");
     expect(withoutDevice(s, "lulu")).toBe(s);
+  });
+
+  it("says what a switch changed", () => {
+    expect(compareLine(12, { label: "Cherry", minutes: 19 })).toBe("7 min quicker than Cherry's route.");
+    expect(compareLine(21, { label: "Cherry", minutes: 19 })).toBe("2 min longer than Cherry's route.");
+    expect(compareLine(19, { label: "Cherry", minutes: 19 })).toBe("Same time as Cherry's route.");
+    expect(compareLine(14, { label: "Cherry", minutes: null })).toBe("Cherry had no route here.");
   });
 });

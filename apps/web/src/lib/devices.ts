@@ -189,3 +189,11 @@ export function setTip(state: "pending" | "seen", store: Store | undefined = def
     /* the tip may show again; harmless */
   }
 }
+
+/** What changed after switching device, for the route: "7 min quicker than Cherry's route". */
+export function compareLine(minutes: number, prev: { label: string; minutes: number | null }): string {
+  if (prev.minutes === null) return `${prev.label} had no route here.`;
+  const d = minutes - prev.minutes;
+  if (d === 0) return `Same time as ${prev.label}'s route.`;
+  return `${Math.abs(d)} min ${d < 0 ? "quicker" : "longer"} than ${prev.label}'s route.`;
+}

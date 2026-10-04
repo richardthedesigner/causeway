@@ -4,6 +4,12 @@ A running record of what was built, newest first. Each entry links the decision 
 
 ## 2026-10-04 (late night)
 
+**Routes say who they're for, and offer another device** (D-036 step 6)
+- Routes carry a "For Cherry" tag once there's more than one device (or the device is named).
+- After switching device with a route on screen, the route says what changed: "9 min quicker than Cherry's route", or "Cherry had no route here."
+- When nothing fits, the heading says "No route for Cherry", and the routing worker checks the other saved devices. Each one that fits gets "Lulu can do this one: 24 min · Use Lulu for this trip".
+- "This trip" isn't saved: the button reads "Lulu, this trip", and it goes back to Cherry when navigation ends, the journey changes or another device is picked. Checked on Castle Esplanade, where Cherry is stopped by 10.2% on Victoria Terrace.
+
 **First visit and Add a device** (D-036 step 5)
 - With nothing saved, the device button reads "Set up" and one line above the bar says why. Routes still work meanwhile, as a manual wheelchair.
 - Setup is three screens, each skippable: what do you use (the six wheeled types with a line each, everything else one tap away), what do you call it (with favourite), and the key limits. "Add a device" uses the same screens.

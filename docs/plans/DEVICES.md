@@ -89,7 +89,7 @@ Each step is one pull request that can go live on its own.
 - One-time tip after the first save, remembered on the device.
 - **The Cherry and Lulu demo seed no longer loads by default**, because real first visits replace it.
 
-**6. Routes: who it's for and the switch offer** (`RoutePanel.tsx`, `RouteStrip.tsx`, `use-planner.ts`)
+**6. Routes: who it's for and the switch offer** (`RoutePanel.tsx`, `use-planner.ts`, a `fits` request in the routing worker). Done. The borrowed device goes back when navigation ends or the journey changes.
 - "For Cherry" tag on the route verdict.
 - After a switch, compare against the previous device's result and say what changed: time, and anything newly avoided or allowed.
 - When the active device gets no route, plan for each other saved device in the worker. If one fits, offer "Use Lulu for this trip". This extends the existing `once` override from a patch to a whole device; it already clears on a new destination, so it also needs to clear on arrival.

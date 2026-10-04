@@ -15,6 +15,8 @@ interface Props {
   onAdd: () => void;
   /** First visit: the button reads "Set up" and opens setup instead of the list. */
   onSetup?: () => void;
+  /** A device borrowed for this journey only: the button says "Lulu, this trip". */
+  tripLabel?: string;
   /** Show the one-time tip that the button switches device. */
   tip?: boolean;
   onTipSeen?: () => void;
@@ -27,7 +29,7 @@ const typeOf = (d: SavedDevice) => PRESETS[d.profile.preset].label;
  * shows its name; an unnamed one its icon and type. The list opens upwards,
  * so a thumb on the button never covers it.
  */
-export function DeviceMenu({ devices, activeId, onPick, onEdit, onAdd, onSetup, tip, onTipSeen }: Props) {
+export function DeviceMenu({ devices, activeId, onPick, onEdit, onAdd, onSetup, tripLabel, tip, onTipSeen }: Props) {
   const panel = useRef<HTMLDivElement>(null);
   const { open, setOpen, toggle, root } = useMenu(panel);
   /**
@@ -82,7 +84,7 @@ export function DeviceMenu({ devices, activeId, onPick, onEdit, onAdd, onSetup, 
   };
   const pick = (d: SavedDevice) => {
     close();
-    if (d.id === activeId) return;
+    if (d.id === activeId && !tripLabel) return;
     onPick(d.id);
     setSaid(`Now using ${deviceLabel(d)}`);
   };
@@ -132,11 +134,11 @@ export function DeviceMenu({ devices, activeId, onPick, onEdit, onAdd, onSetup, 
           if (tip) onTipSeen?.();
           toggle("device");
         }}
-        aria-label={`Routes are for ${deviceLabel(active)}${active.name ? `, ${typeOf(active)}` : ""}. Change device`}
+        aria-label={tripLabel ? `Routes are for ${tripLabel}, this trip only. Change device` : `Routes are for ${deviceLabel(active)}${active.name ? `, ${typeOf(active)}` : ""}. Change device`}
         className="inline-flex min-h-12 max-w-full min-w-0 items-center gap-1.5 rounded-xl bg-accent px-3 text-sm font-bold text-accent-ink"
       >
-        {active.name ? null : <Accessibility aria-hidden className="size-4 shrink-0" strokeWidth={2.6} />}
-        <span className="truncate">{deviceLabel(active)}</span>
+        {active.name || tripLabel ? null : <Accessibility aria-hidden className="size-4 shrink-0" strokeWidth={2.6} />}
+        <span className="truncate">{tripLabel ? `${tripLabel}, this trip` : deviceLabel(active)}</span>
         <ChevronUp aria-hidden className={cn("size-4 shrink-0 transition-transform", !isOpen && "rotate-180")} strokeWidth={2.6} />
       </button>
       )}

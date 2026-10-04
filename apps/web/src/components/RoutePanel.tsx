@@ -9,6 +9,7 @@ import type { toiletsAlong } from "@/lib/toilets";
 import { ElevationChart } from "@/components/ElevationChart";
 import { NoteList } from "@/components/NoteList";
 import { SearchBar } from "@/components/SearchBar";
+import { compareLine } from "@/lib/devices";
 import type { NoteAbout } from "@/components/NoteSheet";
 import { RouteStrip, VerdictPill } from "@/components/RouteStrip";
 import { Button } from "@/components/ui/button";
@@ -32,6 +33,13 @@ interface Props {
   onOpenMode: () => void;
   /** Who the routes are for: the device button, shown in the destination bar. */
   device?: React.ReactNode;
+  /** The device these routes were planned for, shown on the route ("For Cherry"). */
+  forLabel?: string;
+  /** The previous device's best time for this journey, after a switch. */
+  compare?: { label: string; minutes: number | null } | null;
+  /** Other saved devices that can make this journey when this one can't. */
+  alternatives?: { id: string; label: string; minutes: number }[];
+  onUseForTrip?: (id: string) => void;
   lifts: LiveLifts;
   /** Street works on pavements in this area; null where there is no feed (Scotland for now). */
   works: WorksSummary | null;
@@ -183,7 +191,9 @@ export function RoutePanel(props: Props) {
         </p>
       ) : null}
 
-      {result?.status === "none" ? <NoFit result={result} to={to} onAllowOnce={props.onAllowOnce} onGoClosest={props.onGoClosest} onOpenMode={props.onOpenMode} /> : null}
+      {result?.status === "none" ? (
+        <NoFit result={result} to={to} forLabel={props.forLabel} alternatives={props.alternatives ?? []} onUseForTrip={props.onUseForTrip} onAllowOnce={props.onAllowOnce} onGoClosest={props.onGoClosest} onOpenMode={props.onOpenMode} />
+      ) : null}
 
       {result?.status === "ok" && sel ? (
         <>
@@ -191,12 +201,16 @@ export function RoutePanel(props: Props) {
             <h2 id="route-h" className="sr-only">
               {selTitle?.title || "Best for you"}
             </h2>
+            {props.forLabel ? <span className="justify-self-start rounded-full border border-line px-3 py-0.5 text-sm font-bold">For {props.forLabel}</span> : null}
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
               <VerdictPill v={sel.summary.verdict} />
               <span className="tabular text-[28px] leading-none font-bold">{Math.round(sel.summary.minutes)} min</span>
               <span className="tabular text-sm text-muted">{meta(sel)}</span>
             </div>
             <RouteStrip strip={sel.strip} />
+            {props.compare && props.compare.label !== props.forLabel ? (
+              <p className={cn("m-0 font-bold", props.compare.minutes === null || Math.round(sel.summary.minutes) < props.compare.minutes ? "text-ok" : "text-ink")}>{compareLine(Math.round(sel.summary.minutes), props.compare)}</p>
+            ) : null}
             {why ? <p className="m-0">{why}</p> : null}
             {extras(sel).length ? <p className="m-0 -mt-1 text-sm text-muted">{extras(sel).join(" · ")}</p> : null}
             {result.door ? (
@@ -384,7 +398,7 @@ export function RoutePanel(props: Props) {
  * Nothing fits. Say what's in the way, then what you can do: go as close as
  * you can, or stretch a limit for this journey only. Never a dead end (D-035).
  */
-function NoFit({ result, to, onAllowOnce, onGoClosest, onOpenMode }: { result: Extract<PlanResult, { status: "none" }>; to: Place; onAllowOnce: Props["onAllowOnce"]; onGoClosest: Props["onGoClosest"]; onOpenMode: () => void }) {
+function NoFit({ result, to, forLabel, alternatives, onUseForTrip, onAllowOnce, onGoClosest, onOpenMode }: { result: Extract<PlanResult, { status: "none" }>; to: Place; forLabel?: string; alternatives: NonNullable<Props["alternatives"]>; onUseForTrip?: (id: string) => void; onAllowOnce: Props["onAllowOnce"]; onGoClosest: Props["onGoClosest"]; onOpenMode: () => void }) {
   const b = result.blockers;
   const named = b.slice(0, 2).map((x) => `${x.detail} on ${x.name}`);
   const cl = result.closest;
@@ -392,7 +406,7 @@ function NoFit({ result, to, onAllowOnce, onGoClosest, onOpenMode }: { result: E
     <section aria-live="polite" aria-labelledby="nofit-h" className="grid gap-3">
       <div className="grid gap-1 rounded-[20px] bg-stop-soft p-4">
         <h2 id="nofit-h" className="m-0 flex items-center gap-2 text-lg font-bold text-stop">
-          <CircleX aria-hidden className="size-6 shrink-0" /> {result.message}
+          <CircleX aria-hidden className="size-6 shrink-0" /> {forLabel ? `No route for ${forLabel}` : result.message}
         </h2>
         {named.length ? (
           <p className="m-0">
@@ -404,6 +418,17 @@ function NoFit({ result, to, onAllowOnce, onGoClosest, onOpenMode }: { result: E
         )}
       </div>
       <h3 className="m-0 font-mono text-xs tracking-[0.08em] text-muted uppercase">What you can do</h3>
+      {onUseForTrip
+        ? alternatives.map((a) => (
+            <button key={a.id} type="button" onClick={() => onUseForTrip(a.id)} className="grid gap-1 rounded-2xl border-2 border-line p-4 text-left hover:border-ink">
+              <span className="font-bold">
+                {a.label} can do this one: {a.minutes} min
+              </span>
+              <span className="text-sm text-muted">Plans this journey for {a.label}. You go back to {forLabel ?? "your device"} when it ends.</span>
+              <span className="font-bold text-accent">Use {a.label} for this trip</span>
+            </button>
+          ))
+        : null}
       {cl ? (
         <button
           type="button"
