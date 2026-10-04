@@ -105,12 +105,22 @@ export interface LiftOutageMsg {
   fetchedAt: string;
 }
 
+export interface RailDisruptionMsg {
+  kind: "line-closed" | "line-no-step-free" | "station";
+  line: string | null;
+  stations: string[];
+  message: string;
+  validFrom: string;
+  validUntil: string;
+}
+
 export type WorkerRequest =
   | { type: "init"; graphUrl: string; networkUrl?: string; worksUrl?: string; busUrl?: string; places: Place[] }
   | { type: "works-live"; works: WorksObservation[]; fetchedAt: string }
   /** Venues with an accessible toilet, from the search index, so routing can pass them. */
   | { type: "toilets"; points: { lon: number; lat: number; name: string }[] }
-  | { type: "live"; outages: LiftOutageMsg[] }
+  /** Lift outages, and TfL line and station disruptions where they could be fetched (DATA-04). */
+  | { type: "live"; outages: LiftOutageMsg[]; disruptions?: RailDisruptionMsg[] }
   | {
       type: "plan";
       id: number;
@@ -129,7 +139,8 @@ export type WorkerResponse =
   | { type: "ready"; places: Place[]; network: { coords: [number, number][]; bin: number }[]; bbox: [number, number, number, number]; builtAt: string; buses: { stops: number; lines: number; source: string } | null }
   | { type: "error"; message: string }
   | { type: "works"; summary: WorksSummary }
-  | { type: "live"; applied: number; fetchedAt: string }
+  /** `applied`: platforms closed to step-free travel by lifts. `lines`: line closures in force now, in TfL's words. */
+  | { type: "live"; applied: number; lines: string[]; fetchedAt: string }
   | { type: "plan"; id: number; result: PlanResult }
   | { type: "check"; id: number; checks: Check[] }
   | { type: "fits"; id: number; fits: { key: string; minutes: number | null }[] };

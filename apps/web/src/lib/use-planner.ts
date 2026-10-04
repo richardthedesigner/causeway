@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { fetchLiftOutages, fetchTflStreetWorks } from "@causeway/live";
+import { fetchLiftOutages, fetchRailDisruptions, fetchTflStreetWorks } from "@causeway/live";
 import type { UserNote } from "@causeway/graph";
 import type { Profile } from "@causeway/profile";
 import type { City } from "./cities";
@@ -23,7 +23,7 @@ type Ready = Extract<WorkerResponse, { type: "ready" }>;
 export type LiveLifts =
   | { state: "none" }
   | { state: "loading" }
-  | { state: "ok"; closed: number; at: string }
+  | { state: "ok"; closed: number; lines: string[]; at: string }
   | { state: "failed" };
 
 const LIFT_REFRESH_MS = 5 * 60_000;
@@ -57,9 +57,10 @@ export function usePlanner(city: City) {
     const w = new Worker(new URL("./router.worker.ts", import.meta.url), { type: "module" });
     worker.current = w;
     let timer: ReturnType<typeof setInterval> | undefined;
+    // Lifts, plus line closures and station disruptions (DATA-04). Disruptions failing leaves the lifts working.
     const refreshLifts = () =>
-      fetchLiftOutages()
-        .then((outages) => w.postMessage({ type: "live", outages } satisfies WorkerRequest))
+      Promise.all([fetchLiftOutages(), fetchRailDisruptions().catch(() => undefined)])
+        .then(([outages, disruptions]) => w.postMessage({ type: "live", outages, disruptions } satisfies WorkerRequest))
         .catch(() => setLifts({ state: "failed" }));
     // TfL street disruptions top up the Street Manager file in London; a failure leaves the file's works in place.
     const refreshWorks = () =>
@@ -79,7 +80,7 @@ export function usePlanner(city: City) {
           }, LIFT_REFRESH_MS);
         }
       } else if (m.type === "works") setWorks(m.summary);
-      else if (m.type === "live") setLifts({ state: "ok", closed: m.applied, at: m.fetchedAt });
+      else if (m.type === "live") setLifts({ state: "ok", closed: m.applied, lines: m.lines, at: m.fetchedAt });
       else if (m.type === "error") {
         setError(m.message);
         setPlanning(false);

@@ -7,8 +7,8 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { applyStationAccess, loadSnapshot, type Graph, type TransitNetwork } from "@causeway/graph/node";
-import { applyLiveStates, fetchLiftOutages, liftOutageStates, parseLiftDisruptions } from "@causeway/live";
+import { applyStationAccess, loadSnapshot, refRides, type Graph, type TransitNetwork } from "@causeway/graph/node";
+import { applyLiveStates, fetchLiftOutages, liftOutageStates, parseLiftDisruptions, parseLineStatus, railDisruptionStates } from "@causeway/live";
 import { PRESETS } from "@causeway/profile";
 import { describeSegments, explain, Router, summarise } from "@causeway/router";
 import { LONDON_JOURNEYS } from "../../../scripts/journeys.js";
@@ -19,6 +19,7 @@ const net = JSON.parse(readFileSync(join(ROOT, "data/transit/london/network.json
 const fresh = () => {
   const g = loadSnapshot(join(ROOT, "data/snapshots/london-jubilee.graph.json.gz"));
   applyStationAccess(g, net);
+  refRides(g);
   return g;
 };
 const recorded = parseLiftDisruptions(JSON.parse(readFileSync(join(ROOT, "packages/live/test/fixtures/tfl-lifts-2026-10-04.json"), "utf8")), "2026-10-04T12:00:00Z");
@@ -76,6 +77,22 @@ describe("Parliament Square to Canary Wharf", () => {
     expect(ex.headline).toMatch(/Avoids Canary Wharf, Jubilee line \(lift out of service\)\. Adds \d+ minutes?\./);
     expect(ex.notes.some((n) => /faulty lift/.test(n) && /TfL/.test(n))).toBe(true);
     expect(describeSegments(route).some((s) => /^Take the /.test(s))).toBe(true);
+  });
+
+  it("with the recorded Jubilee line part closure (DATA-04), nobody is sent along the closed stretch", () => {
+    const g = fresh();
+    const closure = parseLineStatus(JSON.parse(readFileSync(join(ROOT, "packages/live/test/fixtures/tfl-line-status-2026-10-04.json"), "utf8")), "2026-10-04T12:00:00Z");
+    expect(applyLiveStates(g, railDisruptionStates(closure, net, refs(g), NOW))).toBeGreaterThan(0);
+    // Our two London zones are joined only by the Jubilee line, so with Green Park to Canary Wharf closed
+    // there is honestly no way through: no route, rather than one along a closed line.
+    const r = new Router(g);
+    for (const preset of ["walking", "manual-wheelchair"] as const) {
+      const p = PRESETS[preset];
+      const c = { now: NOW, wet: false, ice: false };
+      expect(r.route(r.snap(j.from.lon, j.from.lat, p, c), r.snap(j.to.lon, j.to.lat, p, c), p, c), preset).toBeNull();
+    }
+    // The day after, it runs again.
+    expect(plan(g, "walking", new Date("2026-10-05T09:00:00Z")).route).not.toBeNull();
   });
 
   it("someone walking is not rerouted by a lift outage", () => {

@@ -3,8 +3,8 @@
  * Routing runs on the device, in a worker. The profile (health data) never
  * leaves the phone: it arrives here with each request and is not stored.
  */
-import { addBus, applyStationAccess, isKnown, mobilityLabelFor, noteSignals, type Graph, type GraphEdge, type Stretch, type TransitNetwork, type BusNetwork } from "@causeway/graph";
-import { applyEdgeStates, applyLiveStates, liftOutageStates, worksStates, type WorksObservation } from "@causeway/live";
+import { addBus, applyStationAccess, isKnown, refRides, mobilityLabelFor, noteSignals, type Graph, type GraphEdge, type Stretch, type TransitNetwork, type BusNetwork } from "@causeway/graph";
+import { applyEdgeStates, applyLiveStates, liftOutageStates, mergeLiveStates, railDisruptionStates, worksStates, type WorksObservation } from "@causeway/live";
 import { PRESETS, type Profile } from "@causeway/profile";
 import {
   buildNavPlan,
@@ -77,7 +77,11 @@ async function load(url: string, networkUrl: string | undefined, worksUrl: strin
   }
   network = networkUrl ? ((await (await fetch(networkUrl)).json()) as TransitNetwork) : null;
   // TfL's per-line step-free facts go on the board edges before the router indexes the graph (DATA-03).
-  if (network) applyStationAccess(graph, network);
+  if (network) {
+    applyStationAccess(graph, network);
+    // Rides get refs so a line closure can find them (DATA-04).
+    refRides(graph);
+  }
   router = new Router(graph);
   post({ type: "ready", places: places(graph, demo, network), network: networkLines(graph), bbox: graph.meta.bbox, builtAt: graph.meta.builtAt, buses });
   if (worksUrl) {
@@ -392,10 +396,15 @@ self.onmessage = async (ev: MessageEvent<WorkerRequest>) => {
     }
     else if (m.type === "live") {
       if (!graph || !network) return;
-      for (const e of graph.edges) if (e.live?.affects === "step-free") delete e.live;
+      // Each refresh replaces every TfL rail state: lifts, line closures, station disruptions.
+      for (const e of graph.edges) if (e.live && (e.live.affects === "step-free" || e.live.source.startsWith("TfL line") || e.live.source.startsWith("TfL station"))) delete e.live;
       const refs = new Set(graph.edges.map((e) => e.ref).filter((r): r is string => !!r));
-      const applied = applyLiveStates(graph, liftOutageStates(m.outages, network, refs));
-      post({ type: "live", applied, fetchedAt: m.outages[0]?.fetchedAt ?? new Date().toISOString() });
+      const lifts = liftOutageStates(m.outages, network, refs);
+      const rail = railDisruptionStates(m.disruptions ?? [], network, refs);
+      applyLiveStates(graph, mergeLiveStates(lifts, rail));
+      const now = Date.now();
+      const lines = [...new Set([...rail.values()].filter((s) => s.source === "TfL line status" && s.status === "closed" && !s.affects && Date.parse(s.validFrom) <= now).map((s) => s.reason))];
+      post({ type: "live", applied: lifts.size, lines, fetchedAt: m.outages[0]?.fetchedAt ?? new Date().toISOString() });
     }
     else if (m.type === "plan") post({ type: "plan", id: m.id, result: plan(m) });
     else if (m.type === "check") post({ type: "check", id: m.id, checks: check(m) });

@@ -153,6 +153,12 @@ Update (DATA-03): TfL's station data (`tfl-stationdata-detailed.zip`, TfL open d
 - **Lift outages** are joined on `LiftUniqueId`: a line is closed only if the lifts out cut every step-free route to its platforms. A lift outage on the District line at Westminster no longer touches the Jubilee line. Stations without TfL station data fall back to reading the message, as before.
 - The platform-to-train step and gap (and level-boarding doors, and manual ramps) are kept with the fact and shown with it.
 
+Update (DATA-04): TfL line status and station disruptions now act on the rail graph too (`packages/live/src/tfl-disruptions.ts`), refreshed with the lifts.
+- **Line closures** come from `/Line/{ids}/Status?detail=true`, which lists the stations a closure affects. A part closure closes only the rides between those stations, for everyone, with TfL's own start and end times, so "Leaving later" sees planned closures. A closure naming no stations closes the whole line. Rides get refs (`ride:<line>:<a>:<b>`) when the city loads, so no rebuild was needed.
+- **Station messages** are free text, so only three plain cases act: the station is closed, trains don't call, or there's no step-free access. If the message is about part of the station (an entrance, one direction, a footbridge), it is flagged as unknown rather than closed. A message naming only lines we don't model is ignored, and "step-free access is still available" never closes anything.
+- Where a lift outage and a disruption land on one edge, the stronger wins: closed for everyone, then closed for step-free, then flagged.
+- The route panel names any line closure in force.
+
 ## D-021 Movable bridges
 
 **Decided.** 2026-10-04. OSM puts `bridge:movable` on the bridge outline (`man_made=bridge`), not on the decks. Decks inside a movable outline inherit it. Routes that cross one say so: "Crosses Millenium Bridge, a tilting bridge. It closes for a few minutes while it moves for boats. We don't have its timetable yet." (The deck's own OSM name is used as tagged, misspelling included.) Gateshead Millennium Bridge tilt times are not available as open data that we have found; adding them is a Richard-led request to Gateshead Council.

@@ -82,6 +82,31 @@ export function stepFreeLines(a: StationAccess, liftsOut: ReadonlySet<string> = 
 }
 
 /**
+ * Give every ride edge a ref, `ride:<line>:<station>:<station>`, so a line
+ * closure can find the stretch it closes (DATA-04). Snapshots built before
+ * rides had refs get them from the board edges at either end. Returns how many
+ * were labelled.
+ */
+export function refRides(g: Graph): number {
+  const platform = new Map<number, { line: string; station: string }>();
+  for (const e of g.edges) {
+    if (e.kind !== "board" || !e.ref || e.service) continue;
+    const [, line, station] = e.ref.split(":");
+    if (line && station) platform.set(e.to, { line, station });
+  }
+  let n = 0;
+  for (const e of g.edges) {
+    if (e.kind !== "transit" || e.ref || e.service) continue;
+    const a = platform.get(e.from),
+      b = platform.get(e.to);
+    if (!a || !b || a.line !== b.line) continue;
+    e.ref = `ride:${a.line}:${a.station}:${b.station}`;
+    n++;
+  }
+  return n;
+}
+
+/**
  * Put TfL's per-line step-free facts on a graph's board edges (`board:<line>:<station>`).
  * Run when a city loads, so a refreshed network.json needs no graph rebuild.
  * Returns how many board edges changed.
@@ -243,6 +268,7 @@ export function addTransit(g: Graph, net: TransitNetwork): { stationNode: Map<st
         from,
         to,
         kind: "transit",
+        ref: `ride:${r.line}:${a.id}:${b.id}`,
         geometry: [
           [a.lon, a.lat],
           [b.lon, b.lat],

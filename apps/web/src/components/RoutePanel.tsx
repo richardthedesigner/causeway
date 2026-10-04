@@ -143,6 +143,8 @@ export function RoutePanel(props: Props) {
   const liveLine =
     props.lifts.state === "failed"
       ? "Couldn't get live lift status from TfL. Check before you travel."
+      : props.lifts.state === "ok" && props.lifts.lines.length > 0
+        ? `${props.lifts.lines[0]} Routed around (TfL, ${props.lifts.at.slice(11, 16)} UTC).`
       : props.lifts.state === "ok" && props.lifts.closed > 0
         ? `${props.lifts.closed} lift${props.lifts.closed === 1 ? "" : "s"} out of service, routed around (TfL, ${props.lifts.at.slice(11, 16)} UTC).`
         : worksClosed
@@ -389,6 +391,9 @@ export function RoutePanel(props: Props) {
                   <li>
                     Lift status from TfL at {props.lifts.at.slice(11, 16)} UTC: {props.lifts.closed === 0 ? "no outages on this network" : `${props.lifts.closed} platform${props.lifts.closed === 1 ? "" : "s"} closed to step-free travel, routed around`}.
                   </li>
+                ) : null}
+                {props.lifts.state === "ok" && props.lifts.lines.length ? (
+                  <li>Line closures from TfL, routed around: {props.lifts.lines.join(" ")}</li>
                 ) : props.lifts.state === "loading" ? (
                   <li>Checking lifts with TfL…</li>
                 ) : null}
