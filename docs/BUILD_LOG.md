@@ -4,6 +4,11 @@ A running record of what was built, newest first. Each entry links the decision 
 
 ## 2026-10-04 (evening)
 
+**Navigation on buses and trams**
+- During a ride, the off-route limit widens from 25 m to 150 m. The ride is drawn stop to stop in straight lines, but the bus follows the road, so riders were being told they were off route mid-ride.
+- 350 m before your stop: "Get ready to get off. Your stop is Dean Bridge."
+- Back on foot, the 25 m limit returns. Covered by a test.
+
 **Rides drawn apart from walking:** bus, tram, Metro and train legs are dotted on the map, labelled where you board ("37", "Tram", "Metro", "Jubilee"). Walking stays a solid line, so you can see at a glance how much you push or walk. The labels follow theme changes.
 
 **Fewer Overture duplicates** (D-028 update, #15)

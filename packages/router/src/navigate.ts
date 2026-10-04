@@ -39,6 +39,8 @@ export interface NavPlan {
   length: number;
   maneuvers: Maneuver[];
   hazards: Hazard[];
+  /** Stretches where you're carried (bus, tram, train): [from, to] metres along, and where you get off. */
+  rides?: { from: number; to: number; alight: string }[];
 }
 
 const RAIL = new Set(["transit", "board", "interchange"]);
@@ -182,7 +184,16 @@ export function buildNavPlan(r: Route, p: Profile): NavPlan {
   });
 
   hazards.sort((a, b) => a.at - b.at);
-  return { coords, cum, length, maneuvers, hazards };
+  const rides: NonNullable<NavPlan["rides"]> = [];
+  let rideFrom: number | null = null;
+  r.steps.forEach((s, i) => {
+    if (s.edge.kind === "board" && s.forward) rideFrom = starts[i]!;
+    else if (s.edge.kind === "board" && !s.forward && rideFrom !== null) {
+      rides.push({ from: rideFrom, to: starts[i]!, alight: (s.edge.name ?? "").split(", ")[0]! });
+      rideFrom = null;
+    }
+  });
+  return { coords, cum, length, maneuvers, hazards, rides };
 }
 
 export interface Progress {
@@ -201,6 +212,10 @@ export interface Progress {
 }
 
 const OFF_ROUTE_M = 25;
+/** On a bus or tram the line between stops is straight but the road isn't: allow for that. */
+const OFF_ROUTE_RIDING_M = 150;
+/** Say "get off at the next stop" this far before it. */
+const ALIGHT_WARN_M = 350;
 const HAZARD_WARN_M = 60;
 const MANEUVER_WARN_M = 40;
 
@@ -226,13 +241,17 @@ export class Navigator {
       const proj = project([lon, lat], coords[i]!, coords[i + 1]!);
       if (proj.d < best.d) best = { d: proj.d, along: cum[i]! + proj.t * (cum[i + 1]! - cum[i]!) };
     }
-    const limit = Math.max(OFF_ROUTE_M, accuracyM);
+    const riding = (this.plan.rides ?? []).find((r) => this.along >= r.from - 5 && this.along < r.to);
+    const limit = Math.max(riding ? OFF_ROUTE_RIDING_M : OFF_ROUTE_M, accuracyM);
     if (best.d > limit) this.offCount++;
     else {
       this.offCount = 0;
       this.along = Math.max(this.along, best.along);
     }
     const offRoute = this.offCount >= 2;
+    const rideNow = (this.plan.rides ?? []).find((r) => this.along >= r.from - 5 && this.along < r.to);
+    const alightKey = rideNow ? `alight:${rideNow.to}` : null;
+    const alightSoon = rideNow && rideNow.to - this.along <= ALIGHT_WARN_M && !this.said.has(alightKey!);
     const arrived = this.plan.length - this.along < 15;
     const next = this.plan.maneuvers.find((m) => m.at > this.along + 2) ?? null;
     const distanceToNext = next ? Math.max(0, next.at - this.along) : 0;
@@ -244,6 +263,9 @@ export class Navigator {
     if (arrived && !this.said.has("arrive")) {
       announce = "You have arrived.";
       this.said.add("arrive");
+    } else if (alightSoon) {
+      announce = `Get ready to get off. Your stop is ${rideNow!.alight}.`;
+      this.said.add(alightKey!);
     } else if (offRoute && !this.said.has(`off:${Math.round(this.along / 50)}`)) {
       announce = "You're off the route. Working out a new one.";
       this.said.add(`off:${Math.round(this.along / 50)}`);

@@ -81,3 +81,32 @@ describe("Navigator", () => {
     expect(nav.update(...near, 60).offRoute).toBe(false);
   });
 });
+
+describe("Navigator on a bus", () => {
+  // 200 m walk, 1.8 km ride, then a walk: straight east along a line of latitude.
+  const M = 1 / (111_320 * Math.cos((55.95 * Math.PI) / 180));
+  const xs = [0, 200, 2000, 2200];
+  const plan = {
+    coords: xs.map((x) => [-3.2 + x * M, 55.95] as [number, number]),
+    cum: xs,
+    length: 2200,
+    maneuvers: [],
+    hazards: [],
+    rides: [{ from: 200, to: 2000, alight: "Dean Bridge" }],
+  };
+  const at = (x: number, northM = 0) => [-3.2 + x * M, 55.95 + northM / 111_320] as const;
+
+  it("allows for the road between stops, says when to get off, and is strict again on foot", () => {
+    const nav = new Navigator(plan);
+    nav.update(...at(100));
+    nav.update(...at(250));
+    // 100 m off the straight line mid-ride: the bus is on its road, not lost.
+    expect(nav.update(...at(900, 100)).offRoute).toBe(false);
+    expect(nav.update(...at(1000, 100)).offRoute).toBe(false);
+    const near = nav.update(...at(1700));
+    expect(near.announce).toBe("Get ready to get off. Your stop is Dean Bridge.");
+    nav.update(...at(2100));
+    nav.update(...at(2150, 100));
+    expect(nav.update(...at(2160, 100)).offRoute).toBe(true);
+  });
+});
