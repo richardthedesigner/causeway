@@ -2,6 +2,27 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
+## 2026-10-05 (small hours)
+
+More pilot-city data, from the roadmap's Now list.
+
+**Ice and floods** (D-047, DATA-07)
+- In ice, Edinburgh routes prefer the council's priority gritting routes and say so.
+- Environment Agency flood warnings, live: a severe warning closes the paths in its area, a warning flags them, an alert is named.
+
+**Park gates and OSM notes** (D-048, DATA-08)
+- A route to a park ends at the gate nearest your way in (OS Open Greenspace), not the middle of the grass.
+- Open OpenStreetMap notes about the ground near a route are shown, dated and unchecked.
+
+**The Toilet Map** (D-049, DATA-09)
+- Accessible, RADAR and opening-hours facts OSM lacks, and toilets it hasn't mapped, with when each was last checked.
+
+**Inclusive Mobility rest distances** (D-013, DATA-10)
+- Walking stick and crutches 50 m, fatigue 100 m. "More benches" still finds something useful.
+
+**Weekly graphs** (D-033, DATA-11)
+- The data refresh now rebuilds the street graphs and every layer keyed to them, and counts them in its summary.
+
 ## 2026-10-04 (late night)
 
 Data for the pilot cities, from the roadmap's Now list.

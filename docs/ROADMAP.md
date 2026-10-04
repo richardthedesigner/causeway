@@ -50,13 +50,13 @@ The current direction: **fix and fill the pilot cities** with open data that nee
 
 The next five things to pick up, in order.
 
-1. **DATA-07**: weather warnings, floods and gritted footways.
-2. **DATA-08**: park entrances (OS Open Greenspace) and OSM Notes.
-3. **DATA-09**: Toilet Map daily export with verified dates.
-4. **DATA-10**: presets on Inclusive Mobility values.
-5. **DATA-11**: rebuild the street graphs on the weekly refresh too.
+1. **DATA-23**: TfL station toilets in the toilet layer and search.
+2. **SEC-04**: `pnpm audit` in CI, failing on high severity.
+3. **SEC-05**: check nothing leaks the profile.
+4. **STAB-10**: end-to-end journeys for the device switcher, notes and Leaving later.
+5. **STAB-11**: the device editor's header at 200% text on a small phone.
 
-DATA-02 (SRWR for Edinburgh) is next in value but blocked: its download site doesn't answer the cloud build container.
+The rest of the pilot-city data (DATA-02, DATA-12 to DATA-20) is blocked on access, licences or keys. Research (RES) needs Richard and testers.
 
 ## Data and coverage
 
@@ -70,11 +70,11 @@ Fix and fill the pilot cities. DATA-01 to DATA-10 are in order of value per day 
 | DATA-04 | TfL station and line disruptions on transit edges | M | now | done (2026-10-04) | Claude | D-020. `packages/live/src/tfl-disruptions.ts`, refreshed with the lifts. Rides get refs at load (`refRides`) |
 | DATA-05 | Street Manager activity archive: skips, scaffolding, hoardings | S | now | done (2026-10-04) | Claude | D-027. Activity archive in `pnpm build:works`: 9 in Newcastle, 5 in London, all "on the pavement" |
 | DATA-06 | Edinburgh Adopted Roads: footway surface and width as a separate layer | M | next | done (2026-10-04) | Claude | D-046. `pnpm build:footways`, `data/council/`. Widths on pavement edges 1,731 to 8,707 |
-| DATA-07 | Weather warnings, floods and gritted footways: prefer gritted pavements in ice, flag riverside paths in floods | M | now | todo | Claude | §2 #7, #8, #10 |
-| DATA-08 | Park entrances (OS Open Greenspace) and OSM Notes | M | now | todo | Claude | §2 #11. Routes end at a gate, not the middle of a park |
-| DATA-09 | Toilet Map daily export with verified dates, accessible and RADAR flags | S | now | todo | Claude | §2 #9 |
-| DATA-10 | Presets on Inclusive Mobility values: rest intervals, kerb tolerance | S | now | todo | Claude | §8, D-013 |
-| DATA-11 | Rebuild the street graphs on the weekly refresh too, not only timetables, works and search | M | now | todo | Claude | [#14](https://github.com/richardthedesigner/causeway/issues/14), D-033. Richard runs the refresh once by hand first (OPEN_ITEMS) |
+| DATA-07 | Weather warnings, floods and gritted footways: prefer gritted pavements in ice, flag riverside paths in floods | M | now | done (2026-10-04) | Claude | D-047. Edinburgh gritting routes in the council layer (1,130 edges); EA flood warnings live (`pnpm build:floods`). Met Office warnings still wait on a key (DATA-17); Scotland floods are DATA-25 |
+| DATA-08 | Park entrances (OS Open Greenspace) and OSM Notes | M | now | done (2026-10-04) | Claude | D-048. `pnpm build:greenspace` (648 gates in Edinburgh); `pnpm build:osm-notes` (28 in Edinburgh, 23 in London), shown only |
+| DATA-09 | Toilet Map daily export with verified dates, accessible and RADAR flags | S | now | done (2026-10-04) | Claude | D-049. `pnpm build:toilets`; merged at load, OSM first. Edinburgh 62, Newcastle 22, London 73 |
+| DATA-10 | Presets on Inclusive Mobility values: rest intervals, kerb tolerance | S | now | done (2026-10-04) | Claude | D-013. Walking stick and crutches 50 m, fatigue 100 m. Kerbs unchanged (IM 6 mm is a build tolerance) |
+| DATA-11 | Rebuild the street graphs on the weekly refresh too, not only timetables, works and search | M | now | done (2026-10-04) | Claude | D-033. The refresh rebuilds graphs, then footways, floods, gates, notes and toilets. Newcastle took 37 s here. Richard still runs it once by hand first |
 | DATA-12 | Edinburgh council data: kerb heights, dropped kerbs and tactile paving, steps, widths, setted streets | L | next | blocked | Richard, Claude | Waits on Richard's licence email. §3, §7 |
 | DATA-13 | Glasgow council data: kerbs, steps with ramps, bus stops, gritting, pavement parking | L | later | blocked | Richard, Claude | Waits on a licence. The richest council data in the UK. §3, §7 |
 | DATA-14 | London borough data: Islington and Southwark (condition, widths, crossings), Westminster (Blue Badge bays), Kensington and Chelsea (tables and chairs) | M | later | blocked | Richard, Claude | Waits on licences. §3, §7 |
@@ -85,8 +85,10 @@ Fix and fill the pilot cities. DATA-01 to DATA-10 are in order of value per day 
 | DATA-19 | Tyne and Wear Metro lift status | M | later | blocked | Richard, Claude | Waits on Nexus. [#13](https://github.com/richardthedesigner/causeway/issues/13) |
 | DATA-20 | Live bus and tram departures in Edinburgh and Newcastle | M | later | blocked | Claude | [#8](https://github.com/richardthedesigner/causeway/issues/8). Lothian 403, Transport for Edinburgh 522, Nexus needs a key |
 | DATA-22 | Should the council's pavement surface win over OSM on streets drawn as one line? | S | next | blocked | Richard, Claude | D-046. They disagree on 2,822 of 6,341 edges; OSM wins today. A decision, then a one-line change |
-| DATA-23 | TfL station toilets in the toilet layer and search (65 at our stations, with RADAR and accessible flags) | S | next | todo | Claude | Data is already in `network.json` (DATA-03) |
-| DATA-24 | Rebuild the council footway layer on the weekly refresh | S | later | todo | Claude | `pnpm build:footways`. Keyed by OSM way and nodes, so it needs rerunning after a graph rebuild |
+| DATA-23 | TfL station toilets in the toilet layer and search (65 at our stations, with RADAR and accessible flags) | S | now | todo | Claude | Data is already in `network.json` (DATA-03) |
+| DATA-24 | Rebuild the council footway layer on the weekly refresh | S | later | done (2026-10-04) | Claude | Done by DATA-11 |
+| DATA-25 | Scotland's flood warnings (SEPA) for the Water of Leith walkway | M | later | todo | Claude | D-047. No open feed matching the EA's found yet; look again |
+| DATA-26 | Pavement gritting routes for Newcastle and London | S | later | todo | Claude | D-047. None open found; City of London has priority pavements (survey §2 #10) |
 | DATA-21 | Map York Place and the western way into the Grassmarket in OSM (about 1.1 km) | M | later | todo | Richard | [DEVICES.md](plans/DEVICES.md). Turns unknowns into known ground |
 
 ## Research: check our guesses with real people
@@ -150,8 +152,8 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | SEC-01 | Security headers and a Content Security Policy in `apps/web/vercel.json` (a static export can't set them in Next) | S | now | done (2026-10-04) | Claude | D-041. `apps/web/vercel.json`. `pnpm a11y` and `pnpm e2e` serve the build with the same headers and fail on anything the policy blocks |
 | SEC-02 | `SECURITY.md`: how to report a vulnerability | S | next | done (2026-10-04) | Claude | `SECURITY.md`. Private reporting has to be turned on (SEC-14) |
 | SEC-03 | Pin GitHub Actions to commit SHAs and give each workflow the least permissions it needs | S | next | done (2026-10-04) | Claude | Pinned to the latest release in each major, version in a comment. CI has `contents: read` |
-| SEC-04 | `pnpm audit` in CI, failing on high severity | S | next | todo | Claude | |
-| SEC-05 | Check nothing leaks the profile (logs, URLs, error messages) | S | next | todo | Claude | D-009 |
+| SEC-04 | `pnpm audit` in CI, failing on high severity | S | now | todo | Claude | |
+| SEC-05 | Check nothing leaks the profile (logs, URLs, error messages) | S | now | todo | Claude | D-009 |
 | SEC-06 | Export and delete everything about me, in one place | M | next | todo | Claude | UK GDPR. Needed with or without accounts |
 | SEC-07 | Review row-level security and storage bucket rules against a threat model | M | later | todo | Claude | `db/migrations`, `scripts/test-db.sh` |
 | SEC-08 | Harden `/review`: sign-in rate limits, session length | S | later | todo | Claude | |
@@ -174,8 +176,8 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | STAB-06 | Data refresh guard: fail the weekly PR if counts drop by more than a set amount | S | next | todo | Claude | D-033 |
 | STAB-07 | The routing worker recovers if it crashes, and says so | S | later | todo | Claude | `router.worker.ts` |
 | STAB-09 | A city opened from last time started from Edinburgh's Causewayside, 537 km from London | S | next | done (2026-10-04) | Claude | Found by STAB-01. `page.tsx` sets the saved city's start |
-| STAB-10 | End-to-end journeys for the device switcher, notes and Leaving later | S | next | todo | Claude | Extend `scripts/e2e.mjs` |
-| STAB-11 | The device editor's header fills a 320 by 640 screen at 200% text | S | next | todo | Claude | Found checking FEAT-01. Shrink or scroll the header with the content |
+| STAB-10 | End-to-end journeys for the device switcher, notes and Leaving later | S | now | todo | Claude | Extend `scripts/e2e.mjs` |
+| STAB-11 | The device editor's header fills a 320 by 640 screen at 200% text | S | now | todo | Claude | Found checking FEAT-01. Shrink or scroll the header with the content |
 | STAB-08 | Offline test: load a city, cut the network, route | S | later | todo | Claude | D-023 |
 
 ## Speed
@@ -254,6 +256,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 
 Newest first. One line per change: date, ID, what happened, link.
 
+- 2026-10-04: DATA-07 to DATA-11 done in PR #33, and DATA-24 with them. Added DATA-25, DATA-26. Now: DATA-23, SEC-04, SEC-05, STAB-10, STAB-11.
 - 2026-10-04: DATA-01, DATA-03, DATA-04, DATA-05 and DATA-06 done in PR #33. DATA-02 blocked (SRWR unreachable from the cloud). Added DATA-22 to DATA-24. Now: DATA-07 to DATA-11.
 - 2026-10-04: SEC-01, SEC-02, SEC-03, STAB-01, STAB-03, STAB-09, UPD-01, FEAT-01, DEP-03, DEP-04 and BLOAT-01 done in PR #33 (branch `claude/clever-fermat-ij543q`), carried over from the earlier roadmap's IDs. Added SEC-12 to SEC-14, STAB-10, STAB-11. Now: DATA-01 to DATA-05.
 - 2026-10-04: Merged the two roadmaps (#31 and #34) into this one. Kept #34's order, phases and Drive copy; added IDs, sizes and owners across every area. Gateshead walking (#7) and Overture duplicates (#15) were already closed.
