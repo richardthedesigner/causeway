@@ -14,7 +14,9 @@ export type MobilityPreset =
   | "manual-wheelchair"
   | "manual-wheelchair-companion"
   | "powerchair"
+  | "powerchair-light"
   | "mobility-scooter"
+  | "mobility-scooter-road"
   | "rollator"
   | "walking-stick"
   | "crutches"
@@ -72,7 +74,17 @@ export interface Profile {
   buses?: boolean;
   /** Has an operator's permit to take this mobility scooter on buses (CPT code: class 2, small enough). */
   busScooterPermit?: boolean;
+  /**
+   * Road-legal (class 3) mobility scooter: registered, may use the carriageway
+   * at up to 8 mph, so a street with no pavement is an ordinary road, not a hazard.
+   */
+  roadLegal?: boolean;
 }
+
+/** Any powered wheelchair, light or heavy duty. Uses the bus wheelchair space. */
+export const isPowerchair = (p: Pick<Profile, "preset">) => p.preset === "powerchair" || p.preset === "powerchair-light";
+/** Any mobility scooter, pavement or road. */
+export const isScooter = (p: Pick<Profile, "preset">) => p.preset === "mobility-scooter" || p.preset === "mobility-scooter-road";
 
 const SMOOTH: SurfaceTolerance = {
   asphalt: 0,
@@ -169,9 +181,10 @@ export const PRESETS: Record<MobilityPreset, Profile> = {
     uncertaintyTolerance: 0.4,
     companion: true,
   },
+  /** Heavy duty or outdoor chair: big batteries, larger wheels, climbs kerbs and copes with setts. */
   powerchair: {
     preset: "powerchair",
-    label: "Powerchair",
+    label: "Powerchair, heavy duty",
     speedMps: 1.4,
     maxInclineUpPct: 12,
     maxInclineDownPct: 10,
@@ -188,9 +201,34 @@ export const PRESETS: Record<MobilityPreset, Profile> = {
     uncertaintyTolerance: 0.3,
     companion: false,
   },
+  /**
+   * Lightweight or folding powerchair: small castors, low clearance, small
+   * batteries. Gets stuck on cobbles and setts (tester feedback, 2026-10), and
+   * manages less than a pavement scooter. Starting figures until user testing.
+   */
+  "powerchair-light": {
+    preset: "powerchair-light",
+    label: "Powerchair, lightweight",
+    speedMps: 1.3,
+    maxInclineUpPct: 8,
+    maxInclineDownPct: 8,
+    comfortInclinePct: 5,
+    maxCrossSlopePct: 4,
+    maxKerbCm: 3,
+    minWidthM: 0.8,
+    maxSteps: 0,
+    escalators: false,
+    surfaces: { ...SMOOTH, sett: 0.9, cobblestone: null, compacted: 0.5, fine_gravel: 0.8 },
+    wetSurfaceSensitivity: 1.6,
+    maxRestIntervalM: null,
+    maxToiletIntervalM: null,
+    uncertaintyTolerance: 0.25,
+    companion: false,
+  },
+  /** Class 2 pavement scooter: 4 mph, pavements only. Small ones can go on buses with a permit. */
   "mobility-scooter": {
     preset: "mobility-scooter",
-    label: "Mobility scooter",
+    label: "Mobility scooter, pavement",
     speedMps: 1.8,
     maxInclineUpPct: 10,
     maxInclineDownPct: 10,
@@ -206,6 +244,32 @@ export const PRESETS: Record<MobilityPreset, Profile> = {
     maxToiletIntervalM: null,
     uncertaintyTolerance: 0.3,
     companion: false,
+  },
+  /**
+   * Class 3 road scooter: registered, 8 mph on the road, 4 mph on pavements.
+   * Bigger and heavier than class 2, so too large for buses, but better on
+   * kerbs, hills and rough ground, and fine on a street without a pavement.
+   */
+  "mobility-scooter-road": {
+    preset: "mobility-scooter-road",
+    label: "Mobility scooter, road",
+    speedMps: 1.8,
+    maxInclineUpPct: 12,
+    maxInclineDownPct: 10,
+    comfortInclinePct: 7,
+    maxCrossSlopePct: 6,
+    maxKerbCm: 7,
+    minWidthM: 1.2,
+    maxSteps: 0,
+    escalators: false,
+    surfaces: { ...SMOOTH, sett: 0.3, cobblestone: 0.6, compacted: 0.2, fine_gravel: 0.4 },
+    wetSurfaceSensitivity: 1.3,
+    maxRestIntervalM: null,
+    maxToiletIntervalM: null,
+    uncertaintyTolerance: 0.3,
+    companion: false,
+    buses: false,
+    roadLegal: true,
   },
   rollator: {
     preset: "rollator",
@@ -338,4 +402,21 @@ export function learnPace(p: Profile, observedMps: number): Profile {
   const w = Math.max(0.2, 1 / (n + 2));
   const speed = Math.min(2.5, Math.max(0.3, p.speedMps * (1 - w) + observedMps * w));
   return { ...p, speedMps: Math.round(speed * 100) / 100, paceSamples: n + 1 };
+}
+
+/**
+ * A device the user has saved and named ("Lulu", "Cherry"). Each carries its
+ * own limits, so switching device switches every threshold at once. Same
+ * privacy rules as the profile: on this device only.
+ */
+export interface SavedDevice {
+  id: string;
+  /** The user's name for it. Also written to profile.label, which the app shows. */
+  name: string;
+  favourite: boolean;
+  profile: Profile;
+}
+
+export function savedDevice(id: string, name: string, preset: MobilityPreset, overrides: Partial<Profile> = {}, favourite = false): SavedDevice {
+  return { id, name, favourite, profile: profileFrom(preset, { ...overrides, label: name }) };
 }

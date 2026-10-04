@@ -18,10 +18,10 @@ interface Props {
 const STEP_LIMIT = 30;
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
 
-/** Eleven starting points in three short sets, so nobody reads a list of eleven. */
+/** Thirteen starting points in three short sets, so nobody reads a list of thirteen. */
 const PRESET_GROUPS: { id: string; label: string; presets: MobilityPreset[] }[] = [
   { id: "walk", label: "Walking", presets: ["walking", "walking-stick", "crutches", "rollator"] },
-  { id: "wheels", label: "On wheels", presets: ["manual-wheelchair", "manual-wheelchair-companion", "powerchair", "mobility-scooter", "pram"] },
+  { id: "wheels", label: "On wheels", presets: ["manual-wheelchair", "manual-wheelchair-companion", "powerchair-light", "powerchair", "mobility-scooter", "mobility-scooter-road", "pram"] },
   { id: "other", label: "Other needs", presets: ["fatigue", "visual-impairment"] },
 ];
 

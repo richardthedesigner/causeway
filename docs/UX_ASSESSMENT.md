@@ -59,7 +59,7 @@ Severity: **critical** (blocks the task), **serious** (likely to cause errors or
 
 | Principle | Assessment |
 |---|---|
-| Same experience for everyone | Yes. No accessibility mode; walking is one preset among eleven, all through the same screens. |
+| Same experience for everyone | Yes. No accessibility mode; walking is one preset among thirteen, all through the same screens. |
 | Honesty over confidence | Strong. Nothing says "step-free" while anything is unknown; unknown stretches are dashed; entrances say "not known" rather than guessing; every access fact has a source. |
 | The user's limits, not "wheelchair" | Yes: presets plus editable slopes, kerbs, steps, surfaces and tolerance for unknowns, saved on the device only. |
 | Cognitive load | Improved: one primary action per state (search, choose route, confirm pin). Route detail is behind scrolling, not walls of data. |

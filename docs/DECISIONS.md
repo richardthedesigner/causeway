@@ -264,3 +264,13 @@ Bridged: Edinburgh 172 of 446 islands, Newcastle 9 of 24, London 23 of 48. `scri
 **Stay manual:** street graphs and base maps. They need LiDAR and a reviewed Protomaps build, and they change slowly.
 
 **Known limit:** pull requests opened with the workflow token don't trigger CI themselves; the workflow runs the tests before opening one.
+
+## D-034 Powered devices in four classes, and saved named devices
+
+**Decided.** 2026-10-04, from tester feedback. Plan and UI spec: [plans/DEVICES.md](plans/DEVICES.md).
+- **Classes:** lightweight and heavy duty powerchairs, pavement (class 2) and road (class 3) scooters. Each is a preset, so the router stays one engine with per-user numbers (D-002); nothing special-cases a device.
+- **Keys kept:** `powerchair` and `mobility-scooter` keep their keys and numbers and become the heavy duty and pavement classes. Two new keys: `powerchair-light`, `mobility-scooter-road`.
+- **Road scooters** carry `roadLegal`: no penalty for a street without a pavement, no unknown for an unmapped one, and no buses.
+- **Devices** are named profiles (`SavedDevice`), stored on the device only, like the profile (D-009). The name is the profile's label.
+- **Demo seed:** Cherry (lightweight powerchair, no setts or cobbles) and Lulu (pavement scooter), both favourites, until onboarding creates real devices.
+
