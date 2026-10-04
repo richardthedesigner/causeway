@@ -17,6 +17,7 @@ import type { Place } from "@/lib/plan-types";
 import { loadProfile, saveProfile } from "@/lib/profile-store";
 import { useNotes } from "@/lib/use-notes";
 import { CITIES, cityById, type City } from "@/lib/cities";
+import { toiletsAlong } from "@/lib/toilets";
 import { usePlaces } from "@/lib/use-places";
 import { usePlanner, type Conditions } from "@/lib/use-planner";
 
@@ -141,6 +142,7 @@ export default function Home() {
     return typeof document === "undefined" ? null : { url: u(city.basemap), key: city.id, glyphs: u("fonts/glyphs.json"), center: [city.start.lon, city.start.lat] as [number, number] };
   }, [city]); // eslint-disable-line react-hooks/exhaustive-deps
   const selectedRoute = routes.find((r) => r.id === selected) ?? routes[0] ?? null;
+  const toilets = useMemo(() => (index && selectedRoute && view.kind === "route" ? toiletsAlong(index, selectedRoute.coords) : null), [index, selectedRoute, view.kind]);
   const entrances =
     planner.result?.status === "ok" ? planner.result.entrances.map((e) => ({ lon: e.lon, lat: e.lat, ok: e.verdict.passable })) : [];
 
@@ -223,6 +225,7 @@ export default function Home() {
         </div>
       ) : to ? (
         <RoutePanel
+          toilets={toilets}
           from={from}
           to={to}
           profile={profile}
@@ -287,6 +290,7 @@ export default function Home() {
         pin={pin}
         showSlopes={showSlopes}
         entrances={view.kind === "route" ? entrances : []}
+        toilets={toilets?.toilets ?? []}
         onMapClick={navigating ? () => {} : onMapClick}
         me={me}
         basemap={basemap}

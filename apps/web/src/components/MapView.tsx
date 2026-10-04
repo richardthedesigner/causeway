@@ -14,6 +14,8 @@ interface Props {
   pin: Place | null;
   showSlopes: boolean;
   entrances: { lon: number; lat: number; ok: "yes" | "no" | "unknown" }[];
+  /** Accessible toilets along the chosen route. */
+  toilets?: { lon: number; lat: number; public: boolean }[];
   onMapClick: (lon: number, lat: number) => void;
   /** Live (or preview) position while navigating; the map follows it. */
   me?: { lon: number; lat: number; accuracyM: number } | null;
@@ -38,7 +40,7 @@ const point = (p: { lon: number; lat: number }, props: Record<string, unknown> =
  * Our own footway graph and routes, drawn over a Protomaps base map (D-024).
  * Colours come from the page's CSS tokens and follow theme changes live.
  */
-export function MapView({ network, routes, selectedId, from, to, pin, showSlopes, entrances, onMapClick, me, basemap }: Props) {
+export function MapView({ network, routes, selectedId, from, to, pin, showSlopes, entrances, onMapClick, me, basemap, toilets = [] }: Props) {
   const el = useRef<HTMLDivElement>(null);
   const map = useRef<MLMap | null>(null);
   const ready = useRef(false);
@@ -60,7 +62,7 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
     map.current = m;
     m.on("load", () => {
       const empty = fc([]);
-      for (const id of ["network", "route-alt", "route", "unknown", "rides", "ride-labels", "markers", "entrances", "me"]) m.addSource(id, { type: "geojson", data: empty });
+      for (const id of ["network", "route-alt", "route", "unknown", "rides", "ride-labels", "toilets", "markers", "entrances", "me"]) m.addSource(id, { type: "geojson", data: empty });
       m.addLayer({ id: "network", type: "line", source: "network", paint: { "line-color": ["get", "c"], "line-width": ["interpolate", ["linear"], ["zoom"], 12, 0.8, 17, 3.5], "line-opacity": 0.9 }, layout: { "line-cap": "round" } });
       m.addLayer({ id: "network-steps", type: "line", source: "network", filter: ["==", ["get", "bin"], 5], paint: { "line-color": css("--muted"), "line-width": ["interpolate", ["linear"], ["zoom"], 12, 1.5, 17, 6], "line-dasharray": [0.25, 0.5], "line-opacity": 0.8 } });
       m.addLayer({ id: "route-alt", type: "line", source: "route-alt", paint: { "line-color": css("--route-alt"), "line-width": 7 }, layout: { "line-cap": "round", "line-join": "round" } });
@@ -77,6 +79,14 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
         source: "ride-labels",
         layout: { "text-field": ["get", "label"], "text-font": ["Noto Sans Medium"], "text-size": 14, "text-offset": [0, -1.4], "text-allow-overlap": true },
         paint: { "text-color": css("--surface"), "text-halo-color": css("--route"), "text-halo-width": 6 },
+      });
+      // Accessible toilets near the route: a labelled dot, so it reads without colour.
+      m.addLayer({
+        id: "toilets",
+        type: "symbol",
+        source: "toilets",
+        layout: { "text-field": "WC", "text-font": ["Noto Sans Medium"], "text-size": 11, "text-allow-overlap": true },
+        paint: { "text-color": css("--surface"), "text-halo-color": css("--ink"), "text-halo-width": 5 },
       });
       m.addLayer({ id: "entrances", type: "circle", source: "entrances", paint: { "circle-radius": 7, "circle-color": ["get", "c"], "circle-stroke-color": css("--surface"), "circle-stroke-width": 2 } });
       m.addLayer({ id: "markers", type: "circle", source: "markers", paint: { "circle-radius": ["match", ["get", "end"], 1, 11, 2, 10, 8], "circle-color": ["match", ["get", "end"], 1, css("--stop"), 2, css("--surface"), css("--ink")], "circle-stroke-color": ["match", ["get", "end"], 2, css("--accent"), css("--surface")], "circle-stroke-width": ["match", ["get", "end"], 2, 4, 3] } });
@@ -109,6 +119,7 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
       (m.getSource("route") as GeoJSONSource).setData(fc(sel ? [line(sel.coords)] : []));
       (m.getSource("route-alt") as GeoJSONSource).setData(fc(routes.filter((r) => r !== sel).map((r) => line(r.coords))));
       (m.getSource("unknown") as GeoJSONSource).setData(fc(sel ? sel.unknownCoords.map((c) => line(c)) : []));
+      (m.getSource("toilets") as GeoJSONSource).setData(fc(toilets.map((t) => point(t))));
       (m.getSource("rides") as GeoJSONSource).setData(fc(sel ? sel.rides.map((r) => line(r.coords)) : []));
       (m.getSource("ride-labels") as GeoJSONSource).setData(fc(sel ? sel.rides.map((r) => point({ lon: r.coords[0]![0], lat: r.coords[0]![1] }, { label: r.label })) : []));
       (m.getSource("markers") as GeoJSONSource).setData(fc([...(from ? [point(from, { end: 0 })] : []), ...(to ? [point(to, { end: 1 })] : []), ...(pin ? [point(pin, { end: 2 })] : [])]));
@@ -120,7 +131,7 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
     return () => {
       m.off("causeway:refresh", draw);
     };
-  }, [network, routes, selectedId, from, to, pin, showSlopes, entrances]);
+  }, [network, routes, selectedId, from, to, pin, showSlopes, entrances, toilets]);
 
   const [mapReady, setMapReady] = useState(false);
   const dark = useDark();
@@ -137,6 +148,8 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
     m.setPaintProperty("ride-casing", "line-color", css("--surface"));
     m.setPaintProperty("ride", "line-color", css("--route"));
     m.setPaintProperty("ride-labels", "text-color", css("--surface"));
+    m.setPaintProperty("toilets", "text-color", css("--surface"));
+    m.setPaintProperty("toilets", "text-halo-color", css("--ink"));
     m.setPaintProperty("ride-labels", "text-halo-color", css("--route"));
     m.setPaintProperty("unknown", "line-color", css("--surface"));
     m.setPaintProperty("entrances", "circle-stroke-color", css("--surface"));

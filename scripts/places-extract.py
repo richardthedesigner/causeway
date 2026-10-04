@@ -34,7 +34,7 @@ SKIP = {
 # Unnamed things still worth finding by category.
 UNNAMED_OK = {("amenity", "toilets"), ("amenity", "atm"), ("amenity", "pharmacy")}
 
-ACCESS_TAGS = ("wheelchair", "toilets:wheelchair", "wheelchair:description", "step_count", "entrance", "automatic_door", "door", "changing_table", "hearing_loop", "toilets", "level")
+ACCESS_TAGS = ("wheelchair", "toilets:wheelchair", "wheelchair:description", "step_count", "entrance", "automatic_door", "door", "changing_table", "hearing_loop", "toilets", "level", "centralkey", "changing_places", "fee", "opening_hours", "access")
 
 places = []
 addresses = []

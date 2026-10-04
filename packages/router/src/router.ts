@@ -509,7 +509,7 @@ export function explain(router: Router, chosen: Route, from: GraphNode, to: Grap
   }
   if (p.maxToiletIntervalM) {
     const t = restStats(router.graph, chosen).toilets.filter((x) => x.wheelchair === "yes" || x.changingPlaces);
-    notes.push(t.length ? `${t.length} accessible toilet${t.length === 1 ? "" : "s"} mapped near the route.` : "No accessible toilets mapped near this route.");
+    notes.push(t.length ? `${t.length} accessible public toilet${t.length === 1 ? "" : "s"} mapped near the route.` : "No accessible public toilets mapped near this route. Venues with one are listed under Accessible toilets.");
   }
   for (const b of sum.movableBridges) {
     const verb = b.type === "tilt" ? "tilting" : b.type === "swing" ? "swing" : "movable";
