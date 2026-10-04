@@ -297,3 +297,10 @@ Partnership items for Richard:
 | **TfL StopPoint** (`/StopPoint/{ids}`) | Station positions, hubs and `Accessibility` properties (`AccessViaLift`, `LimitedCapacityLift`, interchange notes). Batch requests return the hub record for interchange stations, whose children carry the accessibility. Some Underground platforms in hubs (Canning Town Jubilee) have none | As above | V (2026-10-04) | **keep**. `AccessViaLift = No` is not "has steps". |
 | **TfL lift disruptions v2** | Live lift outages, placed on platforms by line name in the message | As above | V (2026-10-04): 18 outages including Canary Wharf (Jubilee) | **keep**. Integrated (D-020). |
 | **Gateshead Millennium Bridge tilt times** | Closures of the tilting bridge | Unknown | Not found as open data | **partnership-only** (request to Gateshead Council) |
+
+## Base map (2026-10-04)
+
+| Source | Use | Licence | Verified | Verdict |
+|---|---|---|---|---|
+| **Protomaps daily planet build** (`build.protomaps.com/20261004.pmtiles`) | Vector base map cut per city (`data/basemap/*.pmtiles`) | Data ODbL (OpenStreetMap); schema and styles BSD-3 | V (range-read extracts, 2026-10-04) | **keep** (D-024) |
+| **Protomaps basemaps-assets fonts** (Noto Sans) | Map labels, bundled as `data/basemap/fonts/glyphs.json` | OFL | V (2026-10-04) | **keep** |

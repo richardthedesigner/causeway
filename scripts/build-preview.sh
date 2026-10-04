@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build the private artifact preview of apps/web: relative asset paths, graph as base64 text,
+# Build the private artifact preview of apps/web: relative asset paths, graph and base map as base64 text,
 # "_next" renamed to "next" (the artifact host reserves leading underscores), no legacy polyfill.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -10,6 +10,9 @@ rm -rf "$OUT" && mkdir -p "$OUT/graph"
 cp -r out/_next "$OUT/next"
 for f in out/graph/*.graph.json.gz; do base64 -w0 "$f" > "$OUT/graph/$(basename "$f" .json.gz).b64.txt"; done
 cp out/graph/london-network.json "$OUT/graph/"
+mkdir -p "$OUT/basemap" "$OUT/fonts"
+for f in out/basemap/*.pmtiles; do base64 -w0 "$f" > "$OUT/basemap/$(basename "$f" .pmtiles).b64.txt"; done
+cp out/fonts/glyphs.json "$OUT/fonts/"
 python3 - out/index.html "$OUT/causewayside.html" <<'PY'
 import re, sys
 html = open(sys.argv[1]).read()

@@ -6,6 +6,8 @@ export interface City {
   /** Short coverage line shown under the search box. */
   coverage: string;
   graph: string;
+  /** Protomaps extract for the base map. */
+  basemap: string;
   /** Rail network for live lift outages (London only for now). */
   network?: string;
   liveLifts: boolean;
@@ -15,7 +17,7 @@ export interface City {
   credit: string;
 }
 
-const OSM = "Map data © OpenStreetMap contributors (ODbL).";
+const OSM = "Map data © OpenStreetMap contributors (ODbL). Base map: Protomaps.";
 
 export const CITIES: City[] = [
   {
@@ -23,6 +25,7 @@ export const CITIES: City[] = [
     name: "Edinburgh",
     coverage: "Central Edinburgh: Old and New Town, Southside, Stockbridge, Bruntsfield.",
     graph: "graph/edinburgh-central.graph.json.gz",
+    basemap: "basemap/edinburgh-central.pmtiles",
     liveLifts: false,
     weatherAt: [55.9486, -3.1999],
     start: { id: "causewayside", name: "Causewayside", kind: "Southside / demo address", lon: -3.1812, lat: 55.9385 },
@@ -41,6 +44,7 @@ export const CITIES: City[] = [
     name: "Newcastle and Gateshead",
     coverage: "Grey Street and the Monument down to the Quayside, across to Gateshead and BALTIC.",
     graph: "graph/newcastle-gateshead.graph.json.gz",
+    basemap: "basemap/newcastle-gateshead.pmtiles",
     liveLifts: false,
     weatherAt: [54.97, -1.607],
     start: { id: "grey-street", name: "Grey Street", kind: "City centre", lon: -1.6123, lat: 54.9722 },
@@ -57,6 +61,7 @@ export const CITIES: City[] = [
     name: "London",
     coverage: "Westminster and Canary Wharf, joined by the Jubilee line and DLR. More of London later.",
     graph: "graph/london-jubilee.graph.json.gz",
+    basemap: "basemap/london-jubilee.pmtiles",
     network: "graph/london-network.json",
     liveLifts: true,
     weatherAt: [51.502, -0.07],
