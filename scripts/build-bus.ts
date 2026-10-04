@@ -14,8 +14,19 @@ const ROOT = join(import.meta.dirname, "..");
 const REGION: Record<string, string> = { "edinburgh-central": "scotland", "newcastle-gateshead": "north_east", "london-jubilee": "london" };
 /** GTFS route types to add beyond buses and trams: the Metro in Newcastle (London's comes from TfL). */
 const EXTRA_MODES: Record<string, Record<string, string>> = { "newcastle-gateshead": { "1": "metro" } };
-/** Sample days for "typical" service: a Tuesday, Saturday and Sunday clear of bank holidays. */
-const DAYS = { wd: "20261006", sa: "20261010", su: "20261011" };
+/**
+ * Sample days for "typical" service: the next Tuesday, Saturday and Sunday at least two days
+ * ahead, so the timetables published now cover them. Override with BUS_DAYS=YYYYMMDD,YYYYMMDD,YYYYMMDD
+ * (for example to step around a bank holiday).
+ */
+const nextDay = (dow: number) => {
+  const d = new Date();
+  d.setUTCDate(d.getUTCDate() + 2);
+  while (d.getUTCDay() !== dow) d.setUTCDate(d.getUTCDate() + 1);
+  return d.toISOString().slice(0, 10).replace(/-/g, "");
+};
+const [wd, sa, su] = process.env.BUS_DAYS?.split(",") ?? [nextDay(2), nextDay(6), nextDay(0)];
+const DAYS = { wd: wd!, sa: sa!, su: su! };
 
 for (const name of process.argv[2] ? [process.argv[2]] : Object.keys(REGION)) {
   const area = AREAS[name];

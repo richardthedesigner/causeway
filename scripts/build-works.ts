@@ -1,6 +1,6 @@
 /**
  * Build each English area's works file from the latest Street Manager monthly archive:
- *   pnpm build:works [YYYY/MM]
+ *   pnpm build:works [YYYY/MM]   (default: last month)
  * Writes data/live/<area>.works.json (WorksObservations still open at build time).
  * Scotland's register (SRWR) has no open feed yet, so Edinburgh gets none (DATA_SOURCES.md).
  *
@@ -16,7 +16,14 @@ import { AREAS } from "./areas.js";
 import { cached, CACHE, EDINBURGH_OLD_TOWN, toArrayBuffer } from "./sources.js";
 
 const ROOT = join(import.meta.dirname, "..");
-const month = process.argv[2] ?? "2026/09";
+/** The last complete month: Street Manager publishes each month's archive after it ends. */
+const lastMonth = () => {
+  const d = new Date();
+  d.setUTCDate(1);
+  d.setUTCMonth(d.getUTCMonth() - 1);
+  return `${d.getUTCFullYear()}/${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
+};
+const month = process.argv[2] ?? lastMonth();
 const zipFile = join(CACHE, `sm-permit-${month.replace("/", "-")}.zip`);
 if (!existsSync(zipFile)) execFileSync("curl", ["-sS", "-o", zipFile, `https://opendata.manage-roadworks.service.gov.uk/permit/${month}.zip`], { stdio: "inherit" });
 

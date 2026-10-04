@@ -248,3 +248,15 @@ It leaves alone:
 - pairs whose known ground heights differ by more than 2 m (a wall, not a gap).
 
 Bridged: Edinburgh 172 of 446 islands, Newcastle 9 of 24, London 23 of 48. `scripts/bridge-islands.ts` applied it to the committed snapshots without a full rebuild. Central Station to Jackson Street now takes the Metro (about 10 minutes against 24 on foot), with a test.
+
+## D-033 Weekly data refresh as a pull request
+
+**Decided.** 2026-10-04 (issue #14). `.github/workflows/data-refresh.yml` runs on Mondays at 04:17 UTC, or by hand.
+- **Rebuilds:** the search index (fresh OSM, the pinned Overture release), the bus, tram and Metro timetables (BODS GTFS, sampling the next Tuesday, Saturday and Sunday), and pavement works (last month's Street Manager archive).
+- **Checks:** runs the typecheck and the full test suite against the new data.
+- **Opens a pull request into `main`** with a before-and-after count table (`scripts/data-summary.ts`). Nothing reaches production until someone merges it; the mirror then copies it to the production branch.
+- **Fails softly:** each source is a separate step, so one feed being down doesn't block the rest. The PR body asks the reviewer to check for sudden drops, which mean an outage rather than real change.
+
+**Stay manual:** street graphs and base maps. They need LiDAR and a reviewed Protomaps build, and they change slowly.
+
+**Known limit:** pull requests opened with the workflow token don't trigger CI themselves; the workflow runs the tests before opening one.

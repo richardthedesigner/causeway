@@ -4,6 +4,11 @@ A running record of what was built, newest first. Each entry links the decision 
 
 ## 2026-10-04 (evening)
 
+**Weekly data refresh** (D-033, #14)
+- A GitHub Actions workflow rebuilds timetables, works and the search index.
+- It tests the result and opens a PR with a count table.
+- The bus and works builds now work out their sample days and archive month from today's date (they were hard-coded).
+
 **Footway islands joined** (D-032, closes #7)
 - `bridgeIslands` joins small islands of footway to the street across gaps of up to 15 m, with unknown attributes.
 - It skips platforms, bridges and height steps.
