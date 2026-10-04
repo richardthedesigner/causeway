@@ -4,6 +4,7 @@ Accessibility-first wayfinding. It gets a wheelchair user from A to B on a route
 
 **Status: Phase 4 (a working web app for central Edinburgh, Newcastle and Gateshead, and two London zones).** Routing on the device for each person's limits. Walking, buses, trams, the Tyne and Wear Metro, and step-free Jubilee line and DLR, with live lift and roadworks data where it's open. Search, a base map, navigation and access notes are all in. Every screen answers "can I get there?" first: [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md).
 
+- Where it's going next: [docs/ROADMAP.md](docs/ROADMAP.md)
 - What changed and when: [docs/BUILD_LOG.md](docs/BUILD_LOG.md)
 - Why: [docs/DECISIONS.md](docs/DECISIONS.md)
 - How it looks and behaves: [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md), and in [Figma](https://www.figma.com/design/fXQDly3nwKL9NufpZW1wPa)
