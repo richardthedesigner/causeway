@@ -326,6 +326,7 @@ Partnership items for Richard:
 | Source | Use | Licence | Verified | Verdict |
 |---|---|---|---|---|
 | **Street Manager open data** (`opendata.manage-roadworks.service.gov.uk/permit/YYYY/MM.zip`) | Footway closures and works for English areas: `close_footway_ref` (`no`, `yes_provide_alternative_route`, `yes_provide_pedestrian_walkway`), `works_location_type`, BNG geometry, dates | OGL v3 | V (2026-09 archive, 1 GB, 2026-10-04): Newcastle 56 works on pavements, 43 closing them | **keep** (D-026). Monthly archive in the build now; live SNS notifications for production |
+| **Street Manager activity archive** (`opendata.manage-roadworks.service.gov.uk/activity/YYYY/MM.zip`) | Skips, scaffolding, hoardings, cranes, events and other non-works licences, with `activity_location_type` (Footway, Footpath, Carriageway), BNG point, dates. No footway-closure flag | OGL v3 | V (2026-09 archive, 12 MB, 2026-10-04): 9 on pavements in Newcastle, 5 in London | **keep** (DATA-05). On the pavement, counted as unknown |
 | **TfL road disruptions** (`/Road/all/Street/Disruption`) | Live London top-up, kept only when the description mentions the pavement | TfL open data terms | V (300 segments, 2026-10-04) | **keep** |
 | **Scottish Road Works Register** (SRWR, roadworks.scot) | Edinburgh and all of Scotland: works, closures, footway-only works (`TrafficManagement = Works Entirely On The Footway`), street café permits as polygons, scaffolding, hoardings, events. Daily disruptions export at `downloads.srwr.scot/export/disruptions-daily/` (redirects to a zip with `CurrentActivities.csv`, BNG WKT geometry, USRN) | OGL v3 | V (2026-10-04): City of Edinburgh 2,344 current activities, 344 entirely on the footway, 338 street cafés. The download pages are JavaScript shells, which is why an earlier check found nothing | **keep**: corrected 2026-10-04, see [DATA_SURVEY_UK.md](DATA_SURVEY_UK.md) |
 
@@ -343,3 +344,13 @@ Partnership items for Richard:
 | **TfL StopPoint arrivals** (`/StopPoint/{id}/Arrivals`) | Live London departures (next step) | TfL open data terms | Reachable, 2026-10-04 | **keep** |
 
 | **Bus Open Data Service GTFS: trams and Metro** (same files) | Edinburgh Trams (route type 0: 9 stops in the area), Tyne and Wear Metro (route type 1: 6 stations, Green and Yellow lines) | OGL v3 | V (2026-10-04) | **keep** (D-031). Nexus lift status: not open, so Metro stations below street level count as unknown for step-free users |
+
+## Council footways and TfL station data (2026-10-04)
+
+| Source | What we use | Licence | Verified | Verdict |
+|---|---|---|---|---|
+| **City of Edinburgh Council, Adopted Roads** (`edinburghcouncilmaps.info/arcgis/rest/services/Transport/Transport/MapServer/23`) | Footway polygons with `surface` (setts, flags, asphalt and so on) and `width`, matched to our pavement edges. A separate layer, `data/council/edinburgh-central.footways.json`, joined at load and never written into the ODbL graph (D-008). Fills only what OSM doesn't know | OGL v3. Credit: "City of Edinburgh Council, Open Government Licence v3.0" | V (25,127 footway polygons in the central box, 2026-10-04): widths on 8,707 pavement edges (was 1,731) | **keep** (DATA-06) |
+| **TfL station data** (`api.tfl.gov.uk/stationdata/tfl-stationdata-detailed.zip`) | Each station's areas and the level paths, ramps and lifts between them; platform-to-train step and gap; toilets | TfL open data | V (feed of 2026-08-03; all 72 of our stations) | **keep** (DATA-03) |
+| **TfL line status and station disruptions** (`/Line/{ids}/Status?detail=true`, `/StopPoint/Mode/{modes}/Disruption`) | Line closures by affected station; station closures and losses of step-free access | TfL open data | V (2026-10-04, recorded as test fixtures) | **keep** (DATA-04) |
+| **Scottish Road Works Register** (`downloads.srwr.scot`) | Edinburgh roadworks, café permits, scaffolding | OGL v3 (survey §2 #1) | Not reachable from the build container: every TLS connection is reset (2026-10-04) | **keep**, blocked here (DATA-02). Build it where the site answers |
+

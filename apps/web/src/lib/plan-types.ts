@@ -115,7 +115,7 @@ export interface RailDisruptionMsg {
 }
 
 export type WorkerRequest =
-  | { type: "init"; graphUrl: string; networkUrl?: string; worksUrl?: string; busUrl?: string; places: Place[] }
+  | { type: "init"; graphUrl: string; networkUrl?: string; worksUrl?: string; busUrl?: string; footwaysUrl?: string; places: Place[] }
   | { type: "works-live"; works: WorksObservation[]; fetchedAt: string }
   /** Venues with an accessible toilet, from the search index, so routing can pass them. */
   | { type: "toilets"; points: { lon: number; lat: number; name: string }[] }

@@ -4,7 +4,8 @@
  */
 import { join } from "node:path";
 import { beforeAll, describe, expect, it } from "vitest";
-import { loadSnapshot } from "@causeway/graph/node";
+import { readFileSync } from "node:fs";
+import { applyCouncilFootways, loadSnapshot, type CouncilFootways } from "@causeway/graph/node";
 import { PRESETS } from "@causeway/profile";
 import { Router, summarise } from "@causeway/router";
 import { EDINBURGH_CENTRAL_JOURNEYS } from "../../../scripts/journeys.js";
@@ -12,7 +13,10 @@ import { EDINBURGH_CENTRAL_JOURNEYS } from "../../../scripts/journeys.js";
 const SNAPSHOT = join(import.meta.dirname, "../../../data/snapshots/edinburgh-central.graph.json.gz");
 let router: Router;
 beforeAll(() => {
-  router = new Router(loadSnapshot(SNAPSHOT));
+  // As the app does: the council's footway surfaces and widths fill what OSM doesn't know (DATA-06).
+  const g = loadSnapshot(SNAPSHOT);
+  applyCouncilFootways(g, JSON.parse(readFileSync(join(import.meta.dirname, "../../../data/council/edinburgh-central.footways.json"), "utf8")) as CouncilFootways);
+  router = new Router(g);
 }, 60_000);
 
 describe("central Edinburgh journeys, manual wheelchair", () => {

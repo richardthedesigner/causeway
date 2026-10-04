@@ -3,7 +3,7 @@
  * Routing runs on the device, in a worker. The profile (health data) never
  * leaves the phone: it arrives here with each request and is not stored.
  */
-import { addBus, applyStationAccess, isKnown, refRides, mobilityLabelFor, noteSignals, type Graph, type GraphEdge, type Stretch, type TransitNetwork, type BusNetwork } from "@causeway/graph";
+import { addBus, applyCouncilFootways, applyStationAccess, isKnown, refRides, mobilityLabelFor, noteSignals, type Graph, type GraphEdge, type Stretch, type TransitNetwork, type BusNetwork, type CouncilFootways } from "@causeway/graph";
 import { applyEdgeStates, applyLiveStates, liftOutageStates, mergeLiveStates, railDisruptionStates, worksStates, type WorksObservation } from "@causeway/live";
 import { PRESETS, type Profile } from "@causeway/profile";
 import {
@@ -58,7 +58,7 @@ function applyWorks() {
 
 const post = (m: WorkerResponse) => self.postMessage(m);
 
-async function load(url: string, networkUrl: string | undefined, worksUrl: string | undefined, busUrl: string | undefined, demo: Place[]) {
+async function load(url: string, networkUrl: string | undefined, worksUrl: string | undefined, busUrl: string | undefined, footwaysUrl: string | undefined, demo: Place[]) {
   const res = await fetch(url);
   if (!res.ok || !res.body) throw new Error(`graph: HTTP ${res.status}`);
   // Hosts that won't serve .gz get the same bytes as base64 text (the private preview build).
@@ -73,6 +73,14 @@ async function load(url: string, networkUrl: string | undefined, worksUrl: strin
       buses = { ...addBus(graph, net), source: net.source };
     } catch {
       buses = null;
+    }
+  }
+  // Council footway surfaces and widths fill what OSM doesn't know (DATA-06). Missing: OSM alone, as before.
+  if (footwaysUrl) {
+    try {
+      applyCouncilFootways(graph, (await (await fetch(footwaysUrl)).json()) as CouncilFootways);
+    } catch {
+      /* the layer is a bonus */
     }
   }
   network = networkUrl ? ((await (await fetch(networkUrl)).json()) as TransitNetwork) : null;
@@ -388,7 +396,7 @@ function fits(req: Extract<WorkerRequest, { type: "fits" }>): { key: string; min
 self.onmessage = async (ev: MessageEvent<WorkerRequest>) => {
   const m = ev.data;
   try {
-    if (m.type === "init") await load(m.graphUrl, m.networkUrl, m.worksUrl, m.busUrl, m.places);
+    if (m.type === "init") await load(m.graphUrl, m.networkUrl, m.worksUrl, m.busUrl, m.footwaysUrl, m.places);
     else if (m.type === "toilets") router?.addToilets(m.points);
     else if (m.type === "works-live") {
       liveWorks = { works: m.works, fetchedAt: m.fetchedAt };

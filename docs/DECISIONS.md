@@ -430,3 +430,14 @@ When there is nothing to compare with, it builds. Once DEP-01 makes `main` the p
 **Decided.** 2026-10-04 (DEP-04). The service worker (D-023) takes over as soon as a new build is installed, but a page that's already open keeps running the old code until it's reloaded. People keep a map open for days.
 
 **What we do.** The app looks for a new version when it comes back to the front and every hour. When one takes over, a card says "A new version of Causewayside is ready" with **Reload** and **Later**. It never reloads by itself, and waits while navigating, since a reload mid-journey would drop the route. It is rendered outside `<main>`, which the bottom sheet hides from screen readers.
+
+## D-046 Council footway data as a separate layer
+
+**Decided.** 2026-10-04 (DATA-06). Edinburgh's Adopted Roads layer (OGL v3) has a surface and width for each adopted footway polygon. OSM has a width on only about 5% of central Edinburgh's pavement edges.
+
+**What we do.** `pnpm build:footways` matches each pavement edge to the footway polygon its middle sits in. A street drawn as one line in OSM (a street proxy) takes the footways within 12 m of its middle, the narrowest width and the roughest surface. The result is a separate file keyed by `<osm way>:<from node>:<to node>`, joined when Edinburgh loads (`applyCouncilFootways`) and never written into the snapshot, as D-008 proposes for non-OSM data.
+- **OSM first.** The layer only fills a surface or width OSM doesn't have. Widths on pavement edges went from 1,731 to 8,707; surfaces from 22,085 to 24,641 of 31,750.
+- **Where both know, they often disagree** (2,822 of 6,341 edges), mostly OSM "asphalt" against council flags, and OSM "sett" against council flags or asphalt. Many are probably street proxies carrying the carriageway's surface, not the pavement's. OSM still wins. Whether the council should win on street proxies is a question for Richard (DATA-22).
+- Widths outside 0.5 to 10 m are ignored; a few large polygons carry area-like figures.
+- Credit: "Pavement surfaces and widths: City of Edinburgh Council, Open Government Licence v3.0", in the city credit line.
+

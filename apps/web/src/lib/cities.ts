@@ -16,6 +16,8 @@ export interface City {
   works?: string;
   /** Rail network for live lift outages (London only for now). */
   network?: string;
+  /** Council footway surfaces and widths, a separate layer joined at load (DATA-06, D-008). Edinburgh only. */
+  footways?: string;
   liveLifts: boolean;
   weatherAt: [number, number];
   start: Place;
@@ -34,6 +36,7 @@ export const CITIES: City[] = [
     basemap: "basemap/edinburgh-central.pmtiles",
     index: "places/edinburgh-central.json.gz",
     bus: "graph/edinburgh-central-bus.json",
+    footways: "graph/edinburgh-central-footways.json",
     liveLifts: false,
     weatherAt: [55.9486, -3.1999],
     start: { id: "causewayside", name: "Causewayside", kind: "Southside / demo address", lon: -3.1812, lat: 55.9385 },
@@ -45,7 +48,7 @@ export const CITIES: City[] = [
       { id: "st-giles", name: "High Street by St Giles'", kind: "Royal Mile", lon: -3.1907, lat: 55.9496 },
       { id: "meadows", name: "The Meadows", kind: "Park", lon: -3.1925, lat: 55.9405 },
     ],
-    credit: `${OSM} Terrain: LiDAR for Scotland, Open Government Licence v3.0.`,
+    credit: `${OSM} Terrain: LiDAR for Scotland, Open Government Licence v3.0. Pavement surfaces and widths: City of Edinburgh Council, Open Government Licence v3.0.`,
   },
   {
     id: "newcastle",
