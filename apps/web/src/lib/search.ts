@@ -23,6 +23,8 @@ export interface Entry {
   access?: Record<string, string>;
   rank: number;
   words: string[];
+  /** The name's words run together, so "grass market" finds "Grassmarket" and the other way round. */
+  joined: string;
 }
 
 export interface Index {
@@ -174,7 +176,7 @@ export function accessFacts(a: Record<string, string> | undefined, cat?: string)
 export function buildIndex(file: PlacesFile | null, extra: Place[]): Index {
   const entries: Entry[] = [];
   const add = (place: Place, rank: number, extraWords = "", cat?: string, access?: Record<string, string>) =>
-    entries.push({ place, rank, cat, access, words: norm(`${place.name} ${extraWords}`).split(" ") });
+    entries.push({ place, rank, cat, access, words: norm(`${place.name} ${extraWords}`).split(" "), joined: norm(place.name).replace(/ /g, "") });
 
   for (const p of extra) add(p, p.kind === "Street" ? 1 : 0, p.kind);
   const postcodes = new Map<string, Place>();
@@ -239,7 +241,8 @@ export interface Hit {
 
 /**
  * Search the index. Name matches need every typed word to start a word in the
- * name or address. Category questions list that category nearest first; with
+ * name or address, or the typed words run together to start the name run
+ * together (spaces don't count: "grass market" finds "Grassmarket"). Category questions list that category nearest first; with
  * an access word, only places mapped as wheelchair accessible.
  */
 export function search(index: Index, q: string, near: { lon: number; lat: number }, limit = 25): { hits: Hit[]; query: Query; hiddenNotMapped: number } {
@@ -259,6 +262,8 @@ export function search(index: Index, q: string, near: { lon: number; lat: number
     .split(" ")
     .filter((w) => w && !FILLER.has(w) && !ACCESS_WORDS.has(w));
   const byName = !query.cats || query.terms.length > 0;
+  const joinedTerms = nameTerms.join("");
+  const rawJoined = raw.replace(/ /g, "");
   for (const e of index.entries) {
     if (query.cats && e.cat && query.cats.includes(e.cat)) {
       if (!e.cat || !query.cats.includes(e.cat)) continue;
@@ -271,14 +276,14 @@ export function search(index: Index, q: string, near: { lon: number; lat: number
       hits.push({ place: e.place, cat: e.cat, access: e.access, metres: m, score: query.terms.length ? 5 + m / 1000 : m / 100 });
       continue;
     }
-    if (!byName || !nameTerms.length || !nameTerms.every((t) => e.words.some((w) => w.startsWith(t)))) continue;
+    if (!byName || !nameTerms.length) continue;
+    if (!nameTerms.every((t) => e.words.some((w) => w.startsWith(t))) && !e.joined.startsWith(joinedTerms)) continue;
     if (query.accessible && e.cat && !accessibleMapped(e)) {
       hiddenNotMapped++;
       continue;
     }
-    const n = norm(e.place.name);
     const m = dist(e.place, near);
-    const match = n === raw ? 0 : n.startsWith(raw) ? 1 : 2;
+    const match = e.joined === rawJoined ? 0 : e.joined.startsWith(rawJoined) ? 1 : 2;
     hits.push({ place: e.place, cat: e.cat, access: e.access, metres: m, score: match * 10 + e.rank * 2 + Math.min(m / 1000, 5) });
   }
   hits.sort((a, b) => a.score - b.score);

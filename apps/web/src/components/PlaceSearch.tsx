@@ -26,6 +26,9 @@ interface Props {
 
 const SHORTCUTS = ["Accessible toilets", "Step-free cafés", "Stations", "Pharmacies"];
 
+/** The query still starts with the one earlier results came from. */
+const continues = (query: string, from: string) => query.toLowerCase().startsWith(from.toLowerCase());
+
 const metres = (m: number) => (m < 950 ? `${Math.max(10, Math.round(m / 10) * 10)} m` : `${(m / 1000).toFixed(1)} km`);
 
 function Icon({ p }: { p: Place }) {
@@ -53,11 +56,13 @@ export function PlaceSearch({ label, index, suggestions, near, bbox, cityName, e
   const [q, setQ] = useState("");
   const [live, setLive] = useState<{ q: string; places: Place[]; outside: number } | null>(null);
   const local = useMemo(() => (index && q.trim() ? search(index, q, near) : null), [index, q, near]);
+  // Live results stay up while the query still extends the one they came from, so typing doesn't blank the list between lookups.
+  const query = q.trim();
+  const shown = live && query && continues(query, live.q) ? live : null;
 
   // Live lookups only when the bundled index comes up short, debounced, and only for places inside the mapped area.
   useEffect(() => {
-    setLive(null);
-    const query = q.trim();
+    setLive((prev) => (prev && query && continues(query, prev.q) ? prev : null));
     if (!index || query.length < 3) return;
     const pc = formatPostcode(query);
     const needPostcode = pc && !local?.hits.some((h) => h.place.name === pc);
@@ -80,7 +85,7 @@ export function PlaceSearch({ label, index, suggestions, near, bbox, cityName, e
   }, [q, index]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const hits: Hit[] = (local?.hits ?? []).filter((h) => h.place.id !== excludeId);
-  const liveExtra = (live?.q === q.trim() ? live.places : []).filter((p) => !hits.some((h) => h.place.name === p.name && Math.abs(h.place.lat - p.lat) < 0.0005));
+  const liveExtra = (shown?.places ?? []).filter((p) => !hits.some((h) => h.place.name === p.name && Math.abs(h.place.lat - p.lat) < 0.0005));
   const cat = local?.query.cats;
   const accessFilter = !!local?.query.accessible;
 
@@ -161,7 +166,7 @@ export function PlaceSearch({ label, index, suggestions, near, bbox, cityName, e
           </CommandGroup>
         ) : null}
       </CommandList>
-      {live?.outside && live.q === q.trim() ? <p className="m-0 text-sm text-muted">{live.outside === 1 ? "1 match is" : `${live.outside} matches are`} outside the area we have routes for yet.</p> : null}
+      {shown?.outside ? <p className="m-0 text-sm text-muted">{shown.outside === 1 ? "1 match is" : `${shown.outside} matches are`} outside the area we have routes for yet.</p> : null}
     </Command>
   );
 }
