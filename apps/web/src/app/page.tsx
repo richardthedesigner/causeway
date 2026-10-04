@@ -20,13 +20,21 @@ import { Button } from "@/components/ui/button";
 import { CommandGroup, CommandItem } from "@/components/ui/command";
 import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
 import { CITIES, cityById, type City } from "@/lib/cities";
-import type { Place } from "@/lib/plan-types";
+import type { Place, PlannedRoute } from "@/lib/plan-types";
 import { activeDevice, deviceLabel, FIRST_VISIT, loadDeviceState, saveDeviceState, setTip, tipPending, withActive, withActiveName, withActiveProfile, withDeviceProfile, withFavourite, withoutDevice, withSetup, type DeviceState } from "@/lib/devices";
 import { addRecent, loadRecents } from "@/lib/recents";
 import { useNotes } from "@/lib/use-notes";
+import { hoursText } from "@/lib/opening-hours";
 import { toiletsAlong } from "@/lib/toilets";
 import { usePlaces } from "@/lib/use-places";
 import { usePlanner, type Conditions } from "@/lib/use-planner";
+
+/** When you'd reach a point this far along the route, leaving now at the route's average pace. */
+const passingAt = (r: PlannedRoute) => {
+  const t0 = Date.now(),
+    mps = r.summary.distanceM / Math.max(60, r.summary.minutes * 60);
+  return (m: number) => new Date(t0 + (m / mps) * 1000);
+};
 
 const PRESET_CONDITIONS: Record<Ground, Conditions> = {
   dry: { wet: false, ice: false, summary: "Dry", source: "Set by you" },
@@ -60,7 +68,7 @@ export default function Home() {
   // Venues with an accessible toilet go to the router, so "Past more toilets" can use them (public ones are in the graph).
   useEffect(() => {
     if (!index) return;
-    planner.sendToilets(index.entries.filter((e) => e.cat !== "amenity=toilets" && e.access?.["toilets:wheelchair"] === "yes").map((e) => ({ lon: e.place.lon, lat: e.place.lat, name: e.place.name })));
+    planner.sendToilets(index.entries.filter((e) => e.cat !== "amenity=toilets" && e.access?.["toilets:wheelchair"] === "yes" && hoursText(e.access.opening_hours, new Date())?.open !== false).map((e) => ({ lon: e.place.lon, lat: e.place.lat, name: e.place.name })));
   }, [index]); // eslint-disable-line react-hooks/exhaustive-deps
   // Server render and first paint use the first-visit default; the saved devices load on mount.
   const [devices, setDevices] = useState<DeviceState>(FIRST_VISIT);
@@ -243,7 +251,7 @@ export default function Home() {
     return typeof document === "undefined" ? null : { url: u(city.basemap), key: city.id, glyphs: u("fonts/glyphs.json"), center: [city.start.lon, city.start.lat] as [number, number] };
   }, [city]); // eslint-disable-line react-hooks/exhaustive-deps
   const selectedRoute = routes.find((r) => r.id === selected) ?? routes[0] ?? null;
-  const toilets = useMemo(() => (index && selectedRoute && view === "route" ? toiletsAlong(index, selectedRoute.coords) : null), [index, selectedRoute, view]);
+  const toilets = useMemo(() => (index && selectedRoute && view === "route" ? toiletsAlong(index, selectedRoute.coords, 80, passingAt(selectedRoute)) : null), [index, selectedRoute, view]);
   const entrances = useMemo(() => (result?.status === "ok" ? result.entrances.map((e) => ({ lon: e.lon, lat: e.lat, ok: e.verdict.passable })) : []), [result]);
 
   const profileChip = (

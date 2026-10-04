@@ -4,6 +4,10 @@ A running record of what was built, newest first. Each entry links the decision 
 
 ## 2026-10-04 (after midnight)
 
+**Open when you get there** (D-039)
+- Opening hours are read, not just shown: the destination says whether it's open when you arrive, and each accessible toilet whether it's open when you pass.
+- Reads 97% of the 2,757 mapped hours; the rest are shown as mapped. A shut toilet doesn't count toward the toilet interval.
+
 **Lit streets after dark** (D-038)
 - The router now knows when it's dark, from the sun's position worked out on the device.
 - After dark, the visual-impairment profile (and anyone who turns on "After dark, prefer streets that are lit") steers off unlit paths. Unmapped lighting costs a little and is named as not mapped.

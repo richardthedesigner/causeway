@@ -5,6 +5,7 @@ import type { Profile } from "@causeway/profile";
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import { BusDepartures } from "@/components/BusDepartures";
+import { hoursText } from "@/lib/opening-hours";
 import type { toiletsAlong } from "@/lib/toilets";
 import { ElevationChart } from "@/components/ElevationChart";
 import { NoteList } from "@/components/NoteList";
@@ -218,6 +219,7 @@ export function RoutePanel(props: Props) {
               <span className="tabular text-[28px] leading-none font-bold">{Math.round(sel.summary.minutes)} min</span>
               <span className="tabular text-sm text-muted">{meta(sel)}</span>
             </div>
+            <ArrivalHours hours={to.hours} minutes={sel.summary.minutes} />
             <RouteStrip strip={sel.strip} />
             {props.compare && props.compare.label !== props.forLabel ? (
               <p className={cn("m-0 font-bold", props.compare.minutes === null || Math.round(sel.summary.minutes) < props.compare.minutes ? "text-ok" : "text-ink")}>{compareLine(Math.round(sel.summary.minutes), props.compare)}</p>
@@ -588,5 +590,16 @@ function Toilets({ data, wantM }: { data: NonNullable<Props["toilets"]>; wantM: 
       )}
       <p className="m-0 mt-2 text-sm text-muted">From OpenStreetMap. Mapped by volunteers; check opening times.</p>
     </More>
+  );
+}
+
+/** Whether the destination is open when you'd get there, from its mapped hours. */
+function ArrivalHours({ hours, minutes }: { hours?: string; minutes: number }) {
+  const h = hoursText(hours, new Date(Date.now() + minutes * 60_000));
+  if (!h) return null;
+  return (
+    <p className={cn("m-0 text-sm", h.open === false ? "font-bold text-ink" : "text-muted")}>
+      {h.open === null ? h.text : `When you arrive: ${h.text.charAt(0).toLowerCase()}${h.text.slice(1)}`}. Hours from OpenStreetMap.
+    </p>
   );
 }

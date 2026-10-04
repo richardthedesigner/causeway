@@ -349,3 +349,15 @@ The visual-impairment preset sets 60 s per 100 m; anyone can turn it on with "Af
 **Example.** Stockbridge to Dean Village for the visual-impairment profile: by day, 714 m of 1,134 m is on the unlit Water of Leith walkway; after dark, 10 m of 1,563 m.
 
 **To revisit.** The 60 s figure is a guess, like the crossing weights (#12). Ask low-vision users in Phase 2. Planning a trip for later tonight needs a departure time, which the app doesn't have yet.
+
+## D-039 Open when you get there
+
+**Decided.** 2026-10-04. 2,757 places in our three cities have OpenStreetMap `opening_hours`. We showed the raw string at best ("Hours: Mo-Sa 10:00-18:00; Su 11:00-17:00"), which is hard to read and harder to work out against the clock.
+
+**What we do.** `apps/web/src/lib/opening-hours.ts` reads the common forms (day ranges, several time spans, past midnight, "off", "24/7", later rules overriding earlier ones) in UK local time. It reads 2,665 of the 2,757 (97%).
+- **Destination:** under the route time, "When you arrive: closed, opens tomorrow 09:00", in bold when shut. Arrival is now plus the route's time.
+- **Accessible toilets on the route:** each says whether it's open when you'd pass it ("Open until 17:00 when you pass", "Shut when you pass, opens tomorrow 09:00"). A shut toilet doesn't count toward the longest stretch without one, and venues shut now aren't offered to "Past more toilets".
+
+**Honesty.** Anything we can't read fully (months, sunrise, comments, "open end") shows the hours as mapped, never a guess. We don't know bank holidays, so a rule for them adds "(may differ on bank holidays)". Hours are volunteer-mapped and can be stale; the line says they're from OpenStreetMap.
+
+**Later.** With a departure time (not built yet), "when you arrive" should use it.

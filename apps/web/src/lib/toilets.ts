@@ -4,6 +4,7 @@
  * customers). Facts are OSM's, with what matters on arrival: RADAR key,
  * Changing Places, fee, hours, customers only.
  */
+import { hoursText } from "./opening-hours";
 import type { Entry, Index } from "./search";
 
 export interface RouteToilet {
@@ -16,18 +17,21 @@ export interface RouteToilet {
   /** A public toilet, or one inside a venue. */
   public: boolean;
   facts: string[];
+  /** Open when you'd pass it, from the mapped hours; null when no hours are mapped or we can't read them. */
+  open: boolean | null;
 }
 
 const RADAR = /^(yes|radar)$/i;
 
-function factsOf(a: Record<string, string>, isPublic: boolean): string[] {
+function factsOf(a: Record<string, string>, isPublic: boolean, passing: Date): string[] {
   const out: string[] = [];
   if (a.changing_places === "yes") out.push("Changing Places");
   if (a.centralkey && RADAR.test(a.centralkey)) out.push("RADAR key");
   if (!isPublic || a.access === "customers") out.push("Customers");
   if (a.fee === "yes") out.push("Fee");
   else if (a.fee === "no") out.push("Free");
-  if (a.opening_hours) out.push(a.opening_hours === "24/7" ? "Open 24 hours" : `Hours: ${a.opening_hours}`);
+  const h = hoursText(a.opening_hours, passing);
+  if (h) out.push(h.open === null ? h.text : h.open ? `${h.text} when you pass` : h.text.replace(/^Closed/, "Shut when you pass"));
   if (a.changing_table === "yes") out.push("Baby changing");
   return out;
 }
@@ -38,7 +42,8 @@ const accessibleToilet = (e: Entry): boolean | null => {
   return a["toilets:wheelchair"] === "yes" ? false : null;
 };
 
-export function toiletsAlong(index: Index, coords: [number, number][], withinM = 80): { toilets: RouteToilet[]; longestGapM: number } {
+/** `passing` gives the time you'd reach a point this far along the route; by default, now. */
+export function toiletsAlong(index: Index, coords: [number, number][], withinM = 80, passing: (atM: number) => Date = () => new Date()): { toilets: RouteToilet[]; longestGapM: number } {
   if (coords.length < 2) return { toilets: [], longestGapM: 0 };
   const cum = [0];
   const k = Math.cos((coords[0]![1] * Math.PI) / 180);
@@ -70,10 +75,13 @@ export function toiletsAlong(index: Index, coords: [number, number][], withinM =
       if (d <= withinM && (!best || d < best.d)) best = { d, at: cum[i]! + t * (cum[i + 1]! - cum[i]!) };
     }
     if (!best) continue;
-    out.push({ name: e.place.name, lon, lat, at: Math.round(best.at), offM: Math.round(best.d), public: isPublic, facts: factsOf(e.access ?? {}, isPublic) });
+    const when = passing(best.at);
+    const a = e.access ?? {};
+    out.push({ name: e.place.name, lon, lat, at: Math.round(best.at), offM: Math.round(best.d), public: isPublic, facts: factsOf(a, isPublic, when), open: hoursText(a.opening_hours, when)?.open ?? null });
   }
   out.sort((a, b) => a.at - b.at);
-  const stops = [0, ...out.map((t) => t.at), cum[cum.length - 1]!];
+  // A toilet that's shut when you pass doesn't close the gap.
+  const stops = [0, ...out.filter((t) => t.open !== false).map((t) => t.at), cum[cum.length - 1]!];
   let gap = 0;
   for (let i = 1; i < stops.length; i++) gap = Math.max(gap, stops[i]! - stops[i - 1]!);
   return { toilets: out, longestGapM: Math.round(gap) };
