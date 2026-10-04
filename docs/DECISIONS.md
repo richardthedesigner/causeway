@@ -284,6 +284,8 @@ Bridged: Edinburgh 172 of 446 islands, Newcastle 9 of 24, London 23 of 48. `scri
 
 **Stay manual:** street graphs and base maps. They need LiDAR and a reviewed Protomaps build, and they change slowly.
 
+Update (DATA-11): the street graphs join the weekly refresh. They read the same OSM the search index has just fetched and the same LiDAR, and take about a minute each (Newcastle: 37 seconds here). The layers keyed to graph edges follow them (council footways, flood areas), and so do park gates, OSM notes and the Toilet Map. The summary table now counts graph edges, edges with a known gradient and each layer, so a broken build shows as a sudden drop, and the acceptance journeys run against the new graphs before the pull request opens. Base maps stay manual.
+
 **Known limit:** pull requests opened with the workflow token don't trigger CI themselves; the workflow runs the tests before opening one.
 
 ## D-034 Powered devices in four classes, and saved named devices
