@@ -62,3 +62,13 @@ export const NEWCASTLE_JOURNEYS: Journey[] = [
     to: { label: "BALTIC Centre for Contemporary Art, Gateshead", lon: -1.5977, lat: 54.969 },
   },
 ];
+
+/** London: wheeling plus step-free Underground, where a live lift outage at an interchange forces a reroute. */
+export const LONDON_JOURNEYS: Journey[] = [
+  {
+    id: "parliament-square-canada-square",
+    title: "Parliament Square to Canada Square, Canary Wharf",
+    from: { label: "Parliament Square", lon: -0.1263, lat: 51.5007 },
+    to: { label: "Canada Square, Canary Wharf", lon: -0.0195, lat: 51.5049 },
+  },
+];

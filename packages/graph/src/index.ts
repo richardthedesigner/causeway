@@ -2,3 +2,4 @@
 export * from "./attribute.js";
 export * from "./schema.js";
 export * from "./geo.js";
+export * from "./transit.js";

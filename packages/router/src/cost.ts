@@ -53,6 +53,15 @@ const UNKNOWN_RISK_PER_100M: Record<string, number> = {
 /** Unknown kerb at a crossing is the classic strand point: a flat cost per crossing. */
 const UNKNOWN_KERB_S = 120;
 const LIFT_WAIT_S = 45;
+const RIDE_MPS = 8.5;
+/** Average wait plus platform walk when boarding; alighting is quicker. */
+const BOARD_WAIT_S = 240;
+const ALIGHT_S = 90;
+/** A station whose step-free status we can't confirm: a cautious user goes a long way round instead. */
+const UNKNOWN_STATION_S = 900;
+
+/** Someone who needs lifts or ramps rather than stairs and escalators. */
+export const needsStepFree = (p: Profile) => p.maxSteps < 10 || !p.escalators;
 
 /** Speed multiplier for a signed gradient. Wheeled users slow hard uphill; walkers follow Tobler. */
 export function speedFactor(p: Profile, gradePct: number): number {
@@ -83,11 +92,26 @@ export function evaluateEdge(e: GraphEdge, forward: boolean, p: Profile, c: Cond
 
   // Live state first: a closure beats everything.
   if (e.live && Date.parse(e.live.validUntil) > c.now.getTime() && Date.parse(e.live.validFrom) <= c.now.getTime()) {
-    if (e.live.status === "closed") return exclude("live", `closed: ${e.live.reason}`);
-    if (e.live.status === "restricted" || e.live.status === "degraded") {
+    const applies = e.live.affects !== "step-free" || needsStepFree(p);
+    if (applies && e.live.status === "closed") return exclude("live", e.live.affects === "step-free" ? `lift out of service: ${e.live.reason}` : `closed: ${e.live.reason}`);
+    if (applies && (e.live.status === "restricted" || e.live.status === "degraded")) {
       reasons.push({ kind: "unknown", attr: "live", detail: `${e.live.status}: ${e.live.reason}`, seconds: 0 });
       unknownCritical = true;
     }
+  }
+
+  // Rail: rides, boarding and interchanges.
+  if (e.kind === "transit") {
+    const seconds = e.lengthM / RIDE_MPS;
+    return { passable: unknownCritical ? "unknown" : "yes", seconds, cost: seconds, reasons: [...reasons, { kind: "penalty", attr: "transit", detail: e.name ?? "train", seconds: 0 }] };
+  }
+  if (e.kind === "board" || e.kind === "interchange") {
+    const seconds = e.kind === "board" ? (forward ? BOARD_WAIT_S : ALIGHT_S) : e.lengthM / Math.min(p.speedMps, 1.2) + 60;
+    if (needsStepFree(p) && !isKnown(a.stepCount)) {
+      const s = UNKNOWN_STATION_S * (1 - p.uncertaintyTolerance);
+      return { passable: "unknown", seconds, cost: seconds + s, reasons: [...reasons, { kind: "unknown", attr: "station", detail: "step-free access not confirmed", seconds: s }] };
+    }
+    return { passable: unknownCritical ? "unknown" : "yes", seconds, cost: seconds, reasons };
   }
 
   // Vertical connectors.

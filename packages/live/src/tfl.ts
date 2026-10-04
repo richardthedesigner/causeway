@@ -78,3 +78,60 @@ export function toLiveStates(
 
 const titleCase = (s: string) =>
   s.toLowerCase().replace(/\b([a-z])/g, (m) => m.toUpperCase()).replace(/'S\b/g, "'s");
+
+/**
+ * Place lift outages on the graph's station edges. A TfL outage names a
+ * station or hub and, in its message, usually the line it affects ("to the
+ * Jubilee line") or the level ("between the street and the ticket hall").
+ * We close only what the message supports; if it names neither, every
+ * platform at that station is closed for step-free users. Never guesses
+ * wider than the message.
+ */
+export function liftOutageStates(
+  outages: LiftOutage[],
+  net: { stations: Record<string, { id: string; hub: string | null }>; routes: { line: string; lineName: string }[] },
+  edgeRefs: Set<string>,
+  ttlMinutes = 15,
+): Map<string, LiveState> {
+  const out = new Map<string, LiveState>();
+  const lineNames = [...new Map(net.routes.map((r) => [r.line, r.lineName])).entries()];
+  for (const o of outages) {
+    const stations = Object.values(net.stations).filter((s) => s.id === o.stationId || s.hub === o.stationId);
+    if (!stations.length) continue;
+    const msg = o.message.toLowerCase();
+    const lines = lineNames.filter(([id, name]) => msg.includes(name.toLowerCase()) || msg.includes(`${id} line`) || (id === "dlr" && /\bdlr\b/.test(msg)));
+    const streetLevel = /street/.test(msg) && /ticket hall/.test(msg) && !lines.length;
+    const state: LiveState = {
+      status: "closed",
+      affects: "step-free",
+      reason: o.message,
+      source: "TfL Unified API lift disruptions",
+      validFrom: o.fetchedAt,
+      validUntil: new Date(Date.parse(o.fetchedAt) + ttlMinutes * 60_000).toISOString(),
+    };
+    for (const s of stations) {
+      if (streetLevel) {
+        if (edgeRefs.has(`link:${s.id}`)) out.set(`link:${s.id}`, state);
+        continue;
+      }
+      for (const ref of edgeRefs) {
+        if (!ref.startsWith("board:") || !ref.endsWith(`:${s.id}`)) continue;
+        const line = ref.split(":")[1]!;
+        if (!lines.length || lines.some(([id]) => id === line)) out.set(ref, state);
+      }
+    }
+  }
+  return out;
+}
+
+/** Apply live states to a graph by edge ref. Returns how many edges changed. */
+export function applyLiveStates(g: { edges: { ref?: string; live?: LiveState }[] }, states: Map<string, LiveState>): number {
+  let n = 0;
+  for (const e of g.edges) {
+    if (e.ref && states.has(e.ref)) {
+      e.live = states.get(e.ref)!;
+      n++;
+    }
+  }
+  return n;
+}

@@ -28,7 +28,15 @@ export type EdgeKind =
    * as a stand-in for its pavements, and say so: kerb and width facts are
    * unknown by construction, and the edge is never presented as verified.
    */
-  | "street_proxy";
+  | "street_proxy"
+  /** Street to a rail station (transit.ts). */
+  | "station_link"
+  /** Station concourse to a line's platform: where step-free access and lift outages live. */
+  | "board"
+  /** A ride between consecutive stops. */
+  | "transit"
+  /** Change between lines within one station complex. */
+  | "interchange";
 
 export type Surface =
   | "asphalt"
@@ -138,6 +146,11 @@ export type LiveStatus = "open" | "closed" | "restricted" | "degraded";
 
 export interface LiveState {
   status: LiveStatus;
+  /**
+   * Who it affects. "step-free" (a lift outage) blocks only people who
+   * can't use stairs or escalators; absent means everyone.
+   */
+  affects?: "step-free";
   reason: string;
   source: string;
   /** ISO 8601. Live states always expire; nothing stays closed forever by accident. */
@@ -167,6 +180,8 @@ export interface GraphEdge {
   attrs: EdgeAttrs;
   live?: LiveState;
   osmWayId?: number;
+  /** Stable reference for non-OSM edges, e.g. "board:jubilee:940GZZLUCYF", so live feeds can find them. */
+  ref?: string;
 }
 
 export interface Graph {

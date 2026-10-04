@@ -1,0 +1,2061 @@
+{
+ "940GZZDLABR": {
+  "id": "940GZZDLABR",
+  "name": "Abbey Road DLR Station",
+  "lat": 51.531926,
+  "lon": 0.003737,
+  "hub": null,
+  "accessibility": {
+   "AccessViaLift": "Yes",
+   "BlueBadgeCarParkSpaces": "0",
+   "LimitedCapacityLift": "No",
+   "SpecificEntranceRequired": "No",
+   "TaxiRankOutsideStation": "No",
+   "Toilet": "Yes"
+  },
+  "lines": [
+   "dlr"
+  ]
+ },
+ "940GZZDLALL": {
+  "id": "940GZZDLALL",
+  "name": "All Saints DLR Station",
+  "lat": 51.511,
+  "lon": -0.013135,
+  "hub": null,
+  "accessibility": {
+   "AccessViaLift": "Yes",
+   "BlueBadgeCarParkSpaces": "0",
+   "LimitedCapacityLift": "No",
+   "SpecificEntranceRequired": "No",
+   "TaxiRankOutsideStation": "No",
+   "Toilet": "No"
+  },
+  "lines": [
+   "dlr"
+  ]
+ },
+ "940GZZDLBEC": {
+  "id": "940GZZDLBEC",
+  "name": "Beckton DLR Station",
+  "lat": 51.514362,
+  "lon": 0.061453,
+  "hub": null,
+  "accessibility": {
+   "AccessViaLift": "No",
+   "BlueBadgeCarParkSpaces": "0",
+   "LimitedCapacityLift": "No",
+   "SpecificEntranceRequired": "No",
+   "TaxiRankOutsideStation": "No",
+   "Toilet": "No"
+  },
+  "lines": [
+   "dlr"
+  ]
+ },
+ "940GZZDLBLA": {
+  "id": "940GZZDLBLA",
+  "name": "Blackwall DLR Station",
+  "lat": 51.507991,
+  "lon": -0.006969,
+  "hub": null,
+  "accessibility": {
+   "AccessViaLift": "Yes",
+   "BlueBadgeCarParkSpaces": "0",
+   "LimitedCapacityLift": "No",
+   "SpecificEntranceRequired": "No",
+   "TaxiRankOutsideStation": "No",
+   "Toilet": "No"
+  },
+  "lines": [
+   "dlr"
+  ]
+ },
+ "940GZZDLBOW": {
+  "id": "940GZZDLBOW",
+  "name": "Bow Church DLR Station",
+  "lat": 51.527858,
+  "lon": -0.020936,
+  "hub": null,
+  "accessibility": {
+   "AccessViaLift": "Yes",
+   "BlueBadgeCarParkSpaces": "0",
+   "LimitedCapacityLift": "No",
+   "SpecificEntranceRequired": "No",
+   "TaxiRankOutsideStation": "No",
+   "Toilet": "No"
+  },
+  "lines": [
+   "dlr"
+  ]
+ },
+ "940GZZDLBPK": {
+  "id": "940GZZDLBPK",
+  "name": "Beckton Park DLR Station",
+  "lat": 51.508793,
+  "lon": 0.054932,
+  "hub": null,
+  "accessibility": {
+   "AccessViaLift": "Yes",
+   "BlueBadgeCarParkSpaces": "0",
+   "LimitedCapacityLift": "No",
+   "SpecificEntranceRequired": "No",
+   "TaxiRankOutsideStation": "No",
+   "Toilet": "No"
+  },
+  "lines": [
+   "dlr"
+  ]
+ },
+ "940GZZDLCLA": {
+  "id": "940GZZDLCLA",
+  "name": "Crossharbour DLR Station",
+  "lat": 51.495728,
+  "lon": -0.014606,
+  "hub": null,
+  "accessibility": {
+   "AccessViaLift": "No",
+   "BlueBadgeCarParkSpaces": "0",
+   "LimitedCapacityLift": "Yes",
+   "SpecificEntranceRequired": "No",
+   "TaxiRankOutsideStation": "No",
+   "Toilet": "No"
+  },
+  "lines": [
+   "dlr"
+  ]
+ },
+ "940GZZDLCYP": {
+  "id": "940GZZDLCYP",
+  "name": "Cyprus DLR Station",
+  "lat": 51.508473,
+  "lon": 0.063925,
+  "hub": null,
+  "accessibility": {
+   "AccessViaLift": "Yes",
+   "BlueBadgeCarParkSpaces": "0",
+   "LimitedCapacityLift": "No",
+   "SpecificEntranceRequired": "No",
+   "TaxiRankOutsideStation": "No",
+   "Toilet": "No"
+  },
+  "lines": [
+   "dlr"
+  ]
+ },
+ "940GZZDLDEP": {
+  "id": "940GZZDLDEP",
+  "name": "Deptford Bridge DLR Station",
+  "lat": 51.474215,
+  "lon": -0.022438,
+  "hub": null,
+  "accessibility": {
+   "AccessViaLift": "Yes",
+   "BlueBadgeCarParkSpaces": "0",
+   "LimitedCapacityLift": "No",
+   "SpecificEntranceRequired": "No",
+   "TaxiRankOutsideStation": "No",
+   "Toilet": "No"
+  },
+  "lines": [
+   "dlr"
+  ]
+ },
+ "940GZZDLDEV": {
+  "id": "940GZZDLDEV",
+  "name": "Devons Road DLR Station",
+  "lat": 51.522667,
+  "lon": -0.017615,
+  "hub": null,
+  "accessibility": {
+   "AccessViaLift": "No",
+   "BlueBadgeCarParkSpaces": "0",
+   "LimitedCapacityLift": "Yes",
+   "SpecificEntranceRequired": "No",
+   "TaxiRankOutsideStation": "No",
+   "Toilet": "No"
+  },
+  "lines": [
+   "dlr"
+  ]
+ },
+ "HUBBAN": {
+  "id": "HUBBAN",
+  "name": "Bank",
+  "lat": 51.513395,
+  "lon": -0.089095,
+  "hub": "HUBBAN",
+  "accessibility": {},
+  "lines": [
+   "133",
+   "141",
+   "21",
+   "25",
+   "26",
+   "43",
+   "8",
+   "central",
+   "dlr",
+   "n21",
+   "n242",
+   "n25",
+   "n26",
+   "n550",
+   "n551",
+   "n8",
+   "northern",
+   "waterloo-city"
+  ],
+  "children": [
+   {
+    "id": "940GZZDLBNK",
+    "name": "Bank DLR Station",
+    "modes": [
+     "dlr"
+    ],
+    "accessibility": {
+     "AccessViaLift": "Yes",
+     "AddtionalInformation": "DLR only\r\nLift from street to ticket hall only available on request \u2013 you need to press button to alert staff",
+     "BlueBadgeCarParkSpaces": "0",
+     "LimitedCapacityLift": "No",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "No"
+    },
+    "lat": 51.513233,
+    "lon": -0.088515
+   },
+   {
+    "id": "9400ZZDLBNK1",
+    "name": "Bank DLR Station",
+    "modes": [
+     "dlr"
+    ],
+    "accessibility": {
+     "AccessViaLift": "Yes",
+     "AddtionalInformation": "DLR only\r\nLift from street to ticket hall only available on request \u2013 you need to press button to alert staff",
+     "BlueBadgeCarParkSpaces": "0",
+     "LimitedCapacityLift": "No",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "No"
+    },
+    "lat": 51.512171,
+    "lon": -0.087911
+   }
+  ]
+ },
+ "HUBCAN": {
+  "id": "HUBCAN",
+  "name": "Canning Town",
+  "lat": 51.514029,
+  "lon": 0.008025,
+  "hub": "HUBCAN",
+  "accessibility": {},
+  "lines": [
+   "dlr",
+   "jubilee"
+  ],
+  "children": [
+   {
+    "id": "940GZZDLCGT",
+    "name": "Canning Town DLR Station",
+    "modes": [
+     "dlr"
+    ],
+    "accessibility": {
+     "AccessViaLift": "Yes",
+     "AddtionalInformation": "If you are boarding the Jubilee line at this  station and require level access to leave the  train at Green Park, please make sure that you  travel in the correct carriage ",
+     "BlueBadgeCarParkSpaces": "0",
+     "LimitedCapacityLift": "No",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "Yes",
+     "ToiletNote": "(bus station)"
+    },
+    "lat": 51.514127,
+    "lon": 0.008101
+   },
+   {
+    "id": "4900ZZDLCGT2",
+    "name": "Canning Town Bus Station",
+    "modes": [
+     "dlr"
+    ],
+    "accessibility": {
+     "AccessViaLift": "Yes",
+     "AddtionalInformation": "If you are boarding the Jubilee line at this  station and require level access to leave the  train at Green Park, please make sure that you  travel in the correct carriage ",
+     "BlueBadgeCarParkSpaces": "0",
+     "LimitedCapacityLift": "No",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "Yes",
+     "ToiletNote": "(bus station)"
+    },
+    "lat": 51.51458,
+    "lon": 0.00814
+   },
+   {
+    "id": "9400ZZDLCGT1",
+    "name": "Canning Town DLR Station",
+    "modes": [
+     "dlr"
+    ],
+    "accessibility": {
+     "AccessViaLift": "Yes",
+     "AddtionalInformation": "If you are boarding the Jubilee line at this  station and require level access to leave the  train at Green Park, please make sure that you  travel in the correct carriage ",
+     "BlueBadgeCarParkSpaces": "0",
+     "LimitedCapacityLift": "No",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "Yes",
+     "ToiletNote": "(bus station)"
+    },
+    "lat": 51.514464,
+    "lon": 0.007856
+   },
+   {
+    "id": "9400ZZDLCGT3",
+    "name": "Canning Town DLR Station",
+    "modes": [
+     "dlr"
+    ],
+    "accessibility": {
+     "AccessViaLift": "Yes",
+     "AddtionalInformation": "If you are boarding the Jubilee line at this  station and require level access to leave the  train at Green Park, please make sure that you  travel in the correct carriage ",
+     "BlueBadgeCarParkSpaces": "0",
+     "LimitedCapacityLift": "No",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "Yes",
+     "ToiletNote": "(bus station)"
+    },
+    "lat": 51.514379,
+    "lon": 0.007564
+   }
+  ]
+ },
+ "HUBCAW": {
+  "id": "HUBCAW",
+  "name": "Canary Wharf",
+  "lat": 51.503734,
+  "lon": -0.019121,
+  "hub": "HUBCAW",
+  "accessibility": {},
+  "lines": [
+   "135",
+   "277",
+   "d7",
+   "dlr",
+   "elizabeth",
+   "jubilee",
+   "n277",
+   "n550"
+  ],
+  "children": [
+   {
+    "id": "940GZZDLCAN",
+    "name": "Canary Wharf DLR Station",
+    "modes": [
+     "dlr"
+    ],
+    "accessibility": {
+     "AccessViaLift": "Yes",
+     "AddtionalInformation": "200m between Jubilee line and DLR station via the street. If you are boarding the Jubilee line at this station and require level access to leave the train at Green Park, please make sure that you travel in the correct carriage ",
+     "BlueBadgeCarParkSpaces": "0",
+     "LimitedCapacityLift": "No",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "Yes"
+    },
+    "lat": 51.504838,
+    "lon": -0.020997
+   },
+   {
+    "id": "9400ZZDLCAN1",
+    "name": "Canary Wharf DLR Station",
+    "modes": [
+     "dlr"
+    ],
+    "accessibility": {
+     "AccessViaLift": "Yes",
+     "AddtionalInformation": "200m between Jubilee line and DLR station via the street. If you are boarding the Jubilee line at this station and require level access to leave the train at Green Park, please make sure that you travel in the correct carriage ",
+     "BlueBadgeCarParkSpaces": "0",
+     "LimitedCapacityLift": "No",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "Yes"
+    },
+    "lat": 51.504936,
+    "lon": -0.020935
+   },
+   {
+    "id": "940GZZLUCYF",
+    "name": "Canary Wharf Underground Station",
+    "modes": [
+     "tube"
+    ],
+    "accessibility": {
+     "AccessViaLift": "Yes",
+     "AddtionalInformation": "200m between Jubilee line and DLR station via the street. If you are boarding the Jubilee line at this station and require level access to leave the train at Green Park, please make sure that you travel in the correct carriage ",
+     "BlueBadgeCarParkSpaces": "0",
+     "LimitedCapacityLift": "No",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "Yes"
+    },
+    "lat": 51.503488,
+    "lon": -0.018246
+   },
+   {
+    "id": "4900ZZLUCYF1",
+    "name": "Canary Wharf Station",
+    "modes": [
+     "tube"
+    ],
+    "accessibility": {
+     "AccessViaLift": "Yes",
+     "AddtionalInformation": "200m between Jubilee line and DLR station via the street. If you are boarding the Jubilee line at this station and require level access to leave the train at Green Park, please make sure that you travel in the correct carriage ",
+     "BlueBadgeCarParkSpaces": "0",
+     "LimitedCapacityLift": "No",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "Yes"
+    },
+    "lat": 51.50352,
+    "lon": -0.02
+   },
+   {
+    "id": "4900ZZLUCYF2",
+    "name": "Canary Wharf Station",
+    "modes": [
+     "tube"
+    ],
+    "accessibility": {
+     "AccessViaLift": "Yes",
+     "AddtionalInformation": "200m between Jubilee line and DLR station via the street. If you are boarding the Jubilee line at this station and require level access to leave the train at Green Park, please make sure that you travel in the correct carriage ",
+     "BlueBadgeCarParkSpaces": "0",
+     "LimitedCapacityLift": "No",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "Yes"
+    },
+    "lat": 51.50344,
+    "lon": -0.01603
+   },
+   {
+    "id": "4900ZZLUCYF3",
+    "name": "Canary Wharf Station",
+    "modes": [
+     "tube"
+    ],
+    "accessibility": {
+     "AccessViaLift": "Yes",
+     "AddtionalInformation": "200m between Jubilee line and DLR station via the street. If you are boarding the Jubilee line at this station and require level access to leave the train at Green Park, please make sure that you travel in the correct carriage ",
+     "BlueBadgeCarParkSpaces": "0",
+     "LimitedCapacityLift": "No",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "Yes"
+    },
+    "lat": 51.50345,
+    "lon": -0.01748
+   }
+  ]
+ },
+ "HUBCUS": {
+  "id": "HUBCUS",
+  "name": "Custom House",
+  "lat": 51.518757,
+  "lon": 0.027418,
+  "hub": "HUBCUS",
+  "accessibility": {},
+  "lines": [
+   "dlr",
+   "elizabeth"
+  ],
+  "children": [
+   {
+    "id": "940GZZDLCUS",
+    "name": "Custom House (for ExCel) DLR Station",
+    "modes": [
+     "dlr"
+    ],
+    "accessibility": {
+     "AccessViaLift": "Yes",
+     "BlueBadgeCarParkSpaces": "0",
+     "LimitedCapacityLift": "No",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "No"
+    },
+    "lat": 51.509716,
+    "lon": 0.026699
+   },
+   {
+    "id": "9400ZZDLCUS1",
+    "name": "Custom House (for ExCel) DLR Station",
+    "modes": [
+     "dlr"
+    ],
+    "accessibility": {
+     "AccessViaLift": "Yes",
+     "BlueBadgeCarParkSpaces": "0",
+     "LimitedCapacityLift": "No",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "No"
+    },
+    "lat": 51.50951,
+    "lon": 0.026661
+   }
+  ]
+ },
+ "HUBCUT": {
+  "id": "HUBCUT",
+  "name": "Cutty Sark",
+  "lat": 51.481675,
+  "lon": -0.010802,
+  "hub": "HUBCUT",
+  "accessibility": {},
+  "lines": [
+   "dlr"
+  ],
+  "children": [
+   {
+    "id": "940GZZDLCUT",
+    "name": "Cutty Sark (for Maritime Greenwich) DLR Station",
+    "modes": [
+     "dlr"
+    ],
+    "accessibility": {
+     "AccessViaLift": "Yes",
+     "BlueBadgeCarParkSpaces": "0",
+     "LimitedCapacityLift": "No",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "No"
+    },
+    "lat": 51.481671,
+    "lon": -0.01081
+   },
+   {
+    "id": "9400ZZDLCUT1",
+    "name": "Cutty Sark (for Maritime Greenwich) DLR Station",
+    "modes": [
+     "dlr"
+    ],
+    "accessibility": {
+     "AccessViaLift": "Yes",
+     "BlueBadgeCarParkSpaces": "0",
+     "LimitedCapacityLift": "No",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "No"
+    },
+    "lat": 51.481615,
+    "lon": -0.010654
+   }
+  ]
+ },
+ "940GZZDLEIN": {
+  "id": "940GZZDLEIN",
+  "name": "East India DLR Station",
+  "lat": 51.509359,
+  "lon": -0.002326,
+  "hub": null,
+  "accessibility": {
+   "AccessViaLift": "Yes",
+   "BlueBadgeCarParkSpaces": "0",
+   "LimitedCapacityLift": "No",
+   "SpecificEntranceRequired": "No",
+   "TaxiRankOutsideStation": "No",
+   "Toilet": "No"
+  },
+  "lines": [
+   "d3",
+   "dlr",
+   "n550",
+   "sl4"
+  ]
+ },
+ "940GZZDLELV": {
+  "id": "940GZZDLELV",
+  "name": "Elverson Road DLR Station",
+  "lat": 51.469074,
+  "lon": -0.016728,
+  "hub": null,
+  "accessibility": {
+   "AccessViaLift": "No",
+   "BlueBadgeCarParkSpaces": "0",
+   "LimitedCapacityLift": "No",
+   "SpecificEntranceRequired": "No",
+   "TaxiRankOutsideStation": "No",
+   "Toilet": "No"
+  },
+  "lines": [
+   "dlr"
+  ]
+ },
+ "940GZZDLGAL": {
+  "id": "940GZZDLGAL",
+  "name": "Gallions Reach DLR Station",
+  "lat": 51.508941,
+  "lon": 0.071555,
+  "hub": null,
+  "accessibility": {
+   "AccessViaLift": "Yes",
+   "BlueBadgeCarParkSpaces": "0",
+   "LimitedCapacityLift": "No",
+   "SpecificEntranceRequired": "No",
+   "TaxiRankOutsideStation": "No",
+   "Toilet": "No"
+  },
+  "lines": [
+   "dlr"
+  ]
+ },
+ "940GZZDLHEQ": {
+  "id": "940GZZDLHEQ",
+  "name": "Heron Quays DLR Station",
+  "lat": 51.503379,
+  "lon": -0.021421,
+  "hub": null,
+  "accessibility": {
+   "AccessViaLift": "Yes",
+   "BlueBadgeCarParkSpaces": "0",
+   "LimitedCapacityLift": "No",
+   "SpecificEntranceRequired": "No",
+   "TaxiRankOutsideStation": "No",
+   "Toilet": "No"
+  },
+  "lines": [
+   "dlr"
+  ]
+ },
+ "940GZZDLISL": {
+  "id": "940GZZDLISL",
+  "name": "Island Gardens DLR Station",
+  "lat": 51.487811,
+  "lon": -0.010139,
+  "hub": null,
+  "accessibility": {
+   "AccessViaLift": "Yes",
+   "BlueBadgeCarParkSpaces": "0",
+   "LimitedCapacityLift": "No",
+   "SpecificEntranceRequired": "No",
+   "TaxiRankOutsideStation": "No",
+   "Toilet": "No"
+  },
+  "lines": [
+   "dlr"
+  ]
+ },
+ "940GZZDLKGV": {
+  "id": "940GZZDLKGV",
+  "name": "King George V DLR Station",
+  "lat": 51.502003,
+  "lon": 0.062624,
+  "hub": null,
+  "accessibility": {
+   "AccessViaLift": "Yes",
+   "BlueBadgeCarParkSpaces": "0",
+   "LimitedCapacityLift": "No",
+   "SpecificEntranceRequired": "No",
+   "TaxiRankOutsideStation": "No",
+   "Toilet": "No"
+  },
+  "lines": [
+   "dlr"
+  ]
+ },
+ "940GZZDLLDP": {
+  "id": "940GZZDLLDP",
+  "name": "Langdon Park DLR Station",
+  "lat": 51.515172,
+  "lon": -0.01415,
+  "hub": null,
+  "accessibility": {},
+  "lines": [
+   "dlr"
+  ]
+ },
+ "940GZZDLMUD": {
+  "id": "940GZZDLMUD",
+  "name": "Mudchute DLR Station",
+  "lat": 51.490704,
+  "lon": -0.014738,
+  "hub": null,
+  "accessibility": {
+   "AccessViaLift": "No",
+   "BlueBadgeCarParkSpaces": "0",
+   "LimitedCapacityLift": "No",
+   "SpecificEntranceRequired": "No",
+   "TaxiRankOutsideStation": "No",
+   "Toilet": "No"
+  },
+  "lines": [
+   "dlr"
+  ]
+ },
+ "940GZZDLPDK": {
+  "id": "940GZZDLPDK",
+  "name": "Pontoon Dock DLR Station",
+  "lat": 51.502212,
+  "lon": 0.032115,
+  "hub": null,
+  "accessibility": {
+   "AccessViaLift": "Yes",
+   "BlueBadgeCarParkSpaces": "0",
+   "LimitedCapacityLift": "No",
+   "SpecificEntranceRequired": "No",
+   "TaxiRankOutsideStation": "No",
+   "Toilet": "No"
+  },
+  "lines": [
+   "129",
+   "241",
+   "330",
+   "dlr"
+  ]
+ },
+ "940GZZDLPOP": {
+  "id": "940GZZDLPOP",
+  "name": "Poplar DLR Station",
+  "lat": 51.507744,
+  "lon": -0.017384,
+  "hub": null,
+  "accessibility": {
+   "AccessViaLift": "No",
+   "BlueBadgeCarParkSpaces": "0",
+   "LimitedCapacityLift": "Yes",
+   "SpecificEntranceRequired": "No",
+   "TaxiRankOutsideStation": "No",
+   "Toilet": "No"
+  },
+  "lines": [
+   "dlr"
+  ]
+ },
+ "940GZZDLPRE": {
+  "id": "940GZZDLPRE",
+  "name": "Prince Regent DLR Station",
+  "lat": 51.509263,
+  "lon": 0.034158,
+  "hub": null,
+  "accessibility": {
+   "AccessViaLift": "Yes",
+   "BlueBadgeCarParkSpaces": "0",
+   "LimitedCapacityLift": "No",
+   "SpecificEntranceRequired": "No",
+   "TaxiRankOutsideStation": "No",
+   "Toilet": "No"
+  },
+  "lines": [
+   "dlr"
+  ]
+ },
+ "HUBGNW": {
+  "id": "HUBGNW",
+  "name": "Greenwich",
+  "lat": 51.478235,
+  "lon": -0.014096,
+  "hub": "HUBGNW",
+  "accessibility": {},
+  "lines": [
+   "dlr",
+   "southeastern",
+   "thameslink"
+  ],
+  "children": [
+   {
+    "id": "940GZZDLGRE",
+    "name": "Greenwich DLR Station",
+    "modes": [
+     "dlr"
+    ],
+    "accessibility": {
+     "AccessViaLift": "Yes",
+     "BlueBadgeCarParkSpaces": "1",
+     "LimitedCapacityLift": "No",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "No"
+    },
+    "lat": 51.478087,
+    "lon": -0.013673
+   },
+   {
+    "id": "9400ZZDLGRE1",
+    "name": "Greenwich DLR Station",
+    "modes": [
+     "dlr"
+    ],
+    "accessibility": {
+     "AccessViaLift": "Yes",
+     "BlueBadgeCarParkSpaces": "1",
+     "LimitedCapacityLift": "No",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "No"
+    },
+    "lat": 51.478162,
+    "lon": -0.016003
+   },
+   {
+    "id": "9400ZZDLGRE2",
+    "name": "Greenwich DLR Station",
+    "modes": [
+     "dlr"
+    ],
+    "accessibility": {
+     "AccessViaLift": "Yes",
+     "BlueBadgeCarParkSpaces": "1",
+     "LimitedCapacityLift": "No",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "No"
+    },
+    "lat": 51.478082,
+    "lon": -0.015488
+   }
+  ]
+ },
+ "HUBLCY": {
+  "id": "HUBLCY",
+  "name": "London City Airport",
+  "lat": 51.503419,
+  "lon": 0.048749,
+  "hub": "HUBLCY",
+  "accessibility": {},
+  "lines": [
+   "dlr"
+  ],
+  "children": [
+   {
+    "id": "940GZZDLLCA",
+    "name": "London City Airport DLR Station",
+    "modes": [
+     "dlr"
+    ],
+    "accessibility": {
+     "AccessViaLift": "Yes",
+     "BlueBadgeCarParkSpaces": "0",
+     "LimitedCapacityLift": "No",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "No"
+    },
+    "lat": 51.503416,
+    "lon": 0.048739
+   },
+   {
+    "id": "9400ZZDLLCA1",
+    "name": "London City Airport DLR Station",
+    "modes": [
+     "dlr"
+    ],
+    "accessibility": {
+     "AccessViaLift": "Yes",
+     "BlueBadgeCarParkSpaces": "0",
+     "LimitedCapacityLift": "No",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "No"
+    },
+    "lat": 51.503415,
+    "lon": 0.048754
+   }
+  ]
+ },
+ "HUBLEW": {
+  "id": "HUBLEW",
+  "name": "Lewisham",
+  "lat": 51.465081,
+  "lon": -0.013016,
+  "hub": "HUBLEW",
+  "accessibility": {},
+  "lines": [
+   "dlr",
+   "southeastern",
+   "thameslink"
+  ],
+  "children": [
+   {
+    "id": "940GZZDLLEW",
+    "name": "Lewisham DLR Station",
+    "modes": [
+     "dlr"
+    ],
+    "accessibility": {
+     "AccessViaLift": "Yes",
+     "BlueBadgeCarParkSpaces": "0",
+     "LimitedCapacityLift": "No",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "Yes",
+     "ToiletNote": "(National Rail)"
+    },
+    "lat": 51.464665,
+    "lon": -0.012874
+   },
+   {
+    "id": "9400ZZDLLEW1",
+    "name": "Lewisham DLR Station",
+    "modes": [
+     "dlr"
+    ],
+    "accessibility": {
+     "AccessViaLift": "Yes",
+     "BlueBadgeCarParkSpaces": "0",
+     "LimitedCapacityLift": "No",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "Yes",
+     "ToiletNote": "(National Rail)"
+    },
+    "lat": 51.465053,
+    "lon": -0.01244
+   }
+  ]
+ },
+ "HUBLHS": {
+  "id": "HUBLHS",
+  "name": "Limehouse",
+  "lat": 51.512469,
+  "lon": -0.039799,
+  "hub": "HUBLHS",
+  "accessibility": {},
+  "lines": [
+   "c2c",
+   "dlr"
+  ],
+  "children": [
+   {
+    "id": "940GZZDLLIM",
+    "name": "Limehouse DLR Station",
+    "modes": [
+     "dlr"
+    ],
+    "accessibility": {
+     "AccessViaLift": "No",
+     "AddtionalInformation": "You can change between westbound National  Rail services and eastbound DLR towards  Westferry",
+     "BlueBadgeCarParkSpaces": "0",
+     "LimitedCapacityLift": "Yes",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "No"
+    },
+    "lat": 51.512393,
+    "lon": -0.039809
+   },
+   {
+    "id": "9400ZZDLLIM1",
+    "name": "Limehouse DLR Station",
+    "modes": [
+     "dlr"
+    ],
+    "accessibility": {
+     "AccessViaLift": "No",
+     "AddtionalInformation": "You can change between westbound National  Rail services and eastbound DLR towards  Westferry",
+     "BlueBadgeCarParkSpaces": "0",
+     "LimitedCapacityLift": "Yes",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "No"
+    },
+    "lat": 51.512336,
+    "lon": -0.03961
+   }
+  ]
+ },
+ "940GZZDLPUD": {
+  "id": "940GZZDLPUD",
+  "name": "Pudding Mill Lane DLR Station",
+  "lat": 51.534302,
+  "lon": -0.012755,
+  "hub": null,
+  "accessibility": {
+   "AccessViaLift": "Yes",
+   "BlueBadgeCarParkSpaces": "0",
+   "LimitedCapacityLift": "No",
+   "SpecificEntranceRequired": "No",
+   "TaxiRankOutsideStation": "No",
+   "Toilet": "No"
+  },
+  "lines": [
+   "dlr"
+  ]
+ },
+ "940GZZDLRAL": {
+  "id": "940GZZDLRAL",
+  "name": "Royal Albert DLR Station",
+  "lat": 51.508357,
+  "lon": 0.045935,
+  "hub": null,
+  "accessibility": {
+   "AccessViaLift": "Yes",
+   "BlueBadgeCarParkSpaces": "0",
+   "LimitedCapacityLift": "No",
+   "SpecificEntranceRequired": "No",
+   "TaxiRankOutsideStation": "No",
+   "Toilet": "No"
+  },
+  "lines": [
+   "dlr"
+  ]
+ },
+ "940GZZDLSHS": {
+  "id": "940GZZDLSHS",
+  "name": "Stratford High Street DLR Station",
+  "lat": 51.538196,
+  "lon": -0.001078,
+  "hub": null,
+  "accessibility": {
+   "AccessViaLift": "Yes",
+   "BlueBadgeCarParkSpaces": "0",
+   "LimitedCapacityLift": "No",
+   "SpecificEntranceRequired": "No",
+   "TaxiRankOutsideStation": "No",
+   "Toilet": "Yes"
+  },
+  "lines": [
+   "dlr"
+  ]
+ },
+ "940GZZDLSIT": {
+  "id": "940GZZDLSIT",
+  "name": "Stratford International DLR Station",
+  "lat": 51.545265,
+  "lon": -0.009638,
+  "hub": null,
+  "accessibility": {
+   "AccessViaLift": "Yes",
+   "BlueBadgeCarParkSpaces": "0",
+   "LimitedCapacityLift": "No",
+   "SpecificEntranceRequired": "No",
+   "TaxiRankOutsideStation": "No",
+   "Toilet": "No"
+  },
+  "lines": [
+   "dlr"
+  ]
+ },
+ "940GZZDLSOQ": {
+  "id": "940GZZDLSOQ",
+  "name": "South Quay DLR Station",
+  "lat": 51.50005,
+  "lon": -0.015975,
+  "hub": null,
+  "accessibility": {
+   "AccessViaLift": "No",
+   "BlueBadgeCarParkSpaces": "0",
+   "LimitedCapacityLift": "Yes",
+   "SpecificEntranceRequired": "No",
+   "TaxiRankOutsideStation": "No",
+   "Toilet": "No"
+  },
+  "lines": [
+   "dlr"
+  ]
+ },
+ "940GZZDLSTL": {
+  "id": "940GZZDLSTL",
+  "name": "Star Lane DLR Station",
+  "lat": 51.520786,
+  "lon": 0.004156,
+  "hub": null,
+  "accessibility": {
+   "AccessViaLift": "Yes",
+   "BlueBadgeCarParkSpaces": "0",
+   "LimitedCapacityLift": "No",
+   "SpecificEntranceRequired": "No",
+   "TaxiRankOutsideStation": "No",
+   "Toilet": "Yes"
+  },
+  "lines": [
+   "276",
+   "323",
+   "dlr"
+  ]
+ },
+ "940GZZDLWFE": {
+  "id": "940GZZDLWFE",
+  "name": "Westferry DLR Station",
+  "lat": 51.509431,
+  "lon": -0.02675,
+  "hub": null,
+  "accessibility": {
+   "AccessViaLift": "No",
+   "BlueBadgeCarParkSpaces": "0",
+   "LimitedCapacityLift": "Yes",
+   "SpecificEntranceRequired": "No",
+   "TaxiRankOutsideStation": "No",
+   "Toilet": "No"
+  },
+  "lines": [
+   "dlr"
+  ]
+ },
+ "940GZZDLWIQ": {
+  "id": "940GZZDLWIQ",
+  "name": "West India Quay DLR Station",
+  "lat": 51.50703,
+  "lon": -0.020311,
+  "hub": null,
+  "accessibility": {
+   "AccessViaLift": "No",
+   "BlueBadgeCarParkSpaces": "0",
+   "LimitedCapacityLift": "Yes",
+   "SpecificEntranceRequired": "No",
+   "TaxiRankOutsideStation": "No",
+   "Toilet": "No"
+  },
+  "lines": [
+   "dlr"
+  ]
+ },
+ "940GZZDLWSV": {
+  "id": "940GZZDLWSV",
+  "name": "West Silvertown DLR Station",
+  "lat": 51.502838,
+  "lon": 0.02246,
+  "hub": null,
+  "accessibility": {
+   "AccessViaLift": "Yes",
+   "BlueBadgeCarParkSpaces": "0",
+   "LimitedCapacityLift": "No",
+   "SpecificEntranceRequired": "No",
+   "TaxiRankOutsideStation": "No",
+   "Toilet": "No"
+  },
+  "lines": [
+   "dlr"
+  ]
+ },
+ "HUBRVC": {
+  "id": "HUBRVC",
+  "name": "Royal Victoria",
+  "lat": 51.50934,
+  "lon": 0.018505,
+  "hub": "HUBRVC",
+  "accessibility": {},
+  "lines": [
+   "dlr",
+   "london-cable-car"
+  ],
+  "children": [
+   {
+    "id": "940GZZDLRVC",
+    "name": "Royal Victoria DLR Station",
+    "modes": [
+     "dlr"
+    ],
+    "accessibility": {
+     "AccessViaLift": "Yes",
+     "BlueBadgeCarParkSpaces": "0",
+     "LimitedCapacityLift": "No",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "No"
+    },
+    "lat": 51.509336,
+    "lon": 0.018497
+   },
+   {
+    "id": "9400ZZDLRVC1",
+    "name": "Royal Victoria DLR Station",
+    "modes": [
+     "dlr"
+    ],
+    "accessibility": {
+     "AccessViaLift": "Yes",
+     "BlueBadgeCarParkSpaces": "0",
+     "LimitedCapacityLift": "No",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "No"
+    },
+    "lat": 51.508927,
+    "lon": 0.018205
+   }
+  ]
+ },
+ "HUBSDE": {
+  "id": "HUBSDE",
+  "name": "Shadwell",
+  "lat": 51.511492,
+  "lon": -0.056782,
+  "hub": "HUBSDE",
+  "accessibility": {},
+  "lines": [
+   "dlr",
+   "windrush"
+  ],
+  "children": [
+   {
+    "id": "940GZZDLSHA",
+    "name": "Shadwell DLR Station",
+    "modes": [
+     "dlr"
+    ],
+    "accessibility": {
+     "AccessViaLift": "No",
+     "AddtionalInformation": "DLR only",
+     "BlueBadgeCarParkSpaces": "0",
+     "LimitedCapacityLift": "No",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "No"
+    },
+    "lat": 51.511693,
+    "lon": -0.056643
+   },
+   {
+    "id": "4900ZZDLSHA3",
+    "name": "Shadwell Station",
+    "modes": [
+     "dlr"
+    ],
+    "accessibility": {
+     "AccessViaLift": "No",
+     "AddtionalInformation": "DLR only",
+     "BlueBadgeCarParkSpaces": "0",
+     "LimitedCapacityLift": "No",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "No"
+    },
+    "lat": 51.51146,
+    "lon": -0.05642
+   }
+  ]
+ },
+ "HUBSRA": {
+  "id": "HUBSRA",
+  "name": "Stratford",
+  "lat": 51.541508,
+  "lon": -0.00241,
+  "hub": "HUBSRA",
+  "accessibility": {},
+  "lines": [
+   "104",
+   "108",
+   "158",
+   "238",
+   "241",
+   "25",
+   "257",
+   "262",
+   "276",
+   "308",
+   "339",
+   "388",
+   "425",
+   "473",
+   "678",
+   "69",
+   "86",
+   "97",
+   "c2c",
+   "central",
+   "d8",
+   "dlr",
+   "elizabeth",
+   "greater-anglia",
+   "jubilee",
+   "mildmay",
+   "n205",
+   "n25",
+   "n8",
+   "n86"
+  ],
+  "children": [
+   {
+    "id": "940GZZDLSTD",
+    "name": "Stratford DLR Station",
+    "modes": [
+     "dlr"
+    ],
+    "accessibility": {
+     "AccessViaLift": "Yes",
+     "AddtionalInformation": "You need to make a journey of up to 100m  including lifts and ramps to change between  some lines. If you are boarding the Jubilee line at this station and require level access to leave the train at Green Park, please make sure that you travel in the corr",
+     "BlueBadgeCarParkSpaces": "0",
+     "LimitedCapacityLift": "No",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "Yes"
+    },
+    "lat": 51.541758,
+    "lon": -0.003287
+   },
+   {
+    "id": "9400ZZDLSTD1",
+    "name": "Stratford DLR Station",
+    "modes": [
+     "dlr"
+    ],
+    "accessibility": {
+     "AccessViaLift": "Yes",
+     "AddtionalInformation": "You need to make a journey of up to 100m  including lifts and ramps to change between  some lines. If you are boarding the Jubilee line at this station and require level access to leave the train at Green Park, please make sure that you travel in the corr",
+     "BlueBadgeCarParkSpaces": "0",
+     "LimitedCapacityLift": "No",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "Yes"
+    },
+    "lat": 51.540743,
+    "lon": -0.004413
+   },
+   {
+    "id": "9400ZZDLSTD3",
+    "name": "Stratford DLR Station",
+    "modes": [
+     "dlr"
+    ],
+    "accessibility": {
+     "AccessViaLift": "Yes",
+     "AddtionalInformation": "You need to make a journey of up to 100m  including lifts and ramps to change between  some lines. If you are boarding the Jubilee line at this station and require level access to leave the train at Green Park, please make sure that you travel in the corr",
+     "BlueBadgeCarParkSpaces": "0",
+     "LimitedCapacityLift": "No",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "Yes"
+    },
+    "lat": 51.541017,
+    "lon": -0.003075
+   },
+   {
+    "id": "9400ZZDLSTD4",
+    "name": "Stratford DLR Station",
+    "modes": [
+     "dlr"
+    ],
+    "accessibility": {
+     "AccessViaLift": "Yes",
+     "AddtionalInformation": "You need to make a journey of up to 100m  including lifts and ramps to change between  some lines. If you are boarding the Jubilee line at this station and require level access to leave the train at Green Park, please make sure that you travel in the corr",
+     "BlueBadgeCarParkSpaces": "0",
+     "LimitedCapacityLift": "No",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "Yes"
+    },
+    "lat": 51.541015,
+    "lon": -0.00293
+   }
+  ]
+ },
+ "HUBTOG": {
+  "id": "HUBTOG",
+  "name": "Tower Gateway",
+  "lat": 51.510621,
+  "lon": -0.074813,
+  "hub": "HUBTOG",
+  "accessibility": {},
+  "lines": [
+   "dlr"
+  ],
+  "children": [
+   {
+    "id": "940GZZDLTWG",
+    "name": "Tower Gateway DLR Station",
+    "modes": [
+     "dlr"
+    ],
+    "accessibility": {
+     "AccessViaLift": "No",
+     "BlueBadgeCarParkSpaces": "0",
+     "LimitedCapacityLift": "Yes",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "No"
+    },
+    "lat": 51.510617,
+    "lon": -0.074818
+   },
+   {
+    "id": "9400ZZDLTWG1",
+    "name": "Tower Gateway DLR Station",
+    "modes": [
+     "dlr"
+    ],
+    "accessibility": {
+     "AccessViaLift": "No",
+     "BlueBadgeCarParkSpaces": "0",
+     "LimitedCapacityLift": "Yes",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "No"
+    },
+    "lat": 51.510556,
+    "lon": -0.074389
+   }
+  ]
+ },
+ "HUBWEH": {
+  "id": "HUBWEH",
+  "name": "West Ham",
+  "lat": 51.528178,
+  "lon": 0.004997,
+  "hub": "HUBWEH",
+  "accessibility": {},
+  "lines": [
+   "c2c",
+   "district",
+   "dlr",
+   "hammersmith-city",
+   "jubilee"
+  ],
+  "children": []
+ },
+ "HUBWWA": {
+  "id": "HUBWWA",
+  "name": "Woolwich Arsenal",
+  "lat": 51.489962,
+  "lon": 0.06917,
+  "hub": "HUBWWA",
+  "accessibility": {},
+  "lines": [
+   "dlr",
+   "southeastern",
+   "thameslink"
+  ],
+  "children": [
+   {
+    "id": "940GZZDLWLA",
+    "name": "Woolwich Arsenal DLR Station",
+    "modes": [
+     "dlr"
+    ],
+    "accessibility": {
+     "AccessViaLift": "Yes",
+     "BlueBadgeCarParkSpaces": "0",
+     "LimitedCapacityLift": "No",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "No"
+    },
+    "lat": 51.490009,
+    "lon": 0.069127
+   },
+   {
+    "id": "9400ZZDLWLA1",
+    "name": "Woolwich Arsenal DLR Station",
+    "modes": [
+     "dlr"
+    ],
+    "accessibility": {
+     "AccessViaLift": "Yes",
+     "BlueBadgeCarParkSpaces": "0",
+     "LimitedCapacityLift": "No",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "No"
+    },
+    "lat": 51.490214,
+    "lon": 0.069208
+   }
+  ]
+ },
+ "940GZZLUBMY": {
+  "id": "940GZZLUBMY",
+  "name": "Bermondsey Underground Station",
+  "lat": 51.49775,
+  "lon": -0.063993,
+  "hub": null,
+  "accessibility": {
+   "AccessViaLift": "Yes",
+   "AddtionalInformation": "If you require level access to leave the train at  Green Park, please make sure that you travel in the correct carriage ",
+   "BlueBadgeCarParkSpaces": "0",
+   "LimitedCapacityLift": "No",
+   "SpecificEntranceRequired": "No",
+   "TaxiRankOutsideStation": "No",
+   "Toilet": "No"
+  },
+  "lines": [
+   "jubilee"
+  ]
+ },
+ "940GZZLUBST": {
+  "id": "940GZZLUBST",
+  "name": "Baker Street Underground Station",
+  "lat": 51.522883,
+  "lon": -0.15713,
+  "hub": null,
+  "accessibility": {
+   "AccessViaLift": "No",
+   "BlueBadgeCarParkSpaces": "0",
+   "LimitedCapacityLift": "No",
+   "TaxiRankOutsideStation": "No",
+   "Toilet": "No"
+  },
+  "lines": [
+   "bakerloo",
+   "circle",
+   "hammersmith-city",
+   "jubilee",
+   "metropolitan"
+  ]
+ },
+ "940GZZLUCPK": {
+  "id": "940GZZLUCPK",
+  "name": "Canons Park Underground Station",
+  "lat": 51.607701,
+  "lon": -0.294693,
+  "hub": null,
+  "accessibility": {},
+  "lines": [
+   "jubilee"
+  ]
+ },
+ "940GZZLUDOH": {
+  "id": "940GZZLUDOH",
+  "name": "Dollis Hill Underground Station",
+  "lat": 51.551955,
+  "lon": -0.239068,
+  "hub": null,
+  "accessibility": {},
+  "lines": [
+   "jubilee"
+  ]
+ },
+ "940GZZLUFYR": {
+  "id": "940GZZLUFYR",
+  "name": "Finchley Road Underground Station",
+  "lat": 51.546825,
+  "lon": -0.179845,
+  "hub": null,
+  "accessibility": {
+   "AccessViaLift": "No",
+   "BlueBadgeCarParkSpaces": "0",
+   "LimitedCapacityLift": "No",
+   "TaxiRankOutsideStation": "No",
+   "Toilet": "No"
+  },
+  "lines": [
+   "jubilee",
+   "metropolitan"
+  ]
+ },
+ "940GZZLUGPK": {
+  "id": "940GZZLUGPK",
+  "name": "Green Park Underground Station",
+  "lat": 51.506947,
+  "lon": -0.142787,
+  "hub": null,
+  "accessibility": {
+   "AccessViaLift": "Yes",
+   "AddtionalInformation": "You need to make a 220m journey to change between the Jubilee and the Piccadilly line, a  160m journey to change between the Victoria  and the Piccadilly line and a 380m journey to  change between the Victoria and the Jubilee line",
+   "BlueBadgeCarParkSpaces": "0",
+   "LimitedCapacityLift": "No",
+   "SpecificEntranceRequired": "No",
+   "TaxiRankOutsideStation": "No",
+   "Toilet": "No"
+  },
+  "lines": [
+   "jubilee",
+   "piccadilly",
+   "victoria"
+  ]
+ },
+ "940GZZLUKBN": {
+  "id": "940GZZLUKBN",
+  "name": "Kilburn Underground Station",
+  "lat": 51.547183,
+  "lon": -0.204248,
+  "hub": null,
+  "accessibility": {
+   "AccessViaLift": "Yes",
+   "BlueBadgeCarParkSpaces": "0",
+   "LimitedCapacityLift": "No",
+   "SpecificEntranceRequired": "No",
+   "TaxiRankOutsideStation": "No",
+   "Toilet": "Yes"
+  },
+  "lines": [
+   "jubilee"
+  ]
+ },
+ "940GZZLUKBY": {
+  "id": "940GZZLUKBY",
+  "name": "Kingsbury Underground Station",
+  "lat": 51.584845,
+  "lon": -0.27879,
+  "hub": null,
+  "accessibility": {
+   "AccessViaLift": "Yes",
+   "BlueBadgeCarParkSpaces": "0",
+   "LimitedCapacityLift": "No",
+   "SpecificEntranceRequired": "No",
+   "TaxiRankOutsideStation": "No",
+   "Toilet": "Yes"
+  },
+  "lines": [
+   "jubilee"
+  ]
+ },
+ "940GZZLUNDN": {
+  "id": "940GZZLUNDN",
+  "name": "Neasden Underground Station",
+  "lat": 51.553986,
+  "lon": -0.249837,
+  "hub": null,
+  "accessibility": {},
+  "lines": [
+   "jubilee"
+  ]
+ },
+ "HUBBDS": {
+  "id": "HUBBDS",
+  "name": "Bond Street",
+  "lat": 51.513362,
+  "lon": -0.148795,
+  "hub": "HUBBDS",
+  "accessibility": {},
+  "lines": [
+   "central",
+   "elizabeth",
+   "jubilee"
+  ],
+  "children": []
+ },
+ "HUBLBG": {
+  "id": "HUBLBG",
+  "name": "London Bridge",
+  "lat": 51.505881,
+  "lon": -0.086807,
+  "hub": "HUBLBG",
+  "accessibility": {},
+  "lines": [
+   "133",
+   "141",
+   "149",
+   "17",
+   "21",
+   "344",
+   "35",
+   "388",
+   "43",
+   "47",
+   "jubilee",
+   "n133",
+   "n199",
+   "n21",
+   "n343",
+   "northern",
+   "southeastern",
+   "southern",
+   "thameslink"
+  ],
+  "children": []
+ },
+ "HUBNGW": {
+  "id": "HUBNGW",
+  "name": "North Greenwich",
+  "lat": 51.500474,
+  "lon": 0.004295,
+  "hub": "HUBNGW",
+  "accessibility": {},
+  "lines": [
+   "108",
+   "129",
+   "132",
+   "161",
+   "180",
+   "188",
+   "335",
+   "422",
+   "486",
+   "jubilee",
+   "london-cable-car",
+   "n472",
+   "sl11"
+  ],
+  "children": [
+   {
+    "id": "940GZZLUNGW",
+    "name": "North Greenwich Underground Station",
+    "modes": [
+     "tube"
+    ],
+    "accessibility": {
+     "AccessViaLift": "Yes",
+     "AddtionalInformation": "If you require level access to leave the train at  Green Park, please make sure that you travel in the correct carriage ",
+     "BlueBadgeCarParkSpaces": "19",
+     "LimitedCapacityLift": "No",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "Yes",
+     "ToiletNote": "(Bus station)"
+    },
+    "lat": 51.50047,
+    "lon": 0.004287
+   },
+   {
+    "id": "4900ZZLUNGW1",
+    "name": "North Greenwich",
+    "modes": [
+     "tube"
+    ],
+    "accessibility": {
+     "AccessViaLift": "Yes",
+     "AddtionalInformation": "If you require level access to leave the train at  Green Park, please make sure that you travel in the correct carriage ",
+     "BlueBadgeCarParkSpaces": "19",
+     "LimitedCapacityLift": "No",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "Yes",
+     "ToiletNote": "(Bus station)"
+    },
+    "lat": 51.50026,
+    "lon": 0.00462
+   },
+   {
+    "id": "4900ZZLUNGW2",
+    "name": "North Greenwich",
+    "modes": [
+     "tube"
+    ],
+    "accessibility": {
+     "AccessViaLift": "Yes",
+     "AddtionalInformation": "If you require level access to leave the train at  Green Park, please make sure that you travel in the correct carriage ",
+     "BlueBadgeCarParkSpaces": "19",
+     "LimitedCapacityLift": "No",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "Yes",
+     "ToiletNote": "(Bus station)"
+    },
+    "lat": 51.50007,
+    "lon": 0.00313
+   }
+  ]
+ },
+ "HUBZCW": {
+  "id": "HUBZCW",
+  "name": "Canada Water",
+  "lat": 51.498053,
+  "lon": -0.049667,
+  "hub": "HUBZCW",
+  "accessibility": {},
+  "lines": [
+   "1",
+   "188",
+   "199",
+   "225",
+   "381",
+   "47",
+   "c10",
+   "jubilee",
+   "n199",
+   "n381",
+   "p12",
+   "windrush"
+  ],
+  "children": []
+ },
+ "940GZZLUQBY": {
+  "id": "940GZZLUQBY",
+  "name": "Queensbury Underground Station",
+  "lat": 51.594188,
+  "lon": -0.286219,
+  "hub": null,
+  "accessibility": {},
+  "lines": [
+   "jubilee"
+  ]
+ },
+ "940GZZLUSJW": {
+  "id": "940GZZLUSJW",
+  "name": "St. John's Wood Underground Station",
+  "lat": 51.534521,
+  "lon": -0.173948,
+  "hub": null,
+  "accessibility": {},
+  "lines": [
+   "jubilee"
+  ]
+ },
+ "940GZZLUSTM": {
+  "id": "940GZZLUSTM",
+  "name": "Stanmore Underground Station",
+  "lat": 51.619839,
+  "lon": -0.303266,
+  "hub": null,
+  "accessibility": {
+   "AccessViaLift": "No",
+   "BlueBadgeCarParkSpaces": "6",
+   "LimitedCapacityLift": "No",
+   "SpecificEntranceInstructions": "You can only enter/exit the station using the station car park entrance \u2013 to get from car park to ticket hall you need to make a journey of 110m including steep ramps. No entrance/ exit using London Road/bus station entrance \u2013 you need to make a 450m jour",
+   "SpecificEntranceRequired": "Yes",
+   "TaxiRankOutsideStation": "No",
+   "Toilet": "Yes"
+  },
+  "lines": [
+   "jubilee"
+  ]
+ },
+ "940GZZLUSWC": {
+  "id": "940GZZLUSWC",
+  "name": "Swiss Cottage Underground Station",
+  "lat": 51.543681,
+  "lon": -0.174894,
+  "hub": null,
+  "accessibility": {},
+  "lines": [
+   "jubilee"
+  ]
+ },
+ "940GZZLUSWK": {
+  "id": "940GZZLUSWK",
+  "name": "Southwark Underground Station",
+  "lat": 51.50427,
+  "lon": -0.105331,
+  "hub": null,
+  "accessibility": {
+   "AccessViaLift": "Yes",
+   "AddtionalInformation": "If you require level access to leave the train at  Green Park, please make sure that you travel in the correct carriage",
+   "BlueBadgeCarParkSpaces": "0",
+   "LimitedCapacityLift": "No",
+   "SpecificEntranceRequired": "No",
+   "TaxiRankOutsideStation": "No",
+   "Toilet": "No"
+  },
+  "lines": [
+   "jubilee"
+  ]
+ },
+ "940GZZLUWIG": {
+  "id": "940GZZLUWIG",
+  "name": "Willesden Green Underground Station",
+  "lat": 51.549146,
+  "lon": -0.221537,
+  "hub": null,
+  "accessibility": {},
+  "lines": [
+   "jubilee",
+   "metropolitan"
+  ]
+ },
+ "940GZZLUWYP": {
+  "id": "940GZZLUWYP",
+  "name": "Wembley Park Underground Station",
+  "lat": 51.563198,
+  "lon": -0.279262,
+  "hub": null,
+  "accessibility": {
+   "AccessViaLift": "Yes",
+   "AddtionalInformation": "If you are travelling to Wembley Park from  stations east of Westminster and require level  access, please ensure that you board the  correct carriage. If you are travelling to  Wembley Park from Green Park and require  level access, please continue to Ki",
+   "BlueBadgeCarParkSpaces": "6",
+   "LimitedCapacityLift": "No",
+   "SpecificEntranceRequired": "No",
+   "TaxiRankOutsideStation": "No",
+   "Toilet": "Yes"
+  },
+  "lines": [
+   "jubilee",
+   "metropolitan"
+  ]
+ },
+ "HUBWAT": {
+  "id": "HUBWAT",
+  "name": "Waterloo",
+  "lat": 51.504269,
+  "lon": -0.113356,
+  "hub": "HUBWAT",
+  "accessibility": {},
+  "lines": [
+   "1",
+   "11",
+   "139",
+   "172",
+   "176",
+   "188",
+   "243",
+   "341",
+   "381",
+   "59",
+   "68",
+   "76",
+   "77",
+   "bakerloo",
+   "bl1",
+   "c10",
+   "jubilee",
+   "n1",
+   "n171",
+   "n381",
+   "n68",
+   "northern",
+   "sl6",
+   "south-western-railway",
+   "waterloo-city"
+  ],
+  "children": []
+ },
+ "HUBWHD": {
+  "id": "HUBWHD",
+  "name": "West Hampstead",
+  "lat": 51.547533,
+  "lon": -0.191357,
+  "hub": "HUBWHD",
+  "accessibility": {},
+  "lines": [
+   "jubilee",
+   "mildmay",
+   "thameslink"
+  ],
+  "children": []
+ },
+ "HUBWSM": {
+  "id": "HUBWSM",
+  "name": "Westminster",
+  "lat": 51.501603,
+  "lon": -0.125984,
+  "hub": "HUBWSM",
+  "accessibility": {},
+  "lines": [
+   "12",
+   "159",
+   "24",
+   "26",
+   "453",
+   "87",
+   "88",
+   "circle",
+   "district",
+   "jubilee",
+   "n109",
+   "n11",
+   "n136",
+   "n155",
+   "n26",
+   "n3",
+   "n381",
+   "n44",
+   "n53",
+   "n87"
+  ],
+  "children": [
+   {
+    "id": "940GZZLUWSM",
+    "name": "Westminster Underground Station",
+    "modes": [
+     "tube"
+    ],
+    "accessibility": {
+     "AccessViaLift": "Yes",
+     "BlueBadgeCarParkSpaces": "0",
+     "LimitedCapacityLift": "No",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "No"
+    },
+    "lat": 51.50132,
+    "lon": -0.124861
+   },
+   {
+    "id": "4900ZZLUWSM1",
+    "name": "Westminster Station",
+    "modes": [
+     "tube"
+    ],
+    "accessibility": {
+     "AccessViaLift": "Yes",
+     "BlueBadgeCarParkSpaces": "0",
+     "LimitedCapacityLift": "No",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "No"
+    },
+    "lat": 51.50125,
+    "lon": -0.12377
+   },
+   {
+    "id": "4900ZZLUWSM2",
+    "name": "Westminster Station",
+    "modes": [
+     "tube"
+    ],
+    "accessibility": {
+     "AccessViaLift": "Yes",
+     "BlueBadgeCarParkSpaces": "0",
+     "LimitedCapacityLift": "No",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "No"
+    },
+    "lat": 51.50095,
+    "lon": -0.12495
+   },
+   {
+    "id": "4900ZZLUWSM3",
+    "name": "Westminster Station",
+    "modes": [
+     "tube"
+    ],
+    "accessibility": {
+     "AccessViaLift": "Yes",
+     "BlueBadgeCarParkSpaces": "0",
+     "LimitedCapacityLift": "No",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "No"
+    },
+    "lat": 51.50086,
+    "lon": -0.12383
+   },
+   {
+    "id": "4900ZZLUWSM4",
+    "name": "Westminster Station",
+    "modes": [
+     "tube"
+    ],
+    "accessibility": {
+     "AccessViaLift": "Yes",
+     "BlueBadgeCarParkSpaces": "0",
+     "LimitedCapacityLift": "No",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "No"
+    },
+    "lat": 51.50125,
+    "lon": -0.12607
+   },
+   {
+    "id": "4900ZZLUWSM5",
+    "name": "Westminster Station",
+    "modes": [
+     "tube"
+    ],
+    "accessibility": {
+     "AccessViaLift": "Yes",
+     "BlueBadgeCarParkSpaces": "0",
+     "LimitedCapacityLift": "No",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "No"
+    },
+    "lat": 51.50126,
+    "lon": -0.12651
+   },
+   {
+    "id": "4900ZZLUWSM6",
+    "name": "Westminster Station",
+    "modes": [
+     "tube"
+    ],
+    "accessibility": {
+     "AccessViaLift": "Yes",
+     "BlueBadgeCarParkSpaces": "0",
+     "LimitedCapacityLift": "No",
+     "SpecificEntranceRequired": "No",
+     "TaxiRankOutsideStation": "No",
+     "Toilet": "No"
+    },
+    "lat": 51.50115,
+    "lon": -0.12386
+   }
+  ]
+ }
+}

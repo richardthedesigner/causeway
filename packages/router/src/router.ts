@@ -237,6 +237,10 @@ export interface RouteSummary {
   unknownM: number;
   /** Length-weighted confidence in [0, 1] across incline, surface and width. */
   confidence: number;
+  /** Distance on foot or wheels, excluding train rides. */
+  walkM: number;
+  /** Train legs, in order. */
+  rides: { line: string; from: string; to: string; stops: number }[];
   /** Names of movable bridges crossed (they close while they tilt or swing). */
   movableBridges: { name: string; type: string }[];
   /** Plain-language passability verdict. Never "step-free" unless we know. */
@@ -257,6 +261,8 @@ export function summarise(r: Route, now: Date = DRY.now): RouteSummary {
   for (const s of r.steps) {
     const a = s.edge.attrs;
     const L = s.edge.lengthM;
+    // Train legs aren't footway: station unknowns are reported per station (see verdict and notes), not by track length.
+    if (RAIL.has(s.edge.kind)) continue;
     if (isKnown(a.incline)) {
       const rise = (a.incline.value * (s.forward ? 1 : -1) * L) / 100;
       if (rise > 0) ascent += rise;
@@ -281,8 +287,11 @@ export function summarise(r: Route, now: Date = DRY.now): RouteSummary {
   }
   for (const k of Object.keys(surfaceMix)) surfaceMix[k] = Math.round(surfaceMix[k]!);
   const movable = new Map<string, string>();
+  const rides = ridesOf(r);
+  const walkM = r.steps.filter((s) => !RAIL.has(s.edge.kind)).reduce((t, s) => t + s.edge.lengthM, 0);
   for (const s of r.steps) if (s.edge.movable) movable.set(s.edge.name ?? "a movable bridge", s.edge.movable);
   const blocked = r.steps.some((s) => s.eval.passable === "no" || s.nodeEval.passable === "no");
+  const walkLen = Math.max(1, walkM);
   return {
     minutes: Math.round((r.seconds / 60) * 10) / 10,
     distanceM: Math.round(r.lengthM),
@@ -295,9 +304,11 @@ export function summarise(r: Route, now: Date = DRY.now): RouteSummary {
     steps,
     lifts,
     unknownM: Math.round(unknownM),
-    confidence: r.lengthM ? Math.round((confSum / r.lengthM) * 100) / 100 : 0,
+    confidence: Math.round((confSum / walkLen) * 100) / 100,
     movableBridges: [...movable].map(([name, type]) => ({ name, type })),
-    verdict: blocked ? "not-passable" : unknownM > 0 ? "passable-with-unknowns" : "passable",
+    walkM: Math.round(walkM),
+    rides,
+    verdict: blocked ? "not-passable" : unknownM > 0 || r.steps.some((s) => RAIL.has(s.edge.kind) && s.eval.passable === "unknown") ? "passable-with-unknowns" : "passable",
   };
 }
 
@@ -308,6 +319,24 @@ export function elevationProfile(r: Route, start: GraphNode): { d: number; z: nu
   for (const s of r.steps) {
     d += s.edge.lengthM;
     out.push({ d: Math.round(d), z: s.node.ele.value === null ? null : Math.round(s.node.ele.value * 10) / 10 });
+  }
+  return out;
+}
+
+const RAIL: ReadonlySet<string> = new Set(["transit", "board", "interchange"]);
+
+/** Train legs: board (forward), one or more rides, alight (backward). */
+function ridesOf(r: Route): { line: string; from: string; to: string; stops: number }[] {
+  const out: { line: string; from: string; to: string; stops: number }[] = [];
+  let cur: { line: string; from: string; stops: number } | null = null;
+  const station = (e: GraphEdge) => (e.name ?? "").split(", ")[0]!;
+  for (const s of r.steps) {
+    if (s.edge.kind === "board" && s.forward) cur = { line: (s.edge.name ?? "").split(", ").slice(1).join(", "), from: station(s.edge), stops: 0 };
+    else if (s.edge.kind === "transit" && cur) cur.stops++;
+    else if (s.edge.kind === "board" && !s.forward && cur) {
+      out.push({ ...cur, to: station(s.edge) });
+      cur = null;
+    }
   }
   return out;
 }
@@ -357,10 +386,21 @@ export function explain(router: Router, chosen: Route, from: GraphNode, to: Grap
   const avoided = [...avoidedByName.values()].sort(
     (a, b) => Number(b.reason.kind === "excluded") - Number(a.reason.kind === "excluded") || b.lengthM - a.lengthM,
   );
-  const addedMinutes = base ? Math.max(0, Math.round((chosen.seconds - base.lengthM / p.speedMps) / 60)) : 0;
+  // The direct route's time at this user's pace (rides take the same time for everyone).
+  const baseSeconds = base ? base.steps.reduce((t, st) => t + (RAIL.has(st.edge.kind) ? st.eval.seconds : st.edge.lengthM / p.speedMps), 0) : 0;
+  const addedMinutes = base ? Math.max(0, Math.round((chosen.seconds - baseSeconds) / 60)) : 0;
 
   const notes: string[] = [];
   const sum = summarise(chosen, c.now);
+  for (const a of avoided) {
+    if (a.reason.attr !== "live") continue;
+    const full = a.reason.detail.replace(/^(lift out of service|closed): /, "");
+    notes.push(`${a.name}: ${full} (TfL, live)`);
+    a.reason = { ...a.reason, detail: a.reason.detail.startsWith("lift") ? "lift out of service" : "closed" };
+  }
+  for (const s of chosen.steps) {
+    if (s.edge.kind === "board" && s.eval.passable === "unknown") notes.push(`TfL doesn't confirm step-free access at ${s.edge.name}. Check before you travel.`);
+  }
   if (sum.lifts) {
     const live = router.graph.meta.liveFeeds?.some((f) => f.endsWith("lifts"));
     notes.push(`Uses ${sum.lifts === 1 ? "a lift" : `${sum.lifts} lifts`}.${live ? "" : " We have no live lift status here, so check before you set off."}`);
@@ -402,6 +442,36 @@ export function placeName(e: GraphEdge): string {
  * Consecutive steps on the same named way and kind merge into one segment.
  */
 export function describeSegments(r: Route): string[] {
+  // Rail legs read as one instruction each; walking parts as before.
+  const out: string[] = [];
+  let walk: Step[] = [];
+  const flush = () => {
+    if (walk.length) out.push(...describeWalk({ steps: walk, cost: 0, seconds: 0, lengthM: 0 }));
+    walk = [];
+  };
+  const rides = ridesOf(r);
+  let ri = 0;
+  for (const s of r.steps) {
+    const k = s.edge.kind;
+    if (k === "station_link") {
+      flush();
+      out.push(s.forward ? `Leave ${s.edge.name} station.` : `Go into ${s.edge.name} station.`);
+    } else if (k === "board" && s.forward) {
+      flush();
+      const ride = rides[ri++];
+      if (ride) out.push(`Take the ${ride.line} from ${ride.from} to ${ride.to}, ${ride.stops} stop${ride.stops === 1 ? "" : "s"}.`);
+    } else if (k === "interchange") {
+      flush();
+      out.push(`${s.edge.name}.`);
+    } else if (k === "transit" || k === "board") {
+      continue;
+    } else walk.push(s);
+  }
+  flush();
+  return out;
+}
+
+function describeWalk(r: Route): string[] {
   type Seg = { name: string; kind: string; m: number; rise: number; surface: string | null; unknown: boolean };
   const segs: Seg[] = [];
   for (const s of r.steps) {

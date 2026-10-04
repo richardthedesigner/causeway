@@ -12,6 +12,8 @@ export interface Area {
   osm: { file: string; note: string } | { apiTiles: [number, number, number, number][]; note: string };
   dtm: ChunkSource[];
   terrainCredit: string;
+  /** Rail network to add (data/transit/...), for areas whose journeys use it. */
+  transit?: string;
 }
 
 /** Split a bbox into API-sized tiles. */
@@ -22,6 +24,10 @@ const tiles = (b: [number, number, number, number], nx: number, ny: number) => {
   for (let i = 0; i < nx; i++) for (let j = 0; j < ny; j++) out.push([b[0] + i * dx, b[1] + j * dy, b[0] + (i + 1) * dx, b[1] + (j + 1) * dy].map((v) => Math.round(v * 1e5) / 1e5) as [number, number, number, number]);
   return out;
 };
+
+// London: two street zones joined by the Jubilee line and DLR. Walking legs only happen near stations.
+const WESTMINSTER: [number, number, number, number] = [-0.133, 51.4975, -0.118, 51.5045];
+const CANARY_WHARF: [number, number, number, number] = [-0.029, 51.4995, -0.013, 51.509];
 
 const NEWCASTLE_BBOX: [number, number, number, number] = [-1.627, 54.961, -1.59, 54.979];
 
@@ -42,5 +48,14 @@ export const AREAS: Record<string, Area> = {
     osm: { apiTiles: tiles(NEWCASTLE_BBOX, 3, 2), note: "OSM API /map" },
     dtm: [ENGLAND_LIDAR],
     terrainCredit: "© Environment Agency copyright and/or database right. Contains public sector information licensed under the Open Government Licence v3.0",
+  },
+  "london-jubilee": {
+    name: "london-jubilee",
+    title: "London: Westminster and Canary Wharf by Jubilee line and DLR",
+    bbox: [WESTMINSTER[0], WESTMINSTER[1], CANARY_WHARF[2], CANARY_WHARF[3]],
+    osm: { apiTiles: [...tiles(WESTMINSTER, 2, 2), ...tiles(CANARY_WHARF, 2, 2)], note: "OSM API /map (Westminster and Canary Wharf zones)" },
+    dtm: [ENGLAND_LIDAR],
+    terrainCredit: "© Environment Agency copyright and/or database right. Contains public sector information licensed under the Open Government Licence v3.0",
+    transit: "data/transit/london/network.json",
   },
 };

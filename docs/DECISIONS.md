@@ -136,3 +136,16 @@ Proposal: **accept it, and publish the enriched footway graph under ODbL.** It f
 **Decided.** 2026-10-04. `packages/live`:
 - **Weather**: Open-Meteo, fetched by the user's browser (unreachable from the build container). It decides `wet` (rain now or over 0.2 mm in 3 hours) and `ice` (snow, freezing rain, or at or below 1°C after precipitation in 12 hours). The user can always override, and the app says where the setting came from. Non-commercial terms apply (D-011).
 - **TfL lift disruptions**: parsed and tested against a real response recorded 2026-10-04 (18 outages). Outages become `closed` live states on lift edges, expiring after 15 minutes unless refreshed, so a stale closure never outlives its feed. Mapping TfL lift IDs to graph edges needs the London station graph (Phase 3).
+
+## D-020 Transit lite: rail inside the pedestrian graph
+
+**Decided.** 2026-10-04. For Phase 3, step-free rail is modelled in our own graph rather than OpenTripPlanner. Each station is a street-level node linked to nearby street nodes (street level only; indoor OSM station mapping never stands in for the street). Each line gets a platform node per station. `board` edges carry TfL's step-free fact and any lift outage; `transit` edges are rides; `interchange` edges join stations of one hub within 150 m. Farther pairs, like Canary Wharf's Jubilee and DLR stations 200 m apart, connect through the street graph, as they do in reality.
+
+- This gives one cost model, one "Why this way?" and reroute-before-commit for lift outages, with no extra server.
+- Ride times are distance-based (about 30 km/h including dwell) plus a 4-minute boarding allowance. There are no timetables yet: OpenTripPlanner replaces the ride layer when departure times matter (D-003).
+- Step-free status: TfL StopPoint `AccessViaLift = Yes` means step-free. Otherwise it is unknown, except on the DLR, which TfL describes as step-free throughout by lift or ramp (marked reported, verify per station). `AccessViaLift = No` is *not* treated as "has steps"; on the DLR it usually means ramp access.
+- Lift outages close only the edges the message supports: the named line's platforms ("to the Jubilee line"), the street link ("between the street and the ticket hall"), or every platform at the station if the message names neither. They affect only step-free users (`affects: "step-free"`), and they expire after 15 minutes unless refreshed.
+
+## D-021 Movable bridges
+
+**Decided.** 2026-10-04. OSM puts `bridge:movable` on the bridge outline (`man_made=bridge`), not on the decks. Decks inside a movable outline inherit it. Routes that cross one say so: "Crosses Millenium Bridge, a tilting bridge. It closes for a few minutes while it moves for boats. We don't have its timetable yet." (The deck's own OSM name is used as tagged, misspelling included.) Gateshead Millennium Bridge tilt times are not available as open data that we have found; adding them is a Richard-led request to Gateshead Council.

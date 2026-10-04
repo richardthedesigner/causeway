@@ -287,3 +287,13 @@ Partnership items for Richard:
 39. Traffic Scotland DATEX II (low priority).
 40. Project Sidewalk team (possible UK deployment on Mapillary imagery).
 41. Transport for All (user validation).
+
+## Phase 3 additions (2026-10-04)
+
+| Source | Use | Licence | Verified | Verdict |
+|---|---|---|---|---|
+| **Environment Agency LiDAR composite DTM 1 m, WCS** (`environment.data.gov.uk/spatialdata/lidar-composite-digital-terrain-model-dtm-1m/wcs`, coverage `13787b9a-26a4-4775-8523-806d13af58fc__Lidar_Composite_Elevation_DTM_1m`) | Gradient for Newcastle, Gateshead and London. Requested as 500 m GeoTIFF chunks (`subset=E(...)&subset=N(...)`, EPSG:27700) | OGL v3; "© Environment Agency copyright and/or database right" | V (GetCapabilities and GetCoverage, 2026-10-04) | **keep**. Per-pixel survey dates are not exposed; the composite's year is used as the observation date. |
+| **TfL Line Route Sequence** (`/Line/{id}/Route/Sequence/all`) | Station order for the Jubilee line and DLR. Recorded in `data/transit/london/` | TfL open data terms, "Powered by TfL Open Data" | V (2026-10-04) | **keep** |
+| **TfL StopPoint** (`/StopPoint/{ids}`) | Station positions, hubs and `Accessibility` properties (`AccessViaLift`, `LimitedCapacityLift`, interchange notes). Batch requests return the hub record for interchange stations, whose children carry the accessibility. Some Underground platforms in hubs (Canning Town Jubilee) have none | As above | V (2026-10-04) | **keep**. `AccessViaLift = No` is not "has steps". |
+| **TfL lift disruptions v2** | Live lift outages, placed on platforms by line name in the message | As above | V (2026-10-04): 18 outages including Canary Wharf (Jubilee) | **keep**. Integrated (D-020). |
+| **Gateshead Millennium Bridge tilt times** | Closures of the tilting bridge | Unknown | Not found as open data | **partnership-only** (request to Gateshead Council) |

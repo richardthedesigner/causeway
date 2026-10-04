@@ -1,0 +1,84 @@
+/**
+ * London: wheeling plus step-free Underground. With the lift outages TfL
+ * reported on 2026-10-04 (recorded), Canary Wharf's Jubilee line lift is out,
+ * so a wheelchair user must be rerouted before they set off; someone walking
+ * is not. The live variant runs the same check against TfL right now.
+ */
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { describe, expect, it } from "vitest";
+import { loadSnapshot, type Graph, type TransitNetwork } from "@causeway/graph/node";
+import { applyLiveStates, fetchLiftOutages, liftOutageStates, parseLiftDisruptions } from "@causeway/live";
+import { PRESETS } from "@causeway/profile";
+import { describeSegments, explain, Router, summarise } from "@causeway/router";
+import { LONDON_JOURNEYS } from "../../../scripts/journeys.js";
+
+const ROOT = join(import.meta.dirname, "../../..");
+const net = JSON.parse(readFileSync(join(ROOT, "data/transit/london/network.json"), "utf8")) as TransitNetwork;
+const fresh = () => loadSnapshot(join(ROOT, "data/snapshots/london-jubilee.graph.json.gz"));
+const recorded = parseLiftDisruptions(JSON.parse(readFileSync(join(ROOT, "packages/live/test/fixtures/tfl-lifts-2026-10-04.json"), "utf8")), "2026-10-04T12:00:00Z");
+const NOW = new Date("2026-10-04T12:05:00Z");
+const j = LONDON_JOURNEYS[0]!;
+const refs = (g: Graph) => new Set(g.edges.map((e) => e.ref).filter((r): r is string => !!r));
+
+function plan(g: Graph, preset: keyof typeof PRESETS, now = NOW) {
+  const r = new Router(g);
+  const p = PRESETS[preset];
+  const c = { now, wet: false, ice: false };
+  const a = r.snap(j.from.lon, j.from.lat, p, c);
+  const b = r.snap(j.to.lon, j.to.lat, p, c);
+  const route = r.route(a, b, p, c);
+  expect(route, preset).not.toBeNull();
+  return { r, route: route!, a, b, p, c };
+}
+
+describe("Parliament Square to Canary Wharf", () => {
+  it("places the Canary Wharf outage on the Jubilee line platforms only", () => {
+    const states = liftOutageStates(recorded, net, refs(fresh()));
+    expect(states.has("board:jubilee:940GZZLUCYF")).toBe(true);
+    expect(states.has("board:dlr:940GZZDLCAN")).toBe(false);
+    expect(states.get("board:jubilee:940GZZLUCYF")!.affects).toBe("step-free");
+  });
+
+  it("with no outages, a wheelchair user takes the Jubilee line straight to Canary Wharf", () => {
+    const { route } = plan(fresh(), "manual-wheelchair");
+    expect(summarise(route, NOW).rides).toEqual([{ line: "Jubilee line", from: "Westminster", to: "Canary Wharf", stops: expect.any(Number) }]);
+  });
+
+  it("with the recorded outage, the wheelchair route avoids alighting at Canary Wharf on the Jubilee line, and says why", () => {
+    const g = fresh();
+    applyLiveStates(g, liftOutageStates(recorded, net, refs(g)));
+    const { r, route, a, b, p, c } = plan(g, "manual-wheelchair");
+    const rides = summarise(route, NOW).rides;
+    expect(rides.some((x) => x.line === "Jubilee line" && x.to === "Canary Wharf")).toBe(false);
+    expect(rides.length).toBeGreaterThan(0);
+    const ex = explain(r, route, a, b, p, PRESETS.walking, c);
+    expect(ex.headline).toMatch(/Avoids Canary Wharf, Jubilee line \(lift out of service\)\. Adds \d+ minutes?\./);
+    expect(ex.notes.some((n) => /faulty lift/.test(n) && /TfL/.test(n))).toBe(true);
+    expect(describeSegments(route).some((s) => /^Take the /.test(s))).toBe(true);
+  });
+
+  it("someone walking is not rerouted by a lift outage", () => {
+    const g = fresh();
+    applyLiveStates(g, liftOutageStates(recorded, net, refs(g)));
+    const { route } = plan(g, "walking");
+    expect(summarise(route, NOW).rides.some((x) => x.to === "Canary Wharf" && x.line === "Jubilee line")).toBe(true);
+  });
+
+  it("an outage expires: an hour later, without a refresh, the direct route is back", () => {
+    const g = fresh();
+    applyLiveStates(g, liftOutageStates(recorded, net, refs(g)));
+    const { route } = plan(g, "manual-wheelchair", new Date("2026-10-04T13:30:00Z"));
+    expect(summarise(route, NOW).rides.some((x) => x.to === "Canary Wharf" && x.line === "Jubilee line")).toBe(true);
+  });
+
+  it.skipIf(!process.env.CAUSEWAY_LIVE)("live: never sends a step-free user through a platform TfL reports out of service right now", async () => {
+    const now = new Date();
+    const live = await fetchLiftOutages(fetch, now);
+    const g = fresh();
+    const states = liftOutageStates(live, net, refs(g));
+    applyLiveStates(g, states);
+    const { route } = plan(g, "manual-wheelchair", new Date(now.getTime() + 60_000));
+    for (const s of route.steps) if (s.edge.ref) expect(states.has(s.edge.ref), s.edge.ref).toBe(false);
+  });
+});

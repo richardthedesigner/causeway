@@ -4,7 +4,7 @@
  */
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { buildGraphFromOsm, enrichWithTerrain, loadChunkedDtm, parseOsmXml, registerOsgb, saveSnapshot, toOsgb, type OsmData } from "@causeway/graph/node";
+import { addTransit, buildGraphFromOsm, enrichWithTerrain, type TransitNetwork, loadChunkedDtm, parseOsmXml, registerOsgb, saveSnapshot, toOsgb, type OsmData } from "@causeway/graph/node";
 import { AREAS } from "./areas.js";
 import { cached, CACHE, EDINBURGH_OLD_TOWN, osmTileUrl, toArrayBuffer } from "./sources.js";
 
@@ -36,6 +36,12 @@ log(`dtm ${JSON.stringify(dtm.stats)}`);
 const stats = enrichWithTerrain(g, dtm);
 log(`terrain sampled ${stats.sampledEdges}, off-ground ${stats.offGroundEdges}, discontinuities ${stats.discontinuities}, osm incline checks ${stats.inclineChecks.length}`);
 g.meta.sources.push({ id: area.dtm[0]!.source, licence: "OGL-UK-3.0", attribution: area.terrainCredit, snapshot: `sources used: ${JSON.stringify(dtm.stats.byPhase)}` });
+
+if (area.transit) {
+  const net = JSON.parse(readFileSync(join(ROOT, area.transit), "utf8")) as TransitNetwork;
+  const { stationNode, platformNode } = addTransit(g, net);
+  log(`transit: ${stationNode.size} stations, ${platformNode.size} platforms, ${g.edges.filter((e) => e.kind === "station_link").length} street links`);
+}
 
 saveSnapshot(join(ROOT, `data/snapshots/${area.name}.graph.json.gz`), g);
 writeFileSync(join(CACHE, `${area.name}.incline-checks.json`), JSON.stringify(stats.inclineChecks));
