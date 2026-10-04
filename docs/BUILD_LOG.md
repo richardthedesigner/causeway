@@ -4,6 +4,11 @@ A running record of what was built, newest first. Each entry links the decision 
 
 ## 2026-10-04 (evening)
 
+**Footway islands joined** (D-032, closes #7)
+- `bridgeIslands` joins small islands of footway to the street across gaps of up to 15 m, with unknown attributes.
+- It skips platforms, bridges and height steps.
+- 204 connectors across the three areas. Gateshead Interchange is reachable, so the Metro is useful there.
+
 **Trams and the Tyne and Wear Metro** (D-031, commit `b3a4bf8`)
 - Edinburgh Trams and the Metro come from the same open timetables as the buses, each line tagged with its mode.
 - Metro stations below street level count as unknown for step-free users: Nexus has no open lift status (#13).

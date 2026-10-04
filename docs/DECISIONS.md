@@ -235,3 +235,16 @@ The route panel lists each bus leg with how often it runs now (timetable) and, i
 - Seat and shelter rules (D-029) stay bus-only: tram stops and Metro stations aren't mapped stop by stop.
 
 Found while testing: walking from Gateshead Interchange to Jackson Street (about 100 m) costs about 30 minutes in the Newcastle graph, so the footways there need checking. Logged as a GitHub issue.
+
+## D-032 Join footway islands across short gaps, and say they're unknown
+
+**Decided.** 2026-10-04 (fixes issue #7). OSM often ends a footway at a crossing on a road we drop, such as a bus-only road in an interchange (`access=no`). The pavements beyond become an island a few metres from the street, so routes couldn't leave Gateshead Interchange.
+
+`bridgeIslands` (`packages/graph/src/islands.ts`) runs in `build-area` after terrain. It joins each island of up to 500 nodes to the main network at its closest point within 15 m, preferring a mapped crossing. The connector is a crossing when either end is one; every attribute is unknown, so kerbs and surface count as unknown; it carries a `gap:` ref.
+
+It leaves alone:
+- railway platforms (reached through the station, not across the tracks);
+- bridges and tunnels;
+- pairs whose known ground heights differ by more than 2 m (a wall, not a gap).
+
+Bridged: Edinburgh 172 of 446 islands, Newcastle 9 of 24, London 23 of 48. `scripts/bridge-islands.ts` applied it to the committed snapshots without a full rebuild. Central Station to Jackson Street now takes the Metro (about 10 minutes against 24 on foot), with a test.

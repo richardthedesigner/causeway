@@ -101,3 +101,15 @@ describe("trams and the Metro", () => {
     expect(evaluateEdge(board("tram", "Princes Street"), true, PRESETS["mobility-scooter"], TUE_10).passable).toBe("unknown");
   });
 });
+
+describe("Newcastle: out of Gateshead Interchange (issue #7)", () => {
+  it("reaches Jackson Street from the Metro on foot, and takes the Metro from Central Station", () => {
+    const g = loadSnapshot(join(ROOT, "data/snapshots/newcastle-gateshead.graph.json.gz"));
+    addBus(g, JSON.parse(readFileSync(join(ROOT, "data/transit/newcastle-gateshead/bus.json"), "utf8")) as BusNetwork);
+    const r = new Router(g);
+    const p = { ...PRESETS.walking, buses: false };
+    const route = r.route(r.snap(-1.617, 54.9689, p), r.snap(-1.6025, 54.9617, p), p, TUE_10)!;
+    expect(describeSegments(route).some((t) => /Metro/.test(t))).toBe(true);
+    expect(route.seconds / 60).toBeLessThan(20);
+  });
+});
