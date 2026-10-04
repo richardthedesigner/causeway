@@ -1,8 +1,8 @@
 "use client";
 import { Check, ChevronDown, CloudRain, Layers, LocateFixed, Snowflake, Sun } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
 import type { City } from "@/lib/cities";
 import type { Conditions } from "@/lib/use-planner";
+import { useMenu } from "@/lib/use-menu";
 import { cn } from "@/lib/utils";
 
 export type Ground = "dry" | "wet" | "ice";
@@ -32,29 +32,6 @@ const GROUND = {
 const chip = "pointer-events-auto inline-flex max-w-full min-h-12 items-center gap-2 rounded-full bg-glass px-4 font-bold shadow-[0_2px_12px_rgb(0_0_0/0.16)] backdrop-blur-md";
 const fab = "pointer-events-auto grid size-12 place-items-center rounded-2xl bg-glass shadow-[0_2px_12px_rgb(0_0_0/0.16)] backdrop-blur-md";
 const panel = "pointer-events-auto absolute z-30 mt-2 grid min-w-60 gap-1 rounded-2xl border border-line bg-surface p-2 text-base shadow-[0_8px_30px_rgb(0_0_0/0.2)]";
-
-/** One open menu at a time; Escape or a tap elsewhere closes it and returns focus to its button. */
-function useMenu() {
-  const [open, setOpen] = useState<string | null>(null);
-  const root = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!open) return;
-    const away = (e: PointerEvent) => !root.current?.contains(e.target as Node) && setOpen(null);
-    const esc = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
-      root.current?.querySelector<HTMLButtonElement>(`[data-menu="${open}"]`)?.focus();
-      setOpen(null);
-    };
-    document.addEventListener("pointerdown", away);
-    document.addEventListener("keydown", esc);
-    return () => {
-      document.removeEventListener("pointerdown", away);
-      document.removeEventListener("keydown", esc);
-    };
-  }, [open]);
-  const toggle = (id: string) => setOpen((o) => (o === id ? null : id));
-  return { open, setOpen, toggle, root };
-}
 
 function Option({ on, onClick, children }: { on: boolean; onClick: () => void; children: React.ReactNode }) {
   return (

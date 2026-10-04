@@ -8,7 +8,7 @@
  * devices from tester feedback (2026-10): Cherry, a lightweight powerchair
  * that gets stuck on setts and cobbles, and Lulu, a pavement scooter.
  */
-import { PRESETS, savedDevice, type Profile, type SavedDevice } from "@causeway/profile";
+import { PRESETS, savedDevice, type MobilityPreset, type Profile, type SavedDevice } from "@causeway/profile";
 
 const DEVICES_KEY = "causewayside.devices.v1";
 const ACTIVE_KEY = "causewayside.device.active.v1";
@@ -130,4 +130,9 @@ export function withActiveProfile(state: DeviceState, profile: Profile): DeviceS
 
 export function withActive(state: DeviceState, id: string): DeviceState {
   return state.devices.some((d) => d.id === id) ? { ...state, activeId: id } : state;
+}
+
+/** Add an unnamed device and make it the one in use. Naming it comes with first-visit setup (plan step 5). */
+export function withNewDevice(state: DeviceState, id: string, preset: MobilityPreset = "manual-wheelchair"): DeviceState {
+  return { devices: [...state.devices, savedDevice(id, "", preset)], activeId: id };
 }
