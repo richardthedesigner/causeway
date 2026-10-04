@@ -59,7 +59,7 @@ A running record of what was built, newest first. Each entry links the decision 
 
 ## 2026-10-04 (evening)
 
-**Crossings for blind and partially sighted people** (D-034)
+**Crossings for blind and partially sighted people** (D-037; first committed as a second D-034)
 - Crossing type, beeping lights, rotating cones, tactile paving and shared cycle paths now shape routes for the visual-impairment profile, and for anyone who turns on the new toggle.
 - Directions name the cue at each crossing.
 - Causewayside to Grassmarket goes from 3 uncontrolled crossings to none.
