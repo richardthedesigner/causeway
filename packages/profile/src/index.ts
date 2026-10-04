@@ -82,6 +82,8 @@ export interface Profile {
   crossingCues?: { uncontrolledS: number; zebraS: number; silentSignalS: number; noTactileS: number };
   /** Seconds per 100 m to avoid paths shared with cycles. Absent: no preference. */
   sharedPathPer100mS?: number;
+  /** After dark, seconds per 100 m to avoid streets that aren't lit. Absent: no preference. */
+  litAfterDarkPer100mS?: number;
   /**
    * Road-legal (class 3) mobility scooter: registered, may use the carriageway
    * at up to 8 mph, so a street with no pavement is an ordinary road, not a hazard.
@@ -395,6 +397,8 @@ export const PRESETS: Record<MobilityPreset, Profile> = {
     // Cues a cane or guide dog user relies on (RNIB, Guide Dogs guidance on controlled crossings).
     crossingCues: { uncontrolledS: 240, zebraS: 60, silentSignalS: 120, noTactileS: 45 },
     sharedPathPer100mS: 60,
+    // Many with low vision see far less at night (RNIB); lit streets also feel safer.
+    litAfterDarkPer100mS: 60,
   },
 };
 

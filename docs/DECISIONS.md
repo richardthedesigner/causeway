@@ -329,3 +329,23 @@ Footpaths carry whether they're shared with cycles.
 The numbers are starting points, like the rest of the presets, for Phase 2 research with RNIB and Guide Dogs users.
 
 Snapshots were enriched with `scripts/enrich-crossings.ts`; new builds get the facts directly.
+
+## D-038 Lit streets after dark
+
+**Decided.** 2026-10-04. The graph already carried OSM's `lit` tag on every footway, but routing ignored it. Many people with low vision see far less at night, and an unlit path is harder for everyone to trust.
+
+**How dark is worked out.** On the device, from the clock and the city's position (`packages/router/src/sun.ts`, NOAA's simplified solar position). Dark means the sun is more than 6 degrees below the horizon, the end of civil twilight. No weather or sunset API, so it works offline.
+
+**Cost.** A new profile field, `litAfterDarkPer100mS`: seconds per 100 m worth taking to avoid a stretch that isn't lit.
+- Mapped as unlit: the full amount.
+- Lighting not mapped: a share, by how much this person minds not knowing (`0.5 × (1 − uncertaintyTolerance)`), and named "lighting not mapped", never "unlit".
+- Indoors, covered, and riding a bus: nothing.
+- It's a preference, not a verdict: it never makes a route "unknown" or "no".
+
+The visual-impairment preset sets 60 s per 100 m; anyone can turn it on with "After dark, prefer streets that are lit" in the device settings. The route explanation says how much of the route isn't lit, or isn't mapped.
+
+**Coverage.** Edinburgh: 13,155 stretches lit, 2,010 unlit, 19,224 not mapped. Newcastle: 2,301, 124, 3,882.
+
+**Example.** Stockbridge to Dean Village for the visual-impairment profile: by day, 714 m of 1,134 m is on the unlit Water of Leith walkway; after dark, 10 m of 1,563 m.
+
+**To revisit.** The 60 s figure is a guess, like the crossing weights (#12). Ask low-vision users in Phase 2. Planning a trip for later tonight needs a departure time, which the app doesn't have yet.

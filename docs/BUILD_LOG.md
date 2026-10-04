@@ -2,6 +2,13 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map.
 
+## 2026-10-04 (after midnight)
+
+**Lit streets after dark** (D-038)
+- The router now knows when it's dark, from the sun's position worked out on the device.
+- After dark, the visual-impairment profile (and anyone who turns on "After dark, prefer streets that are lit") steers off unlit paths. Unmapped lighting costs a little and is named as not mapped.
+- Stockbridge to Dean Village: 714 m unlit by day, 10 m after dark. The route explanation says how much isn't lit.
+
 ## 2026-10-04 (late night)
 
 **"This trip" at the bottom; the ground leaves the top of the map** (D-036 step 8)

@@ -16,6 +16,8 @@ export interface Conditions {
   wet: boolean;
   /** Ice or snow: steep and sett sections close for wheeled users. */
   ice: boolean;
+  /** After civil twilight: unlit stretches cost those who asked to avoid them. Absent means daylight. */
+  dark?: boolean;
 }
 
 export const DRY: Conditions = { now: new Date("2026-10-04T12:00:00Z"), wet: false, ice: false };
@@ -192,13 +194,33 @@ const NOTE_MAX_FACTOR = 0.5;
 
 export function evaluateEdge(e: GraphEdge, forward: boolean, p: Profile, c: Conditions, ctx: EdgeContext = {}): Evaluation {
   const base = evaluateEdgeBase(e, forward, p, c, ctx);
+  if (base.cost === Infinity) return base;
+  const extra: Reason[] = [];
   // Paths shared with cycles: hard to hear a bike coming. A preference, priced per 100 m.
-  if (p.sharedPathPer100mS && e.sharedWithCycles?.value === true && base.cost < Infinity) {
+  if (p.sharedPathPer100mS && e.sharedWithCycles?.value === true) {
     const inferred = e.sharedWithCycles.state === "inferred";
     const pen = Math.round(((p.sharedPathPer100mS * e.lengthM) / 100) * (inferred ? 0.5 : 1));
-    return { ...base, cost: base.cost + pen, reasons: [...base.reasons, { kind: "penalty", attr: "cycles", detail: inferred ? "shared with cycles (probably)" : "shared with cycles", seconds: pen }] };
+    extra.push({ kind: "penalty", attr: "cycles", detail: inferred ? "shared with cycles (probably)" : "shared with cycles", seconds: pen });
   }
-  return base;
+  const dark = darkCost(e, p, c);
+  if (dark) extra.push(dark);
+  if (!extra.length) return base;
+  return { ...base, cost: base.cost + extra.reduce((t, r) => t + r.seconds, 0), reasons: [...base.reasons, ...extra] };
+}
+
+const INDOORS = new Set<GraphEdge["kind"]>(["transit", "board", "corridor", "elevator", "escalator"]);
+
+/**
+ * After dark, unlit stretches for those who asked to avoid them, priced per 100 m. A preference,
+ * never a verdict: it doesn't make a route unknown. Lighting nobody mapped costs a share of an unlit
+ * stretch, by how much this person minds not knowing.
+ */
+export function darkCost(e: GraphEdge, p: Profile, c: Conditions): Reason | null {
+  if (!c.dark || !p.litAfterDarkPer100mS || INDOORS.has(e.kind) || e.attrs.covered.value === true) return null;
+  const per = (p.litAfterDarkPer100mS * e.lengthM) / 100;
+  if (e.attrs.lit.value === false) return { kind: "penalty", attr: "lit", detail: "not lit", seconds: Math.round(per) };
+  if (!isKnown(e.attrs.lit)) return { kind: "penalty", attr: "lit", detail: "lighting not mapped", seconds: Math.round(per * 0.5 * (1 - p.uncertaintyTolerance)) };
+  return null;
 }
 
 function evaluateEdgeBase(e: GraphEdge, forward: boolean, p: Profile, c: Conditions, ctx: EdgeContext = {}): Evaluation {

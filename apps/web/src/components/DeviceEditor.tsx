@@ -191,6 +191,7 @@ export function DeviceEditor({ open, onOpenChange, device, onChange, onRename, o
               checked={!!profile.crossingCues}
               onChange={(v) => set({ crossingCues: v ? (PRESETS["visual-impairment"].crossingCues ?? { uncontrolledS: 240, zebraS: 60, silentSignalS: 120, noTactileS: 45 }) : undefined, sharedPathPer100mS: v ? (PRESETS["visual-impairment"].sharedPathPer100mS ?? 60) : undefined })}
             />
+            <Toggle id="lit-after-dark" label="After dark, prefer streets that are lit" checked={!!profile.litAfterDarkPer100mS} onChange={(v) => set({ litAfterDarkPer100mS: v ? (PRESETS["visual-impairment"].litAfterDarkPer100mS ?? 60) : undefined })} />
             <fieldset className="m-0 grid gap-2 border-0 p-0 py-2">
               <legend className="text-base">Accessible toilet at least every</legend>
               <div role="radiogroup" aria-label="Accessible toilet at least every" className="flex flex-wrap gap-2">
