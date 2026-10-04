@@ -152,7 +152,7 @@ Proposal: **accept it, and publish the enriched footway graph under ODbL.** It f
 
 ## D-022 Reports stay on the device until there's a backend decision
 
-**Decided** (interim). 2026-10-04. Problem reports (kind, location, time, optional note and photo) are saved on the device. Sending them anywhere means storing location data from members of the public and running moderation and corroboration, so that waits for Richard's call on the backend (Supabase, D-009 privacy rules). Reports never include the mobility profile. The data shape (`apps/web/src/lib/reports.ts`) matches the `report` table in `db/migrations/0001_graph.sql`.
+**Superseded by D-028** (2026-10-04): Richard decided to share notes and send reports. **Decided** (interim). 2026-10-04. Problem reports (kind, location, time, optional note and photo) are saved on the device. Sending them anywhere means storing location data from members of the public and running moderation and corroboration, so that waits for Richard's call on the backend (Supabase, D-009 privacy rules). Reports never include the mobility profile. The data shape (`apps/web/src/lib/reports.ts`) matches the `report` table in `db/migrations/0001_graph.sql`.
 
 ## D-023 Offline on the web
 
@@ -193,3 +193,18 @@ Open: whether notes should carry the conditions ("when wet") as a field rather t
 First use: pavement works. Street Manager (England, OGL) permits that close the footway close those pavement edges for everyone until the works' end date; works on the footway that don't close it, including a temporary walkway in the road, are "degraded" and counted as unknown; carriageway-only works are left out. In London TfL street disruptions that mention the pavement top this up live every 5 minutes. The build reads Street Manager's monthly archive (`pnpm build:works`, 1 GB, about a minute); production should subscribe to Street Manager's live notifications (free, needs registering an endpoint) through the same adapter. Scotland's register (SRWR) has no open feed: Edinburgh says "No open roadworks feed here yet" rather than implying there are none.
 
 Next adapters, in order of value: Overture places (more venues and addresses; release 2026-09-23.1 is on S3), National Rail Knowledgebase stations (step-free access and staffing; needs a free key), Met Office DataHub (warnings; key), Mapillary (kerb and surface detections; key), accessibility.cloud (venue accessibility; key, and its own sources' licences). Keys stay server-side once there is a backend; until then these run in the build.
+
+## D-028 Sharing notes and sending reports: Supabase, anonymous, post-moderated
+
+**Decided** by Richard, 2026-10-04 ("yes, turn sharing on"). Supersedes D-022 and the storage half of D-026. Setup and upkeep: [BACKEND.md](BACKEND.md). Code: `db/migrations/0003_sharing.sql`, `0004_storage.sql`, `apps/web/src/lib/sync.ts`.
+
+- **Where.** Supabase (Postgres + PostGIS), London region, which DATA_MODEL already names as the source of truth. No SDK in the app: plain fetch against its REST endpoints. The build turns sharing on with `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`; without them everything stays on the device.
+- **No accounts.** Anonymous sign-in, only when you first save something. Reading shared notes needs no sign-in. The anonymous id lets you delete your own notes and lets us count different people; it is never shown. Others' notes carry a salted per-person pseudonym (for corroboration), never the id.
+- **Notes show straight away, and come down fast** (post-moderation). Anyone can flag a note as wrong, unkind or about a person; two different people flagging hides it until someone looks. Pre-moderating every note would leave notes invisible for days at this scale, and notes are already framed as "not checked by us".
+- **Photos are pre-moderated.** They go to a private bucket and nobody else sees them until a person has checked them (faces, number plates) and copied them to the public bucket.
+- **Reports are write-only.** They go to triage, not on the map.
+- **Limits, enforced by the database, not the app.** 30 notes a day per person, 1 to 280 characters, row-level security on every table. `scripts/test-db.sh` checks 14 rules on Postgres + PostGIS, in CI.
+- **Privacy.** No profile, ever (D-009). The mobility label is the only health-related fact: opt-in per note, explained on the switch, with a preview of exactly what others will see. That is explicit consent for special category data. A DPIA is still owed before wider launch. Notes keep exact points (they are about places); reports keep the device's accuracy.
+- **Your notes, your call.** "Delete my note" removes it from the server too.
+
+**Owed by people, not code:** a CAPTCHA (Cloudflare Turnstile) on anonymous sign-up before any publicity, someone named to check flags and photos weekly, and the DPIA.
