@@ -7,7 +7,8 @@ A running record of what was built, newest first. Each entry links the decision 
 **Fewer Overture duplicates** (D-028 update, #15)
 - Same address plus a shared name word or the same kind of place counts as one venue.
 - 483 fewer duplicates across the three cities.
-- Wrong categories from Overture are still open.
+- Overture categories now come from its taxonomy ("Bakery", not "Casual eatery"), mapped to OSM tags through the hierarchy.
+- #15 closed.
 
 **CI on the production branch**: CI now runs on pushes to the production branch too. Before, only `main` was tested, and the mirror's pushes don't trigger workflows.
 
