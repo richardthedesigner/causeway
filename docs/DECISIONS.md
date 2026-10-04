@@ -131,6 +131,8 @@ Proposal: **accept it, and publish the enriched footway graph under ODbL.** It f
 
 **Decided.** 2026-10-04. Entrances (`entrance`, `door`, `automatic_door`, `door:width`, `step_count`, `wheelchair`, `ramp`), benches and toilets are extracted from OSM. Entrances on the footway network can exclude a route (a manual revolving door, steps over the user's limit, a door narrower than their minimum width). Every entrance near a venue destination gets a verdict for this user under "Getting in". An entrance is never called accessible when the step is unknown. Coverage is very thin (1 of 963 Old Town entrances has an `automatic_door` tag), so this is a crowd-verification and partner-data priority (Euan's Guide, AccessAble: Richard's call).
 
+**Update 2026-10-04:** a building destination now routes to the best entrance that fits this person (the first with a "yes" verdict within 50 m), and the route screen says which. If none fits, or none is reachable, the route ends at the building's centre as before and "Getting in" says what is known.
+
 ## D-019 Live weather and TfL lift outages (adapters)
 
 **Decided.** 2026-10-04. `packages/live`:

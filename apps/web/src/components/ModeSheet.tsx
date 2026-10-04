@@ -4,8 +4,8 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { Minus, Plus } from "lucide-react";
-import { PRESET_ORDER } from "@/lib/profile-store";
+import { ChevronDown, Minus, Plus } from "lucide-react";
+
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -17,6 +17,21 @@ interface Props {
 
 const STEP_LIMIT = 30;
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
+
+/** Eleven starting points in three short sets, so nobody reads a list of eleven. */
+const PRESET_GROUPS: { id: string; label: string; presets: MobilityPreset[] }[] = [
+  { id: "walk", label: "Walking", presets: ["walking", "walking-stick", "crutches", "rollator"] },
+  { id: "wheels", label: "On wheels", presets: ["manual-wheelchair", "manual-wheelchair-companion", "powerchair", "mobility-scooter", "pram"] },
+  { id: "other", label: "Other needs", presets: ["fatigue", "visual-impairment"] },
+];
+
+/** The closed "Your limits" row still says what matters: "Uphill 6% / Kerb 2 cm / No steps". */
+function limitsSummary(p: Profile, steps: number): string {
+  const up = p.maxInclineUpPct >= 50 ? "Any slope" : `Uphill ${p.maxInclineUpPct}%`;
+  const kerb = p.maxKerbCm === 0 ? "Flush kerbs" : `Kerb ${p.maxKerbCm} cm`;
+  const st = steps === 0 ? "No steps" : steps >= STEP_LIMIT ? "Any steps" : `Up to ${steps} steps`;
+  return `${up} / ${kerb} / ${st}`;
+}
 
 
 /**
@@ -34,39 +49,51 @@ export function ModeSheet({ open, onOpenChange, profile, onChange }: Props) {
       <SheetContent title="How do you get around?" description="Routes are worked out for your limits. Saved on this device only.">
         <fieldset className="m-0 border-0 p-0">
           <legend className="mb-2 text-base font-bold">Start from</legend>
-          <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Start from">
-            {PRESET_ORDER.map((k) => {
-              const on = profile.preset === k;
-              return (
-                <button
-                  key={k}
-                  type="button"
-                  role="radio"
-                  aria-checked={on}
-                  onClick={() => pick(k)}
-                  className={cn(
-                    "min-h-14 rounded-2xl border px-3 py-2 text-left text-base leading-tight",
-                    on ? "border-ink bg-ink text-surface" : "border-line bg-surface text-ink hover:border-ink",
-                  )}
-                >
-                  {PRESETS[k].label}
-                </button>
-              );
-            })}
+          <div className="grid gap-4" role="radiogroup" aria-label="Start from">
+            {PRESET_GROUPS.map((g) => (
+              <div key={g.label} role="group" aria-labelledby={`group-${g.id}`} className="grid gap-2">
+                <span id={`group-${g.id}`} className="text-sm text-muted">
+                  {g.label}
+                </span>
+                <div className="grid grid-cols-2 gap-2">
+                  {g.presets.map((k) => {
+                    const on = profile.preset === k;
+                    return (
+                      <button
+                        key={k}
+                        type="button"
+                        role="radio"
+                        aria-checked={on}
+                        onClick={() => pick(k)}
+                        className={cn(
+                          "min-h-12 rounded-2xl border px-3 py-2 text-left text-base leading-tight",
+                          on ? "border-ink bg-ink text-surface" : "border-line bg-surface text-ink hover:border-ink",
+                        )}
+                      >
+                        {PRESETS[k].label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </div>
         </fieldset>
 
-        <section className="mt-6 grid gap-5" aria-labelledby="limits-h">
-          <div className="flex items-baseline justify-between gap-3">
-            <h3 id="limits-h" className="m-0 text-base font-bold">
-              Your limits
-            </h3>
-            {custom ? (
-              <Button variant="ghost" className="min-h-12 px-3 text-sm" onClick={() => pick(profile.preset)}>
-                Reset to {PRESETS[profile.preset].label.toLowerCase()}
-              </Button>
-            ) : null}
-          </div>
+        <details className="group mt-6 rounded-2xl border border-line" open={custom || undefined}>
+          <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4">
+            <span className="grid">
+              <span className="font-bold">Your limits</span>
+              <span className="text-sm text-muted">{limitsSummary(profile, stepsAllowed)}</span>
+            </span>
+            <ChevronDown aria-hidden className="size-5 shrink-0 transition-transform group-open:rotate-180" />
+          </summary>
+        <section className="grid gap-5 px-4 pb-4" aria-label="Your limits">
+          {custom ? (
+            <Button variant="ghost" className="min-h-12 justify-self-start px-3 text-sm" onClick={() => pick(profile.preset)}>
+              Reset to {PRESETS[profile.preset].label.toLowerCase()}
+            </Button>
+          ) : null}
 
           <Limit label="Steepest uphill" value={`${profile.maxInclineUpPct >= 50 ? "Any" : `${profile.maxInclineUpPct}%`}`} onStep={(d) => set({ maxInclineUpPct: clamp(Math.min(profile.maxInclineUpPct, 20) + d * 0.5, 2, 20) })}>
             <Slider
@@ -165,6 +192,7 @@ export function ModeSheet({ open, onOpenChange, profile, onChange }: Props) {
             />
           </Limit>
         </section>
+        </details>
       </SheetContent>
     </Sheet>
   );

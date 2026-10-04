@@ -184,8 +184,22 @@ function plan(req: Extract<WorkerRequest, { type: "plan" }>): PlanResult {
   // Notes stay a separate layer: joined to edge ids here, per request, never written into the graph.
   router.noteSignals = noteSignals(req.notes, graph, c.now, mobilityLabelFor(p.preset), c.wet);
   const a = router.snap(req.from.lon, req.from.lat, p, c);
-  const b = router.snap(req.to.lon, req.to.lat, p, c);
-  const alts = router.alternatives(a, b, p, c, 3);
+  // A building: aim for the door that fits this person (D-018), not its middle. Fall back to the middle if no door fits or none is reachable.
+  const isVenue = !!req.to.venue || req.to.id.startsWith("pin:");
+  const entrances = isVenue ? entrancesNear(graph, req.to.lon, req.to.lat, p, 50).slice(0, 4) : [];
+  const fits = entrances.find((e) => e.verdict.passable === "yes");
+  let door: { name: string | null; osmId: number; detail: string } | null = null;
+  let b = router.snap(req.to.lon, req.to.lat, p, c);
+  let alts: Route[] = [];
+  if (fits) {
+    const bd = router.snap(fits.lon, fits.lat, p, c);
+    alts = router.alternatives(a, bd, p, c, 3);
+    if (alts.length) {
+      b = bd;
+      door = { name: fits.name, osmId: fits.osmId, detail: fits.verdict.detail };
+    }
+  }
+  if (!alts.length) alts = router.alternatives(a, b, p, c, 3);
   if (!alts.length) {
     const w = router.route(router.snap(req.from.lon, req.from.lat, PRESETS.walking, c), router.snap(req.to.lon, req.to.lat, PRESETS.walking, c), PRESETS.walking, c);
     return {
@@ -237,7 +251,8 @@ function plan(req: Extract<WorkerRequest, { type: "plan" }>): PlanResult {
     notes: ex.notes,
     avoided: ex.avoided.slice(0, 4).map((x) => ({ name: x.name, detail: x.reason.detail })),
     tradeoffs: tos,
-    entrances: entrancesNear(graph, req.to.lon, req.to.lat, p, 50).slice(0, 4),
+    entrances,
+    door,
   };
 }
 
