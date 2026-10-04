@@ -4,13 +4,51 @@ A running record of what was built, newest first. Each entry links the decision 
 
 ## 2026-10-04 (night)
 
-**New app UI: "can I get there?" first** (D-032, commit `e2c2a1d`)
+**New app UI: "can I get there?" first** (D-035, commit `e2c2a1d`)
 - Replaces every screen. Profile in the search bar, verdict before time, a route strip coloured by slope, the map line to match.
 - Nothing fits now offers the closest point you can reach and a one-journey change to one limit (`diagnose` in the router, tested on Castle Wynd South).
 - Recent places with a verdict from where you start. Navigation warns up to 300 m ahead.
 - axe clean on four screens, no overflow at 200% text, light and dark. The design system: [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md); screens in [ux/v2/](ux/v2/).
 
+**Powerchairs and scooters in two classes each, and named devices** (D-034, [plan](plans/DEVICES.md))
+- From tester feedback: a lightweight powerchair manages far less than a heavy duty one, and road scooters differ from pavement scooters.
+- New presets: "Powerchair, lightweight" (8% uphill, 3 cm kerbs, never cobbles) and "Mobility scooter, road" (class 3: uses streets without a pavement, no buses).
+- Saved, named devices with favourites. The app starts with Cherry (lightweight powerchair, no setts or cobbles) and Lulu (pavement scooter) as a demo seed.
+- The device switcher and naming screens wait for the UI update; the spec is in the plan.
+
 ## 2026-10-04 (evening)
+
+**Accessible toilets on the way**
+- The route lists accessible toilets within about 80 m: public toilets mapped as wheelchair accessible, and venues mapped with an accessible toilet (marked "Customers").
+- Each shows Changing Places, RADAR key, fee and opening hours where mapped, and they appear as WC labels on the map.
+- New setting: "Accessible toilet at least every" (don't mind, 500 m, 1 km, 2 km). The route says when its longest gap is longer than that.
+- The search index now keeps the `centralkey`, `changing_places`, `fee`, `opening_hours` and `access` tags.
+- Steering: when the longest gap is over your setting, a "Past more toilets" option is offered. It uses the same constrained search as benches (D-019): a toilet counts within 80 m of the path, and venue toilets from search are passed to the router. Closes #17.
+
+**Navigation on buses and trams**
+- During a ride, the off-route limit widens from 25 m to 150 m. The ride is drawn stop to stop in straight lines, but the bus follows the road, so riders were being told they were off route mid-ride.
+- 350 m before your stop: "Get ready to get off. Your stop is Dean Bridge."
+- Back on foot, the 25 m limit returns. Covered by a test.
+
+**Rides drawn apart from walking:** bus, tram, Metro and train legs are dotted on the map, labelled where you board ("37", "Tram", "Metro", "Jubilee"). Walking stays a solid line, so you can see at a glance how much you push or walk. The labels follow theme changes.
+
+**Fewer Overture duplicates** (D-028 update, #15)
+- Same address plus a shared name word or the same kind of place counts as one venue.
+- 483 fewer duplicates across the three cities.
+- Overture categories now come from its taxonomy ("Bakery", not "Casual eatery"), mapped to OSM tags through the hierarchy.
+- #15 closed.
+
+**CI on the production branch**: CI now runs on pushes to the production branch too. Before, only `main` was tested, and the mirror's pushes don't trigger workflows.
+
+**Weekly data refresh** (D-033, #14)
+- A GitHub Actions workflow rebuilds timetables, works and the search index.
+- It tests the result and opens a PR with a count table.
+- The bus and works builds now work out their sample days and archive month from today's date (they were hard-coded).
+
+**Footway islands joined** (D-032, closes #7)
+- `bridgeIslands` joins small islands of footway to the street across gaps of up to 15 m, with unknown attributes.
+- It skips platforms, bridges and height steps.
+- 204 connectors across the three areas. Gateshead Interchange is reachable, so the Metro is useful there.
 
 **Trams and the Tyne and Wear Metro** (D-031, commit `b3a4bf8`)
 - Edinburgh Trams and the Metro come from the same open timetables as the buses, each line tagged with its mode.

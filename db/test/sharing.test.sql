@@ -59,9 +59,13 @@ select pg_temp.check((select count(*) = 0 from note_public where id = '11111111-
 
 -- Reports: write only.
 insert into report (geom, kind, detail) values (st_setsrid(st_point(-3.19, 55.95), 4326), 'blocked', 'Bins across the pavement');
-do $$ begin
-  perform count(*) from report;
-  raise exception 'FAILED: read reports as the public';
+-- Refused outright, or (once 0005 lets reviewers read them) filtered to nothing: either way the public sees no reports.
+do $$
+declare n int;
+begin
+  select count(*) into n from report;
+  if n > 0 then raise exception 'FAILED: read reports as the public'; end if;
+  raise notice 'ok: reports are write-only for the public';
 exception when insufficient_privilege then raise notice 'ok: reports are write-only for the public';
 end $$;
 

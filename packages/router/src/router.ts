@@ -37,6 +37,8 @@ export class Router {
   private mainComponent = -1;
   /** Edge id to distance from its midpoint to the nearest bench (only when the graph has benches). */
   readonly benchM = new Map<number, number>();
+  /** Distance from each edge to the nearest accessible toilet (public, or in a venue). */
+  readonly toiletM = new Map<number, number>();
   /** Edge id to what people's notes say about it. Held beside the graph, never written into it (D-008). */
   noteSignals = new Map<number, NoteSignal>();
 
@@ -53,6 +55,29 @@ export class Router {
     }
     this.labelComponents();
     this.indexBenches();
+    this.indexToilets();
+  }
+
+  /** Accessible toilets the graph didn't carry (venues, from the app's search index). Re-indexes. */
+  addToilets(points: { lon: number; lat: number; name: string }[]) {
+    let id = -1;
+    for (const pt of points)
+      (this.graph.amenities ??= []).push({
+        id: id--,
+        lon: pt.lon,
+        lat: pt.lat,
+        kind: "toilets",
+        wheelchair: { value: "yes", state: "reported", source: "osm", observedAt: null, method: "toilets:wheelchair on a venue" },
+        details: { access: { value: "customers", state: "reported", source: "osm", observedAt: null, method: "a venue's toilet" }, name: { value: pt.name, state: "reported", source: "osm", observedAt: null, method: "OSM name" } },
+        osmId: 0,
+      });
+    this.indexToilets();
+  }
+
+  private indexToilets() {
+    const pts = (this.graph.amenities ?? []).filter((a) => a.kind !== "bench" && (a.wheelchair.value === "yes" || a.kind === "changing_places")).map((a) => [a.lon, a.lat] as [number, number]);
+    this.toiletM.clear();
+    this.indexNear(pts, this.toiletM);
   }
 
   /**
@@ -66,19 +91,23 @@ export class Router {
   private hasRides: boolean | undefined;
 
   private indexBenches() {
-    const benches = (this.graph.amenities ?? []).filter((a) => a.kind === "bench");
-    if (!benches.length) return;
+    this.indexNear((this.graph.amenities ?? []).filter((a) => a.kind === "bench").map((b) => [b.lon, b.lat] as [number, number]), this.benchM);
+  }
+
+  /** For every edge, metres from its middle to the nearest of `points` (within about 400 m). */
+  private indexNear(points: [number, number][], into: Map<number, number>) {
+    if (!points.length) return;
     const CELL = 0.002; // about 200 m
     const grid = new Map<string, [number, number][]>();
     const key = (x: number, y: number) => `${Math.floor(x / CELL)}:${Math.floor(y / CELL)}`;
-    for (const b of benches) (grid.get(key(b.lon, b.lat)) ?? grid.set(key(b.lon, b.lat), []).get(key(b.lon, b.lat))!).push([b.lon, b.lat]);
+    for (const b of points) (grid.get(key(b[0], b[1])) ?? grid.set(key(b[0], b[1]), []).get(key(b[0], b[1]))!).push(b);
     for (const e of this.graph.edges) {
       const mid = e.geometry[Math.floor(e.geometry.length / 2)]!;
       const cx = Math.floor(mid[0] / CELL),
         cy = Math.floor(mid[1] / CELL);
       let best = Infinity;
       for (let dx = -2; dx <= 2; dx++) for (let dy = -2; dy <= 2; dy++) for (const b of grid.get(`${cx + dx}:${cy + dy}`) ?? []) best = Math.min(best, haversine(mid, b));
-      this.benchM.set(e.id, best);
+      into.set(e.id, best);
     }
   }
 
@@ -185,11 +214,15 @@ export class Router {
 
   /**
    * Route that never goes more than `maxGapM` without passing a mapped bench
-   * (within 30 m of the edge). Resource-constrained A*: the state is the node
-   * plus distance since the last bench, in eight buckets. Null when no such
-   * route exists in the mapped data.
+   * (within 30 m of the edge), or with `stop: "toilet"` an accessible toilet
+   * (within 80 m). Resource-constrained A*: the state is the node plus
+   * distance since the last stop, in eight buckets. Null when no such route
+   * exists in the mapped data.
    */
-  routeWithRests(from: GraphNode, to: GraphNode, p: Profile, c: Conditions = DRY, maxGapM = p.maxRestIntervalM ?? 400): Route | null {
+  routeWithRests(from: GraphNode, to: GraphNode, p: Profile, c: Conditions = DRY, maxGapM = p.maxRestIntervalM ?? 400, stop: "bench" | "toilet" = "bench"): Route | null {
+    // A bench counts within 30 m of the path; a toilet within 80 m (worth a short detour off it).
+    const near = stop === "bench" ? this.benchM : this.toiletM;
+    const reach = stop === "bench" ? 30 : 80;
     const B = 8;
     const bucketM = maxGapM / B;
     const vmax = this.fastest(p);
@@ -212,7 +245,7 @@ export class Router {
         break;
       }
       for (const a of this.out.get(L.node) ?? []) {
-        const benchHere = (this.benchM.get(a.edge.id) ?? Infinity) <= 30;
+        const benchHere = (near.get(a.edge.id) ?? Infinity) <= reach;
         const gap = RAIL.has(a.edge.kind) ? 0 : benchHere ? 0 : L.gap + a.edge.lengthM;
         if (gap > maxGapM) continue;
         const ev = evaluateEdge(a.edge, a.forward, p, c, { note: this.noteSignals.get(a.edge.id) });
@@ -526,7 +559,7 @@ export function explain(router: Router, chosen: Route, from: GraphNode, to: Grap
   }
   if (p.maxToiletIntervalM) {
     const t = restStats(router.graph, chosen).toilets.filter((x) => x.wheelchair === "yes" || x.changingPlaces);
-    notes.push(t.length ? `${t.length} accessible toilet${t.length === 1 ? "" : "s"} mapped near the route.` : "No accessible toilets mapped near this route.");
+    notes.push(t.length ? `${t.length} accessible public toilet${t.length === 1 ? "" : "s"} mapped near the route.` : "No accessible public toilets mapped near this route. Venues with one are listed under Accessible toilets.");
   }
   for (const b of sum.movableBridges) {
     const verb = b.type === "tilt" ? "tilting" : b.type === "swing" ? "swing" : "movable";
@@ -644,7 +677,7 @@ export function toGeoJSON(r: Route, props: Record<string, unknown> = {}) {
 // ------------------------------------------------------------- trade-offs
 
 export interface Tradeoff {
-  id: "smoother" | "gentler" | "more-certain" | "more-benches";
+  id: "smoother" | "gentler" | "more-certain" | "more-benches" | "more-toilets";
   label: string;
   /** null when no route exists with this constraint: we say so rather than hide it. */
   route: Route | null;
@@ -707,6 +740,30 @@ export function tradeoffs(router: Router, chosen: Route, from: GraphNode, to: Gr
       });
     }
   }
+  if (p.maxToiletIntervalM) {
+    const gap = restStats(router.graph, chosen).longestWithoutToiletM;
+    if (gap > p.maxToiletIntervalM) {
+      let best: { r: Route; gap: number } | null = null;
+      for (const f of [1, 1.5, 2, 3]) {
+        const r = router.routeWithRests(from, to, p, c, p.maxToiletIntervalM * f, "toilet");
+        if (r) {
+          const g2 = restStats(router.graph, r).longestWithoutToiletM;
+          if (g2 < gap * 0.85) best = { r, gap: g2 };
+          break;
+        }
+      }
+      out.push({
+        id: "more-toilets",
+        label: "Past more toilets",
+        route: best?.r ?? null,
+        message: !best
+          ? "No way there passes mapped accessible toilets closer together than this. Not every toilet is mapped."
+          : best.gap <= p.maxToiletIntervalM
+            ? `An accessible toilet at least every ${p.maxToiletIntervalM >= 1000 ? `${p.maxToiletIntervalM / 1000} km` : `${p.maxToiletIntervalM} m`}. Adds ${mins(best.r)} min.`
+            : `Longest stretch without one ${Math.round(best.gap / 10) * 10} m instead of ${Math.round(gap / 10) * 10} m. Adds ${mins(best.r)} min.`,
+      });
+    }
+  }
   if (sum.unknownM > 0) {
     const r = router.route(from, to, { ...p, uncertaintyTolerance: 0 }, c);
     const unknownM = r ? summarise(r, c.now).unknownM : Infinity;
@@ -761,8 +818,10 @@ export interface RestStats {
   /** Longest stretch of the route with no mapped bench within 25 m. */
   longestWithoutBenchM: number;
   benches: number;
-  /** Toilets within 60 m of the route, in order along it. */
+  /** Toilets within 80 m of the route, in order along it. */
   toilets: { at: number; wheelchair: "yes" | "limited" | "no" | null; changingPlaces: boolean }[];
+  /** Longest stretch with no accessible toilet within 80 m. */
+  longestWithoutToiletM: number;
 }
 
 /** Benches and toilets along a route, from what OSM has mapped (never complete; say so in copy). */
@@ -793,10 +852,13 @@ export function restStats(g: Graph, r: Route): RestStats {
   for (let i = 1; i < stops.length; i++) gap = Math.max(gap, stops[i]! - stops[i - 1]!);
   const toilets = near
     .filter((a) => a.kind !== "bench")
-    .map((a) => ({ at: along([a.lon, a.lat], 60), wheelchair: a.wheelchair.value, changingPlaces: a.kind === "changing_places" }))
+    .map((a) => ({ at: along([a.lon, a.lat], 80), wheelchair: a.wheelchair.value, changingPlaces: a.kind === "changing_places" }))
     .filter((t): t is { at: number; wheelchair: "yes" | "limited" | "no" | null; changingPlaces: boolean } => t.at !== null)
     .sort((a, b) => a.at - b.at);
-  return { longestWithoutBenchM: Math.round(gap), benches: benchAt.length, toilets };
+  const loos = [0, ...toilets.filter((t) => t.wheelchair === "yes" || t.changingPlaces).map((t) => t.at), cum[cum.length - 1] ?? 0];
+  let toiletGap = 0;
+  for (let i = 1; i < loos.length; i++) toiletGap = Math.max(toiletGap, loos[i]! - loos[i - 1]!);
+  return { longestWithoutBenchM: Math.round(gap), benches: benchAt.length, toilets, longestWithoutToiletM: Math.round(toiletGap) };
 }
 
 // ------------------------------------------------------------- no route
@@ -825,7 +887,7 @@ const RELAXABLE = new Set(["steps", "escalator", "incline", "kerb", "surface", "
 
 /**
  * When nothing fits: say what is in the way, how close you can get, and
- * what one-off change would find a way. Never a dead end (D-032).
+ * what one-off change would find a way. Never a dead end (D-035).
  *
  * "In the way" means on the way someone with no limits would go, past the
  * last point this person can reach: earlier obstacles already have a way round.

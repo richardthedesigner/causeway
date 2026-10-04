@@ -21,6 +21,7 @@ import type { Place } from "@/lib/plan-types";
 import { loadProfile, saveProfile } from "@/lib/profile-store";
 import { addRecent, loadRecents } from "@/lib/recents";
 import { useNotes } from "@/lib/use-notes";
+import { toiletsAlong } from "@/lib/toilets";
 import { usePlaces } from "@/lib/use-places";
 import { usePlanner, type Conditions } from "@/lib/use-planner";
 
@@ -55,6 +56,11 @@ export default function Home() {
   }, []);
   const planner = usePlanner(city);
   const index = usePlaces(city, planner.ready?.places ?? null);
+  // Venues with an accessible toilet go to the router, so "Past more toilets" can use them (public ones are in the graph).
+  useEffect(() => {
+    if (!index) return;
+    planner.sendToilets(index.entries.filter((e) => e.cat !== "amenity=toilets" && e.access?.["toilets:wheelchair"] === "yes").map((e) => ({ lon: e.place.lon, lat: e.place.lat, name: e.place.name })));
+  }, [index]); // eslint-disable-line react-hooks/exhaustive-deps
   const [profile, setProfile] = useState<Profile>(PRESETS["manual-wheelchair"]);
   const [modeOpen, setModeOpen] = useState(false);
   const [from, setFrom] = useState<Place>(CITIES[0]!.start);
@@ -205,6 +211,7 @@ export default function Home() {
     return typeof document === "undefined" ? null : { url: u(city.basemap), key: city.id, glyphs: u("fonts/glyphs.json"), center: [city.start.lon, city.start.lat] as [number, number] };
   }, [city]); // eslint-disable-line react-hooks/exhaustive-deps
   const selectedRoute = routes.find((r) => r.id === selected) ?? routes[0] ?? null;
+  const toilets = useMemo(() => (index && selectedRoute && view === "route" ? toiletsAlong(index, selectedRoute.coords) : null), [index, selectedRoute, view]);
   const entrances = useMemo(() => (result?.status === "ok" ? result.entrances.map((e) => ({ lon: e.lon, lat: e.lat, ok: e.verdict.passable })) : []), [result]);
 
   const profileChip = (
@@ -347,6 +354,7 @@ export default function Home() {
         </div>
       ) : to ? (
         <RoutePanel
+          toilets={toilets}
           from={from}
           to={to}
           profile={routeProfile}
@@ -401,6 +409,7 @@ export default function Home() {
         pin={pin}
         showSlopes={showSlopes}
         entrances={view === "route" ? entrances : []}
+        toilets={toilets?.toilets ?? []}
         onMapClick={navigating ? () => {} : onMapClick}
         me={me}
         basemap={basemap}

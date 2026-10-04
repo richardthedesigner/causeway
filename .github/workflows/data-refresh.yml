@@ -1,0 +1,88 @@
+name: data-refresh
+# Rebuild the open data the app ships with and open a pull request when it changes (issue #14).
+# Weekly: bus, tram and Metro timetables (BODS GTFS), pavement works (Street Manager), and the
+# search index (OSM, plus the pinned Overture release). The street graphs and base maps stay
+# manual: they need LiDAR and a reviewed Protomaps build, and they change slowly.
+on:
+  schedule:
+    - cron: "17 4 * * 1" # Mondays 04:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: data-refresh
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install osmium duckdb
+      - run: pnpm install --frozen-lockfile
+
+      # Everything is downloaded fresh each run (about 2 GB, mostly GTFS and the Street Manager archive).
+      - name: Fresh sources
+        run: |
+          mkdir -p .data-cache
+          rm -f .data-cache/gtfs-*.zip .data-cache/*.overture-*.json .data-cache/*-[0-9].osm .data-cache/*.bus-stop-facts.json
+          curl -sSfL -o .data-cache/Edinburgh.osm.pbf https://download.bbbike.org/osm/bbbike/Edinburgh/Edinburgh.osm.pbf
+
+      # Each step fails softly: one source being down shouldn't block the others.
+      # Places first: it downloads the OSM tiles that the bus stop facts also read.
+      - name: Search index
+        run: |
+          for a in edinburgh-central newcastle-gateshead london-jubilee; do pnpm build:places "$a" || echo "::warning::places failed for $a"; done
+        continue-on-error: true
+      - name: Buses, trams and Metro
+        run: pnpm build:bus
+        continue-on-error: true
+      - name: Pavement works
+        run: |
+          rm -f .data-cache/sm-permit-*.json
+          pnpm build:works
+        continue-on-error: true
+
+      - name: Check the app still works with the new data
+        run: |
+          pnpm typecheck
+          pnpm test
+
+      - name: Summary
+        id: summary
+        run: |
+          {
+            echo 'body<<EOF'
+            echo 'Weekly data refresh. Counts now, with the change since `main`:'
+            echo
+            pnpm -s tsx scripts/data-summary.ts --compare origin/main
+            echo
+            echo 'Built by the data-refresh workflow. Check the bus and works counts for sudden drops (a feed outage) before merging.'
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - uses: peter-evans/create-pull-request@v7
+        with:
+          branch: data-refresh
+          base: main
+          title: "Data refresh: timetables, works and places"
+          commit-message: "Refresh timetables, pavement works and the search index"
+          body: ${{ steps.summary.outputs.body }}
+          add-paths: |
+            data/places/*.json.gz
+            data/transit/*/bus.json
+            data/live/*.works.json
+          delete-branch: true

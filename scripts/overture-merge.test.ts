@@ -19,3 +19,20 @@ describe("mergeOverture", () => {
     expect(mergeOverture(osm, [ov("A", { conf: 0.5 }), ov("B", { c: null }), ov("C", { c: "home_service" })])).toEqual([]);
   });
 });
+
+describe("address matching", () => {
+  it("normalises street addresses", async () => {
+    const { streetAddress } = await import("./overture-merge.js");
+    expect(streetAddress("30 Grindlay St, EH3 9AX")).toBe("30 grindlay street");
+    expect(streetAddress("30 Grindlay Street")).toBe("30 grindlay street");
+    expect(streetAddress("Grindlay Street")).toBeNull();
+  });
+
+  it("drops a same-address place of the same kind under another name, but keeps other businesses in the building", () => {
+    const osmHotel = [{ n: "InterContinental Edinburgh", x: -3.1925, y: 55.9535, ad: "19-21 George Street, EH2 2PB", c: "tourism=hotel" }];
+    const ovHotel = { id: "h", n: "The George", c: "hotel", x: -3.1926, y: 55.9535, ad: "19-21 George St", conf: 0.95 };
+    expect(mergeOverture(osmHotel, [ovHotel])).toEqual([]);
+    expect(mergeOverture(osmHotel, [{ ...ovHotel, ad: "25 George St" }])).toHaveLength(1);
+    expect(mergeOverture(osmHotel, [{ ...ovHotel, n: "Smith Accountants", c: "accountant" }])).toHaveLength(1);
+  });
+});

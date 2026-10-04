@@ -5,6 +5,7 @@ import type { Profile } from "@causeway/profile";
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import { BusDepartures } from "@/components/BusDepartures";
+import type { toiletsAlong } from "@/lib/toilets";
 import { ElevationChart } from "@/components/ElevationChart";
 import { NoteList } from "@/components/NoteList";
 import type { NoteAbout } from "@/components/NoteSheet";
@@ -33,6 +34,8 @@ interface Props {
   works: WorksSummary | null;
   /** The city has a works feed at all. */
   worksCovered: boolean;
+  /** Accessible toilets along the chosen route, from the search index. */
+  toilets: ReturnType<typeof toiletsAlong> | null;
   /** Live bus departures exist for this city (TfL in London). */
   liveBuses: boolean;
   onStart: () => void;
@@ -322,6 +325,8 @@ export function RoutePanel(props: Props) {
 
             <BusDepartures legs={sel.busLegs} live={props.liveBuses} />
 
+            {props.toilets ? <Toilets data={props.toilets} wantM={profile.maxToiletIntervalM} /> : null}
+
             {sel.unknowns.length ? (
               <More title="What we don't know" aside={`${sel.unknowns.length} place${sel.unknowns.length === 1 ? "" : "s"}`}>
                 <ul className="m-0 grid list-none gap-3 p-0">
@@ -380,7 +385,7 @@ export function RoutePanel(props: Props) {
 
 /**
  * Nothing fits. Say what's in the way, then what you can do: go as close as
- * you can, or stretch a limit for this journey only. Never a dead end (D-032).
+ * you can, or stretch a limit for this journey only. Never a dead end (D-035).
  */
 function NoFit({ result, to, onAllowOnce, onGoClosest, onOpenMode }: { result: Extract<PlanResult, { status: "none" }>; to: Place; onAllowOnce: Props["onAllowOnce"]; onGoClosest: Props["onGoClosest"]; onOpenMode: () => void }) {
   const b = result.blockers;
@@ -518,5 +523,37 @@ function ShareButton({ to, minutes }: { to: string; minutes: number }) {
         {copied ? "Copied" : ""}
       </span>
     </Button>
+  );
+}
+
+const km = (m: number) => (m >= 1000 ? `${(m / 1000).toFixed(1)} km` : `${Math.round(m / 10) * 10} m`);
+
+/** Accessible toilets on the way, in route order, with what matters when you get there. */
+function Toilets({ data, wantM }: { data: NonNullable<Props["toilets"]>; wantM: number | null }) {
+  const { toilets, longestGapM } = data;
+  const short = wantM !== null && longestGapM > wantM;
+  return (
+    <More title="Accessible toilets" aside={toilets.length ? `${toilets.length} on the way` : "None mapped"}>
+      {wantM !== null ? (
+        <p className={cn("m-0 mb-2 text-sm", short ? "text-caution" : "text-muted")}>
+          {short ? `Longest stretch without one: ${km(longestGapM)}. You asked for one every ${km(wantM)}.` : `One at least every ${km(wantM)}, as you asked.`}
+        </p>
+      ) : null}
+      {toilets.length ? (
+        <ul className="m-0 grid list-none gap-2 p-0">
+          {toilets.slice(0, 12).map((t) => (
+            <li key={`${t.name}${t.at}`} className="grid">
+              <span>
+                {t.name} <span className="tabular text-muted">/ at {km(t.at)}</span>
+              </span>
+              <span className="text-sm text-muted">{[t.public ? "Public toilet" : "In a venue", t.offM > 15 ? `${km(t.offM)} off the route` : null, ...t.facts].filter(Boolean).join(" / ")}</span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="m-0 text-sm text-muted">No accessible toilets are mapped within about 80 m of this route. Some won't be mapped.</p>
+      )}
+      <p className="m-0 mt-2 text-sm text-muted">From OpenStreetMap. Mapped by volunteers; check opening times.</p>
+    </More>
   );
 }

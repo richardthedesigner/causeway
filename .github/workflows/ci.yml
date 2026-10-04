@@ -1,7 +1,8 @@
 name: ci
 on:
   push:
-    branches: [main]
+    # Both: work lands on either, and the mirror's own push (GITHUB_TOKEN) doesn't trigger workflows.
+    branches: [main, claude/sleepy-johnson-mavbrs]
   pull_request:
 
 jobs:

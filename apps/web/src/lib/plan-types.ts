@@ -30,6 +30,8 @@ export interface PlannedRoute {
   minutesExtra: number;
   /** Turn-by-turn plan for this route (manoeuvres, hazards, geometry). */
   nav: NavPlan;
+  /** Rides (bus, tram, Metro, train), drawn apart from the walking and labelled where you board. */
+  rides: { coords: [number, number][]; label: string }[];
   /** Bus legs, for the departures line: stop, route, buses an hour now (timetable). */
   busLegs: { stopId: string; stopName: string; route: string; headsign: string | null; perHour: number }[];
   /** Where the data is missing, by street, so the user can judge it. */
@@ -104,6 +106,8 @@ export interface LiftOutageMsg {
 export type WorkerRequest =
   | { type: "init"; graphUrl: string; networkUrl?: string; worksUrl?: string; busUrl?: string; places: Place[] }
   | { type: "works-live"; works: WorksObservation[]; fetchedAt: string }
+  /** Venues with an accessible toilet, from the search index, so routing can pass them. */
+  | { type: "toilets"; points: { lon: number; lat: number; name: string }[] }
   | { type: "live"; outages: LiftOutageMsg[] }
   | {
       type: "plan";

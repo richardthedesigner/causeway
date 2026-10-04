@@ -18,10 +18,10 @@ interface Props {
 const STEP_LIMIT = 30;
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
 
-/** Eleven starting points in three short sets, so nobody reads a list of eleven. */
+/** Thirteen starting points in three short sets, so nobody reads a list of thirteen. */
 const PRESET_GROUPS: { id: string; label: string; presets: MobilityPreset[] }[] = [
   { id: "walk", label: "Walking", presets: ["walking", "walking-stick", "crutches", "rollator"] },
-  { id: "wheels", label: "On wheels", presets: ["manual-wheelchair", "manual-wheelchair-companion", "powerchair", "mobility-scooter", "pram"] },
+  { id: "wheels", label: "On wheels", presets: ["manual-wheelchair", "manual-wheelchair-companion", "powerchair-light", "powerchair", "mobility-scooter", "mobility-scooter-road", "pram"] },
   { id: "other", label: "Other needs", presets: ["fatigue", "visual-impairment"] },
 ];
 
@@ -146,6 +146,26 @@ export function ModeSheet({ open, onOpenChange, profile, onChange }: Props) {
               onChange={(v) => set({ surfaces: { ...profile.surfaces, gravel: v ? null : PRESETS[profile.preset].surfaces.gravel ?? 0.6, grass: v ? null : PRESETS[profile.preset].surfaces.grass ?? 0.8 } })}
             />
             <Toggle id="buses" label="Use buses" checked={profile.buses !== false} onChange={(v) => set({ buses: v })} />
+            <fieldset className="m-0 grid gap-2 border-0 p-0 py-2">
+              <legend className="text-base">Accessible toilet at least every</legend>
+              <div role="radiogroup" aria-label="Accessible toilet at least every" className="flex flex-wrap gap-2">
+                {([null, 500, 1000, 2000] as const).map((m) => {
+                  const on = profile.maxToiletIntervalM === m;
+                  return (
+                    <button
+                      key={String(m)}
+                      type="button"
+                      role="radio"
+                      aria-checked={on}
+                      onClick={() => set({ maxToiletIntervalM: m })}
+                      className={cn("min-h-12 rounded-full border px-4 text-base", on ? "border-ink bg-ink text-surface" : "border-line bg-surface text-ink hover:border-ink")}
+                    >
+                      {m === null ? "Don't mind" : m >= 1000 ? `${m / 1000} km` : `${m} m`}
+                    </button>
+                  );
+                })}
+              </div>
+            </fieldset>
             {profile.preset === "mobility-scooter" ? (
               <Toggle
                 id="scooter-permit"

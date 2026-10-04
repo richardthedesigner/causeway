@@ -200,6 +200,8 @@ Next adapters, in order of value: Overture places (more venues and addresses; re
 
 **Decided.** 2026-10-04. OSM has the access tags but misses many venues (Newcastle: 2,214 OSM places against 5,376 in Overture). Overture places are added to each city's search index when they are confident (0.7 and over), open, somewhere people go, and not already in OSM under a similar name within 75 m (word overlap, "&" read as "and", and spelling variants within 40 m). They show with their category and address and no access line, and an "accessible" search never lists them, because nothing says they are. When names tie, OSM ranks first.
 
+Update (issue #15): an Overture place is also a duplicate when an OSM place within 40 m has the same house number and street and either shares a name word or is the same kind of place. An address alone isn't enough, because one building can hold many businesses. This removed 409 more duplicates in Edinburgh, 58 in Newcastle and 16 in London.
+
 ## D-029 Buses: frequency-based, built from open timetables, honest about the wheelchair space
 
 **Decided.** 2026-10-04. Buses come from the Bus Open Data Service GTFS downloads (England and Scotland, no key, OGL; `pnpm build:bus`). For each route direction we keep the stops inside the area, the typical ride time between stops and how many buses leave each stop in each hour on a typical weekday, Saturday and Sunday. The app adds them to the graph when a city loads (`addBus`), so timetables refresh without rebuilding streets.
@@ -223,6 +225,8 @@ The route panel lists each bus leg with how often it runs now (timetable) and, i
 - **Privacy.** No profile, ever (D-009). The mobility label is the only health-related fact: opt-in per note, explained on the switch, with a preview of exactly what others will see. That is explicit consent for special category data. A DPIA is still owed before wider launch. Notes keep exact points (they are about places); reports keep the device's accuracy.
 - **Your notes, your call.** "Delete my note" removes it from the server too.
 
+**Update 2026-10-04: review page.** `/review` lets invited reviewers work through flagged notes, photos and reports. They sign in as themselves with an email code; row-level security (`0005_review.sql`) decides what they can do, they can only change review fields, and `review_log` records every decision with who made it. The page never holds the service key.
+
 **Owed by people, not code:** a CAPTCHA (Cloudflare Turnstile) on anonymous sign-up before any publicity, someone named to check flags and photos weekly, and the DPIA.
 
 ## D-031 Trams and the Tyne and Wear Metro come in with the buses
@@ -236,7 +240,41 @@ The route panel lists each bus leg with how often it runs now (timetable) and, i
 
 Found while testing: walking from Gateshead Interchange to Jackson Street (about 100 m) costs about 30 minutes in the Newcastle graph, so the footways there need checking. Logged as a GitHub issue.
 
-## D-032 The app answers "can I get there?" first
+## D-032 Join footway islands across short gaps, and say they're unknown
+
+**Decided.** 2026-10-04 (fixes issue #7). OSM often ends a footway at a crossing on a road we drop, such as a bus-only road in an interchange (`access=no`). The pavements beyond become an island a few metres from the street, so routes couldn't leave Gateshead Interchange.
+
+`bridgeIslands` (`packages/graph/src/islands.ts`) runs in `build-area` after terrain. It joins each island of up to 500 nodes to the main network at its closest point within 15 m, preferring a mapped crossing. The connector is a crossing when either end is one; every attribute is unknown, so kerbs and surface count as unknown; it carries a `gap:` ref.
+
+It leaves alone:
+- railway platforms (reached through the station, not across the tracks);
+- bridges and tunnels;
+- pairs whose known ground heights differ by more than 2 m (a wall, not a gap).
+
+Bridged: Edinburgh 172 of 446 islands, Newcastle 9 of 24, London 23 of 48. `scripts/bridge-islands.ts` applied it to the committed snapshots without a full rebuild. Central Station to Jackson Street now takes the Metro (about 10 minutes against 24 on foot), with a test.
+
+## D-033 Weekly data refresh as a pull request
+
+**Decided.** 2026-10-04 (issue #14). `.github/workflows/data-refresh.yml` runs on Mondays at 04:17 UTC, or by hand.
+- **Rebuilds:** the search index (fresh OSM, the pinned Overture release), the bus, tram and Metro timetables (BODS GTFS, sampling the next Tuesday, Saturday and Sunday), and pavement works (last month's Street Manager archive).
+- **Checks:** runs the typecheck and the full test suite against the new data.
+- **Opens a pull request into `main`** with a before-and-after count table (`scripts/data-summary.ts`). Nothing reaches production until someone merges it; the mirror then copies it to the production branch.
+- **Fails softly:** each source is a separate step, so one feed being down doesn't block the rest. The PR body asks the reviewer to check for sudden drops, which mean an outage rather than real change.
+
+**Stay manual:** street graphs and base maps. They need LiDAR and a reviewed Protomaps build, and they change slowly.
+
+**Known limit:** pull requests opened with the workflow token don't trigger CI themselves; the workflow runs the tests before opening one.
+
+## D-034 Powered devices in four classes, and saved named devices
+
+**Decided.** 2026-10-04, from tester feedback. Plan and UI spec: [plans/DEVICES.md](plans/DEVICES.md).
+- **Classes:** lightweight and heavy duty powerchairs, pavement (class 2) and road (class 3) scooters. Each is a preset, so the router stays one engine with per-user numbers (D-002); nothing special-cases a device.
+- **Keys kept:** `powerchair` and `mobility-scooter` keep their keys and numbers and become the heavy duty and pavement classes. Two new keys: `powerchair-light`, `mobility-scooter-road`.
+- **Road scooters** carry `roadLegal`: no penalty for a street without a pavement, no unknown for an unmapped one, and no buses.
+- **Devices** are named profiles (`SavedDevice`), stored on the device only, like the profile (D-009). The name is the profile's label.
+- **Demo seed:** Cherry (lightweight powerchair, no setts or cobbles) and Lulu (pavement scooter), both favourites, until onboarding creates real devices.
+
+## D-035 The app answers "can I get there?" first
 
 **Decided** by Richard, 2026-10-04 ("this is strong enough to replace all existing UI"). Compared with Google Maps and Apple Maps, then redesigned from scratch. The full system: [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md).
 

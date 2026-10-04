@@ -1,6 +1,6 @@
 # Design system
 
-How the Causewayside app looks and behaves, and why. Decision: [D-032](DECISIONS.md). Screens: [docs/ux/v2/](ux/v2/). Figma: see "Figma" at the end.
+How the Causewayside app looks and behaves, and why. Decision: [D-035](DECISIONS.md). Screens: [docs/ux/v2/](ux/v2/). Figma: see "Figma" at the end.
 
 The code is the source of truth. Tokens live in `apps/web/src/app/globals.css`; the components named below live in `apps/web/src/components/`. If this page and the code disagree, the code wins and this page is out of date.
 
@@ -195,7 +195,7 @@ Top: the instruction card (`--nav`), arrow icon, distance, instruction. Under it
 | Nothing fits | [nothing-fits.png](ux/v2/nothing-fits.png), [nothing-fits-options.png](ux/v2/nothing-fits-options.png), [allowed-once.png](ux/v2/allowed-once.png) |
 | Navigating | [navigating.png](ux/v2/navigating.png) |
 
-The screenshots in `docs/ux/` (not `v2/`) and [UX_ASSESSMENT.md](UX_ASSESSMENT.md) show the interface before D-032.
+The screenshots in `docs/ux/` (not `v2/`) and [UX_ASSESSMENT.md](UX_ASSESSMENT.md) show the interface before D-035.
 
 ## Checks
 

@@ -50,7 +50,9 @@ export function mobilityLabelFor(preset: string): MobilityLabel {
     case "manual-wheelchair-companion":
       return "manual wheelchair";
     case "powerchair":
+    case "powerchair-light":
     case "mobility-scooter":
+    case "mobility-scooter-road":
       return "powerchair or scooter";
     case "rollator":
     case "walking-stick":

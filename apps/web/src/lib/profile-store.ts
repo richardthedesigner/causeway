@@ -4,6 +4,7 @@
  * guarded and the app works without it.
  */
 import { PRESETS, type Profile } from "@causeway/profile";
+import { defaultDevice } from "./devices";
 
 const KEY = "causewayside.profile.v1";
 
@@ -17,7 +18,8 @@ export function loadProfile(): Profile {
   } catch {
     /* storage blocked or corrupt: fall through to the default */
   }
-  return PRESETS["manual-wheelchair"];
+  // Nothing set yet: start as the favourite saved device (Cherry, while the demo seed is in).
+  return defaultDevice()?.profile ?? PRESETS["manual-wheelchair"];
 }
 
 export function saveProfile(p: Profile) {
