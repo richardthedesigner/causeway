@@ -340,3 +340,6 @@ export function edgeElevationProfile(e: GraphEdge, dtm: Dtm): { d: number; z: nu
 
 const round = (v: number, dp: number) => Math.round(v * 10 ** dp) / 10 ** dp;
 
+
+export const fromOsgb = (e: number, n: number): [number, number] =>
+  proj4("EPSG:27700", "EPSG:4326", [e, n]) as [number, number];

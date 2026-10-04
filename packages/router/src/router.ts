@@ -3,9 +3,9 @@
  * implementation: it exists to prove the data model and cost model, and
  * to be the reference the chosen engine is tested against (DECISIONS.md D-003).
  */
-import { confidence, haversine, isKnown, type Graph, type GraphEdge, type GraphNode } from "@causeway/graph";
+import { confidence, haversine, isKnown, type Graph, type GraphEdge, type GraphNode, type NoteSignal } from "@causeway/graph";
 import type { Profile } from "@causeway/profile";
-import { DRY, entranceVerdict, evaluateEdge, evaluateNode, surfaceLabel, type Conditions, type EntranceVerdict, type Evaluation, type Reason } from "./cost.js";
+import { DRY, entranceVerdict, evaluateEdge, evaluateNode, surfaceLabel, type Conditions, type EdgeContext, type EntranceVerdict, type Evaluation, type Reason } from "./cost.js";
 
 interface Arc {
   edge: GraphEdge;
@@ -37,6 +37,13 @@ export class Router {
   private mainComponent = -1;
   /** Edge id to distance from its midpoint to the nearest bench (only when the graph has benches). */
   readonly benchM = new Map<number, number>();
+  /** Edge id to what people's notes say about it. Held beside the graph, never written into it (D-008). */
+  noteSignals = new Map<number, NoteSignal>();
+
+  /** Everything around an edge the cost model needs that isn't the edge itself. */
+  edgeContext(id: number): EdgeContext {
+    return { benchM: this.benchM.get(id), note: this.noteSignals.get(id) };
+  }
 
   constructor(readonly graph: Graph) {
     for (const n of graph.nodes) this.nodes.set(n.id, n);
@@ -136,7 +143,7 @@ export class Router {
       const gu = g.get(u)!;
       for (const a of this.out.get(u) ?? []) {
         if (closed.has(a.to)) continue;
-        const ev = evaluateEdge(a.edge, a.forward, p, c, { benchM: this.benchM.get(a.edge.id) });
+        const ev = evaluateEdge(a.edge, a.forward, p, c, this.edgeContext(a.edge.id));
         if (ev.cost === Infinity) continue;
         const v = this.nodes.get(a.to)!;
         const nv = evaluateNode(v, a.edge.kind === "crossing", p, c);
@@ -198,7 +205,7 @@ export class Router {
         const benchHere = (this.benchM.get(a.edge.id) ?? Infinity) <= 30;
         const gap = RAIL.has(a.edge.kind) ? 0 : benchHere ? 0 : L.gap + a.edge.lengthM;
         if (gap > maxGapM) continue;
-        const ev = evaluateEdge(a.edge, a.forward, p, c);
+        const ev = evaluateEdge(a.edge, a.forward, p, c, { note: this.noteSignals.get(a.edge.id) });
         if (ev.cost === Infinity) continue;
         const v = this.nodes.get(a.to)!;
         const nv = evaluateNode(v, a.edge.kind === "crossing", p, c);
@@ -447,7 +454,7 @@ export function explain(router: Router, chosen: Route, from: GraphNode, to: Grap
   if (base) {
     for (const s of base.steps) {
       if (chosenIds.has(s.edge.id)) continue;
-      const ev = evaluateEdge(s.edge, s.forward, p, c);
+      const ev = evaluateEdge(s.edge, s.forward, p, c, { note: router.noteSignals.get(s.edge.id) });
       const nv = evaluateNode(s.node, s.edge.kind === "crossing", p, c);
       const worst = [...ev.reasons, ...nv.reasons]
         .filter((r) => r.kind !== "penalty" || r.seconds > 5)

@@ -142,3 +142,31 @@ describe("learnPace", () => {
     expect(learnPace(p, 12).speedMps).toBe(1.0); // a bus ride is not a pace
   });
 });
+
+describe("notes in the cost model", () => {
+  const unknownSurface = { surface: unknownAttr<never>() } as Partial<EdgeAttrs>;
+
+  it("adds a capped soft penalty for bad notes and never excludes", () => {
+    const plain = evaluateEdge(edge(), true, manual, DRY);
+    const bad = evaluateEdge(edge(), true, manual, DRY, { note: { score: -2, count: 3 } });
+    expect(bad.cost).toBeGreaterThan(plain.cost);
+    expect(bad.cost).toBeLessThanOrEqual(plain.cost + plain.seconds * 0.5 + 1e-9);
+    expect(bad.passable).toBe("yes");
+    expect(bad.reasons.some((r) => r.attr === "note" && r.kind === "penalty")).toBe(true);
+  });
+
+  it("lets good notes ease the unknown risk but never the travel time or the verdict", () => {
+    const plain = evaluateEdge(edge({}, unknownSurface), true, manual, DRY);
+    const good = evaluateEdge(edge({}, unknownSurface), true, manual, DRY, { note: { score: 2, count: 3 } });
+    expect(good.cost).toBeLessThan(plain.cost);
+    expect(good.cost).toBeGreaterThanOrEqual(good.seconds);
+    expect(good.passable).toBe(plain.passable);
+    // Nothing unknown on a known edge: a good note changes nothing.
+    expect(evaluateEdge(edge(), true, manual, DRY, { note: { score: 2, count: 1 } }).cost).toBe(evaluateEdge(edge(), true, manual, DRY).cost);
+  });
+
+  it("does not lift an exclusion, however good the notes", () => {
+    const steep = edge({}, { incline: attr(12, "inferred", "lidar-scotland", "2022-01-01T00:00:00Z"), inclineMax: attr(12, "inferred", "lidar-scotland", "2022-01-01T00:00:00Z") });
+    expect(evaluateEdge(steep, true, manual, DRY, { note: { score: 2, count: 9 } }).cost).toBe(Infinity);
+  });
+});
