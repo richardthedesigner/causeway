@@ -9,6 +9,8 @@ import type { toiletsAlong } from "@/lib/toilets";
 import { ElevationChart } from "@/components/ElevationChart";
 import { NoteList } from "@/components/NoteList";
 import { SearchBar } from "@/components/SearchBar";
+import { GroundPicker } from "@/components/TripSettings";
+import type { Ground } from "@/components/MapChrome";
 import { compareLine } from "@/lib/devices";
 import type { NoteAbout } from "@/components/NoteSheet";
 import { RouteStrip, VerdictPill } from "@/components/RouteStrip";
@@ -40,6 +42,8 @@ interface Props {
   /** Other saved devices that can make this journey when this one can't. */
   alternatives?: { id: string; label: string; minutes: number }[];
   onUseForTrip?: (id: string) => void;
+  /** Change the ground from the route (the top-of-map chip moved into the sheet, D-036 step 8). */
+  onGround?: (g: Ground) => void;
   lifts: LiveLifts;
   /** Street works on pavements in this area; null where there is no feed (Scotland for now). */
   works: WorksSummary | null;
@@ -172,7 +176,14 @@ export function RoutePanel(props: Props) {
         }
         trailing={props.device}
       />
-      <p className="m-0 -mt-1 px-1 text-sm text-muted">Worked out for {groundWord(conditions)}.</p>
+      {props.onGround ? (
+        <div className="-mt-1 flex flex-wrap items-center justify-between gap-2 px-1">
+          <span className="text-sm text-muted">Worked out for {groundWord(conditions)}.</span>
+          <GroundPicker ground={conditions.ice ? "ice" : conditions.wet ? "wet" : "dry"} onGround={props.onGround} />
+        </div>
+      ) : (
+        <p className="m-0 -mt-1 px-1 text-sm text-muted">Worked out for {groundWord(conditions)}.</p>
+      )}
 
       {props.once ? (
         <div role="status" className="flex items-start gap-3 rounded-2xl border-2 border-caution bg-caution-soft p-3">

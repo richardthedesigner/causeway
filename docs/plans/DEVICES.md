@@ -98,7 +98,7 @@ Each step is one pull request that can go live on its own.
 - Bottom bar: device icon button, arrival time, End.
 - Tapping the device opens "Switch device mid-journey?" with the other favourite as the main action and "Keep Cherry" as the second. Switching re-plans from the current position.
 
-**8. "This trip" in the full drawer** (`page.tsx`, `MapChrome.tsx`)
+**8. "This trip" in the full drawer** (`TripSettings.tsx`, `MapChrome.tsx`). Done. The route view gets the same ground picker beside "Worked out for dry ground", since the top chip is gone.
 - At the full snap, under recents: getting around as, weather, buses, toilet spacing.
 - This moves the weather control from the top of the map into the drawer, so every control sits at the bottom. The city picker and layers can follow later.
 

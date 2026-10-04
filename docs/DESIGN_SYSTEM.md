@@ -20,7 +20,7 @@ Every screen answers one question first: **can I get there?** A wheelchair user'
 |---|---|---|
 | Map | Full screen, behind everything | Full screen |
 | Sheet | Bottom sheet, snaps to 24%, 52%, 94% | 420 px panel docked left, 16 px inset |
-| Map chrome | City and ground chips top left; layers and locate buttons top right | Same, starting right of the panel |
+| Map chrome | City chip top left; layers and locate buttons top right. The ground moved into the sheet (D-036) | Same, starting right of the panel |
 | Route actions | Start bar pinned to the bottom of the screen | Inline under the route card |
 | Navigation | Instruction card top, progress panel bottom | Both 440 px wide, left |
 
@@ -158,7 +158,7 @@ Magnifier, field, and the profile chip (accent fill, wheelchair icon, short prof
 
 ### Map chrome (`MapChrome.tsx`)
 
-Glass chips and buttons over the map. City chip (menu of cities, with the coverage line). Ground chip (Dry / Wet / Icy, with the weather source). Layers button (slopes on every street, the slope key, "About this map" with attribution). Locate button (start from your location). While navigating only the layers button stays.
+Glass chips and buttons over the map. City chip (menu of cities, with the coverage line). Layers button (slopes on every street, the slope key, "About this map" with attribution). Locate button (start from your location). While navigating only the layers button stays. The ground (Dry / Wet / Icy, with the weather source) is set in the sheet: under "This trip" when it's swiped up, and beside the route.
 
 ### Route card (`RoutePanel.tsx`)
 

@@ -14,6 +14,7 @@ import { NoteSheet, type NoteAbout } from "@/components/NoteSheet";
 import { PlaceIcon, PlaceSearch } from "@/components/PlaceSearch";
 import { ReportSheet } from "@/components/ReportSheet";
 import { RoutePanel } from "@/components/RoutePanel";
+import { TripSettings } from "@/components/TripSettings";
 import { VerdictPill } from "@/components/RouteStrip";
 import { Button } from "@/components/ui/button";
 import { CommandGroup, CommandItem } from "@/components/ui/command";
@@ -375,6 +376,17 @@ export default function Home() {
             </button>
           </p>
           <p className="m-0 -mt-2 text-sm text-muted">Or tap the map to drop a pin.</p>
+          <TripSettings
+            deviceLabel={deviceLabel(routeDevice)}
+            onDevice={() => setModeOpen(true)}
+            ground={ground}
+            groundNote={`${conditions.summary}. ${conditions.source}.`}
+            onGround={(g) => setConditions(PRESET_CONDITIONS[g])}
+            buses={profile.buses !== false}
+            onBuses={(v) => updateProfile({ ...profile, buses: v })}
+            toiletEvery={profile.maxToiletIntervalM}
+            onToilets={() => setModeOpen(true)}
+          />
         </div>
       ) : view === "from" ? (
         <div className="grid gap-3 [&>*]:min-w-0">
@@ -420,6 +432,7 @@ export default function Home() {
           device={profileChip}
           forLabel={devices.devices.length > 1 || routeDevice.name ? deviceLabel(routeDevice) : undefined}
           compare={compare}
+          onGround={(g) => setConditions(PRESET_CONDITIONS[g])}
           alternatives={alternatives}
           onUseForTrip={(id) => {
             const r = planner.result;
@@ -475,9 +488,6 @@ export default function Home() {
         city={city}
         cities={CITIES}
         onCity={switchCity}
-        ground={ground}
-        conditions={conditions}
-        onGround={(g) => setConditions(PRESET_CONDITIONS[g])}
         showSlopes={showSlopes}
         onSlopes={setShowSlopes}
         onLocate={locate}
