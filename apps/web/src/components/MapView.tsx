@@ -21,6 +21,12 @@ interface Props {
   me?: { lon: number; lat: number; accuracyM: number } | null;
   /** City basemap (Protomaps extract) and the bundled glyphs it labels with. */
   basemap?: { url: string; key: string; glyphs: string; center: [number, number] } | null;
+  /** What's in the way when nothing fits, marked in red. */
+  blockers?: { lon: number; lat: number }[];
+  /** A route on offer but not chosen (as close as you can get), drawn faint. */
+  preview?: Pick<PlannedRoute, "coords" | "bands" | "rides"> | null;
+  /** Centre here (the locate button); `n` changes to re-centre on the same spot. */
+  focus?: { lon: number; lat: number; n: number } | null;
 }
 
 const css = (v: string) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
@@ -40,7 +46,7 @@ const point = (p: { lon: number; lat: number }, props: Record<string, unknown> =
  * Our own footway graph and routes, drawn over a Protomaps base map (D-024).
  * Colours come from the page's CSS tokens and follow theme changes live.
  */
-export function MapView({ network, routes, selectedId, from, to, pin, showSlopes, entrances, onMapClick, me, basemap, toilets = [] }: Props) {
+export function MapView({ network, routes, selectedId, from, to, pin, showSlopes, entrances, onMapClick, me, basemap, toilets = [], blockers = [], preview = null, focus = null }: Props) {
   const el = useRef<HTMLDivElement>(null);
   const map = useRef<MLMap | null>(null);
   const ready = useRef(false);
@@ -62,12 +68,15 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
     map.current = m;
     m.on("load", () => {
       const empty = fc([]);
-      for (const id of ["network", "route-alt", "route", "unknown", "rides", "ride-labels", "toilets", "markers", "entrances", "me"]) m.addSource(id, { type: "geojson", data: empty });
+      for (const id of ["network", "route-alt", "route", "bands", "unknown", "rides", "ride-labels", "toilets", "markers", "entrances", "blockers", "me"]) m.addSource(id, { type: "geojson", data: empty });
       m.addLayer({ id: "network", type: "line", source: "network", paint: { "line-color": ["get", "c"], "line-width": ["interpolate", ["linear"], ["zoom"], 12, 0.8, 17, 3.5], "line-opacity": 0.9 }, layout: { "line-cap": "round" } });
       m.addLayer({ id: "network-steps", type: "line", source: "network", filter: ["==", ["get", "bin"], 5], paint: { "line-color": css("--muted"), "line-width": ["interpolate", ["linear"], ["zoom"], 12, 1.5, 17, 6], "line-dasharray": [0.25, 0.5], "line-opacity": 0.8 } });
       m.addLayer({ id: "route-alt", type: "line", source: "route-alt", paint: { "line-color": css("--route-alt"), "line-width": 7 }, layout: { "line-cap": "round", "line-join": "round" } });
       m.addLayer({ id: "route-casing", type: "line", source: "route", paint: { "line-color": css("--surface"), "line-width": 12 }, layout: { "line-cap": "round", "line-join": "round" } });
-      m.addLayer({ id: "route", type: "line", source: "route", paint: { "line-color": css("--route"), "line-width": 7 }, layout: { "line-cap": "round", "line-join": "round" } });
+      // The chosen route coloured by slope, the same bands as the route strip. Not-known ground is dashed, steps dotted.
+      m.addLayer({ id: "route", type: "line", source: "bands", filter: ["!", ["in", ["get", "bin"], ["literal", [-1, 5]]]], paint: { "line-color": ["get", "c"], "line-width": 7 }, layout: { "line-cap": "round", "line-join": "round" } });
+      m.addLayer({ id: "route-unknown", type: "line", source: "bands", filter: ["==", ["get", "bin"], -1], paint: { "line-color": css("--unknown"), "line-width": 7, "line-dasharray": [0.6, 0.8] } });
+      m.addLayer({ id: "route-steps", type: "line", source: "bands", filter: ["==", ["get", "bin"], 5], paint: { "line-color": css("--stop"), "line-width": 7, "line-dasharray": [0.3, 0.5] } });
       // Unknown stretches: same colour, broken line, so it reads without colour.
       m.addLayer({ id: "unknown", type: "line", source: "unknown", paint: { "line-color": css("--surface"), "line-width": 3, "line-dasharray": [1, 1.5] } });
       // Rides: a dotted line over the route (you're carried, not walking), with the route number where you board.
@@ -89,6 +98,7 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
         paint: { "text-color": css("--surface"), "text-halo-color": css("--ink"), "text-halo-width": 5 },
       });
       m.addLayer({ id: "entrances", type: "circle", source: "entrances", paint: { "circle-radius": 7, "circle-color": ["get", "c"], "circle-stroke-color": css("--surface"), "circle-stroke-width": 2 } });
+      m.addLayer({ id: "blockers", type: "circle", source: "blockers", paint: { "circle-radius": 11, "circle-color": css("--stop"), "circle-stroke-color": css("--surface"), "circle-stroke-width": 3 } });
       m.addLayer({ id: "markers", type: "circle", source: "markers", paint: { "circle-radius": ["match", ["get", "end"], 1, 11, 2, 10, 8], "circle-color": ["match", ["get", "end"], 1, css("--stop"), 2, css("--surface"), css("--ink")], "circle-stroke-color": ["match", ["get", "end"], 2, css("--accent"), css("--surface")], "circle-stroke-width": ["match", ["get", "end"], 2, 4, 3] } });
       // Location: accuracy halo (metres to pixels at this latitude) and a dot.
       m.addLayer({ id: "me-halo", type: "circle", source: "me", paint: { "circle-color": css("--accent"), "circle-opacity": 0.15, "circle-radius": ["interpolate", ["exponential", 2], ["zoom"], 10, ["/", ["get", "acc"], 150], 20, ["*", ["get", "acc"], 6.6]] } });
@@ -116,12 +126,15 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
       );
       m.setPaintProperty("network", "line-opacity", showSlopes ? 0.9 : 0.22);
       const sel = routes.find((r) => r.id === selectedId) ?? routes[0];
-      (m.getSource("route") as GeoJSONSource).setData(fc(sel ? [line(sel.coords)] : []));
+      (m.getSource("route") as GeoJSONSource).setData(fc(sel ? [line(sel.coords)] : preview ? [line(preview.coords)] : []));
+      const bandColour = (bin: number) => (bin >= 0 && bin < 5 ? ramp[bin]! : bin === 6 ? css("--accent") : css("--unknown"));
+      (m.getSource("bands") as GeoJSONSource).setData(fc((sel ?? preview)?.bands.map((b) => line(b.coords, { bin: b.bin, c: bandColour(b.bin) })) ?? []));
       (m.getSource("route-alt") as GeoJSONSource).setData(fc(routes.filter((r) => r !== sel).map((r) => line(r.coords))));
+      (m.getSource("blockers") as GeoJSONSource).setData(fc(blockers.map((b) => point(b))));
       (m.getSource("unknown") as GeoJSONSource).setData(fc(sel ? sel.unknownCoords.map((c) => line(c)) : []));
       (m.getSource("toilets") as GeoJSONSource).setData(fc(toilets.map((t) => point(t))));
-      (m.getSource("rides") as GeoJSONSource).setData(fc(sel ? sel.rides.map((r) => line(r.coords)) : []));
-      (m.getSource("ride-labels") as GeoJSONSource).setData(fc(sel ? sel.rides.map((r) => point({ lon: r.coords[0]![0], lat: r.coords[0]![1] }, { label: r.label })) : []));
+      (m.getSource("rides") as GeoJSONSource).setData(fc((sel ?? preview)?.rides.map((r) => line(r.coords)) ?? []));
+      (m.getSource("ride-labels") as GeoJSONSource).setData(fc((sel ?? preview)?.rides.map((r) => point({ lon: r.coords[0]![0], lat: r.coords[0]![1] }, { label: r.label })) ?? []));
       (m.getSource("markers") as GeoJSONSource).setData(fc([...(from ? [point(from, { end: 0 })] : []), ...(to ? [point(to, { end: 1 })] : []), ...(pin ? [point(pin, { end: 2 })] : [])]));
       const ec = { yes: css("--ok"), unknown: css("--unknown"), no: css("--stop") };
       (m.getSource("entrances") as GeoJSONSource).setData(fc(entrances.map((e) => point(e, { c: ec[e.ok] }))));
@@ -131,7 +144,7 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
     return () => {
       m.off("causeway:refresh", draw);
     };
-  }, [network, routes, selectedId, from, to, pin, showSlopes, entrances, toilets]);
+  }, [network, routes, selectedId, from, to, pin, showSlopes, entrances, toilets, blockers, preview]);
 
   const [mapReady, setMapReady] = useState(false);
   const dark = useDark();
@@ -144,7 +157,10 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
     m.setPaintProperty("network-steps", "line-color", css("--muted"));
     m.setPaintProperty("route-alt", "line-color", css("--route-alt"));
     m.setPaintProperty("route-casing", "line-color", css("--surface"));
-    m.setPaintProperty("route", "line-color", css("--route"));
+    m.setPaintProperty("route-unknown", "line-color", css("--unknown"));
+    m.setPaintProperty("route-steps", "line-color", css("--stop"));
+    m.setPaintProperty("blockers", "circle-color", css("--stop"));
+    m.setPaintProperty("blockers", "circle-stroke-color", css("--surface"));
     m.setPaintProperty("ride-casing", "line-color", css("--surface"));
     m.setPaintProperty("ride", "line-color", css("--route"));
     m.setPaintProperty("ride-labels", "text-color", css("--surface"));
@@ -193,15 +209,24 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
     if (me) m.easeTo({ center: [me.lon, me.lat], zoom: Math.max(m.getZoom(), 17), padding: { top: 0, bottom: Math.round(window.innerHeight * 0.35), left: 0, right: 0 }, duration: matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 400 });
   }, [me]);
 
+  // The locate button: centre on you, above the sheet.
+  useEffect(() => {
+    const m = map.current;
+    if (!m || !focus) return;
+    m.easeTo({ center: [focus.lon, focus.lat], zoom: Math.max(m.getZoom(), 16), padding: window.innerWidth >= 768 ? { top: 0, bottom: 0, left: 450, right: 0 } : { top: 0, bottom: Math.round(window.innerHeight * 0.45), left: 0, right: 0 }, duration: matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 500 });
+  }, [focus]);
+
   // Frame the selected route above the sheet.
   useEffect(() => {
     const m = map.current;
     const sel = routes.find((r) => r.id === selectedId) ?? routes[0];
-    if (!m || !sel || sel.coords.length < 2) return;
-    const b = sel.coords.reduce((bb, c) => bb.extend(c), new maplibregl.LngLatBounds(sel.coords[0], sel.coords[0]));
+    // Nothing fits: frame what's on offer and what's in the way.
+    const coords: [number, number][] = sel ? sel.coords : [...(preview?.coords ?? []), ...blockers.map((x): [number, number] => [x.lon, x.lat]), ...(to ? [[to.lon, to.lat] as [number, number]] : [])];
+    if (!m || coords.length < 2) return;
+    const b = coords.reduce((bb, c) => bb.extend(c), new maplibregl.LngLatBounds(coords[0], coords[0]));
     const wide = window.innerWidth >= 768;
-    m.fitBounds(b, { padding: wide ? { top: 60, bottom: 60, left: 470, right: 60 } : { top: 40, bottom: Math.round(window.innerHeight * 0.5), left: 30, right: 30 }, duration: matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 600, maxZoom: 17 });
-  }, [routes, selectedId]);
+    m.fitBounds(b, { padding: wide ? { top: 80, bottom: 60, left: 470, right: 80 } : { top: 80, bottom: Math.round(window.innerHeight * 0.52), left: 30, right: 70 }, duration: matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 600, maxZoom: 17 });
+  }, [routes, selectedId, preview, blockers]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // MapLibre sets position: relative on its container, so the sizing lives on a wrapper.
   return (

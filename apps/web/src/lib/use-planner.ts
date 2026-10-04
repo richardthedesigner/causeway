@@ -4,7 +4,7 @@ import { fetchLiftOutages, fetchTflStreetWorks } from "@causeway/live";
 import type { UserNote } from "@causeway/graph";
 import type { Profile } from "@causeway/profile";
 import type { City } from "./cities";
-import type { Place, PlanResult, WorkerRequest, WorkerResponse, WorksSummary } from "./plan-types";
+import type { Check, Place, PlanResult, WorkerRequest, WorkerResponse, WorksSummary } from "./plan-types";
 
 export interface Conditions {
   wet: boolean;
@@ -36,6 +36,8 @@ export function usePlanner(city: City) {
   const [planning, setPlanning] = useState(false);
   const [lifts, setLifts] = useState<LiveLifts>({ state: "none" });
   const [works, setWorks] = useState<WorksSummary | null>(null);
+  const checkSeq = useRef(0);
+  const [checks, setChecks] = useState<Record<string, Check>>({});
 
   useEffect(() => {
     setReady(null);
@@ -43,6 +45,7 @@ export function usePlanner(city: City) {
     setError(null);
     setLifts({ state: city.liveLifts ? "loading" : "none" });
     setWorks(null);
+    setChecks({});
     const w = new Worker(new URL("./router.worker.ts", import.meta.url), { type: "module" });
     worker.current = w;
     let timer: ReturnType<typeof setInterval> | undefined;
@@ -72,6 +75,8 @@ export function usePlanner(city: City) {
       else if (m.type === "error") {
         setError(m.message);
         setPlanning(false);
+      } else if (m.type === "check" && m.id === checkSeq.current) {
+        setChecks(Object.fromEntries(m.checks.map((x) => [x.placeId, x])));
       } else if (m.type === "plan" && m.id === seq.current) {
         setResult(m.result);
         setPlanning(false);
@@ -98,5 +103,12 @@ export function usePlanner(city: City) {
     worker.current.postMessage({ type: "plan", id, from, to, profile, conditions: { wet: c.wet, ice: c.ice, now: new Date().toISOString() }, notes: notes.map((n) => ({ ...n, photo: null })) } satisfies WorkerRequest);
   }, []);
 
-  return { ready, error, result, planning, plan, lifts, works, sendToilets, clear: () => setResult(null) };
+  /** Verdicts for a short list of places (recents), from one start. */
+  const check = useCallback((from: Place, to: Place[], profile: Profile, c: Conditions) => {
+    if (!worker.current || !to.length) return;
+    const id = ++checkSeq.current;
+    worker.current.postMessage({ type: "check", id, from, to, profile, conditions: { wet: c.wet, ice: c.ice, now: new Date().toISOString() } } satisfies WorkerRequest);
+  }, []);
+
+  return { ready, error, result, planning, plan, lifts, works, checks, check, sendToilets, clear: () => setResult(null) };
 }

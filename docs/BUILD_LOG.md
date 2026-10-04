@@ -4,6 +4,12 @@ A running record of what was built, newest first. Each entry links the decision 
 
 ## 2026-10-04 (night)
 
+**New app UI: "can I get there?" first** (D-035, commit `e2c2a1d`)
+- Replaces every screen. Profile in the search bar, verdict before time, a route strip coloured by slope, the map line to match.
+- Nothing fits now offers the closest point you can reach and a one-journey change to one limit (`diagnose` in the router, tested on Castle Wynd South).
+- Recent places with a verdict from where you start. Navigation warns up to 300 m ahead.
+- axe clean on four screens, no overflow at 200% text, light and dark. The design system: [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md); screens in [ux/v2/](ux/v2/).
+
 **Powerchairs and scooters in two classes each, and named devices** (D-034, [plan](plans/DEVICES.md))
 - From tester feedback: a lightweight powerchair manages far less than a heavy duty one, and road scooters differ from pavement scooters.
 - New presets: "Powerchair, lightweight" (8% uphill, 3 cm kerbs, never cobbles) and "Mobility scooter, road" (class 3: uses streets without a pavement, no buses).

@@ -1,7 +1,8 @@
 "use client";
 import { hazardText, Navigator, type Progress } from "@causeway/router";
-import { AlertTriangle, ArrowUp, CornerUpLeft, CornerUpRight, Flag, Megaphone, TrainFront, X } from "lucide-react";
+import { AlertTriangle, ArrowUp, CornerUpLeft, CornerUpRight, Flag, MessageSquarePlus, TrainFront, TriangleAlert, Volume2, VolumeX } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { RouteStrip } from "@/components/RouteStrip";
 import { Button } from "@/components/ui/button";
 import type { PlannedRoute } from "@/lib/plan-types";
 
@@ -28,11 +29,15 @@ interface Props {
 
 const fmt = (m: number) => (m >= 1000 ? `${(m / 1000).toFixed(1)} km` : `${Math.max(0, Math.round(m / 10) * 10)} m`);
 
+/** How far ahead the "coming up" card looks: far enough to choose to stop or turn back. */
+const AHEAD_M = 300;
+
 /**
- * Turn-by-turn. Live location where the device allows it; otherwise (or by
- * choice) a preview that moves along the route. One primary action (End),
- * everything in the bottom third, instructions also in a live region for
- * screen readers. Speech is opt-in so it never talks over a screen reader.
+ * Turn-by-turn. The next instruction on top, what's coming up under it
+ * (before you reach it, not at it), and the route strip with you on it at
+ * the bottom. Live location where the device allows it; otherwise a preview
+ * that moves along the route. Instructions are also in a live region for
+ * screen readers; speech is opt-in so it never talks over one.
  */
 export function NavView({ route, speedMps, onEnd, onOffRoute, onPosition, onReport, onNote, onPace }: Props) {
   const nav = useRef(new Navigator(route.nav));
@@ -131,68 +136,86 @@ export function NavView({ route, speedMps, onEnd, onOffRoute, onPosition, onRepo
   useEffect(() => () => onPosition(null), []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const next = p?.next ?? route.nav.maneuvers[1] ?? null;
-  const remaining = Math.max(0, route.nav.length - (p?.along ?? 0));
+  const along = p?.along ?? 0;
+  const remaining = Math.max(0, route.nav.length - along);
+  const minutes = Math.max(1, Math.round(remaining / speedMps / 60));
+  const eta = new Date(Date.now() + minutes * 60_000).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+  const ahead = route.nav.hazards.find((h) => h.at + h.length > along && h.at - along <= AHEAD_M) ?? null;
+  const aheadIn = ahead ? Math.max(0, Math.round((ahead.at - along) / 10) * 10) : 0;
   const Icon = !next ? Flag : next.type === "board" || next.type === "alight" || next.type === "change" ? TrainFront : /left/i.test(next.short) ? CornerUpLeft : /right/i.test(next.short) ? CornerUpRight : next.type === "arrive" ? Flag : ArrowUp;
 
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex justify-center px-2 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))] md:left-4 md:right-auto md:w-[440px] md:px-0">
-      <section aria-label="Navigation" className="pointer-events-auto grid w-full max-w-[520px] gap-3 rounded-[var(--radius)] border border-line bg-surface p-4 shadow-[0_-8px_40px_rgb(0_0_0/0.2)]">
-        <p className="sr-only" aria-live="assertive">
-          {said}
-        </p>
+    <>
+      <p className="sr-only" aria-live="assertive">
+        {said}
+      </p>
+      <section aria-label="Next instruction" className="absolute inset-x-2 top-[calc(0.5rem+env(safe-area-inset-top,0px))] z-30 grid gap-2 md:left-4 md:w-[440px]">
+        <div className="flex items-center gap-4 rounded-[var(--radius)] bg-nav p-4 text-nav-ink shadow-[0_8px_30px_rgb(0_0_0/0.3)]">
+          {p?.arrived ? (
+            <p className="m-0 flex items-center gap-3 text-2xl font-bold">
+              <Flag aria-hidden className="size-10" /> You&apos;ve arrived
+            </p>
+          ) : p?.offRoute ? (
+            <p className="m-0 text-xl font-bold">Off the route. Working out a new one…</p>
+          ) : (
+            <>
+              <Icon aria-hidden className="size-12 shrink-0" strokeWidth={2.4} />
+              <div className="min-w-0">
+                <p className="tabular m-0 text-[32px] leading-none font-bold">{fmt(p ? p.distanceToNext : (next?.at ?? 0))}</p>
+                <p className="m-0 mt-1 text-lg leading-snug">{next?.text ?? ""}</p>
+              </div>
+            </>
+          )}
+        </div>
+        {ahead && !p?.arrived ? (
+          <div className={`flex items-start gap-3 rounded-2xl border-2 border-caution p-3 shadow-md ${p?.hazard ? "bg-caution text-surface" : "bg-caution-soft text-ink"}`}>
+            <TriangleAlert aria-hidden className={`mt-0.5 size-6 shrink-0 ${p?.hazard ? "" : "text-caution"}`} />
+            <p className="m-0">
+              <span className="block font-bold">{hazardText(ahead)}</span>
+              <span className="text-sm">{aheadIn > 5 ? `In ${fmt(aheadIn)}` : "Here now"}</span>
+            </p>
+          </div>
+        ) : null}
+      </section>
+
+      <section aria-label="Journey progress" className="absolute inset-x-0 bottom-0 z-30 grid gap-3 rounded-t-[var(--radius)] border-t border-line bg-surface px-4 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] shadow-[0_-8px_40px_rgb(0_0_0/0.18)] md:bottom-4 md:left-4 md:w-[440px] md:rounded-[var(--radius)] md:border">
+        <RouteStrip strip={route.strip} along={along} />
         {mode !== "live" ? (
           <p className="m-0 text-sm text-muted">{mode === "locating" ? "Finding your location…" : "Preview: moving along the route for you. Live location isn't available here."}</p>
         ) : null}
-        {p?.hazard ? (
-          <p className="m-0 flex items-start gap-2 rounded-2xl bg-surface-2 p-3 font-bold text-ink">
-            <AlertTriangle aria-hidden className="mt-0.5 size-6 shrink-0 text-caution" />
-            <span>
-              {p.hazard.inM > 5 ? `In ${fmt(p.hazard.inM)}: ` : ""}
-              {hazardText(p.hazard)}
-            </span>
-          </p>
-        ) : null}
-        {p?.arrived ? (
-          <p className="m-0 flex items-center gap-3 text-2xl font-bold">
-            <Flag aria-hidden className="size-8" /> You&apos;ve arrived
-          </p>
-        ) : p?.offRoute ? (
-          <p className="m-0 text-xl font-bold">Off the route. Working out a new one…</p>
-        ) : (
-          <div className="flex items-center gap-4">
-            <Icon aria-hidden className="size-12 shrink-0" />
-            <div className="min-w-0">
-              <p className="tabular m-0 font-mono text-3xl font-semibold">{fmt(p ? p.distanceToNext : (next?.at ?? 0))}</p>
-              <p className="m-0 text-lg leading-snug">{next?.text ?? ""}</p>
-            </div>
+        <div className="flex items-center gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="tabular m-0 text-[28px] leading-none font-bold">
+              <span className="sr-only">Arrive at </span>
+              {eta}
+            </p>
+            <p className="tabular m-0 mt-1 text-sm text-muted">
+              {minutes} min · {fmt(remaining)}
+            </p>
           </div>
-        )}
-        <p className="tabular m-0 font-mono text-sm text-muted">
-          {Math.max(1, Math.round(remaining / speedMps / 60))} min / {fmt(remaining)} to go
-        </p>
-        <div className="flex flex-wrap items-center gap-2">
           <Button
-            variant="primary"
             size="lg"
             onClick={() => {
               reportPace();
               onEnd();
             }}
-            className="flex-1"
+            className="rounded-2xl border-stop bg-stop px-8 text-stop-ink hover:brightness-110"
           >
-            <X aria-hidden className="size-5" /> End
+            End
           </Button>
-          <Button size="lg" aria-pressed={speak} onClick={() => setSpeak((v) => !v)} className={speak ? "border-ink bg-ink text-surface" : ""}>
-            <Megaphone aria-hidden className="size-5" /> {speak ? "Speaking" : "Speak"}
+        </div>
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(7.5rem,1fr))] gap-2">
+          <Button aria-pressed={speak} onClick={() => setSpeak((v) => !v)} className={speak ? "rounded-2xl border-ink bg-ink px-2 text-surface" : "rounded-2xl px-2"}>
+            {speak ? <Volume2 aria-hidden className="size-5 shrink-0" /> : <VolumeX aria-hidden className="size-5 shrink-0" />} Speak
           </Button>
-          <Button size="lg" onClick={() => onReport(me.current)}>
-            Report
+          <Button onClick={() => onNote(me.current)} aria-label="Add a note about where you are" className="rounded-2xl px-2">
+            <MessageSquarePlus aria-hidden className="size-5 shrink-0" /> Note
           </Button>
-          <Button size="lg" onClick={() => onNote(me.current)}>
-            Add a note
+          <Button onClick={() => onReport(me.current)} aria-label="Report a problem here" className="rounded-2xl px-2">
+            <AlertTriangle aria-hidden className="size-5 shrink-0" /> Report
           </Button>
         </div>
       </section>
-    </div>
+    </>
   );
 }

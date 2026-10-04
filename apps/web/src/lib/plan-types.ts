@@ -38,6 +38,23 @@ export interface PlannedRoute {
   unknowns: { name: string; m: number; what: string }[];
   /** Named stretches in route order, for notes: which ones the route passes, and what to attach a new note to. */
   stretches: (Stretch & { m: number })[];
+  /** The route as one bar: slope bands and what's on the way, for the route strip. */
+  strip: RouteStrip;
+  /** The route line in pieces by slope band, so the map matches the strip. */
+  bands: { bin: number; coords: [number, number][] }[];
+}
+
+/**
+ * Slope band per part: 0-4 gradient bands (as on the map), -1 not known,
+ * 5 steps, 6 a ride (bus, tram, train). Rides are drawn short: what matters
+ * is the ground you cover yourself.
+ */
+export interface RouteStrip {
+  /** Display length (rides compressed). */
+  length: number;
+  /** t0/t1: distance along the route (the nav plan's scale); d0/d1: along the strip. */
+  parts: { t0: number; t1: number; d0: number; d1: number; bin: number }[];
+  marks: { at: number; kind: "steep" | "setts" | "kerb" | "bridge" | "camber" | "lift" | "ride" | "door"; text: string }[];
 }
 
 export interface Tradeoff {
@@ -59,7 +76,23 @@ export type PlanResult =
       /** The entrance the route ends at, when one near a building fits this person; null means the building's centre. */
       door: { name: string | null; osmId: number; detail: string } | null;
     }
-  | { status: "none"; message: string; walkingHeadline: string | null };
+  | {
+      status: "none";
+      message: string;
+      /** What stops you on the direct way, past the closest point you can reach. */
+      blockers: { name: string; attr: string; detail: string; lon: number; lat: number }[];
+      /** As close as you can get, and how far short that is. */
+      closest: (PlannedRoute & { name: string; leftM: number; end: [number, number] }) | null;
+      /** A change to the limits, for this journey only, that finds a way. */
+      relax: { patch: Partial<Profile>; what: string[]; minutes: number } | null;
+    };
+
+/** A quick verdict for a place you've been to before, from where you are now. */
+export interface Check {
+  placeId: string;
+  verdict: "passable" | "passable-with-unknowns" | "none";
+  minutes: number | null;
+}
 
 export interface LiftOutageMsg {
   stationId: string;
@@ -85,14 +118,16 @@ export type WorkerRequest =
       conditions: Omit<Conditions, "now"> & { now: string };
       /** Notes on this device, without photos. Soft signals for the cost model only. */
       notes: UserNote[];
-    };
+    }
+  | { type: "check"; id: number; from: Place; to: Place[]; profile: Profile; conditions: Omit<Conditions, "now"> & { now: string } };
 
 export type WorkerResponse =
   | { type: "ready"; places: Place[]; network: { coords: [number, number][]; bin: number }[]; bbox: [number, number, number, number]; builtAt: string; buses: { stops: number; lines: number; source: string } | null }
   | { type: "error"; message: string }
   | { type: "works"; summary: WorksSummary }
   | { type: "live"; applied: number; fetchedAt: string }
-  | { type: "plan"; id: number; result: PlanResult };
+  | { type: "plan"; id: number; result: PlanResult }
+  | { type: "check"; id: number; checks: Check[] };
 
 /** Street works on pavements in the loaded area, for the "what we know right now" line. */
 export interface WorksSummary {

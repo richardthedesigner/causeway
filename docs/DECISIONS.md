@@ -274,3 +274,14 @@ Bridged: Edinburgh 172 of 446 islands, Newcastle 9 of 24, London 23 of 48. `scri
 - **Devices** are named profiles (`SavedDevice`), stored on the device only, like the profile (D-009). The name is the profile's label.
 - **Demo seed:** Cherry (lightweight powerchair, no setts or cobbles) and Lulu (pavement scooter), both favourites, until onboarding creates real devices.
 
+## D-035 The app answers "can I get there?" first
+
+**Decided** by Richard, 2026-10-04 ("this is strong enough to replace all existing UI"). Compared with Google Maps and Apple Maps, then redesigned from scratch. The full system: [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md).
+
+- **The profile is the travel mode.** It sits in the search bar on every screen, where Google and Apple put car, walk and transit.
+- **Verdict before time** on every route and every recent place: Fits, Unsure or Doesn't fit. A quick route you can't finish is worth nothing.
+- **The route strip.** One bar coloured by slope, with climbs, setts, unmapped kerbs, lifts and rides pinned on it, matching the coloured line on the map.
+- **Never a dead end.** When nothing fits, the router (`diagnose`) names the obstacles past the last point you can reach, finds that point, and finds the smallest change to your limits that gives a way, trying one limit at a time first. A change is for this journey only, shown in a banner with Undo, and never saved (D-009 still holds: the profile stays on the device and unchanged).
+- **Hazards ahead, not at the spot.** Navigation shows the next hazard up to 300 m ahead; it still announces at 60 m.
+- **Thumb reach.** Search at the bottom; on phones Start is pinned to the bottom of the screen at any sheet height.
+- Recent places live on the device only, like the profile.

@@ -1,5 +1,5 @@
 "use client";
-import { Accessibility, Building2, Coffee, Hash, Home, MapPin, Navigation, Signpost, Toilet, TrainFront } from "lucide-react";
+import { Accessibility, Building2, Coffee, Hash, Home, MapPin, Navigation, Search, Signpost, Toilet, TrainFront } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import type { Place } from "@/lib/plan-types";
@@ -17,6 +17,11 @@ interface Props {
   onPick: (p: Place) => void;
   autoFocus?: boolean;
   onUseLocation?: () => void;
+  /** Sits inside the search bar, after the field (who the routes are for). */
+  trailing?: React.ReactNode;
+  /** Shown instead of the suggestions before anything is typed (recent places). */
+  emptyState?: React.ReactNode;
+  onFocus?: () => void;
 }
 
 const SHORTCUTS = ["Accessible toilets", "Step-free cafés", "Stations", "Pharmacies"];
@@ -42,7 +47,9 @@ function Icon({ p }: { p: Place }) {
  * questions ("accessible toilet") list the nearest matches. cmdk gives
  * arrow-key and screen reader list semantics.
  */
-export function PlaceSearch({ label, index, suggestions, near, bbox, cityName, excludeId, onPick, autoFocus, onUseLocation }: Props) {
+export { Icon as PlaceIcon };
+
+export function PlaceSearch({ label, index, suggestions, near, bbox, cityName, excludeId, onPick, autoFocus, onUseLocation, trailing, emptyState, onFocus }: Props) {
   const [q, setQ] = useState("");
   const [live, setLive] = useState<{ q: string; places: Place[]; outside: number } | null>(null);
   const local = useMemo(() => (index && q.trim() ? search(index, q, near) : null), [index, q, near]);
@@ -79,11 +86,15 @@ export function PlaceSearch({ label, index, suggestions, near, bbox, cityName, e
 
   return (
     <Command label={label} className="gap-2" shouldFilter={false}>
-      <CommandInput placeholder={label} autoFocus={autoFocus} aria-label={label} value={q} onValueChange={setQ} />
+      <div className="flex min-h-14 flex-wrap items-center gap-x-2 rounded-2xl border border-line bg-surface-2 py-1 pr-2 pl-4 focus-within:border-accent">
+        <Search aria-hidden className="size-5 shrink-0 text-muted" />
+        <CommandInput placeholder={label} autoFocus={autoFocus} aria-label={label} value={q} onValueChange={setQ} onFocus={onFocus} className="min-h-12 min-w-0 flex-1 basis-32 border-0 bg-transparent px-0" />
+        {trailing}
+      </div>
       {!q.trim() ? (
         <div className="flex flex-wrap gap-2" aria-label="Quick searches">
           {SHORTCUTS.map((s) => (
-            <button key={s} type="button" onClick={() => setQ(s)} className="min-h-12 rounded-full border border-line px-4 text-base hover:border-ink">
+            <button key={s} type="button" onClick={() => { setQ(s); onFocus?.(); }} className="min-h-11 rounded-full border border-line px-4 text-base hover:border-ink">
               {s}
             </button>
           ))}
@@ -105,7 +116,8 @@ export function PlaceSearch({ label, index, suggestions, near, bbox, cityName, e
             <span className="font-bold">Use my location</span>
           </CommandItem>
         ) : null}
-        {!q.trim()
+        {!q.trim() && emptyState ? emptyState : null}
+        {!q.trim() && !emptyState
           ? suggestions
               .filter((p) => p.id !== excludeId)
               .map((p) => (
