@@ -135,3 +135,15 @@ export function applyLiveStates(g: { edges: { ref?: string; live?: LiveState }[]
   }
   return n;
 }
+
+/** Live departures from a London stop, minutes away, for one route. TfL's arrivals feed, no key. */
+export async function fetchTflArrivals(stopId: string, route: string, fetchImpl: typeof fetch = fetch): Promise<number[]> {
+  const res = await fetchImpl(`https://api.tfl.gov.uk/StopPoint/${encodeURIComponent(stopId)}/Arrivals`);
+  if (!res.ok) throw new Error(`TfL arrivals: HTTP ${res.status}`);
+  const rows = (await res.json()) as { lineName: string; timeToStation: number }[];
+  return rows
+    .filter((r) => r.lineName.toLowerCase() === route.toLowerCase())
+    .map((r) => Math.round(r.timeToStation / 60))
+    .sort((a, b) => a - b)
+    .slice(0, 3);
+}

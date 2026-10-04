@@ -103,7 +103,7 @@ export function buildNavPlan(r: Route, p: Profile): NavPlan {
         const bus = s.edge.service?.mode === "bus" ? s.edge.service : null;
         maneuvers.push(
           bus
-            ? { type: "board", at, text: `Take the ${bus.route} bus${bus.headsign ? ` towards ${bus.headsign}` : ""} from ${station}.${to ? ` Get off at ${to}.` : ""}`, short: `${bus.route} bus` }
+            ? { type: "board", at, text: `Take the ${bus.route} bus${bus.headsign ? ` towards ${bus.headsign}` : ""} from ${station}${stopNote(bus.stop)}.${to ? ` Get off at ${to}.` : ""}`, short: `${bus.route} bus` }
             : { type: "board", at, text: `Take the ${line}${to ? ` to ${to}` : ""} from ${station}.`, short: line ?? "Train" },
         );
       } else maneuvers.push({ type: "alight", at, text: `Get off at ${station}.`, short: `Get off at ${station}` });
@@ -283,4 +283,14 @@ function project(p: [number, number], a: [number, number], b: [number, number]):
   const x = ax + t * dx,
     y = ay + t * dy;
   return { d: Math.hypot(x, y) * 111_320, t };
+}
+
+/** " (shelter and seat)" from what OSM says about a stop; nothing when it says nothing. */
+export function stopNote(f: { shelter?: boolean; bench?: boolean } | undefined): string {
+  if (!f) return "";
+  const has = [f.shelter ? "shelter" : null, f.bench ? "seat" : null].filter(Boolean);
+  const lacks = [f.shelter === false ? "shelter" : null, f.bench === false ? "seat" : null].filter(Boolean);
+  if (has.length) return ` (${has.join(" and ")}${lacks.length ? `, no ${lacks.join(" or ")}` : ""})`;
+  if (lacks.length) return ` (no ${lacks.join(" or ")})`;
+  return "";
 }

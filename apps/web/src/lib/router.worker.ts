@@ -8,6 +8,7 @@ import { applyEdgeStates, applyLiveStates, liftOutageStates, worksStates, type W
 import { PRESETS, type Profile } from "@causeway/profile";
 import {
   buildNavPlan,
+  busWait,
   describeSegments,
   elevationProfile,
   entrancesNear,
@@ -136,9 +137,17 @@ function toPlanned(r: Route, start: Parameters<typeof elevationProfile>[1], id: 
   const unknowns = [...byName.entries()]
     .map(([name, v]) => ({ name, m: Math.round(v.m), what: [...v.what].join(", ") }))
     .sort((a, b) => b.m - a.m);
+  const busLegs = r.steps
+    .filter((s) => s.forward && s.edge.kind === "board" && s.edge.service?.mode === "bus")
+    .map((s) => {
+      const sv = s.edge.service!;
+      const w = busWait(sv.perHour, now);
+      return { stopId: sv.stopId ?? "", stopName: (s.edge.name ?? "").split(", ")[0]!, route: sv.route, headsign: sv.headsign, perHour: w?.perHour ?? 0 };
+    });
   return {
     nav: buildNavPlan(r, p),
     unknowns,
+    busLegs,
     stretches: stretchesOf(r),
     id,
     label,

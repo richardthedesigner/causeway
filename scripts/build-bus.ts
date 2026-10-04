@@ -26,12 +26,21 @@ for (const name of process.argv[2] ? [process.argv[2]] : Object.keys(REGION)) {
   mkdirSync(dir, { recursive: true });
   const out = join(dir, "bus.json");
   execFileSync("python3", [join(ROOT, "scripts/gtfs-bus.py"), JSON.stringify({ zip, zones, days: DAYS, out })], { stdio: "inherit" });
-  const data = JSON.parse(readFileSync(out, "utf8"));
+  const data = JSON.parse(readFileSync(out, "utf8")) as { stops: Record<string, { facts?: unknown }> };
+
+  // Shelter, seat and kerb from OSM, joined on the NaPTAN code that both share.
+  const osmInputs = "file" in area.osm ? [join(CACHE, "Edinburgh.osm.pbf")] : area.osm.apiTiles.map((_, i) => join(CACHE, `${name}-${i}.osm`));
+  const factsFile = join(CACHE, `${name}.bus-stop-facts.json`);
+  execFileSync("python3", [join(ROOT, "scripts/osm-bus-stops.py"), JSON.stringify({ inputs: osmInputs, out: factsFile })], { stdio: "inherit" });
+  const facts = JSON.parse(readFileSync(factsFile, "utf8")) as Record<string, unknown>;
+  let joined = 0;
+  for (const [id, s] of Object.entries(data.stops)) if (facts[id]) (s.facts = facts[id], joined++);
+  console.log(`${joined} of ${Object.keys(data.stops).length} stops have OSM facts`);
   writeFileSync(
     out,
     JSON.stringify({
       area: name,
-      source: `Bus Open Data Service GTFS (${region}), timetables for ${DAYS.wd}, ${DAYS.sa} and ${DAYS.su}`,
+      source: `Bus Open Data Service GTFS (${region}), timetables for ${DAYS.wd}, ${DAYS.sa} and ${DAYS.su}; stop facts from OpenStreetMap`,
       licence: "Open Government Licence v3.0",
       builtAt: new Date().toISOString().slice(0, 10),
       days: DAYS,

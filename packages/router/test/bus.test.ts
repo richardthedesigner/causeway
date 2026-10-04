@@ -43,7 +43,7 @@ describe("buses in Edinburgh", () => {
   it("prices the wheelchair space risk for wheelchair users only", () => {
     const board = busLegs(plan(PRESETS["manual-wheelchair"]))[0]!.edge;
     const chair = evaluateEdge(board, true, PRESETS["manual-wheelchair"], TUE_10);
-    const walker = evaluateEdge(board, true, PRESETS.rollator, TUE_10);
+    const walker = evaluateEdge(board, true, PRESETS.pram, TUE_10);
     expect(chair.reasons.some((x) => x.attr === "bus-space")).toBe(true);
     expect(walker.reasons.some((x) => x.attr === "bus-space")).toBe(false);
     expect(chair.cost).toBeGreaterThan(walker.cost);
@@ -61,5 +61,24 @@ describe("buses in Edinburgh", () => {
     expect(busWait(ph, TUE_10.now)!.seconds).toBe(300);
     expect(busWait(ph, new Date("2026-10-06T10:00:00Z"))!.seconds).toBe(900);
     expect(busWait(ph, new Date("2026-10-06T14:00:00Z"))).toBeNull();
+  });
+});
+
+describe("waiting at the stop", () => {
+  const ph = { wd: Array(24).fill(2), sa: Array(24).fill(2), su: Array(24).fill(2) };
+  const edge = (stop: Record<string, unknown>) =>
+    ({ id: 1, from: 1, to: 2, kind: "board", geometry: [], lengthM: 0, name: "Stop, 8 bus", level: 0, layer: 0, bridge: false, bidirectional: true, attrs: {} as never, service: { mode: "bus", route: "8", headsign: null, operator: null, perHour: ph, stop } }) as never;
+
+  it("costs more without a seat for someone who needs rests, and says so", () => {
+    const p = PRESETS.fatigue;
+    const seat = evaluateEdge(edge({ bench: true }), true, p, TUE_10);
+    const none = evaluateEdge(edge({ bench: false }), true, p, TUE_10);
+    expect(none.cost).toBeGreaterThan(seat.cost);
+    expect(none.reasons.find((r) => r.attr === "bus-seat")?.detail).toBe("no seat at the stop");
+  });
+
+  it("costs more in the rain without a shelter", () => {
+    const wet = { ...TUE_10, wet: true };
+    expect(evaluateEdge(edge({ shelter: false }), true, PRESETS.walking, wet).cost).toBeGreaterThan(evaluateEdge(edge({ shelter: true }), true, PRESETS.walking, wet).cost);
   });
 });

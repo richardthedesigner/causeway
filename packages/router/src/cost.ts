@@ -89,6 +89,30 @@ function evaluateBus(e: GraphEdge, forward: boolean, p: Profile, c: Conditions, 
   if (!wait || wait.seconds > BUS_MAX_WAIT_S) return exclude(`no ${s.route} bus from here at this time`);
   const out: Reason[] = [...reasons, { kind: "penalty", attr: "bus-wait", detail: `about ${wait.perHour} an hour`, seconds: 0 }];
   let cost = wait.seconds;
+  const stop = s.stop ?? {};
+  // Waiting with nowhere to sit: costly for anyone who needs rests.
+  if (p.maxRestIntervalM !== null && wait.seconds > 180) {
+    if (stop.bench === false) {
+      const pen = Math.round(wait.seconds * 0.5);
+      out.push({ kind: "penalty", attr: "bus-seat", detail: "no seat at the stop", seconds: pen });
+      cost += pen;
+    } else if (stop.bench === undefined) {
+      const pen = Math.round(wait.seconds * 0.2 * (1 - p.uncertaintyTolerance));
+      out.push({ kind: "unknown", attr: "bus-seat", detail: "not known if the stop has a seat", seconds: pen });
+      cost += pen;
+    }
+  }
+  // Rain and no shelter.
+  if (c.wet && stop.shelter === false && wait.seconds > 180) {
+    const pen = Math.round(wait.seconds * 0.3);
+    out.push({ kind: "penalty", attr: "bus-shelter", detail: "no shelter at the stop", seconds: pen });
+    cost += pen;
+  }
+  // A mapped low or flush kerb makes the ramp steep for a wheelchair.
+  if (needsWheelchairSpace(p) && (stop.kerb === "lowered" || stop.kerb === "flush" || stop.kerb === "no")) {
+    out.push({ kind: "penalty", attr: "bus-kerb", detail: `${stop.kerb} kerb at the stop, so the ramp is steeper`, seconds: 60 });
+    cost += 60;
+  }
   if (needsWheelchairSpace(p)) {
     // If the space is taken you wait for the next one: priced as the expected extra wait.
     const extra = Math.round(BUS_SPACE_TAKEN * (3600 / wait.perHour));

@@ -247,6 +247,7 @@ export default function Home() {
           lifts={planner.lifts}
           works={planner.works}
           worksCovered={!!city.works}
+          liveBuses={city.liveLifts}
           onStart={() => setNavigating(true)}
           notes={cityNotes}
           author={author}

@@ -15,8 +15,22 @@ import { attr, unknownAttr } from "./attribute.js";
 import { haversine } from "./geo.js";
 import type { EdgeAttrs, Graph, GraphEdge } from "./schema.js";
 
+/** What OpenStreetMap says about a stop (absent keys: not mapped). */
+export interface BusStopFacts {
+  shelter?: boolean;
+  bench?: boolean;
+  tactile?: boolean;
+  lit?: boolean;
+  kerb?: string;
+  kerbHeight?: string;
+  wheelchair?: string;
+  /** Month the OSM stop was last edited, "2025-03". */
+  date?: string;
+}
+
 export interface BusStop {
   n: string;
+  facts?: BusStopFacts;
   /** NaPTAN SMS code, shown on the stop flag in some places. */
   code: string | null;
   x: number;
@@ -60,6 +74,10 @@ export interface BusService {
   operator: string | null;
   /** Board edges: departures per hour from this stop. */
   perHour?: PerHour;
+  /** Board edges: the stop's ATCO code, for live departures. */
+  stopId?: string;
+  /** Board edges: what OSM says about the stop. */
+  stop?: BusStopFacts;
   /** Ride edges: typical seconds stop to stop. */
   runS?: number;
 }
@@ -170,7 +188,7 @@ export function addBus(g: Graph, net: BusNetwork): { stops: number; lines: numbe
         name: `${s.n}, ${label}`,
         bidirectional: true,
         attrs,
-        service: { ...service, perHour: ln.calls[sid] },
+        service: { ...service, perHour: ln.calls[sid], stopId: sid, stop: s.facts },
       });
       return id;
     };

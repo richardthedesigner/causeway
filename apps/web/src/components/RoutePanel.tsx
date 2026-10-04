@@ -3,6 +3,7 @@ import { ArrowUpDown, CircleAlert, CircleCheck, CircleHelp, CircleX, DoorOpen, M
 import { notesForPlace, notesForStretch, type UserNote } from "@causeway/graph";
 import type { Profile } from "@causeway/profile";
 import { useState } from "react";
+import { BusDepartures } from "@/components/BusDepartures";
 import { ElevationChart } from "@/components/ElevationChart";
 import { NoteList } from "@/components/NoteList";
 import type { NoteAbout } from "@/components/NoteSheet";
@@ -30,6 +31,8 @@ interface Props {
   works: WorksSummary | null;
   /** The city has a works feed at all. */
   worksCovered: boolean;
+  /** Live bus departures exist for this city (TfL in London). */
+  liveBuses: boolean;
   onStart: () => void;
   /** Notes on this device (separate from the graph), this device's author id, and the graph build the route came from. */
   notes: UserNote[];
@@ -253,6 +256,8 @@ export function RoutePanel(props: Props) {
               </ul>
             </details>
           ) : null}
+
+          <BusDepartures legs={sel.busLegs} live={props.liveBuses} />
 
           <ElevationChart data={sel.elevation} worstPct={sel.summary.worstInclinePct} />
 

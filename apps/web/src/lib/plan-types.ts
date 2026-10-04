@@ -30,6 +30,8 @@ export interface PlannedRoute {
   minutesExtra: number;
   /** Turn-by-turn plan for this route (manoeuvres, hazards, geometry). */
   nav: NavPlan;
+  /** Bus legs, for the departures line: stop, route, buses an hour now (timetable). */
+  busLegs: { stopId: string; stopName: string; route: string; headsign: string | null; perHour: number }[];
   /** Where the data is missing, by street, so the user can judge it. */
   unknowns: { name: string; m: number; what: string }[];
   /** Named stretches in route order, for notes: which ones the route passes, and what to attach a new note to. */
