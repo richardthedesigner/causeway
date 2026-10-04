@@ -404,7 +404,7 @@ function PeopleSay({
 function RouteSummary({ r, title }: { r: PlannedRoute; title?: string }) {
   const s = r.summary;
   const extras = [
-    s.rides.length ? s.rides.map((x) => `${x.line} to ${x.to}`).join(", then ") : null,
+    s.rides.length ? s.rides.map((x) => `${x.line.replace(/ towards .*/, "")} to ${x.to}`).join(", then ") : null,
     s.movableBridges.length ? `${s.movableBridges.map((b) => b.name).join(", ")} (moving bridge)` : null,
     s.lifts ? `${s.lifts} lift${s.lifts > 1 ? "s" : ""}` : null,
     s.steps ? `${s.steps} flight${s.steps > 1 ? "s" : ""} of steps` : null,

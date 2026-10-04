@@ -68,6 +68,10 @@ export interface Profile {
   uncertaintyTolerance: number;
   /** Someone else is pushing. Changes incline limits and speed; set by the companion toggle. */
   companion: boolean;
+  /** Use buses when they help. Absent means yes. */
+  buses?: boolean;
+  /** Has an operator's permit to take this mobility scooter on buses (CPT code: class 2, small enough). */
+  busScooterPermit?: boolean;
 }
 
 const SMOOTH: SurfaceTolerance = {

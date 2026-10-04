@@ -9,7 +9,7 @@ export type SharedState = "off" | "loading" | "ok" | "offline";
 
 /**
  * Notes for one city: yours from this device, plus everyone's once sharing
- * is on (D-028). Anything not yet sent (notes and reports) goes up whenever
+ * is on (D-030). Anything not yet sent (notes and reports) goes up whenever
  * the city loads or you come back online.
  */
 export function useNotes(city: string) {

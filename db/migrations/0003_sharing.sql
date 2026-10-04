@@ -1,4 +1,4 @@
--- Sharing notes and reports (D-028). Supabase: Postgres + PostGIS, with
+-- Sharing notes and reports (D-030). Supabase: Postgres + PostGIS, with
 -- anonymous sign-in so nobody needs an account. auth.uid() is the
 -- anonymous user's id; it is never shown to anyone else.
 --

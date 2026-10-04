@@ -65,7 +65,7 @@ export interface LiftOutageMsg {
 }
 
 export type WorkerRequest =
-  | { type: "init"; graphUrl: string; networkUrl?: string; worksUrl?: string; places: Place[] }
+  | { type: "init"; graphUrl: string; networkUrl?: string; worksUrl?: string; busUrl?: string; places: Place[] }
   | { type: "works-live"; works: WorksObservation[]; fetchedAt: string }
   | { type: "live"; outages: LiftOutageMsg[] }
   | {
@@ -80,7 +80,7 @@ export type WorkerRequest =
     };
 
 export type WorkerResponse =
-  | { type: "ready"; places: Place[]; network: { coords: [number, number][]; bin: number }[]; bbox: [number, number, number, number]; builtAt: string }
+  | { type: "ready"; places: Place[]; network: { coords: [number, number][]; bin: number }[]; bbox: [number, number, number, number]; builtAt: string; buses: { stops: number; lines: number; source: string } | null }
   | { type: "error"; message: string }
   | { type: "works"; summary: WorksSummary }
   | { type: "live"; applied: number; fetchedAt: string }

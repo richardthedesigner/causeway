@@ -3,7 +3,7 @@
  * Routing runs on the device, in a worker. The profile (health data) never
  * leaves the phone: it arrives here with each request and is not stored.
  */
-import { isKnown, mobilityLabelFor, noteSignals, type Graph, type GraphEdge, type Stretch, type TransitNetwork } from "@causeway/graph";
+import { addBus, isKnown, mobilityLabelFor, noteSignals, type Graph, type GraphEdge, type Stretch, type TransitNetwork, type BusNetwork } from "@causeway/graph";
 import { applyEdgeStates, applyLiveStates, liftOutageStates, worksStates, type WorksObservation } from "@causeway/live";
 import { PRESETS, type Profile } from "@causeway/profile";
 import {
@@ -52,16 +52,26 @@ function applyWorks() {
 
 const post = (m: WorkerResponse) => self.postMessage(m);
 
-async function load(url: string, networkUrl: string | undefined, worksUrl: string | undefined, demo: Place[]) {
+async function load(url: string, networkUrl: string | undefined, worksUrl: string | undefined, busUrl: string | undefined, demo: Place[]) {
   const res = await fetch(url);
   if (!res.ok || !res.body) throw new Error(`graph: HTTP ${res.status}`);
   // Hosts that won't serve .gz get the same bytes as base64 text (the private preview build).
   const gz = url.endsWith(".b64.txt") ? new Blob([Uint8Array.from(atob((await res.text()).trim()), (c) => c.charCodeAt(0))]).stream() : res.body;
   const text = await new Response(gz.pipeThrough(new DecompressionStream("gzip"))).text();
   graph = JSON.parse(text) as Graph;
+  // Buses join before the router indexes the graph. No bus file: walking and rail still work.
+  let buses: { stops: number; lines: number; source: string } | null = null;
+  if (busUrl) {
+    try {
+      const net = (await (await fetch(busUrl)).json()) as BusNetwork;
+      buses = { ...addBus(graph, net), source: net.source };
+    } catch {
+      buses = null;
+    }
+  }
   router = new Router(graph);
   network = networkUrl ? ((await (await fetch(networkUrl)).json()) as TransitNetwork) : null;
-  post({ type: "ready", places: places(graph, demo, network), network: networkLines(graph), bbox: graph.meta.bbox, builtAt: graph.meta.builtAt });
+  post({ type: "ready", places: places(graph, demo, network), network: networkLines(graph), bbox: graph.meta.bbox, builtAt: graph.meta.builtAt, buses });
   if (worksUrl) {
     try {
       fileWorks = (await (await fetch(worksUrl)).json()) as { works: WorksObservation[]; source: string; builtAt: string };
@@ -225,7 +235,7 @@ function plan(req: Extract<WorkerRequest, { type: "plan" }>): PlanResult {
 self.onmessage = async (ev: MessageEvent<WorkerRequest>) => {
   const m = ev.data;
   try {
-    if (m.type === "init") await load(m.graphUrl, m.networkUrl, m.worksUrl, m.places);
+    if (m.type === "init") await load(m.graphUrl, m.networkUrl, m.worksUrl, m.busUrl, m.places);
     else if (m.type === "works-live") {
       liveWorks = { works: m.works, fetchedAt: m.fetchedAt };
       applyWorks();

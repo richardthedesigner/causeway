@@ -7,7 +7,7 @@
  */
 import type { UserNote } from "@causeway/graph";
 
-/** A note on this device. `sharedAt` is set once the server has it (only when sharing is on, D-028). */
+/** A note on this device. `sharedAt` is set once the server has it (only when sharing is on, D-030). */
 export type LocalNote = UserNote & { sharedAt?: string };
 
 const KEY = "causewayside.notes.v1";

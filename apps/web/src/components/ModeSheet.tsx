@@ -118,6 +118,15 @@ export function ModeSheet({ open, onOpenChange, profile, onChange }: Props) {
               checked={profile.surfaces.gravel === null}
               onChange={(v) => set({ surfaces: { ...profile.surfaces, gravel: v ? null : PRESETS[profile.preset].surfaces.gravel ?? 0.6, grass: v ? null : PRESETS[profile.preset].surfaces.grass ?? 0.8 } })}
             />
+            <Toggle id="buses" label="Use buses" checked={profile.buses !== false} onChange={(v) => set({ buses: v })} />
+            {profile.preset === "mobility-scooter" ? (
+              <Toggle
+                id="scooter-permit"
+                label="I have a permit to take my scooter on buses"
+                checked={!!profile.busScooterPermit}
+                onChange={(v) => set({ busScooterPermit: v })}
+              />
+            ) : null}
             <Toggle
               id="companion"
               label="Someone is helping or pushing"

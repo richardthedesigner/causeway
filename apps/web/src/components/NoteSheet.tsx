@@ -22,7 +22,7 @@ interface Props {
   /** The profile preset id. Only its coarse label is ever offered, and only if the person switches it on. */
   preset: string;
   onSaved: (n: UserNote) => void;
-  /** Notes are shared with other people when sharing is on (D-028). */
+  /** Notes are shared with other people when sharing is on (D-030). */
   sharing?: boolean;
 }
 

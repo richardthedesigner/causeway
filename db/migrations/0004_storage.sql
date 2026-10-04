@@ -1,4 +1,4 @@
--- Photo storage for notes (D-028). Supabase only: does nothing on a plain
+-- Photo storage for notes (D-030). Supabase only: does nothing on a plain
 -- Postgres without the storage schema (tests, local builds).
 --
 -- note-photos: private. You can upload into your own folder; nobody can

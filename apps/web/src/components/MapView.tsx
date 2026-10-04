@@ -35,9 +35,8 @@ const point = (p: { lon: number; lat: number }, props: Record<string, unknown> =
 });
 
 /**
- * The map is drawn from our own footway graph: every line is a real,
- * attributed pavement or path. A full basemap (Protomaps, D-007) layers
- * underneath in Phase 2b.
+ * Our own footway graph and routes, drawn over a Protomaps base map (D-024).
+ * Colours come from the page's CSS tokens and follow theme changes live.
  */
 export function MapView({ network, routes, selectedId, from, to, pin, showSlopes, entrances, onMapClick, me, basemap }: Props) {
   const el = useRef<HTMLDivElement>(null);
@@ -111,13 +110,34 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
     };
   }, [network, routes, selectedId, from, to, pin, showSlopes, entrances]);
 
-  // Base map: swap in the city's extract under our own layers.
   const [mapReady, setMapReady] = useState(false);
+  const dark = useDark();
+
+  // Theme change while open: our own layers take their colours from CSS tokens, so read them again.
+  useEffect(() => {
+    const m = map.current;
+    if (!m || !mapReady) return;
+    m.setPaintProperty("ground", "background-color", css("--ground"));
+    m.setPaintProperty("network-steps", "line-color", css("--muted"));
+    m.setPaintProperty("route-alt", "line-color", css("--route-alt"));
+    m.setPaintProperty("route-casing", "line-color", css("--surface"));
+    m.setPaintProperty("route", "line-color", css("--route"));
+    m.setPaintProperty("unknown", "line-color", css("--surface"));
+    m.setPaintProperty("entrances", "circle-stroke-color", css("--surface"));
+    m.setPaintProperty("markers", "circle-color", ["match", ["get", "end"], 1, css("--stop"), 2, css("--surface"), css("--ink")]);
+    m.setPaintProperty("markers", "circle-stroke-color", ["match", ["get", "end"], 2, css("--accent"), css("--surface")]);
+    m.setPaintProperty("me-halo", "circle-color", css("--accent"));
+    m.setPaintProperty("me", "circle-color", css("--accent"));
+    m.setPaintProperty("me", "circle-stroke-color", css("--surface"));
+    m.fire("causeway:refresh");
+  }, [dark, mapReady]);
+
+  // Base map: swap in the city's extract under our own layers (and restyle it when the theme changes).
+  const shownKey = useRef<string | null>(null);
   useEffect(() => {
     const m = map.current;
     if (!m || !mapReady || !basemap) return;
     let cancelled = false;
-    const dark = matchMedia("(prefers-color-scheme: dark)").matches && document.documentElement.dataset.theme !== "light";
     loadBasemap(basemap.url, basemap.key)
       .then((url) => {
         if (cancelled) return;
@@ -125,7 +145,8 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
         if (m.getSource("basemap")) m.removeSource("basemap");
         m.addSource("basemap", { type: "vector", url, attribution: "© OpenStreetMap contributors, Protomaps" });
         for (const l of basemapLayers(dark)) if (l.type !== "background") m.addLayer(l, "network");
-        m.jumpTo({ center: basemap.center, zoom: 14 });
+        if (shownKey.current !== basemap.key) m.jumpTo({ center: basemap.center, zoom: 14 });
+        shownKey.current = basemap.key;
       })
       .catch(() => {
         /* No basemap: the footway network still draws the map. */
@@ -133,7 +154,7 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
     return () => {
       cancelled = true;
     };
-  }, [basemap, mapReady]);
+  }, [basemap, mapReady, dark]);
 
   // Position and follow mode.
   useEffect(() => {
@@ -159,4 +180,27 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
       <div ref={el} className="h-full w-full" />
     </div>
   );
+}
+
+/** Dark mode as the page shows it: the system setting unless the page forces a theme. */
+function useDark(): boolean {
+  const read = () => {
+    if (typeof document === "undefined") return false;
+    const forced = document.documentElement.dataset.theme;
+    return forced ? forced === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  };
+  const [dark, setDark] = useState(read);
+  useEffect(() => {
+    const update = () => setDark(read());
+    const mq = matchMedia("(prefers-color-scheme: dark)");
+    mq.addEventListener("change", update);
+    const mo = new MutationObserver(update);
+    mo.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    update();
+    return () => {
+      mq.removeEventListener("change", update);
+      mo.disconnect();
+    };
+  }, []);
+  return dark;
 }

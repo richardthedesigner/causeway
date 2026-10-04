@@ -1,5 +1,5 @@
 /**
- * Sharing notes and sending reports (D-028). Off unless the build has
+ * Sharing notes and sending reports (D-030). Off unless the build has
  * NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY; without them
  * the app keeps everything on the device, exactly as before.
  *

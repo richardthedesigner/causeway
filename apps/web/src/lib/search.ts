@@ -11,7 +11,7 @@ export interface PlacesFile {
   source: string;
   builtAt: string;
   zones: [number, number, number, number][];
-  places: { n: string; c: string; x: number; y: number; a?: Record<string, string>; ad?: string; d?: string; dk?: 1; id: string }[];
+  places: { n: string; c: string; x: number; y: number; a?: Record<string, string>; ad?: string; d?: string; dk?: 1; id: string; /** "overture" when the place came from Overture Maps, not OSM. */ src?: string }[];
   addresses: { n: string; pc: string | null; x: number; y: number }[];
   postcodes: { n: string; x: number; y: number }[];
 }
@@ -184,7 +184,7 @@ export function buildIndex(file: PlacesFile | null, extra: Place[]): Index {
       const facts = accessFacts(p.a, p.c);
       const name = p.n || (p.ad ? `${label}, ${p.ad.split(",")[0]}` : label);
       const place: Place = {
-        id: `osm:${p.id}`,
+        id: p.src === "overture" ? `overture:${p.id}` : `osm:${p.id}`,
         name,
         kind: [label, p.ad].filter(Boolean).join(" / "),
         lon: p.x,
@@ -193,7 +193,8 @@ export function buildIndex(file: PlacesFile | null, extra: Place[]): Index {
         facts: facts.length ? facts : undefined,
         factsSource: facts.length ? `OpenStreetMap, ${p.dk ? "checked" : "edited"} ${monthYear(p.d) ?? "date unknown"}` : undefined,
       };
-      add(place, p.c === "highway=bus_stop" ? 3 : 2, p.ad ?? "", p.c, p.a);
+      // OSM first when names tie: it is the source with access tags.
+      add(place, p.c === "highway=bus_stop" ? 3 : p.src === "overture" ? 2.5 : 2, p.ad ?? "", p.c, p.a);
     }
     for (const a of file.addresses) add({ id: `addr:${a.n}:${a.x}`, name: a.n, kind: a.pc ? `Address / ${a.pc}` : "Address", lon: a.x, lat: a.y, venue: true }, 4, a.pc ?? "");
     for (const pc of file.postcodes) postcodes.set(pc.n.replace(/\s/g, ""), { id: `pc:${pc.n}`, name: pc.n, kind: "Postcode", lon: pc.x, lat: pc.y });

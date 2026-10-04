@@ -10,7 +10,7 @@ interface Props {
   onOpenChange: (v: boolean) => void;
   where: { lon: number; lat: number; accuracyM: number | null; label: string } | null;
   city: string;
-  /** Reports are sent for triage when sharing is on (D-028). */
+  /** Reports are sent for triage when sharing is on (D-030). */
   sharing?: boolean;
   onSaved?: () => void;
 }

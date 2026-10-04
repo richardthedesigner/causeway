@@ -1,6 +1,6 @@
 # Backend: sharing notes and sending reports
 
-Decision: [D-028](DECISIONS.md). Without the two environment variables below, the app keeps notes and reports on the device and never talks to a server.
+Decision: [D-030](DECISIONS.md). Without the two environment variables below, the app keeps notes and reports on the device and never talks to a server.
 
 ## Set up (once)
 

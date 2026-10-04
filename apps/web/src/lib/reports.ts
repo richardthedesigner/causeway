@@ -26,7 +26,7 @@ export interface Report {
   note: string;
   /** Small JPEG data URL, if the person added a photo. */
   photo: string | null;
-  /** Set once the report has been sent for triage (only when sharing is on, D-028). */
+  /** Set once the report has been sent for triage (only when sharing is on, D-030). */
   sentAt?: string;
 }
 
