@@ -6,6 +6,7 @@
  * per note.
  */
 import type { UserNote } from "@causeway/graph";
+import { loadStored, readList, saveStored, type StoredVersion } from "./stored";
 
 /** A note on this device. `sharedAt` is set once the server has it (only when sharing is on, D-030). */
 export type LocalNote = UserNote & { sharedAt?: string };
@@ -13,22 +14,17 @@ export type LocalNote = UserNote & { sharedAt?: string };
 const KEY = "causewayside.notes.v1";
 const AUTHOR_KEY = "causewayside.author.v1";
 
+/** Newest shape first (STAB-03). Anything unreadable is backed up before it can be overwritten. */
+const VERSIONS: StoredVersion<LocalNote[]>[] = [
+  { key: KEY, read: (json, dropped) => readList(json, dropped, (x) => (x && typeof (x as LocalNote).id === "string" ? (x as LocalNote) : null)) },
+];
+
 export function loadNotes(): LocalNote[] {
-  try {
-    const v = JSON.parse(localStorage.getItem(KEY) ?? "[]");
-    return Array.isArray(v) ? (v as LocalNote[]) : [];
-  } catch {
-    return [];
-  }
+  return loadStored(VERSIONS)?.value ?? [];
 }
 
 export function saveNote(n: LocalNote): boolean {
-  try {
-    localStorage.setItem(KEY, JSON.stringify([n, ...loadNotes().filter((o) => o.id !== n.id)].slice(0, 200)));
-    return true;
-  } catch {
-    return false;
-  }
+  return saveStored(KEY, [n, ...loadNotes().filter((o) => o.id !== n.id)].slice(0, 200));
 }
 
 export function markShared(id: string): void {
@@ -37,12 +33,7 @@ export function markShared(id: string): void {
 }
 
 export function deleteNote(id: string): boolean {
-  try {
-    localStorage.setItem(KEY, JSON.stringify(loadNotes().filter((o) => o.id !== id)));
-    return true;
-  } catch {
-    return false;
-  }
+  return saveStored(KEY, loadNotes().filter((o) => o.id !== id));
 }
 
 /**
