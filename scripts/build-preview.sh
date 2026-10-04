@@ -8,7 +8,8 @@ cd "$ROOT/apps/web"
 rm -rf out && ARTIFACT=1 NEXT_PUBLIC_GRAPH_B64=1 NEXT_TELEMETRY_DISABLED=1 npx next build
 rm -rf "$OUT" && mkdir -p "$OUT/graph"
 cp -r out/_next "$OUT/next"
-base64 -w0 out/graph/edinburgh-central.graph.json.gz > "$OUT/graph/edinburgh-central.graph.b64.txt"
+for f in out/graph/*.graph.json.gz; do base64 -w0 "$f" > "$OUT/graph/$(basename "$f" .json.gz).b64.txt"; done
+cp out/graph/london-network.json "$OUT/graph/"
 python3 - out/index.html "$OUT/causewayside.html" <<'PY'
 import re, sys
 html = open(sys.argv[1]).read()

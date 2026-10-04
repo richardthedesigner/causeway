@@ -3,7 +3,8 @@
  * Routing runs on the device, in a worker. The profile (health data) never
  * leaves the phone: it arrives here with each request and is not stored.
  */
-import { isKnown, type Graph, type GraphEdge } from "@causeway/graph";
+import { isKnown, type Graph, type GraphEdge, type TransitNetwork } from "@causeway/graph";
+import { applyLiveStates, liftOutageStates } from "@causeway/live";
 import { PRESETS } from "@causeway/profile";
 import {
   describeSegments,
@@ -21,10 +22,11 @@ import type { Place, PlannedRoute, PlanResult, WorkerRequest, WorkerResponse } f
 declare const self: DedicatedWorkerGlobalScope;
 let router: Router | null = null;
 let graph: Graph | null = null;
+let network: TransitNetwork | null = null;
 
 const post = (m: WorkerResponse) => self.postMessage(m);
 
-async function load(url: string) {
+async function load(url: string, networkUrl: string | undefined, demo: Place[]) {
   const res = await fetch(url);
   if (!res.ok || !res.body) throw new Error(`graph: HTTP ${res.status}`);
   // Hosts that won't serve .gz get the same bytes as base64 text (the private preview build).
@@ -32,20 +34,18 @@ async function load(url: string) {
   const text = await new Response(gz.pipeThrough(new DecompressionStream("gzip"))).text();
   graph = JSON.parse(text) as Graph;
   router = new Router(graph);
-  post({ type: "ready", places: places(graph), network: network(graph), bbox: graph.meta.bbox, builtAt: graph.meta.builtAt });
+  network = networkUrl ? ((await (await fetch(networkUrl)).json()) as TransitNetwork) : null;
+  post({ type: "ready", places: places(graph, demo, network), network: networkLines(graph), bbox: graph.meta.bbox, builtAt: graph.meta.builtAt });
 }
 
 /** Search index: demo places plus every street name in the graph (tagged names only, never borrowed ones). */
-function places(g: Graph): Place[] {
-  const demo: Place[] = [
-    { id: "causewayside", name: "Causewayside", kind: "Southside / demo address", lon: -3.1812, lat: 55.9385 },
-    { id: "waverley", name: "Edinburgh Waverley", kind: "Railway station", lon: -3.1893, lat: 55.952, venue: true },
-    { id: "grassmarket", name: "Grassmarket", kind: "Old Town", lon: -3.196, lat: 55.9476 },
-    { id: "nms", name: "National Museum of Scotland", kind: "Chambers Street", lon: -3.1897, lat: 55.9469, venue: true },
-    { id: "victoria-street", name: "Victoria Street", kind: "Old Town", lon: -3.1937, lat: 55.9484 },
-    { id: "st-giles", name: "High Street by St Giles'", kind: "Royal Mile", lon: -3.1907, lat: 55.9496 },
-    { id: "meadows", name: "The Meadows", kind: "Park", lon: -3.1925, lat: 55.9405 },
-  ];
+function places(g: Graph, demo: Place[], net: TransitNetwork | null): Place[] {
+  const stations: Place[] = net
+    ? [...new Map(Object.values(net.stations).map((st) => [st.name, st])).values()]
+        .filter((st) => g.edges.some((e) => e.ref === `link:${st.id}`))
+        .map((st) => ({ id: `station:${st.id}`, name: `${st.name} station`, kind: st.mode === "dlr" ? "DLR" : "Underground", lon: st.lon, lat: st.lat, venue: true }))
+    : [];
+  demo = [...demo, ...stations];
   const best = new Map<string, GraphEdge>();
   for (const e of g.edges) {
     if (!e.name || e.nameInferred || e.kind === "steps" || /^Platform/.test(e.name)) continue;
@@ -62,15 +62,16 @@ function places(g: Graph): Place[] {
   return [...demo, ...streets];
 }
 
-/** Base network for the map, binned by steepest gradient (0-4) or unknown (-1). */
-function network(g: Graph) {
+/** Base network for the map, binned by steepest gradient (0-4) or unknown (-1). Rail is not drawn as pavement. */
+function networkLines(g: Graph) {
   const bin = (e: GraphEdge) => {
     if (e.kind === "steps") return 5;
     const v = isKnown(e.attrs.inclineMax) ? Math.abs(e.attrs.inclineMax.value) : null;
     if (v === null) return -1;
     return v < 3 ? 0 : v < 5 ? 1 : v < 8 ? 2 : v < 12 ? 3 : 4;
   };
-  return g.edges.filter((e) => e.kind !== "elevator").map((e) => ({ coords: e.geometry, bin: bin(e) }));
+  const rail = new Set(["transit", "board", "interchange", "station_link", "elevator"]);
+  return g.edges.filter((e) => !rail.has(e.kind)).map((e) => ({ coords: e.geometry, bin: bin(e) }));
 }
 
 function toPlanned(r: Route, start: Parameters<typeof elevationProfile>[1], id: string, label: string, baseSeconds: number, now: Date): PlannedRoute {
@@ -169,7 +170,14 @@ function plan(req: Extract<WorkerRequest, { type: "plan" }>): PlanResult {
 self.onmessage = async (ev: MessageEvent<WorkerRequest>) => {
   const m = ev.data;
   try {
-    if (m.type === "init") await load(m.graphUrl);
+    if (m.type === "init") await load(m.graphUrl, m.networkUrl, m.places);
+    else if (m.type === "live") {
+      if (!graph || !network) return;
+      for (const e of graph.edges) if (e.live?.affects === "step-free") delete e.live;
+      const refs = new Set(graph.edges.map((e) => e.ref).filter((r): r is string => !!r));
+      const applied = applyLiveStates(graph, liftOutageStates(m.outages, network, refs));
+      post({ type: "live", applied, fetchedAt: m.outages[0]?.fetchedAt ?? new Date().toISOString() });
+    }
     else if (m.type === "plan") post({ type: "plan", id: m.id, result: plan(m) });
   } catch (err) {
     post({ type: "error", message: err instanceof Error ? err.message : String(err) });

@@ -45,11 +45,22 @@ export type PlanResult =
     }
   | { status: "none"; message: string; walkingHeadline: string | null };
 
+export interface LiftOutageMsg {
+  stationId: string;
+  stationName: string | null;
+  liftIds: string[];
+  message: string;
+  alternativeMentioned: boolean;
+  fetchedAt: string;
+}
+
 export type WorkerRequest =
-  | { type: "init"; graphUrl: string }
+  | { type: "init"; graphUrl: string; networkUrl?: string; places: Place[] }
+  | { type: "live"; outages: LiftOutageMsg[] }
   | { type: "plan"; id: number; from: Place; to: Place; profile: Profile; conditions: Omit<Conditions, "now"> & { now: string } };
 
 export type WorkerResponse =
   | { type: "ready"; places: Place[]; network: { coords: [number, number][]; bin: number }[]; bbox: [number, number, number, number]; builtAt: string }
   | { type: "error"; message: string }
+  | { type: "live"; applied: number; fetchedAt: string }
   | { type: "plan"; id: number; result: PlanResult };

@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "prebuild": "node -e \"require('fs').mkdirSync('public/graph',{recursive:true});require('fs').copyFileSync('../../data/snapshots/edinburgh-central.graph.json.gz','public/graph/edinburgh-central.graph.json.gz')\"",
+    "prebuild": "node scripts/copy-graphs.mjs",
     "predev": "npm run prebuild",
     "dev": "next dev",
     "build": "next build",

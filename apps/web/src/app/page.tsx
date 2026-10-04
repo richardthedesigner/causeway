@@ -11,9 +11,9 @@ import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerDescription, DrawerTitle } from "@/components/ui/drawer";
 import type { Place } from "@/lib/plan-types";
 import { loadProfile, saveProfile } from "@/lib/profile-store";
+import { CITIES, cityById, type City } from "@/lib/cities";
 import { usePlanner, type Conditions } from "@/lib/use-planner";
 
-const CAUSEWAYSIDE: Place = { id: "causewayside", name: "Causewayside", kind: "Southside / demo address", lon: -3.1812, lat: 55.9385 };
 const PRESET_CONDITIONS: Record<"dry" | "wet" | "ice", Conditions> = {
   dry: { wet: false, ice: false, summary: "Dry", source: "Set by you" },
   wet: { wet: true, ice: false, summary: "Wet: setts and slabs are slippery", source: "Set by you" },
@@ -22,11 +22,22 @@ const PRESET_CONDITIONS: Record<"dry" | "wet" | "ice", Conditions> = {
 
 type View = { kind: "search"; target: "from" | "to" } | { kind: "route" };
 
+const CITY_KEY = "causewayside.city.v1";
+
 export default function Home() {
-  const planner = usePlanner();
+  const [city, setCity] = useState<City>(CITIES[0]!);
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(CITY_KEY);
+      if (saved) setCity(cityById(saved));
+    } catch {
+      /* no storage: default city */
+    }
+  }, []);
+  const planner = usePlanner(city);
   const [profile, setProfile] = useState<Profile>(PRESETS["manual-wheelchair"]);
   const [modeOpen, setModeOpen] = useState(false);
-  const [from, setFrom] = useState<Place>(CAUSEWAYSIDE);
+  const [from, setFrom] = useState<Place>(CITIES[0]!.start);
   const [to, setTo] = useState<Place | null>(null);
   const [view, setView] = useState<View>({ kind: "search", target: "to" });
   const [selected, setSelected] = useState<string | null>(null);
@@ -34,6 +45,7 @@ export default function Home() {
   const [showSlopes, setShowSlopes] = useState(false);
   const [snap, setSnap] = useState<number | string | null>(0.5);
   const [geoError, setGeoError] = useState<string | null>(null);
+  const [pin, setPin] = useState<Place | null>(null);
   const wide = useWide();
 
   useEffect(() => setProfile(loadProfile()), []);
@@ -42,10 +54,23 @@ export default function Home() {
     if (parseFloat(getComputedStyle(document.documentElement).fontSize) >= 20) setSnap(0.94);
   }, []);
 
+  const switchCity = (c: City) => {
+    setCity(c);
+    setFrom(c.start);
+    setTo(null);
+    setPin(null);
+    setView({ kind: "search", target: "to" });
+    try {
+      localStorage.setItem(CITY_KEY, c.id);
+    } catch {
+      /* not remembered; fine */
+    }
+  };
+
   // Live weather sets the default conditions; the user can override.
   useEffect(() => {
     const ctl = new AbortController();
-    fetch(openMeteoUrl(55.9486, -3.1999), { signal: ctl.signal })
+    fetch(openMeteoUrl(...city.weatherAt), { signal: ctl.signal })
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
       .then((j) => {
         const c = conditionsFromOpenMeteo(j);
@@ -53,7 +78,7 @@ export default function Home() {
       })
       .catch(() => setConditions({ ...PRESET_CONDITIONS.dry, summary: "Couldn't check the weather, so we're assuming dry", source: "Change it if the ground is wet or icy" }));
     return () => ctl.abort();
-  }, []);
+  }, [city]);
 
   const updateProfile = useCallback((p: Profile) => {
     setProfile(p);
@@ -65,7 +90,7 @@ export default function Home() {
     if (!planner.ready || !to) return;
     planner.plan(from, to, profile, conditions);
     setSelected(null);
-  }, [planner.ready, from, to, profile, conditions]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [planner.ready, from, to, profile, conditions, planner.lifts]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const pick = (p: Place) => {
     if (view.kind === "search" && view.target === "from") setFrom(p);
@@ -83,7 +108,6 @@ export default function Home() {
   };
 
   // A stray tap must never wipe a route: a tap proposes a pin, and the user confirms it.
-  const [pin, setPin] = useState<Place | null>(null);
   const onMapClick = (lon: number, lat: number) => {
     if (!planner.ready) return;
     const [x0, y0, x1, y1] = planner.ready.bbox;
@@ -130,10 +154,24 @@ export default function Home() {
         </p>
       ) : !planner.ready ? (
         <p className="m-0 py-4 text-muted" aria-live="polite">
-          Loading central Edinburgh…
+          Loading {city.name}…
         </p>
       ) : view.kind === "search" ? (
         <div className="grid gap-4 pt-1">
+          <div role="radiogroup" aria-label="City" className="flex flex-wrap gap-2">
+            {CITIES.map((c) => (
+              <button
+                key={c.id}
+                type="button"
+                role="radio"
+                aria-checked={c.id === city.id}
+                onClick={() => c.id !== city.id && switchCity(c)}
+                className={c.id === city.id ? "min-h-12 rounded-full border border-ink bg-ink px-4 text-surface" : "min-h-12 rounded-full border border-line px-4"}
+              >
+                {c.name}
+              </button>
+            ))}
+          </div>
           <PlaceSearch
             label={view.target === "to" ? "Where to?" : "Starting from?"}
             places={planner.ready.places.filter((p) => p.id !== (view.target === "to" ? from.id : to?.id))}
@@ -156,6 +194,7 @@ export default function Home() {
             </p>
           ) : null}
           <p className="m-0 text-sm text-muted">{view.target === "to" ? `Or tap the map to drop a pin. Starting from ${from.name}.` : "Or pick a street or place."}</p>
+          <p className="m-0 text-sm text-muted">{city.coverage}</p>
         </div>
       ) : to ? (
         <RoutePanel
@@ -175,12 +214,12 @@ export default function Home() {
           }}
           onOpenMode={() => setModeOpen(true)}
           onConditions={(k) => setConditions(PRESET_CONDITIONS[k])}
+          lifts={planner.lifts}
         />
       ) : null}
       <footer className="mt-8 grid gap-2 border-t border-line pt-4 text-sm text-muted">
         <p className="m-0">
-          Map data © OpenStreetMap contributors (ODbL). Terrain: LiDAR for Scotland, Open Government Licence v3.0. Pavement data built{" "}
-          {planner.ready?.builtAt.slice(0, 10) ?? ""}. Covers central Edinburgh only.
+          {city.credit} Pavement data built {planner.ready?.builtAt.slice(0, 10) ?? ""}.
         </p>
       </footer>
     </div>

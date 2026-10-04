@@ -4,7 +4,7 @@ import type { Profile } from "@causeway/profile";
 import { ElevationChart } from "@/components/ElevationChart";
 import { Button } from "@/components/ui/button";
 import type { Place, PlannedRoute, PlanResult } from "@/lib/plan-types";
-import type { Conditions } from "@/lib/use-planner";
+import type { Conditions, LiveLifts } from "@/lib/use-planner";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -21,11 +21,14 @@ interface Props {
   onSwap: () => void;
   onOpenMode: () => void;
   onConditions: (c: "dry" | "wet" | "ice") => void;
+  lifts: LiveLifts;
 }
 
 export const meta = (r: PlannedRoute) => {
   const s = r.summary;
-  const dist = s.distanceM >= 1000 ? `${(s.distanceM / 1000).toFixed(1)} km` : `${s.distanceM} m`;
+  // With a train in the middle, the distance that matters is the bit you push, wheel or walk.
+  const d = s.rides.length ? s.walkM : s.distanceM;
+  const dist = d >= 1000 ? `${(d / 1000).toFixed(1)} km` : `${d} m`;
   const steep = s.worstInclinePct === null ? "slope unknown" : `max ${Math.abs(s.worstInclinePct)}%`;
   return `${Math.round(s.minutes)} min / ${dist} / ${steep}`;
 };
@@ -108,6 +111,15 @@ export function RoutePanel(props: Props) {
               ))}
             </div>
             {planning ? <p className="m-0 text-sm text-muted" aria-live="polite">Updating…</p> : null}
+            {props.lifts.state === "ok" ? (
+              <p className="m-0 text-sm text-muted">
+                Lift status from TfL at {props.lifts.at.slice(11, 16)} UTC: {props.lifts.closed === 0 ? "no outages on this network" : `${props.lifts.closed} platform${props.lifts.closed === 1 ? "" : "s"} closed to step-free travel, routed around`}.
+              </p>
+            ) : props.lifts.state === "failed" ? (
+              <p className="m-0 text-sm text-caution">Couldn&apos;t get live lift status from TfL. Check before you travel.</p>
+            ) : props.lifts.state === "loading" ? (
+              <p className="m-0 text-sm text-muted">Checking lifts with TfL…</p>
+            ) : null}
           </section>
 
           <section aria-labelledby="why-h" className="grid gap-2">
@@ -240,7 +252,10 @@ export function RoutePanel(props: Props) {
 
 function RouteCard({ r, on, onSelect, title, subtitle }: { r: PlannedRoute; on: boolean; onSelect: () => void; title?: string; subtitle?: string }) {
   const s = r.summary;
-  const extras = [s.lifts ? `${s.lifts} lift${s.lifts > 1 ? "s" : ""}` : null, s.steps ? `${s.steps} flight${s.steps > 1 ? "s" : ""} of steps` : null, (s.surfaceMix["setts"] ?? 0) > 20 ? `${s.surfaceMix["setts"]} m of setts` : null].filter(Boolean);
+  const extras = [
+    s.rides.length ? s.rides.map((x) => `${x.line} to ${x.to}`).join(", then ") : null,
+    s.movableBridges.length ? `${s.movableBridges.map((b) => b.name).join(", ")} (moving bridge)` : null,
+    s.lifts ? `${s.lifts} lift${s.lifts > 1 ? "s" : ""}` : null, s.steps ? `${s.steps} flight${s.steps > 1 ? "s" : ""} of steps` : null, (s.surfaceMix["setts"] ?? 0) > 20 ? `${s.surfaceMix["setts"]} m of setts` : null].filter(Boolean);
   return (
     <button
       type="button"

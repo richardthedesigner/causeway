@@ -1,6 +1,8 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { fetchLiftOutages } from "@causeway/live";
 import type { Profile } from "@causeway/profile";
+import type { City } from "./cities";
 import type { Place, PlanResult, WorkerRequest, WorkerResponse } from "./plan-types";
 
 export interface Conditions {
@@ -12,21 +14,48 @@ export interface Conditions {
 
 type Ready = Extract<WorkerResponse, { type: "ready" }>;
 
-/** Owns the routing worker: loads the graph once, then plans on request (latest request wins). */
-export function usePlanner() {
+export type LiveLifts =
+  | { state: "none" }
+  | { state: "loading" }
+  | { state: "ok"; closed: number; at: string }
+  | { state: "failed" };
+
+const LIFT_REFRESH_MS = 5 * 60_000;
+
+/**
+ * Owns the routing worker for one city: loads its graph, keeps live lift
+ * status fresh (London), and plans on request (latest request wins).
+ */
+export function usePlanner(city: City) {
   const worker = useRef<Worker | null>(null);
   const seq = useRef(0);
   const [ready, setReady] = useState<Ready | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<PlanResult | null>(null);
   const [planning, setPlanning] = useState(false);
+  const [lifts, setLifts] = useState<LiveLifts>({ state: "none" });
 
   useEffect(() => {
+    setReady(null);
+    setResult(null);
+    setError(null);
+    setLifts({ state: city.liveLifts ? "loading" : "none" });
     const w = new Worker(new URL("./router.worker.ts", import.meta.url), { type: "module" });
     worker.current = w;
+    let timer: ReturnType<typeof setInterval> | undefined;
+    const refreshLifts = () =>
+      fetchLiftOutages()
+        .then((outages) => w.postMessage({ type: "live", outages } satisfies WorkerRequest))
+        .catch(() => setLifts({ state: "failed" }));
     w.onmessage = (ev: MessageEvent<WorkerResponse>) => {
       const m = ev.data;
-      if (m.type === "ready") setReady(m);
+      if (m.type === "ready") {
+        setReady(m);
+        if (city.liveLifts) {
+          refreshLifts();
+          timer = setInterval(refreshLifts, LIFT_REFRESH_MS);
+        }
+      } else if (m.type === "live") setLifts({ state: "ok", closed: m.applied, at: m.fetchedAt });
       else if (m.type === "error") {
         setError(m.message);
         setPlanning(false);
@@ -35,11 +64,13 @@ export function usePlanner() {
         setPlanning(false);
       }
     };
-    const file = process.env.NEXT_PUBLIC_GRAPH_B64 ? "graph/edinburgh-central.graph.b64.txt" : "graph/edinburgh-central.graph.json.gz";
-    const graphUrl = new URL(file, document.baseURI).toString();
-    w.postMessage({ type: "init", graphUrl } satisfies WorkerRequest);
-    return () => w.terminate();
-  }, []);
+    const url = (f: string) => new URL(process.env.NEXT_PUBLIC_GRAPH_B64 && f.endsWith(".gz") ? f.replace(".json.gz", ".b64.txt") : f, document.baseURI).toString();
+    w.postMessage({ type: "init", graphUrl: url(city.graph), networkUrl: city.network ? url(city.network) : undefined, places: city.places } satisfies WorkerRequest);
+    return () => {
+      clearInterval(timer);
+      w.terminate();
+    };
+  }, [city]);
 
   const plan = useCallback((from: Place, to: Place, profile: Profile, c: Conditions) => {
     if (!worker.current) return;
@@ -49,5 +80,5 @@ export function usePlanner() {
     worker.current.postMessage({ type: "plan", id, from, to, profile, conditions: { wet: c.wet, ice: c.ice, now: new Date().toISOString() } } satisfies WorkerRequest);
   }, []);
 
-  return { ready, error, result, planning, plan, clear: () => setResult(null) };
+  return { ready, error, result, planning, plan, lifts, clear: () => setResult(null) };
 }
