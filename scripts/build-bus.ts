@@ -12,6 +12,8 @@ import { CACHE } from "./sources.js";
 
 const ROOT = join(import.meta.dirname, "..");
 const REGION: Record<string, string> = { "edinburgh-central": "scotland", "newcastle-gateshead": "north_east", "london-jubilee": "london" };
+/** GTFS route types to add beyond buses and trams: the Metro in Newcastle (London's comes from TfL). */
+const EXTRA_MODES: Record<string, Record<string, string>> = { "newcastle-gateshead": { "1": "metro" } };
 /** Sample days for "typical" service: a Tuesday, Saturday and Sunday clear of bank holidays. */
 const DAYS = { wd: "20261006", sa: "20261010", su: "20261011" };
 
@@ -25,7 +27,7 @@ for (const name of process.argv[2] ? [process.argv[2]] : Object.keys(REGION)) {
   const dir = join(ROOT, "data/transit", name);
   mkdirSync(dir, { recursive: true });
   const out = join(dir, "bus.json");
-  execFileSync("python3", [join(ROOT, "scripts/gtfs-bus.py"), JSON.stringify({ zip, zones, days: DAYS, out })], { stdio: "inherit" });
+  execFileSync("python3", [join(ROOT, "scripts/gtfs-bus.py"), JSON.stringify({ zip, zones, days: DAYS, extraModes: EXTRA_MODES[name] ?? {}, out })], { stdio: "inherit" });
   const data = JSON.parse(readFileSync(out, "utf8")) as { stops: Record<string, { facts?: unknown }> };
 
   // Shelter, seat and kerb from OSM, joined on the NaPTAN code that both share.

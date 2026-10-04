@@ -44,9 +44,13 @@ export interface PerHour {
   su: number[];
 }
 
+export type ServiceMode = "bus" | "tram" | "metro";
+
 export interface BusLine {
   /** "<route_id>:<direction>" */
   id: string;
+  /** Absent in older files: bus. */
+  mode?: ServiceMode;
   /** Public route number, "23". */
   route: string;
   operator: string | null;
@@ -68,7 +72,7 @@ export interface BusNetwork {
 
 /** How a bus edge is served, for the cost model and the directions. */
 export interface BusService {
-  mode: "bus";
+  mode: ServiceMode;
   route: string;
   headsign: string | null;
   operator: string | null;
@@ -82,8 +86,20 @@ export interface BusService {
   runS?: number;
 }
 
-/** A stop links to pavement within this distance. */
-const LINK_M = 35;
+/** A stop links to pavement within this distance; a Metro station's point sits inside the building. */
+const LINK_M: Record<ServiceMode, number> = { bus: 35, tram: 40, metro: 120 };
+
+/** Stop names carry the operator in GTFS: "Monument (Tyne and Wear Metro Station)". */
+const cleanName = (n: string) => n.replace(/\s*\((Tyne and Wear Metro Station|Edinburgh Trams)\)$/, "");
+
+const METRO_LINES: Record<string, string> = { GRN: "Green line", YEL: "Yellow line" };
+
+function lineLabel(ln: BusLine): string {
+  const towards = ln.headsign ? ` towards ${cleanName(ln.headsign)}` : "";
+  if (ln.mode === "tram") return `tram${towards}`;
+  if (ln.mode === "metro") return `Metro ${METRO_LINES[ln.route] ?? ln.route}${towards}`;
+  return `${ln.route} bus${towards}`;
+}
 
 function busAttrs(source: string, observedAt: string): EdgeAttrs {
   return {
@@ -125,22 +141,27 @@ export function addBus(g: Graph, net: BusNetwork): { stops: number; lines: numbe
   const cell = (x: number, y: number) => `${Math.floor(x * 2000)}:${Math.floor(y * 2000)}`;
   const grid = new Map<string, typeof g.nodes>();
   for (const n of g.nodes) if (onPavement.has(n.id)) (grid.get(cell(n.lon, n.lat)) ?? grid.set(cell(n.lon, n.lat), []).get(cell(n.lon, n.lat))!).push(n);
-  const nearest = (x: number, y: number) => {
+  const nearest = (x: number, y: number, reach: number) => {
     const cx = Math.floor(x * 2000),
       cy = Math.floor(y * 2000);
     let best: { id: number; d: number; lon: number; lat: number } | null = null;
-    for (let i = -1; i <= 1; i++)
-      for (let j = -1; j <= 1; j++)
+    const r = Math.ceil(reach / 50);
+    for (let i = -r; i <= r; i++)
+      for (let j = -r; j <= r; j++)
         for (const n of grid.get(`${cx + i}:${cy + j}`) ?? []) {
           const d = haversine([x, y], [n.lon, n.lat]);
-          if (d <= LINK_M && (!best || d < best.d)) best = { id: n.id, d, lon: n.lon, lat: n.lat };
+          if (d <= reach && (!best || d < best.d)) best = { id: n.id, d, lon: n.lon, lat: n.lat };
         }
     return best;
   };
 
+  // The widest reach a stop needs, from the modes that call there.
+  const reachOf = new Map<string, number>();
+  for (const ln of net.lines) for (const sid of Object.keys(ln.calls).concat(ln.rides.flatMap((r) => [r[0], r[1]]))) reachOf.set(sid, Math.max(reachOf.get(sid) ?? 0, LINK_M[ln.mode ?? "bus"]));
   const stopNode = new Map<string, number>();
   for (const [sid, s] of Object.entries(net.stops)) {
-    const near = nearest(s.x, s.y);
+    const reach = reachOf.get(sid) ?? LINK_M.bus;
+    const near = nearest(s.x, s.y, reach);
     if (!near) continue;
     const id = nextNode--;
     g.nodes.push({ id, lon: s.x, lat: s.y, ele: unknownAttr(), level: 0, kind: "junction" });
@@ -155,7 +176,7 @@ export function addBus(g: Graph, net: BusNetwork): { stops: number; lines: numbe
         [s.x, s.y],
       ],
       lengthM: Math.max(3, near.d),
-      name: s.n,
+      name: cleanName(s.n),
       bidirectional: true,
       attrs: { ...pavementAttrs.get(near.id)!, stepCount: attr(0, "inferred", "derived", null, "same pavement as the stop") },
     });
@@ -163,8 +184,8 @@ export function addBus(g: Graph, net: BusNetwork): { stops: number; lines: numbe
 
   let lines = 0;
   for (const ln of net.lines) {
-    const label = `${ln.route} bus${ln.headsign ? ` towards ${ln.headsign}` : ""}`;
-    const service = { mode: "bus" as const, route: ln.route, headsign: ln.headsign, operator: ln.operator };
+    const label = lineLabel(ln);
+    const service = { mode: ln.mode ?? ("bus" as const), route: ln.route, headsign: ln.headsign ? cleanName(ln.headsign) : null, operator: ln.operator };
     // One on-board node per stop on this route direction.
     const onBoard = new Map<string, number>();
     const boardAt = (sid: string) => {
@@ -185,7 +206,7 @@ export function addBus(g: Graph, net: BusNetwork): { stops: number; lines: numbe
           [s.x, s.y],
         ],
         lengthM: 0,
-        name: `${s.n}, ${label}`,
+        name: `${cleanName(s.n)}, ${label}`,
         bidirectional: true,
         attrs,
         service: { ...service, perHour: ln.calls[sid], stopId: sid, stop: s.facts },

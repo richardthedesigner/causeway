@@ -10,7 +10,9 @@ weekday, Saturday and Sunday. That is enough for frequency-based routing
 
 Called by scripts/build-bus.ts:
 
-    python3 scripts/gtfs-bus.py '{"zip": "...", "zones": [[minlon, minlat, maxlon, maxlat], ...], "days": {"wd": "20261006", "sa": "20261010", "su": "20261011"}, "out": "..."}'
+    python3 scripts/gtfs-bus.py '{"zip": "...", "zones": [[minlon, minlat, maxlon, maxlat], ...], "days": {"wd": "20261006", "sa": "20261010", "su": "20261011"}, "extraModes": {"1": "metro"}, "out": "..."}'
+
+Buses and trams always; "extraModes" adds other GTFS route types for an area (the Tyne and Wear Metro).
 """
 import csv
 import io
@@ -58,11 +60,15 @@ for c in rows("calendar_dates.txt"):
             (active[k].add if c["exception_type"] == "1" else active[k].discard)(c["service_id"])
 
 routes = {r["route_id"]: r for r in rows("routes.txt")}
+# GTFS route_type to our mode. Rail (2) and London's Underground (1) come from TfL instead (transit.ts).
+MODES = {"3": "bus", "700": "bus", "702": "bus", "704": "bus", "711": "bus", "712": "bus", "713": "bus", "715": "bus", "0": "tram", "900": "tram"}
+for m in cfg.get("extraModes", {}).items():
+    MODES[m[0]] = m[1]
 agencies = {a["agency_id"]: a["agency_name"] for a in rows("agency.txt")}
 trips = {}
 for t in rows("trips.txt"):
     on = [k for k in days if t["service_id"] in active[k]]
-    if on and routes.get(t["route_id"], {}).get("route_type", "3") in ("3", "700", "702", "704", "711", "712", "713", "715"):
+    if on and MODES.get(routes.get(t["route_id"], {}).get("route_type", "3")):
         trips[t["trip_id"]] = (t["route_id"], t.get("direction_id") or "0", t.get("trip_headsign") or "", on)
 
 
@@ -105,6 +111,7 @@ for key, ln in lines.items():
         {
             "id": key,
             "route": r.get("route_short_name") or r.get("route_long_name") or ln["route_id"],
+            "mode": MODES.get(r.get("route_type", "3"), "bus"),
             "operator": agencies.get(r.get("agency_id", ""), None),
             "headsign": ln["headsigns"].most_common(1)[0][0] or None,
             "calls": {sid: ph for sid, ph in ln["perHour"].items()},

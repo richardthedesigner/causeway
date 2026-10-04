@@ -47,8 +47,10 @@ const WHEELED = (p: Profile) => p.maxSteps === 0;
 const BUS_ALIGHT_S = 30;
 /** Longest wait we'll quote: beyond this the timetable, not an average, is what matters. */
 const BUS_MAX_WAIT_S = 30 * 60;
-/** Chance the one wheelchair space is taken when the bus arrives (a working guess until reports exist). */
-const BUS_SPACE_TAKEN = 0.15;
+/** Chance the wheelchair space is taken when the vehicle arrives (working guesses until reports exist): buses have one, trams and Metro trains two or more. */
+const SPACE_TAKEN = { bus: 0.15, tram: 0.05, metro: 0.05 } as const;
+/** Metro stations below street level: step-free only while their lifts work, and Nexus has no open lift feed. */
+const METRO_LIFT_STATIONS = new Set(["Monument", "Central Station", "Gateshead", "Haymarket", "St James", "Manors"]);
 
 const UK_TIME = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", hour: "numeric", minute: "numeric", hourCycle: "h23", weekday: "short" });
 
@@ -77,21 +79,38 @@ function evaluateBus(e: GraphEdge, forward: boolean, p: Profile, c: Conditions, 
   const s = e.service!;
   const passable = unknownCritical ? "unknown" : "yes";
   const exclude = (detail: string): Evaluation => ({ passable: "no", seconds: Infinity, cost: Infinity, reasons: [...reasons, { kind: "excluded", attr: "bus", detail, seconds: Infinity }] });
-  if (p.buses === false) return exclude("buses are turned off in your settings");
+  const vehicle = s.mode === "bus" ? "bus" : s.mode === "tram" ? "tram" : "train";
+  if (p.buses === false && s.mode === "bus") return exclude("buses are turned off in your settings");
   if (e.kind === "transit") {
     const seconds = s.runS ?? e.lengthM / 5;
     return { passable, seconds, cost: seconds, reasons: [...reasons, { kind: "penalty", attr: "transit", detail: e.name ?? "bus", seconds: 0 }] };
   }
   if (e.kind !== "board") return { passable, seconds: 0, cost: 0, reasons };
   if (!forward) return { passable, seconds: BUS_ALIGHT_S, cost: BUS_ALIGHT_S, reasons };
-  if (p.preset === "mobility-scooter" && !p.busScooterPermit) return exclude("most buses only take small scooters, with a permit from the operator");
+  if (s.mode === "bus" && p.preset === "mobility-scooter" && !p.busScooterPermit) return exclude("most buses only take small scooters, with a permit from the operator");
   const wait = busWait(s.perHour, c.now);
-  if (!wait || wait.seconds > BUS_MAX_WAIT_S) return exclude(`no ${s.route} bus from here at this time`);
+  if (!wait || wait.seconds > BUS_MAX_WAIT_S) return exclude(`no ${s.mode === "bus" ? `${s.route} bus` : vehicle} from here at this time`);
   const out: Reason[] = [...reasons, { kind: "penalty", attr: "bus-wait", detail: `about ${wait.perHour} an hour`, seconds: 0 }];
   let cost = wait.seconds;
+  let passableHere: Evaluation["passable"] = passable;
+  if (s.mode !== "bus" && p.preset === "mobility-scooter") {
+    const pen = Math.round(UNKNOWN_STATION_S * 0.5 * (1 - p.uncertaintyTolerance));
+    out.push({ kind: "unknown", attr: "scooter", detail: `check the operator's size rules for scooters on the ${vehicle}`, seconds: pen });
+    cost += pen;
+    passableHere = "unknown";
+  }
+  const station = (e.name ?? "").split(", ")[0]!;
+  if (s.mode === "metro" && needsStepFree(p) && METRO_LIFT_STATIONS.has(station)) {
+    // Never step-free while a lift we can't see could be out (the trust contract).
+    const pen = Math.round(UNKNOWN_STATION_S * 0.5 * (1 - p.uncertaintyTolerance));
+    out.push({ kind: "unknown", attr: "station", detail: `${station} Metro is step-free only by lift, and there's no live lift status`, seconds: pen });
+    cost += pen;
+    passableHere = "unknown";
+  }
   const stop = s.stop ?? {};
   // Waiting with nowhere to sit: costly for anyone who needs rests.
-  if (p.maxRestIntervalM !== null && wait.seconds > 180) {
+  // Tram stops and Metro stations aren't mapped stop by stop like bus stops, so these apply to buses.
+  if (s.mode === "bus" && p.maxRestIntervalM !== null && wait.seconds > 180) {
     if (stop.bench === false) {
       const pen = Math.round(wait.seconds * 0.5);
       out.push({ kind: "penalty", attr: "bus-seat", detail: "no seat at the stop", seconds: pen });
@@ -103,7 +122,7 @@ function evaluateBus(e: GraphEdge, forward: boolean, p: Profile, c: Conditions, 
     }
   }
   // Rain and no shelter.
-  if (c.wet && stop.shelter === false && wait.seconds > 180) {
+  if (s.mode === "bus" && c.wet && stop.shelter === false && wait.seconds > 180) {
     const pen = Math.round(wait.seconds * 0.3);
     out.push({ kind: "penalty", attr: "bus-shelter", detail: "no shelter at the stop", seconds: pen });
     cost += pen;
@@ -115,11 +134,11 @@ function evaluateBus(e: GraphEdge, forward: boolean, p: Profile, c: Conditions, 
   }
   if (needsWheelchairSpace(p)) {
     // If the space is taken you wait for the next one: priced as the expected extra wait.
-    const extra = Math.round(BUS_SPACE_TAKEN * (3600 / wait.perHour));
-    out.push({ kind: "penalty", attr: "bus-space", detail: "the wheelchair space may be in use, so you might need the next bus", seconds: extra });
+    const extra = Math.round(SPACE_TAKEN[s.mode] * (3600 / wait.perHour));
+    out.push({ kind: "penalty", attr: "bus-space", detail: `the wheelchair space may be in use, so you might need the next ${vehicle}`, seconds: extra });
     cost += extra;
   }
-  return { passable, seconds: wait.seconds, cost, reasons: out };
+  return { passable: passableHere, seconds: wait.seconds, cost, reasons: out };
 }
 
 /** Seconds of detour a fully cautious user would accept to avoid one unknown, per 100 m. */
@@ -194,8 +213,8 @@ export function evaluateEdge(e: GraphEdge, forward: boolean, p: Profile, c: Cond
     }
   }
 
-  // Buses: frequency-based waits, and who a bus can carry.
-  if (e.service?.mode === "bus") return evaluateBus(e, forward, p, c, reasons, unknownCritical);
+  // Buses, trams and the Metro: frequency-based waits, and who they can carry.
+  if (e.service) return evaluateBus(e, forward, p, c, reasons, unknownCritical);
 
   // Rail: rides, boarding and interchanges.
   if (e.kind === "transit") {

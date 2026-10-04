@@ -82,3 +82,22 @@ describe("waiting at the stop", () => {
     expect(evaluateEdge(edge({ shelter: false }), true, PRESETS.walking, wet).cost).toBeGreaterThan(evaluateEdge(edge({ shelter: true }), true, PRESETS.walking, wet).cost);
   });
 });
+
+describe("trams and the Metro", () => {
+  const ph = { wd: Array(24).fill(6), sa: Array(24).fill(6), su: Array(24).fill(6) };
+  const board = (mode: "tram" | "metro", station: string) =>
+    ({ id: 1, from: 1, to: 2, kind: "board", geometry: [], lengthM: 0, name: `${station}, Metro Green line`, level: 0, layer: 0, bridge: false, bidirectional: true, attrs: {} as never, service: { mode, route: "GRN", headsign: null, operator: null, perHour: ph } }) as never;
+
+  it("never calls an underground Metro station step-free without lift status", () => {
+    const e = evaluateEdge(board("metro", "Monument"), true, PRESETS["manual-wheelchair"], TUE_10);
+    expect(e.passable).toBe("unknown");
+    expect(e.reasons.some((r) => /by lift/.test(r.detail))).toBe(true);
+    expect(evaluateEdge(board("metro", "Monument"), true, PRESETS.walking, TUE_10).passable).toBe("yes");
+  });
+
+  it("keeps trams when buses are turned off, and asks scooter users to check", () => {
+    const tram = evaluateEdge(board("tram", "Princes Street"), true, { ...PRESETS["manual-wheelchair"], buses: false }, TUE_10);
+    expect(tram.passable).toBe("yes");
+    expect(evaluateEdge(board("tram", "Princes Street"), true, PRESETS["mobility-scooter"], TUE_10).passable).toBe("unknown");
+  });
+});

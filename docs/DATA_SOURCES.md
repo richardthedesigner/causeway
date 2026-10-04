@@ -339,3 +339,5 @@ Partnership items for Richard:
 |---|---|---|---|---|
 | **Bus Open Data Service GTFS** (`data.bus-data.dft.gov.uk/timetable/download/gtfs-file/<region>/`: scotland 204 MB, north_east 40 MB, london 301 MB) | Stops, ride times, departures per hour (`data/transit/<area>/bus.json`) | OGL v3 | V (2026-10-04, no key needed): Edinburgh 842 stops and 189 route directions (Lothian, Lothian Country, Stagecoach...), Newcastle 159 and 186, London zones 40 and 58 | **keep** (D-029) |
 | **TfL StopPoint arrivals** (`/StopPoint/{id}/Arrivals`) | Live London departures (next step) | TfL open data terms | Reachable, 2026-10-04 | **keep** |
+
+| **Bus Open Data Service GTFS: trams and Metro** (same files) | Edinburgh Trams (route type 0: 9 stops in the area), Tyne and Wear Metro (route type 1: 6 stations, Green and Yellow lines) | OGL v3 | V (2026-10-04) | **keep** (D-031). Nexus lift status: not open, so Metro stations below street level count as unknown for step-free users |

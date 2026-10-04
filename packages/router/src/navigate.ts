@@ -101,8 +101,11 @@ export function buildNavPlan(r: Route, p: Profile): NavPlan {
         while (j < r.steps.length && r.steps[j]!.edge.kind === "transit") j++;
         const to = r.steps[j]?.edge.kind === "board" ? (r.steps[j]!.edge.name ?? "").split(", ")[0] : null;
         const bus = s.edge.service?.mode === "bus" ? s.edge.service : null;
+        const scheduled = s.edge.service && !bus;
         maneuvers.push(
-          bus
+          scheduled
+            ? { type: "board", at, text: `Take the ${line} from ${station}.${to ? ` Get off at ${to}.` : ""}`, short: (line ?? "").replace(/ towards .*/, "") }
+            : bus
             ? { type: "board", at, text: `Take the ${bus.route} bus${bus.headsign ? ` towards ${bus.headsign}` : ""} from ${station}${stopNote(bus.stop)}.${to ? ` Get off at ${to}.` : ""}`, short: `${bus.route} bus` }
             : { type: "board", at, text: `Take the ${line}${to ? ` to ${to}` : ""} from ${station}.`, short: line ?? "Train" },
         );

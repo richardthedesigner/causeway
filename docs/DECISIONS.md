@@ -222,3 +222,14 @@ The route panel lists each bus leg with how often it runs now (timetable) and, i
 - **Your notes, your call.** "Delete my note" removes it from the server too.
 
 **Owed by people, not code:** a CAPTCHA (Cloudflare Turnstile) on anonymous sign-up before any publicity, someone named to check flags and photos weekly, and the DPIA.
+
+## D-031 Trams and the Tyne and Wear Metro come in with the buses
+
+**Decided.** 2026-10-04. The same open timetables carry Edinburgh Trams (GTFS route type 0) and, for Newcastle, the Metro (type 1, Green and Yellow lines), so they use the bus layer with a `mode`: wait from trains per hour, ride times from the timetable. London's Underground and DLR stay with TfL (D-020), which has live lift status.
+
+- **Trams:** level boarding at every Edinburgh stop and two wheelchair spaces (5% chance taken, against 15% for buses). Turning buses off leaves trams on.
+- **Metro:** Monument, Central Station, Gateshead, Haymarket, St James and Manors are below street level and step-free only by lift. Nexus publishes no open lift status, so for anyone who needs step-free access those stations count as unknown, never as step-free. Two spaces per train.
+- **Scooters:** tram and Metro operators have size rules we haven't encoded, so for scooter users these legs count as unknown with "check the operator's size rules", rather than allowed or banned.
+- Seat and shelter rules (D-029) stay bus-only: tram stops and Metro stations aren't mapped stop by stop.
+
+Found while testing: walking from Gateshead Interchange to Jackson Street (about 100 m) costs about 30 minutes in the Newcastle graph, so the footways there need checking. Logged as a GitHub issue.
