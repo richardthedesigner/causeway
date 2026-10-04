@@ -5,6 +5,8 @@ import type { Profile } from "@causeway/profile";
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import { BusDepartures } from "@/components/BusDepartures";
+import { leaveLabel, ukTime } from "@/lib/leave";
+import { hoursText } from "@/lib/opening-hours";
 import type { toiletsAlong } from "@/lib/toilets";
 import { ElevationChart } from "@/components/ElevationChart";
 import { NoteList } from "@/components/NoteList";
@@ -16,7 +18,7 @@ import type { NoteAbout } from "@/components/NoteSheet";
 import { RouteStrip, VerdictPill } from "@/components/RouteStrip";
 import { Button } from "@/components/ui/button";
 import type { Place, PlannedRoute, PlanResult, WorksSummary } from "@/lib/plan-types";
-import type { Conditions, LiveLifts } from "@/lib/use-planner";
+import { departure, type Conditions, type LiveLifts } from "@/lib/use-planner";
 import type { FlagReason } from "@/lib/sync";
 import { cn } from "@/lib/utils";
 
@@ -218,6 +220,7 @@ export function RoutePanel(props: Props) {
               <span className="tabular text-[28px] leading-none font-bold">{Math.round(sel.summary.minutes)} min</span>
               <span className="tabular text-sm text-muted">{meta(sel)}</span>
             </div>
+            <ArrivalHours hours={to.hours} minutes={sel.summary.minutes} leave={conditions.leaveAt ?? null} />
             <RouteStrip strip={sel.strip} />
             {props.compare && props.compare.label !== props.forLabel ? (
               <p className={cn("m-0 font-bold", props.compare.minutes === null || Math.round(sel.summary.minutes) < props.compare.minutes ? "text-ok" : "text-ink")}>{compareLine(Math.round(sel.summary.minutes), props.compare)}</p>
@@ -345,7 +348,7 @@ export function RoutePanel(props: Props) {
               <PeopleSay notes={routeNotes} all={notes} author={author} onDelete={props.onDeleteNote} onFlag={props.onFlagNote} title="Notes from people on this route" hint="Their own experience, not checked by us. Notes nudge your routes but never rule a street in or out." />
             </More>
 
-            <BusDepartures legs={sel.busLegs} live={props.liveBuses} />
+            <BusDepartures legs={sel.busLegs} live={props.liveBuses && leaveLabel(conditions.leaveAt ?? null) === "now"} />
 
             {props.toilets ? <Toilets data={props.toilets} wantM={profile.maxToiletIntervalM} /> : null}
 
@@ -588,5 +591,24 @@ function Toilets({ data, wantM }: { data: NonNullable<Props["toilets"]>; wantM: 
       )}
       <p className="m-0 mt-2 text-sm text-muted">From OpenStreetMap. Mapped by volunteers; check opening times.</p>
     </More>
+  );
+}
+
+/** Whether the destination is open when you'd get there, from its mapped hours. */
+function ArrivalHours({ hours, minutes, leave }: { hours?: string; minutes: number; leave: Date | null }) {
+  const start = departure({ leaveAt: leave });
+  const arrive = new Date(start.getTime() + minutes * 60_000);
+  const later = leaveLabel(leave) !== "now";
+  const h = hoursText(hours, arrive);
+  if (!h && !later) return null;
+  return (
+    <>
+      {later ? <p className="m-0 text-sm text-muted">Leaving {leaveLabel(leave)}, arriving about {ukTime(arrive)}.</p> : null}
+      {h ? (
+        <p className={cn("m-0 text-sm", h.open === false ? "font-bold text-ink" : "text-muted")}>
+          {h.open === null ? h.text : `When you arrive: ${h.text.charAt(0).toLowerCase()}${h.text.slice(1)}`}. Hours from OpenStreetMap.
+        </p>
+      ) : null}
+    </>
   );
 }

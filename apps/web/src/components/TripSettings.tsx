@@ -2,6 +2,7 @@
 import { ChevronRight } from "lucide-react";
 import { GROUND, type Ground } from "@/components/MapChrome";
 import { Switch } from "@/components/ui/switch";
+import { leaveLabel, nextAt, ukTime } from "@/lib/leave";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -14,6 +15,8 @@ interface Props {
   onBuses: (v: boolean) => void;
   toiletEvery: number | null;
   onToilets: () => void;
+  leaveAt: Date | null;
+  onLeave: (d: Date | null) => void;
 }
 
 const km = (m: number) => (m >= 1000 ? `${m / 1000} km` : `${m} m`);
@@ -38,6 +41,7 @@ export function TripSettings(p: Props) {
             <ChevronRight aria-hidden className="size-5 shrink-0 text-muted" />
           </span>
         </button>
+        <Leaving row={row} leaveAt={p.leaveAt} onLeave={p.onLeave} />
         <fieldset className={cn(row, "m-0 flex-wrap border-x-0 border-t-0 p-0 py-2")}>
           <legend className="float-left">Ground</legend>
           <GroundPicker ground={p.ground} onGround={p.onGround} />
@@ -80,5 +84,38 @@ export function GroundPicker({ ground, onGround, className }: { ground: Ground; 
         );
       })}
     </div>
+  );
+}
+
+const SOON = [
+  { label: "Now", min: 0 },
+  { label: "In 30 min", min: 30 },
+  { label: "In 1 hour", min: 60 },
+];
+
+/** Now, soon, or a set time (the next time the clock reads it: today, or tomorrow if it's passed). */
+function Leaving({ row, leaveAt, onLeave }: { row: string; leaveAt: Date | null; onLeave: (d: Date | null) => void }) {
+  const label = leaveLabel(leaveAt);
+  const chip = "inline-flex min-h-11 items-center rounded-full border px-3 text-sm font-bold";
+  const set = leaveAt && label !== "now";
+  return (
+    <fieldset className={cn(row, "m-0 flex-wrap border-x-0 border-t-0 p-0 py-2")}>
+      <legend className="float-left">Leaving</legend>
+      <span className="font-bold" aria-live="polite">
+        {label === "now" ? "Now" : `${label.charAt(0).toUpperCase()}${label.slice(1)}`}
+      </span>
+      <div className="flex basis-full flex-wrap items-center gap-1.5">
+        {SOON.map((o) => (
+          <button key={o.label} type="button" onClick={() => onLeave(o.min ? new Date(Date.now() + o.min * 60_000) : null)} className={cn(chip, (o.min === 0 ? !set : false) ? "border-ink bg-ink text-surface" : "border-line hover:border-ink")} aria-pressed={o.min === 0 ? !set : undefined}>
+            {o.label}
+          </button>
+        ))}
+        <label className={cn(chip, "gap-2 font-normal", set ? "border-ink" : "border-line")}>
+          <span className="font-bold">At</span>
+          <input type="time" value={set ? ukTime(leaveAt) : ""} onChange={(e) => onLeave(nextAt(e.target.value))} className="min-h-9 bg-transparent text-base" />
+        </label>
+      </div>
+      {set ? <p className="m-0 basis-full text-sm text-muted">Routes, bus waits, opening hours, daylight and the forecast are for {label}.</p> : null}
+    </fieldset>
   );
 }

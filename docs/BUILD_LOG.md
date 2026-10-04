@@ -1,14 +1,23 @@
 # Build log
 
-A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map.
+A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
 ## 2026-10-04 (evening)
 
-**Roadmap** (`docs/ROADMAP.md`)
-- One list of work across features, data, accounts, deployment, security, stability, speed, bloat, updates, reviews and user testing, each with an ID, size, priority, status and owner.
-- `CLAUDE.md` tells every session to read it first and write back to it.
+**One roadmap** (`docs/ROADMAP.md`, #31 merged with #34)
+- Keeps #34's order: fill the pilot cities from the data survey, then check our guesses with real people. Keeps the read-only Google Doc copy.
+- Every task now has an ID, size, priority, status and owner, across data, research, features, small features, security, stability, speed, bloat, updates, deployment, reviews and work Richard has deferred.
+- `CLAUDE.md` tells every session to read it first, mark its row, and write back to it in the same pull request.
 
 ## 2026-10-04 (after midnight)
+
+**Leaving later** (D-040)
+- "Leaving" in This trip: now, in 30 min, in 1 hour, or at a time. Routes, bus waits, after dark, opening hours and the weather forecast follow it.
+- Open-Meteo's hourly forecast gives the ground for a later trip, labelled as a forecast.
+
+**Open when you get there** (D-039)
+- Opening hours are read, not just shown: the destination says whether it's open when you arrive, and each accessible toilet whether it's open when you pass.
+- Reads 97% of the 2,757 mapped hours; the rest are shown as mapped. A shut toilet doesn't count toward the toilet interval.
 
 **Lit streets after dark** (D-038)
 - The router now knows when it's dark, from the sun's position worked out on the device.
