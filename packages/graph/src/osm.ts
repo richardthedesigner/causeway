@@ -271,6 +271,42 @@ export interface BuildOptions {
   name: string;
   bbox: [number, number, number, number];
   snapshot: string;
+  /** Infer dropped kerbs at UK controlled crossings (default true). See inferUkCrossingKerb. */
+  inferUkKerbs?: boolean;
+}
+
+const CONTROLLED_REFS = new Set(["zebra", "pelican", "puffin", "toucan", "pegasus", "equestrian", "tiger"]);
+
+/**
+ * UK rule: signal-controlled and zebra crossings are built with dropped
+ * kerbs and blister tactile paving (DfT Guidance on the Use of Tactile Paving
+ * Surfaces, 2021; Inclusive Mobility, 2021). Tactile paving tagged at a
+ * crossing implies the same. So where OSM says a crossing is controlled, or
+ * has tactile paving, but says nothing about the kerb, we infer "lowered".
+ *
+ * This is an inference, never a verification: state "inferred", source
+ * "derived", height unknown. Uncontrolled crossings without tactile paving
+ * get nothing; old or substandard installations are why it stays inferred.
+ */
+export function inferUkCrossingKerb(way: OsmWay, osm: OsmData): KerbInfo | undefined {
+  const tagsets = [way.tags, ...way.nodes.map((id) => osm.nodes.get(id)?.tags ?? {})];
+  let controlled = false;
+  let tactile = false;
+  for (const t of tagsets) {
+    const c = t["crossing"];
+    if (c === "traffic_signals" || c === "zebra" || (c === "marked" && t["crossing:markings"] === "zebra")) controlled = true;
+    if (t["crossing:signals"] === "yes" || CONTROLLED_REFS.has(t["crossing_ref"] ?? "")) controlled = true;
+    if (t["tactile_paving"] === "yes") tactile = true;
+  }
+  if (!controlled && !tactile) return undefined;
+  const why = controlled
+    ? "UK controlled crossing: dropped kerb required (DfT tactile paving guidance 2021, Inclusive Mobility 2021)"
+    : "tactile paving tagged at crossing: implies dropped kerb";
+  return {
+    type: attr("lowered", "inferred", "derived", way.timestamp, why),
+    heightCm: unknownAttr(),
+    tactilePaving: tactile ? attr(true, "reported", "osm", way.timestamp, "OSM tactile_paving tag") : attr(true, "inferred", "derived", way.timestamp, why),
+  };
 }
 
 /**
@@ -387,6 +423,17 @@ export function buildGraphFromOsm(osm: OsmData, opts: BuildOptions): Graph {
       for (const end of [way.nodes[0]!, way.nodes[way.nodes.length - 1]!]) {
         const gn = nodes.get(end);
         if (gn && !gn.kerb) gn.kerb = crossingKerb;
+      }
+    } else if (kind === "crossing" && opts.inferUkKerbs !== false) {
+      const inferred = inferUkCrossingKerb(way, osm);
+      if (inferred) {
+        for (const end of [way.nodes[0]!, way.nodes[way.nodes.length - 1]!]) {
+          const gn = nodes.get(end);
+          if (gn && (!gn.kerb || gn.kerb.type.state === "unknown")) {
+            gn.kerb = inferred;
+            if (gn.kind === "junction") gn.kind = "kerb";
+          }
+        }
       }
     }
   }

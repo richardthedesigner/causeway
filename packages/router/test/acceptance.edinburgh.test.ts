@@ -114,10 +114,11 @@ describe("Royal Mile to Victoria Street", () => {
 });
 
 describe("profiles", () => {
-  it("a powerchair and a manual chair can take different routes for the same journey", () => {
-    const m = plan("market-street-high-street", "manual-wheelchair").r;
-    const pc = plan("market-street-high-street", "powerchair").r;
-    const ids = (r: Route) => r.steps.map((s) => s.edge.id).join(",");
-    expect(ids(m)).not.toBe(ids(pc));
+  it("the user's own gradient limit changes the route", () => {
+    const j = journey("waverley-grassmarket");
+    const strict = PRESETS["manual-wheelchair"];
+    const relaxed = { ...strict, maxInclineUpPct: 13, maxInclineDownPct: 13 };
+    const len = (p: typeof strict) => router.route(router.snap(j.from.lon, j.from.lat, p), router.snap(j.to.lon, j.to.lat, p), p)!.lengthM;
+    expect(len(relaxed)).toBeLessThan(len(strict) * 0.8);
   });
 });

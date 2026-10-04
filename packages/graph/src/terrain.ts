@@ -246,10 +246,24 @@ function densify(e: GraphEdge): Profile {
  * present, are kept alongside: the router prefers the higher-confidence one,
  * and Phase 1 uses disagreements as a validation signal.
  */
-export function enrichWithTerrain(
-  g: Graph,
-  dtm: Dtm,
-): { sampledEdges: number; offGroundEdges: number; discontinuities: number } {
+export interface InclineCheck {
+  edgeId: number;
+  name: string | null;
+  osm: number;
+  lidarMean: number;
+  lidarMax: number;
+  lengthM: number;
+}
+
+export interface TerrainStats {
+  sampledEdges: number;
+  offGroundEdges: number;
+  discontinuities: number;
+  /** Edges that carried an OSM incline tag, against what the DTM says. Phase 1 validation signal. */
+  inclineChecks: InclineCheck[];
+}
+
+export function enrichWithTerrain(g: Graph, dtm: Dtm): TerrainStats {
   const observedAt = dtm.observedAt;
   const method = `${dtm.label}, ${dtm.resolution} m DTM, ${STEP_M} m spacing`;
   const nodeById = new Map<number, GraphNode>(g.nodes.map((n) => [n.id, n]));
@@ -273,6 +287,7 @@ export function enrichWithTerrain(
   let sampledEdges = 0;
   let offGroundEdges = 0;
   let discontinuities = 0;
+  const inclineChecks: InclineCheck[] = [];
   for (const e of g.edges) {
     if (e.lengthM < 0.5) continue;
     const from = nodeById.get(e.from);
@@ -302,6 +317,9 @@ export function enrichWithTerrain(
       discontinuities++;
       continue;
     }
+    if (e.attrs.incline.source === "osm" && e.attrs.incline.value !== null && !r.short) {
+      inclineChecks.push({ edgeId: e.id, name: e.name, osm: e.attrs.incline.value, lidarMean: round(r.mean, 1), lidarMax: round(r.max, 1), lengthM: round(e.lengthM, 1) });
+    }
     e.attrs.incline = attr(round(r.mean, 1), "inferred", dtm.source, observedAt, r.short ? `${method}, short edge: ${SHORT_BASELINE_M} m centred baseline` : method);
     e.attrs.inclineMax = attr(round(r.max, 1), "inferred", dtm.source, observedAt, `${method}, ${WINDOW_M} m window`);
     e.attrs.crossSlope =
@@ -310,7 +328,7 @@ export function enrichWithTerrain(
         : attr(round(r.cross, 1), "inferred", dtm.source, observedAt, `${method}, ±${CROSS_OFFSET_M} m perpendicular, p75`);
     sampledEdges++;
   }
-  return { sampledEdges, offGroundEdges, discontinuities };
+  return { sampledEdges, offGroundEdges, discontinuities, inclineChecks };
 }
 
 /** Elevation profile along an edge (used by the route elevation chart). */

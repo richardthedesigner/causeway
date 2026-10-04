@@ -10,7 +10,9 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "build:snapshot": "tsx scripts/build-snapshot.ts",
-    "spike": "tsx scripts/spike-edinburgh.ts"
+    "spike": "tsx scripts/spike-edinburgh.ts",
+    "build:central": "tsx scripts/build-edinburgh-central.ts",
+    "report:central": "tsx scripts/report-edinburgh-central.ts"
   },
   "devDependencies": {
     "@types/node": "^26.6.4",

@@ -103,8 +103,18 @@ Proposal: **accept it, and publish the enriched footway graph under ODbL.** It f
 
 ## D-012 Phase 0 snapshot data source: OSM API `/map`
 
-**Decided**, temporary. Overpass and Geofabrik were unreachable from the build container. The OSM API is fine for a small bbox but must not be used for city builds (OSMF API usage policy). Phase 1 ingests Geofabrik Scotland PBF plus minutely diffs from a worker with normal network access.
+**Decided**, temporary. Overpass and Geofabrik were unreachable from the build container. The OSM API is fine for a small bbox but must not be used for city builds (OSMF API usage policy).
+
+**Update 2026-10-04 (Phase 1):** city builds read the weekly BBBike Edinburgh extract (PBF). `scripts/osm-extract.py` (pyosmium) cuts a pedestrian-relevant bbox to OSM XML, and all tag interpretation stays in TypeScript. Geofabrik plus minutely diffs from a worker replaces this when the worker exists (D-010).
 
 ## D-013 Unknown-risk weights and preset thresholds are placeholders
 
 **Decided**, explicitly provisional. The presets cite Inclusive Mobility (2021) where it applies (5% preferred, 8% absolute over short distances; cross-fall 2.5%) and are otherwise judgement. The unknown-risk weights (60 s per 100 m for unknown gradient, 120 s per unmapped kerb at a crossing) are guesses. Both are calibrated in Phase 2 with disabled testers in each city. Every number lives in one place (`packages/profile`, `packages/router/src/cost.ts`).
+
+## D-014 Phase 1 area: central Edinburgh first, whole city with the worker
+
+**Decided.** 2026-10-04. Phase 1 builds the bbox -3.25, 55.92 to -3.15, 55.975: Haymarket to Abbeyhill, Canonmills to the Grange. That covers the Old and New Towns, Southside including Causewayside, Stockbridge, Bruntsfield, Marchmont and the foot of Leith Walk. It needs four 5 km LiDAR tiles, read as 500 m chunks over HTTP range requests (`packages/graph/src/dtm-tiles.ts`). The rest of the city follows once builds move to a worker (D-010); the code is not area-specific.
+
+## D-015 Infer dropped kerbs at UK controlled crossings
+
+**Decided.** 2026-10-04. OSM records a kerb at about 1% of crossings, so without this nearly every manual-wheelchair route carries unknown crossings. UK guidance (DfT tactile paving guidance 2021; Inclusive Mobility 2021) requires dropped kerbs with blister paving at signal-controlled and zebra crossings. So where OSM says a crossing is controlled, or has tactile paving, and says nothing about the kerb, we set the kerb to `lowered` with state **inferred**, source `derived`, height unknown and the rule as its method. Uncontrolled crossings without tactile paving get nothing. A mapped kerb always wins. The router lets an inferred dropped kerb through but charges a cautious user a small risk penalty (30 s at zero tolerance), and the inspector shows it as inferred. Risk: old or substandard crossings. Phase 2 user testing and council dropped-kerb data are the check.

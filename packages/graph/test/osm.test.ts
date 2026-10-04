@@ -76,3 +76,36 @@ describe("buildGraphFromOsm", () => {
     expect(e.attrs.incline.state).toBe("unknown");
   });
 });
+
+const CROSSINGS = (crossingTags: string, endTags = "") => `<?xml version="1.0"?>
+<osm version="0.6">
+  <node id="1" lat="55.95" lon="-3.19" timestamp="2024-01-01T00:00:00Z">${endTags}</node>
+  <node id="2" lat="55.9501" lon="-3.19" timestamp="2024-01-01T00:00:00Z"/>
+  <node id="3" lat="55.9502" lon="-3.19" timestamp="2024-01-01T00:00:00Z"/>
+  <way id="20" timestamp="2024-01-01T00:00:00Z"><nd ref="1"/><nd ref="2"/><nd ref="3"/>
+    <tag k="highway" v="footway"/><tag k="footway" v="crossing"/>${crossingTags}</way>
+</osm>`;
+const endKerb = (xml: string) => {
+  const g = buildGraphFromOsm(parseOsmXml(xml), { name: "t", bbox: [0, 0, 0, 0], snapshot: "test" });
+  return g.nodes.find((n) => n.osmId === 1)!.kerb;
+};
+
+describe("UK crossing kerb inference", () => {
+  it("infers a dropped kerb at a signal-controlled crossing, as inferred, never verified", () => {
+    const k = endKerb(CROSSINGS('<tag k="crossing" v="traffic_signals"/>'));
+    expect(k?.type.value).toBe("lowered");
+    expect(k?.type.state).toBe("inferred");
+    expect(k?.heightCm.state).toBe("unknown");
+  });
+  it("infers from a zebra crossing reference", () => {
+    expect(endKerb(CROSSINGS('<tag k="crossing" v="marked"/><tag k="crossing_ref" v="zebra"/>'))?.type.value).toBe("lowered");
+  });
+  it("says nothing about an uncontrolled crossing without tactile paving", () => {
+    expect(endKerb(CROSSINGS('<tag k="crossing" v="uncontrolled"/>'))).toBeUndefined();
+  });
+  it("never overrides a mapped kerb", () => {
+    const k = endKerb(CROSSINGS('<tag k="crossing" v="traffic_signals"/>', '<tag k="barrier" v="kerb"/><tag k="kerb" v="raised"/>'));
+    expect(k?.type.value).toBe("raised");
+    expect(k?.type.state).toBe("reported");
+  });
+});

@@ -224,6 +224,12 @@ export function evaluateNode(n: GraphNode, viaCrossing: boolean, p: Profile, _c:
         reasons: [{ kind: "excluded", attr: "kerb", detail: isKnown(n.kerb.heightCm) ? `${h} cm kerb` : `${t} kerb`, seconds: Infinity }],
       };
     }
+    if (n.kerb.type.state === "inferred" && p.maxKerbCm < 10) {
+      // Inferred from the crossing type, not observed: passable, but a cautious user still pays a little.
+      const s = UNKNOWN_KERB_S * 0.25 * (1 - p.uncertaintyTolerance);
+      reasons.push({ kind: "penalty", attr: "kerb", detail: `${t} kerb (inferred from crossing type)`, seconds: s });
+      return { passable: "yes", seconds: 0, cost: s, reasons };
+    }
     reasons.push({ kind: "penalty", attr: "kerb", detail: `${t ?? "unknown"} kerb`, seconds: 0 });
     return { passable: "yes", seconds: 0, cost: 0, reasons };
   }

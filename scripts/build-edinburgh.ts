@@ -8,6 +8,7 @@ import {
   toOsgb,
   type Graph,
   type OsmData,
+  type TerrainStats,
 } from "@causeway/graph";
 import { cached, EDINBURGH_OLD_TOWN as AREA, osmTileUrl, toArrayBuffer } from "./sources.js";
 
@@ -15,7 +16,7 @@ import { cached, EDINBURGH_OLD_TOWN as AREA, osmTileUrl, toArrayBuffer } from ".
  * Build the Edinburgh Old Town graph from OSM + LiDAR. With `fresh`, OSM is
  * fetched now rather than read from the cache (the live acceptance variant).
  */
-export async function buildEdinburgh({ fresh = false } = {}): Promise<{ graph: Graph; stats: Record<string, number> }> {
+export async function buildEdinburgh({ fresh = false } = {}): Promise<{ graph: Graph; stats: TerrainStats }> {
   const osm: OsmData = { nodes: new Map(), ways: new Map() };
   for (const [i, t] of AREA.osmTiles.entries()) {
     const xml = fresh

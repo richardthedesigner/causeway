@@ -1,0 +1,340 @@
+<title>Causewayside Graph Inspector</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Atkinson+Hyperlegible+Mono:wght@400;600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.min.js"></script>
+<style>
+/* Layout: full-bleed map, one control sheet (left panel on desktop, bottom sheet on phones). Colour encodes value; dash encodes "unknown"; hollow encodes "inferred". */
+:root {
+  --ground: #e9ebe6;        /* map ground: pale lichen grey */
+  --sheet: #fbfbf8;
+  --ink: #1e2420;
+  --muted: #5d665f;
+  --rule: #d3d8d1;
+  --accent: #1f5f8b;        /* Edinburgh slate blue for focus and selection */
+  --unknown: #8d948e;
+  --g0: #2f8f6b; --g1: #8bb04a; --g2: #e0a92a; --g3: #d0612b; --g4: #8f1d3f;
+  --s-smooth: #2f6f9f; --s-slab: #6aa0c4; --s-sett: #c0742c; --s-rough: #7d3c62; --s-soft: #8a8f45;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --font-data: "Atkinson Hyperlegible Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r: 14px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #151917; --sheet: #1d2220; --ink: #e9ede8; --muted: #a2aba4; --rule: #333b36; --accent: #7fb6dd; --unknown: #6e756f;
+    --g0: #45b58a; --g1: #a6c95d; --g2: #f0bd3e; --g3: #ee7a44; --g4: #e0507a;
+    --s-smooth: #5d9fd0; --s-slab: #9cc6e2; --s-sett: #e39548; --s-rough: #c06a9f; --s-soft: #b3b968;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --ground: #151917; --sheet: #1d2220; --ink: #e9ede8; --muted: #a2aba4; --rule: #333b36; --accent: #7fb6dd; --unknown: #6e756f;
+  --g0: #45b58a; --g1: #a6c95d; --g2: #f0bd3e; --g3: #ee7a44; --g4: #e0507a;
+  --s-smooth: #5d9fd0; --s-slab: #9cc6e2; --s-sett: #e39548; --s-rough: #c06a9f; --s-soft: #b3b968;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+body { margin: 0; background: var(--ground); color: var(--ink); font: 16px/1.45 var(--font-body); overflow: hidden; }
+#map { position: absolute; inset: 0; }
+.maplibregl-canvas { outline: none; }
+.maplibregl-canvas-container, .maplibregl-canvas { position: absolute; left: 0; top: 0; }
+.maplibregl-ctrl-attrib, .maplibregl-ctrl-bottom-right, .maplibregl-ctrl-bottom-left { display: none; }
+
+.sheet {
+  position: absolute; z-index: 2; background: var(--sheet); color: var(--ink);
+  border: 1px solid var(--rule); border-radius: var(--r);
+  box-shadow: 0 6px 30px rgb(0 0 0 / .14);
+  display: flex; flex-direction: column; gap: 14px;
+  padding: 16px; overflow: auto;
+  left: 16px; top: calc(16px + env(safe-area-inset-top, 0px)); bottom: 16px; width: min(380px, calc(100% - 32px));
+}
+@media (max-width: 640px) {
+  .sheet { top: auto; left: 8px; right: 8px; width: auto; bottom: calc(8px + env(safe-area-inset-bottom, 0px)); max-height: 52%; }
+}
+h1 { margin: 0; font-size: 1.25rem; line-height: 1.2; text-wrap: balance; }
+.sub { margin: 2px 0 0; color: var(--muted); font-size: .9rem; }
+.label { font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 0 0 6px; }
+
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg button {
+  font: inherit; font-size: .95rem; min-height: 48px; padding: 0 14px; border-radius: 999px;
+  border: 1px solid var(--rule); background: transparent; color: var(--ink); cursor: pointer;
+}
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--sheet); border-color: var(--ink); }
+button:focus-visible, a:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.legend { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; font-size: .92rem; }
+.legend li { display: grid; grid-template-columns: 34px 1fr auto; align-items: center; gap: 10px; }
+.legend svg { display: block; }
+.legend .n { font-family: var(--font-data); font-variant-numeric: tabular-nums; color: var(--muted); font-size: .85rem; }
+
+.cov { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 0; }
+.cov div { min-width: 0; }
+.cov dt { font-size: .78rem; color: var(--muted); }
+.cov dd { margin: 0; font-family: var(--font-data); font-variant-numeric: tabular-nums; font-size: 1.05rem; font-weight: 600; }
+
+.detail { border-top: 1px solid var(--rule); padding-top: 12px; display: grid; gap: 10px; min-width: 0; }
+.detail h2 { margin: 0; font-size: 1.05rem; }
+.detail .kind { color: var(--muted); font-size: .9rem; margin: 0; }
+.facts { display: grid; gap: 8px; margin: 0; }
+.fact { display: grid; grid-template-columns: 7.5rem 1fr; gap: 2px 10px; min-width: 0; }
+.fact dt { color: var(--muted); font-size: .9rem; }
+.fact dd { margin: 0; min-width: 0; }
+.fact .v { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
+.fact .prov { grid-column: 2; font-size: .8rem; color: var(--muted); overflow-wrap: anywhere; }
+.chip { display: inline-block; font-size: .72rem; letter-spacing: .05em; text-transform: uppercase; padding: 1px 7px; border-radius: 999px; border: 1px solid currentColor; margin-left: 6px; vertical-align: 1px; }
+.chip.unknown { color: var(--unknown); border-style: dashed; }
+.chip.inferred { color: var(--g2); }
+.chip.reported { color: var(--accent); }
+.chip.verified { color: var(--g0); }
+.hint { color: var(--muted); font-size: .9rem; margin: 0; }
+.foot { margin-top: auto; font-size: .75rem; color: var(--muted); }
+.status { font-family: var(--font-data); font-size: .85rem; color: var(--muted); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div id="map" role="application" aria-label="Map of central Edinburgh footways, coloured by the selected attribute. Select a footway to see its data in the panel."></div>
+
+<aside class="sheet" aria-label="Graph inspector">
+  <header>
+    <h1>Central Edinburgh footways</h1>
+    <p class="sub" id="sub">Loading the graph…</p>
+  </header>
+
+  <section>
+    <p class="label" id="showLabel">Show</p>
+    <div class="seg" role="group" aria-labelledby="showLabel" id="modes"></div>
+  </section>
+
+  <section aria-live="polite">
+    <ul class="legend" id="legend"></ul>
+  </section>
+
+  <section>
+    <p class="label">Known, by length</p>
+    <dl class="cov" id="cov"></dl>
+  </section>
+
+  <section class="detail" id="detail" aria-live="polite">
+    <p class="hint">Select a footway or a kerb to see every fact we hold, with its source and date.</p>
+  </section>
+
+  <p class="foot">Map data © OpenStreetMap contributors, ODbL. Terrain: LiDAR for Scotland, Open Government Licence v3.0. Inferred values are derived, not observed.</p>
+</aside>
+
+<script>
+const STATE = ["unknown", "inferred", "reported", "verified"];
+const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+const MODES = {
+  gradient: {
+    label: "Gradient",
+    note: "Steepest 10 m, either direction",
+    bins: [["0 to 3%", "--g0", 0, 3], ["3 to 5%", "--g1", 3, 5], ["5 to 8%", "--g2", 5, 8], ["8 to 12%", "--g3", 8, 12], ["Over 12%", "--g4", 12, 1e9]],
+    value: (e) => e.inclineMax && Math.abs(e.inclineMax[0]),
+  },
+  camber: {
+    label: "Camber",
+    note: "Cross-slope, 75th percentile",
+    bins: [["Under 2.5%", "--g0", 0, 2.5], ["2.5 to 4%", "--g1", 2.5, 4], ["4 to 6%", "--g2", 4, 6], ["6 to 10%", "--g3", 6, 10], ["Over 10%", "--g4", 10, 1e9]],
+    value: (e) => e.cross && e.cross[0],
+  },
+  surface: {
+    label: "Surface",
+    note: "From OpenStreetMap tags",
+    cats: [["Tarmac or concrete", "--s-smooth", ["asphalt", "concrete"]], ["Paving slabs", "--s-slab", ["paving_stones", "wood", "metal"]], ["Setts", "--s-sett", ["sett"]], ["Cobbles or gravel", "--s-rough", ["cobblestone", "gravel", "fine_gravel", "other"]], ["Compacted, grass", "--s-soft", ["compacted", "grass"]]],
+    value: (e) => e.surface && e.surface[0],
+  },
+  width: {
+    label: "Width",
+    note: "Usable width where tagged",
+    bins: [["Under 0.9 m", "--g4", 0, 0.9], ["0.9 to 1.2 m", "--g3", 0.9, 1.2], ["1.2 to 1.5 m", "--g2", 1.2, 1.5], ["1.5 to 2 m", "--g1", 1.5, 2], ["2 m or more", "--g0", 2, 1e9]],
+    value: (e) => e.width && e.width[0],
+  },
+  confidence: {
+    label: "Confidence",
+    note: "Gradient data: how we know it",
+    cats: [["Verified", "--g0", [3]], ["Reported (OSM)", "--accent", [2]], ["Inferred (LiDAR)", "--g2", [1]]],
+    value: (e) => e.inclineMax && e.inclineMax[1],
+  },
+};
+let mode = "gradient";
+
+const KIND = { sidewalk: "Pavement (one side)", footway: "Footpath", pedestrian: "Pedestrian street", crossing: "Crossing", steps: "Steps", ramp: "Ramp", elevator: "Lift", escalator: "Escalator", corridor: "Indoor corridor", street_proxy: "Street, pavement not mapped" };
+const SURF = { asphalt: "tarmac", concrete: "concrete", paving_stones: "paving slabs", sett: "setts", cobblestone: "cobbles", compacted: "compacted", fine_gravel: "fine gravel", gravel: "gravel", grass: "grass or earth", wood: "boardwalk", metal: "metal", other: "other" };
+
+let data, strings, edges = [], kerbs = [];
+const S = (i) => (i < 0 || i == null ? null : strings[i]);
+const unpack = (a, isString) => (a ? [isString ? S(a[0]) : a[0], a[1], S(a[2]), S(a[3]), S(a[4])] : null);
+
+function classify(e) {
+  const m = MODES[mode], v = m.value(e);
+  if (v == null) return { colour: "--unknown", known: false };
+  if (m.bins) { const b = m.bins.find(([, , lo, hi]) => v >= lo && v < hi); return { colour: b[1], known: true, bin: b[0] }; }
+  const c = m.cats.find(([, , vals]) => vals.includes(v));
+  return c ? { colour: c[1], known: true, bin: c[0] } : { colour: "--unknown", known: false };
+}
+
+function geojson() {
+  return {
+    type: "FeatureCollection",
+    features: edges.map((e, i) => {
+      const c = classify(e);
+      return { type: "Feature", id: i, properties: { i, c: css(c.colour), k: c.known ? 1 : 0, steps: e.kind === "steps" ? 1 : 0 }, geometry: { type: "LineString", coordinates: e.coords } };
+    }),
+  };
+}
+
+function kerbGeojson() {
+  const col = { lowered: css("--g0"), flush: css("--g0"), raised: css("--g4"), rolled: css("--g2") };
+  return {
+    type: "FeatureCollection",
+    features: kerbs.map((k, i) => ({
+      type: "Feature", id: i,
+      properties: { i, c: k.type ? col[k.type[0]] || css("--unknown") : css("--unknown"), hollow: !k.type || k.type[1] === 1 ? 1 : 0 },
+      geometry: { type: "Point", coordinates: [k.lon, k.lat] },
+    })),
+  };
+}
+
+function lengthOf(c) {
+  let d = 0;
+  for (let i = 1; i < c.length; i++) {
+    const [a, b] = [c[i - 1], c[i]], k = Math.cos((a[1] * Math.PI) / 180);
+    d += Math.hypot((b[0] - a[0]) * k, b[1] - a[1]) * 111320;
+  }
+  return d;
+}
+
+function renderLegend() {
+  const m = MODES[mode], counts = new Map(); let unknown = 0, total = 0;
+  for (const e of edges) { const c = classify(e); total += e.len; if (!c.known) unknown += e.len; else counts.set(c.bin, (counts.get(c.bin) || 0) + e.len); }
+  const rows = (m.bins || m.cats).map(([label, colour]) => [label, css(colour), false, counts.get(label) || 0]);
+  rows.push(["Unknown", css("--unknown"), true, unknown]);
+  const swatch = (c, dashed) => `<svg width="34" height="10" aria-hidden="true"><line x1="2" y1="5" x2="32" y2="5" stroke="${c}" stroke-width="${dashed ? 3 : 5}" stroke-linecap="round" ${dashed ? 'stroke-dasharray="1 6"' : ""}/></svg>`;
+  document.getElementById("legend").innerHTML =
+    `<li style="grid-template-columns:1fr"><span class="hint">${m.note}</span></li>` +
+    rows.map(([l, c, d, len]) => `<li>${swatch(c, d)}<span>${l}</span><span class="n">${(len / 1000).toFixed(1)} km / ${Math.round((len / total) * 100)}%</span></li>`).join("");
+}
+
+function renderModes() {
+  document.getElementById("modes").innerHTML = Object.entries(MODES)
+    .map(([k, m]) => `<button type="button" id="mode-${k}" aria-pressed="${k === mode}" data-mode="${k}">${m.label}</button>`).join("");
+}
+
+function renderCoverage() {
+  const total = edges.reduce((t, e) => t + e.len, 0);
+  const share = (f) => Math.round((edges.filter(f).reduce((t, e) => t + e.len, 0) / total) * 100) + "%";
+  const crossings = edges.filter((e) => e.kind === "crossing").length;
+  const cells = [
+    ["Gradient", share((e) => e.inclineMax || e.kind === "steps")],
+    ["Surface", share((e) => e.surface)],
+    ["Width", share((e) => e.width)],
+    ["Camber", share((e) => e.cross)],
+    ["Pavement mapped", share((e) => e.kind !== "street_proxy")],
+    ["Kerb nodes", kerbs.length.toLocaleString("en-GB")],
+  ];
+  document.getElementById("cov").innerHTML = cells.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join("");
+  document.getElementById("sub").textContent = `${(total / 1000).toFixed(0)} km of network / ${edges.length.toLocaleString("en-GB")} segments / ${crossings.toLocaleString("en-GB")} crossings / built ${data.meta.builtAt.slice(0, 10)}`;
+}
+
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+function fact(label, a, fmt) {
+  if (!a) return `<div class="fact"><dt>${label}</dt><dd><span class="v">Unknown</span><span class="chip unknown">unknown</span></dd></div>`;
+  const [v, st, src, date, method] = a;
+  return `<div class="fact"><dt>${label}</dt><dd><span class="v">${esc(fmt(v))}</span><span class="chip ${STATE[st]}">${STATE[st]}</span></dd>
+    <dd class="prov">${esc([src, date, method].filter(Boolean).join(" / "))}</dd></div>`;
+}
+
+function showEdge(i) {
+  const e = edges[i];
+  const pct = (v) => `${v > 0 ? "+" : ""}${v}%`;
+  document.getElementById("detail").innerHTML = `
+    <h2>${esc(e.name || "Unnamed")}</h2>
+    <p class="kind">${KIND[e.kind] || e.kind} / ${Math.round(e.len)} m${e.level ? ` / level ${e.level}` : ""}${e.bridge ? " / bridge" : ""}${e.osm ? ` / <a href="https://www.openstreetmap.org/way/${e.osm}" target="_blank" rel="noopener">OSM way ${e.osm}</a>` : ""}</p>
+    <dl class="facts">
+      ${fact("Gradient (mean)", e.incline, pct)}
+      ${fact("Steepest 10 m", e.inclineMax, pct)}
+      ${fact("Camber", e.cross, (v) => `${v}%`)}
+      ${fact("Surface", e.surface, (v) => SURF[v] || v)}
+      ${fact("Smoothness", e.smooth, (v) => String(v).replace("_", " "))}
+      ${fact("Width", e.width, (v) => `${v} m`)}
+    </dl>
+    <p class="hint">Gradient sign follows the way's drawn direction in OpenStreetMap.</p>`;
+}
+
+function showKerb(i) {
+  const k = kerbs[i];
+  document.getElementById("detail").innerHTML = `
+    <h2>Kerb</h2>
+    <p class="kind">${k.lat.toFixed(5)}, ${k.lon.toFixed(5)}</p>
+    <dl class="facts">
+      ${fact("Type", k.type, (v) => v)}
+      ${fact("Height", k.height, (v) => `${v} cm`)}
+      ${fact("Tactile paving", k.tactile, (v) => (v ? "yes" : "no"))}
+    </dl>`;
+}
+
+const map = new maplibregl.Map({
+  container: "map",
+  style: { version: 8, sources: {}, layers: [{ id: "bg", type: "background", paint: { "background-color": css("--ground") } }] },
+  center: [-3.192, 55.949],
+  zoom: 14.2,
+  attributionControl: false,
+});
+
+map.on("load", async () => {
+  try {
+    data = await (await fetch("edinburgh-central.json")).json();
+  } catch (err) {
+    document.getElementById("sub").textContent = "The graph data didn't load. Reload the page to try again.";
+    return;
+  }
+  strings = data.strings;
+  edges = data.edges.map(([kind, name, d, inc, incMax, cross, surf, width, smooth, level, bridge, osm]) => {
+    const coords = []; let x = 0, y = 0;
+    for (let j = 0; j < d.length; j += 2) { x += d[j]; y += d[j + 1]; coords.push([x / 1e5, y / 1e5]); }
+    return { kind: S(kind), name: S(name), coords, len: lengthOf(coords), incline: unpack(inc), inclineMax: unpack(incMax), cross: unpack(cross), surface: unpack(surf, true), width: unpack(width), smooth: unpack(smooth, true), level, bridge, osm };
+  });
+  kerbs = data.kerbs.map(([x, y, t, h, tp]) => ({ lon: x / 1e5, lat: y / 1e5, type: unpack(t, true), height: unpack(h), tactile: unpack(tp) }));
+
+  map.addSource("edges", { type: "geojson", data: geojson() });
+  map.addLayer({ id: "edges-unknown", type: "line", source: "edges", filter: ["==", ["get", "k"], 0],
+    paint: { "line-color": ["get", "c"], "line-width": ["interpolate", ["linear"], ["zoom"], 12, 1, 17, 3], "line-dasharray": [0.5, 2.5] }, layout: { "line-cap": "round" } });
+  map.addLayer({ id: "edges-known", type: "line", source: "edges", filter: ["==", ["get", "k"], 1],
+    paint: { "line-color": ["get", "c"], "line-width": ["interpolate", ["linear"], ["zoom"], 12, 1.4, 17, 5] }, layout: { "line-cap": "round" } });
+  map.addLayer({ id: "edges-steps", type: "line", source: "edges", filter: ["==", ["get", "steps"], 1],
+    paint: { "line-color": css("--ink"), "line-width": ["interpolate", ["linear"], ["zoom"], 12, 2, 17, 7], "line-dasharray": [0.25, 0.5] } });
+  map.addLayer({ id: "edges-hit", type: "line", source: "edges", paint: { "line-color": "#000", "line-opacity": 0, "line-width": 14 } });
+  map.addLayer({ id: "selected", type: "line", source: "edges", filter: ["==", ["id"], -1],
+    paint: { "line-color": css("--accent"), "line-width": 9, "line-opacity": 0.55 } }, "edges-unknown");
+  map.addSource("kerbs", { type: "geojson", data: kerbGeojson() });
+  map.addLayer({ id: "kerbs", type: "circle", source: "kerbs", minzoom: 15,
+    paint: { "circle-radius": 4.5, "circle-color": ["case", ["==", ["get", "hollow"], 1], css("--sheet"), ["get", "c"]], "circle-stroke-color": ["get", "c"], "circle-stroke-width": 2 } });
+
+  renderModes(); renderLegend(); renderCoverage();
+  document.getElementById("modes").addEventListener("click", (ev) => {
+    const b = ev.target.closest("button[data-mode]"); if (!b) return;
+    mode = b.dataset.mode; renderModes(); renderLegend();
+    map.getSource("edges").setData(geojson());
+    document.getElementById(`mode-${mode}`).focus();
+  });
+  map.on("click", (ev) => {
+    const box = [[ev.point.x - 6, ev.point.y - 6], [ev.point.x + 6, ev.point.y + 6]];
+    const k = map.queryRenderedFeatures(box, { layers: ["kerbs"] })[0];
+    if (k) { showKerb(k.properties.i); return; }
+    const f = map.queryRenderedFeatures(box, { layers: ["edges-hit"] })[0];
+    if (!f) return;
+    map.setFilter("selected", ["==", ["id"], f.id]);
+    showEdge(f.properties.i);
+  });
+  for (const l of ["edges-hit", "kerbs"]) {
+    map.on("mouseenter", l, () => (map.getCanvas().style.cursor = "pointer"));
+    map.on("mouseleave", l, () => (map.getCanvas().style.cursor = ""));
+  }
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+    map.setPaintProperty("bg", "background-color", css("--ground"));
+    map.getSource("edges").setData(geojson()); map.getSource("kerbs").setData(kerbGeojson()); renderLegend();
+  });
+});
+</script>
