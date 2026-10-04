@@ -463,3 +463,14 @@ When there is nothing to compare with, it builds. Once DEP-01 makes `main` the p
 **Park gates.** A route to a park used to end at the park's middle, which might be a pond or the far side of a fence. OS Open Greenspace (OGL) draws parks as sites with access points (`pnpm build:greenspace`: 153 named sites and 648 pedestrian gates in central Edinburgh, 12 and 73 in Newcastle, 73 and 299 in London). When the destination is a park or garden in our search and sits inside a site (the smallest, so a garden inside a park wins), or shares its name with one nearby, the route ends at the gate nearest the way you're coming, trying up to three, and says which park. OS splits some parks (The Meadows is "West Meadow Park" and "East Meadow Park"), so position matters more than name. A door that fits (D-018) still comes first.
 
 **OpenStreetMap notes.** Open notes are people saying a path is blocked or steps have appeared, but also shop closures and StreetComplete's questions. `pnpm build:osm-notes` keeps those about the ground (paths, steps, kerbs, gates, bridges and so on: 28 in Edinburgh, 23 in London), at build time, so no route's area is sent to a third party (D-009). Up to three within 20 m of the best route are shown with it, dated and marked "Not checked by us". They never change the route: anyone can write a note, and many are stale.
+
+## D-049 The Toilet Map fills OSM's gaps
+
+**Decided.** 2026-10-04 (DATA-09). OSM knows many public toilets but often not whether they're accessible, need a RADAR key, or when they open. The Great British Public Toilet Map (CC BY 4.0) is exported daily with those facts and the date each was last checked.
+
+**What we do.** `pnpm build:toilets` cuts the export to each city (Edinburgh 62 toilets, 44 accessible; Newcastle 22; London 73). The app merges it into the search index when a city loads (`mergeToiletMap`):
+- **Same toilet** (an OSM toilet within 30 m): OSM's own tags win; the Toilet Map only fills what OSM lacks. The place then names both sources.
+- **A toilet OSM hasn't mapped** is added, and an accessible one counts for "Accessible toilet at least every…" like any other.
+- Each place says "checked" (someone verified it on the ground) or "updated", with the month, so an old record looks old.
+- Weekly opening times become OSM opening hours, so "open when you pass" works for them too.
+- Credit in each city line: "Toilets: Great British Public Toilet Map, Public Convenience Ltd (CC BY 4.0)".

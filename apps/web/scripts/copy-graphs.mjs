@@ -17,4 +17,5 @@ for (const n of ["newcastle-gateshead", "london-jubilee"]) copyFileSync(`../../d
 for (const n of ["edinburgh-central", "newcastle-gateshead", "london-jubilee"]) {
   copyFileSync(`../../data/places/${n}.greenspace.json`, `public/places/${n}.greenspace.json`);
   copyFileSync(`../../data/places/${n}.osm-notes.json`, `public/places/${n}.osm-notes.json`);
+  copyFileSync(`../../data/places/${n}.toiletmap.json`, `public/places/${n}.toiletmap.json`);
 }

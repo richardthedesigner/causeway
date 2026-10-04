@@ -23,6 +23,7 @@
     "build:floods": "tsx scripts/build-flood-areas.ts",
     "build:greenspace": "tsx scripts/build-greenspace.ts",
     "build:osm-notes": "tsx scripts/build-osm-notes.ts",
+    "build:toilets": "tsx scripts/build-toiletmap.ts",
     "a11y": "node scripts/a11y-check.mjs",
     "e2e": "node scripts/e2e.mjs"
   },

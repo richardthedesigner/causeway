@@ -3,11 +3,24 @@ import { useEffect, useState } from "react";
 import type { City } from "./cities";
 import type { Place } from "./plan-types";
 import { buildIndex, type Index, type PlacesFile } from "./search";
+import { mergeToiletMap, type ToiletMapFile } from "./toiletmap";
 
 /** Load a city's search index (places, addresses, postcodes) and merge in the street names from its graph. */
 export function usePlaces(city: City, streets: Place[] | null): Index | null {
   const [file, setFile] = useState<PlacesFile | null>(null);
   const [failed, setFailed] = useState(false);
+  // The Toilet Map (DATA-09): a bonus, so a failure just leaves OSM's toilets.
+  const [loos, setLoos] = useState<ToiletMapFile | null>(null);
+  useEffect(() => {
+    setLoos(null);
+    if (!city.toiletMap) return;
+    const ctl = new AbortController();
+    fetch(new URL(city.toiletMap, document.baseURI), { signal: ctl.signal })
+      .then((r) => (r.ok ? (r.json() as Promise<ToiletMapFile>) : null))
+      .then(setLoos)
+      .catch(() => undefined);
+    return () => ctl.abort();
+  }, [city]);
   useEffect(() => {
     setFile(null);
     setFailed(false);
@@ -30,7 +43,11 @@ export function usePlaces(city: City, streets: Place[] | null): Index | null {
   useEffect(() => {
     if (!streets) return setIndex(null);
     // Without the index file the streets and demo places still search.
-    if (file || failed) setIndex(buildIndex(file, streets));
-  }, [file, failed, streets]);
+    if (file || failed) {
+      const index = buildIndex(file, streets);
+      mergeToiletMap(index, loos);
+      setIndex(index);
+    }
+  }, [file, failed, streets, loos]);
   return index;
 }

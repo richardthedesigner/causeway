@@ -24,6 +24,8 @@ export interface City {
   greenspace?: string;
   /** Open OpenStreetMap notes about the ground, from the build (DATA-08). */
   osmNotes?: string;
+  /** The Great British Public Toilet Map, cut to this city (DATA-09). */
+  toiletMap?: string;
   liveLifts: boolean;
   weatherAt: [number, number];
   start: Place;
@@ -31,7 +33,7 @@ export interface City {
   credit: string;
 }
 
-const OSM = "Map data © OpenStreetMap contributors (ODbL). Base map: Protomaps. Extra places: Overture Maps Foundation (CDLA Permissive 2.0). Bus timetables: Bus Open Data Service, Open Government Licence v3.0.";
+const OSM = "Map data © OpenStreetMap contributors (ODbL). Base map: Protomaps. Extra places: Overture Maps Foundation (CDLA Permissive 2.0). Bus timetables: Bus Open Data Service, Open Government Licence v3.0. Toilets: Great British Public Toilet Map, Public Convenience Ltd (CC BY 4.0).";
 
 export const CITIES: City[] = [
   {
@@ -45,6 +47,7 @@ export const CITIES: City[] = [
     footways: "graph/edinburgh-central-footways.json",
     greenspace: "places/edinburgh-central.greenspace.json",
     osmNotes: "places/edinburgh-central.osm-notes.json",
+    toiletMap: "places/edinburgh-central.toiletmap.json",
     liveLifts: false,
     weatherAt: [55.9486, -3.1999],
     start: { id: "causewayside", name: "Causewayside", kind: "Southside / demo address", lon: -3.1812, lat: 55.9385 },
@@ -70,6 +73,7 @@ export const CITIES: City[] = [
     floods: "live/newcastle-gateshead.flood-areas.json",
     greenspace: "places/newcastle-gateshead.greenspace.json",
     osmNotes: "places/newcastle-gateshead.osm-notes.json",
+    toiletMap: "places/newcastle-gateshead.toiletmap.json",
     liveLifts: false,
     weatherAt: [54.97, -1.607],
     start: { id: "grey-street", name: "Grey Street", kind: "City centre", lon: -1.6123, lat: 54.9722 },
@@ -93,6 +97,7 @@ export const CITIES: City[] = [
     floods: "live/london-jubilee.flood-areas.json",
     greenspace: "places/london-jubilee.greenspace.json",
     osmNotes: "places/london-jubilee.osm-notes.json",
+    toiletMap: "places/london-jubilee.toiletmap.json",
     network: "graph/london-network.json",
     liveLifts: true,
     weatherAt: [51.502, -0.07],

@@ -357,4 +357,5 @@ Partnership items for Richard:
 | **Environment Agency flood monitoring** (`environment.data.gov.uk/flood-monitoring`: `/id/floodAreas`, `/id/floods`) | Flood areas over our paths (build), warnings in force (live, CORS) | OGL v3 | V (Newcastle 4 areas, London 9, 2026-10-04) | **keep** (DATA-07, D-047) |
 | **OS Open Greenspace** (OS Downloads API, per 100 km square, shapefile) | Named parks and their pedestrian access points | OGL v3. "Contains OS data © Crown copyright and database right" | V (NT, NZ, TQ, March 2026 release) | **keep** (DATA-08, D-048) |
 | **OpenStreetMap notes** (`api.openstreetmap.org/api/0.6/notes.json`, open, by bbox) | Notes about the ground near a route, shown only | ODbL | V (Edinburgh 314 open, 28 kept; London 108, 23) | **keep** (DATA-08, D-048). Fetched at build time only |
+| **Great British Public Toilet Map** daily export (`toiletmap.org.uk/dataset`, JSON) | Accessible, RADAR, fee, baby changing, weekly hours, verified date, per toilet | CC BY 4.0 (Public Convenience Ltd), credit in the app | V (export of 2026-10-04: 16,119 UK toilets; Edinburgh 62, Newcastle 22, London 73) | **keep** (DATA-09, D-049) |
 
