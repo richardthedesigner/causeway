@@ -58,7 +58,7 @@ export default function Home() {
   const [reportAt, setReportAt] = useState<{ lon: number; lat: number; accuracyM: number | null; label: string } | null>(null);
   const [notes, setNotes] = useState<UserNote[]>([]);
   const [author, setAuthor] = useState("");
-  const [noteAbout, setNoteAbout] = useState<NoteAbout | null>(null);
+  const [noteChoices, setNoteChoices] = useState<NoteAbout[] | null>(null);
   const wide = useWide();
 
   useEffect(() => setProfile(loadProfile()), []);
@@ -251,7 +251,7 @@ export default function Home() {
           notes={cityNotes}
           author={author}
           builtAt={planner.ready.builtAt}
-          onAddNote={setNoteAbout}
+          onAddNote={setNoteChoices}
           onDeleteNote={(id) => {
             deleteNote(id);
             setNotes(loadNotes());
@@ -274,7 +274,8 @@ export default function Home() {
         <SubOrDesc wide={wide}>Routes worked out for how you get around.</SubOrDesc>
       </header>
     ) : (
-      <header className="px-4 pt-1 pb-2">
+      // The journey card says where you're going; the heading is there for screen readers and the dialog's name.
+      <header className="sr-only">
         <DrawerOrH1 wide={wide} small>
           Directions
         </DrawerOrH1>
@@ -337,11 +338,11 @@ export default function Home() {
               .flatMap((st) => st.points.map((pt) => ({ st, pt, d: haversine(pt, at) })))
               .sort((x, y) => x.d - y.d)[0];
             if (near)
-              setNoteAbout({
+              setNoteChoices([{
                 target: { kind: "way", name: near.st.name, osmWayIds: near.st.osmWayIds, edgeIds: near.st.edgeIds, graphBuiltAt: planner.ready!.builtAt },
                 lon: near.pt[0],
                 lat: near.pt[1],
-              });
+              }]);
           }}
           onReport={(m) => setReportAt(m ? { lon: m.lon, lat: m.lat, accuracyM: m.accuracyM, label: "your location" } : to ? { lon: to.lon, lat: to.lat, accuracyM: null, label: to.name } : null)}
         />
@@ -359,7 +360,7 @@ export default function Home() {
         </Drawer>
       )}
       <ModeSheet open={modeOpen} onOpenChange={setModeOpen} profile={profile} onChange={updateProfile} />
-      <NoteSheet about={noteAbout} onOpenChange={(v) => !v && setNoteAbout(null)} city={city.id} preset={profile.preset} onSaved={() => setNotes(loadNotes())} />
+      <NoteSheet choices={noteChoices} onOpenChange={(v) => !v && setNoteChoices(null)} city={city.id} preset={profile.preset} onSaved={() => setNotes(loadNotes())} />
       <ReportSheet open={reportAt !== null} onOpenChange={(v) => !v && setReportAt(null)} where={reportAt} city={city.id} />
     </main>
   );

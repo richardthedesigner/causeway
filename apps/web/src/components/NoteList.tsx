@@ -35,7 +35,8 @@ export function NoteList({ notes, all, author, onDelete, className }: { notes: U
               </span>
             </span>
             <span className="pl-7 text-sm text-muted">
-              {day(n.at)} / {noteAttribution(n, own)}
+              {day(n.at)}
+              {n.ground ? ` / ${n.ground === "wet" ? "Wet ground" : "Dry ground"}` : ""} / {noteAttribution(n, own)}
               {agree ? ` / ${agree} ${agree === 1 ? "other person" : "others"} said the same` : ""}
               {old ? " / Over a year old, things may have changed" : ""}
             </span>

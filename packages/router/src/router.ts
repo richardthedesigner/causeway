@@ -697,6 +697,8 @@ export interface EntranceOption {
   verdict: EntranceVerdict;
   /** "OSM node 123, 2024-05-01": every access fact shows its source on request. */
   source: string;
+  /** OSM node id: the stable key notes about this entrance hang off. */
+  osmId: number;
 }
 
 /**
@@ -712,6 +714,7 @@ export function entrancesNear(g: Graph, lon: number, lat: number, p: Profile, ra
     .map((e) => ({ e, d: haversine([lon, lat], [e.lon, e.lat]) }))
     .filter(({ d }) => d <= radiusM)
     .map(({ e, d }) => ({
+      osmId: e.osmId,
       lon: e.lon,
       lat: e.lat,
       name: e.name,

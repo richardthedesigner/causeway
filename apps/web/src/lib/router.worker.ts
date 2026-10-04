@@ -163,7 +163,7 @@ function plan(req: Extract<WorkerRequest, { type: "plan" }>): PlanResult {
   const p = req.profile;
   const c = { ...req.conditions, now: new Date(req.conditions.now) };
   // Notes stay a separate layer: joined to edge ids here, per request, never written into the graph.
-  router.noteSignals = noteSignals(req.notes, graph, c.now, mobilityLabelFor(p.preset));
+  router.noteSignals = noteSignals(req.notes, graph, c.now, mobilityLabelFor(p.preset), c.wet);
   const a = router.snap(req.from.lon, req.from.lat, p, c);
   const b = router.snap(req.to.lon, req.to.lat, p, c);
   const alts = router.alternatives(a, b, p, c, 3);
