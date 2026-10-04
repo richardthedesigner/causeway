@@ -4,6 +4,12 @@ A running record of what was built, newest first. Each entry links the decision 
 
 ## 2026-10-04 (late night)
 
+**Edit a device** (D-036 step 4)
+- "Edit Cherry" opens a full-screen editor on a phone (a side panel on wide screens): name, favourite, type, limits, and remove.
+- A blank name goes back to calling the device by its type. Changing type keeps the name.
+- The four powered types each get a line saying how they differ ("Small wheels. Struggles with kerbs, setts and hills").
+- Remove asks first, in the page, and isn't offered for the last device.
+
 **One bar for search and route** (D-036 step 3)
 - With a route on screen, the destination and the device button share the same bar as search, with no magnifier. The separate "Routes are for … Change" row is gone; a quiet line says what ground the routes were worked out for.
 - When the field or destination would get narrower than 150 px beside the button, the bar splits: the field keeps the first line and the button goes full width under it. Checked at 320 px and 390 px with "Cherry" and with the longest label, "Manual chair + help".

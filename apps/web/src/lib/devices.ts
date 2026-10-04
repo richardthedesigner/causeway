@@ -63,7 +63,7 @@ export function defaultDevice(list: SavedDevice[]): SavedDevice | undefined {
 
 /** What the device button says: the name for a named device, otherwise the type, shortened to fit the search bar. */
 export function deviceLabel(d: SavedDevice): string {
-  if (d.name) return d.name;
+  if (d.name.trim()) return d.name.trim();
   return d.profile.label.replace(/^Manual wheelchair/, "Manual chair").replace(/, pushed$/, " + help");
 }
 
@@ -124,7 +124,7 @@ export function activeDevice(state: DeviceState): SavedDevice {
 export function withActiveProfile(state: DeviceState, profile: Profile): DeviceState {
   return {
     ...state,
-    devices: state.devices.map((d) => (d.id === state.activeId ? { ...d, profile: d.name ? { ...profile, label: d.name } : profile } : d)),
+    devices: state.devices.map((d) => (d.id === state.activeId ? { ...d, profile: d.name.trim() ? { ...profile, label: d.name.trim() } : profile } : d)),
   };
 }
 
@@ -135,4 +135,26 @@ export function withActive(state: DeviceState, id: string): DeviceState {
 /** Add an unnamed device and make it the one in use. Naming it comes with first-visit setup (plan step 5). */
 export function withNewDevice(state: DeviceState, id: string, preset: MobilityPreset = "manual-wheelchair"): DeviceState {
   return { devices: [...state.devices, savedDevice(id, "", preset)], activeId: id };
+}
+
+/** Rename the active device. A blank name goes back to calling it by its type. */
+export function withActiveName(state: DeviceState, raw: string): DeviceState {
+  const name = raw.replace(/\s+/g, " ").trimStart();
+  return {
+    ...state,
+    devices: state.devices.map((d) =>
+      d.id === state.activeId ? { ...d, name, profile: { ...d.profile, label: name.trim() || PRESETS[d.profile.preset].label } } : d,
+    ),
+  };
+}
+
+export function withFavourite(state: DeviceState, id: string, favourite: boolean): DeviceState {
+  return { ...state, devices: state.devices.map((d) => (d.id === id ? { ...d, favourite } : d)) };
+}
+
+/** Remove a device. The last one can't go: there must always be one to route for. */
+export function withoutDevice(state: DeviceState, id: string): DeviceState {
+  const devices = state.devices.filter((d) => d.id !== id);
+  if (!devices.length) return state;
+  return { devices, activeId: state.activeId === id ? defaultDevice(devices)!.id : state.activeId };
 }

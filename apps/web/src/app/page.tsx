@@ -7,7 +7,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { MapChrome, type Ground } from "@/components/MapChrome";
 import { MapView } from "@/components/MapView";
 import { DeviceMenu } from "@/components/DeviceMenu";
-import { ModeSheet } from "@/components/ModeSheet";
+import { DeviceEditor } from "@/components/DeviceEditor";
 import { NavView, type Me } from "@/components/NavView";
 import { NoteSheet, type NoteAbout } from "@/components/NoteSheet";
 import { PlaceIcon, PlaceSearch } from "@/components/PlaceSearch";
@@ -19,7 +19,7 @@ import { CommandGroup, CommandItem } from "@/components/ui/command";
 import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
 import { CITIES, cityById, type City } from "@/lib/cities";
 import type { Place } from "@/lib/plan-types";
-import { activeDevice, loadDeviceState, saveDeviceState, SEED_DEVICES, withActive, withActiveProfile, withNewDevice, type DeviceState } from "@/lib/devices";
+import { activeDevice, loadDeviceState, saveDeviceState, SEED_DEVICES, withActive, withActiveName, withActiveProfile, withFavourite, withNewDevice, withoutDevice, type DeviceState } from "@/lib/devices";
 import { addRecent, loadRecents } from "@/lib/recents";
 import { useNotes } from "@/lib/use-notes";
 import { toiletsAlong } from "@/lib/toilets";
@@ -484,7 +484,23 @@ export default function Home() {
           </DrawerContent>
         </Drawer>
       )}
-      <ModeSheet open={modeOpen} onOpenChange={setModeOpen} profile={profile} onChange={updateProfile} />
+      <DeviceEditor
+        open={modeOpen}
+        onOpenChange={setModeOpen}
+        device={device}
+        onChange={updateProfile}
+        onRename={(name) => changeDevices((s) => withActiveName(s, name))}
+        onFavourite={(on) => changeDevices((s) => withFavourite(s, s.activeId, on))}
+        onRemove={
+          devices.devices.length > 1
+            ? () => {
+                setModeOpen(false);
+                setOnce(null);
+                changeDevices((s) => withoutDevice(s, s.activeId));
+              }
+            : undefined
+        }
+      />
       <NoteSheet choices={noteChoices} onOpenChange={(v) => !v && setNoteChoices(null)} city={city.id} preset={profile.preset} sharing={shared.sharing !== "off"} onSaved={shared.saved} />
       <ReportSheet open={reportAt !== null} onOpenChange={(v) => !v && setReportAt(null)} where={reportAt} city={city.id} sharing={shared.sharing !== "off"} onSaved={shared.saved} />
     </main>

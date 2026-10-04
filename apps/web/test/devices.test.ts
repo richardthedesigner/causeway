@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { PRESETS, savedDevice } from "@causeway/profile";
-import { activeDevice, defaultDevice, deviceLabel, loadDeviceState, orderDevices, saveDeviceState, SEED_DEVICES, withActive, withActiveProfile, withNewDevice } from "../src/lib/devices";
+import { activeDevice, defaultDevice, deviceLabel, loadDeviceState, orderDevices, saveDeviceState, SEED_DEVICES, withActive, withActiveName, withActiveProfile, withFavourite, withNewDevice, withoutDevice } from "../src/lib/devices";
 
 /** An in-memory stand-in for localStorage. */
 function memory(init: Record<string, string> = {}) {
@@ -97,5 +97,28 @@ describe("device rules", () => {
   it("ignores a switch to a device that isn't saved", () => {
     const s = { devices: SEED_DEVICES, activeId: "cherry" };
     expect(withActive(s, "nope")).toBe(s);
+  });
+
+  it("renames the active device, and a blank name falls back to the type", () => {
+    const s = { devices: SEED_DEVICES, activeId: "lulu" };
+    const named = withActiveName(s, "Lulu  the  scooter");
+    expect(activeDevice(named)).toMatchObject({ name: "Lulu the scooter", profile: { label: "Lulu the scooter" } });
+    const blank = withActiveName(s, "   ");
+    expect(activeDevice(blank).name).toBe("");
+    expect(activeDevice(blank).profile.label).toBe("Mobility scooter, pavement");
+    expect(deviceLabel(activeDevice(blank))).toBe("Mobility scooter, pavement");
+  });
+
+  it("favourites and unfavourites a device", () => {
+    const s = withFavourite({ devices: SEED_DEVICES, activeId: "cherry" }, "cherry", false);
+    expect(s.devices[0]!.favourite).toBe(false);
+    expect(orderDevices(s.devices).map((d) => d.id)).toEqual(["lulu", "cherry"]);
+  });
+
+  it("removes a device and moves to a favourite, but never removes the last one", () => {
+    const s = withoutDevice({ devices: SEED_DEVICES, activeId: "cherry" }, "cherry");
+    expect(s.devices.map((d) => d.id)).toEqual(["lulu"]);
+    expect(s.activeId).toBe("lulu");
+    expect(withoutDevice(s, "lulu")).toBe(s);
   });
 });

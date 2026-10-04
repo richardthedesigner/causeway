@@ -78,7 +78,7 @@ Each step is one pull request that can go live on its own.
 - Two-line layout using a container query on the bar: when the bar is narrower than the destination's minimum (about 12 characters) plus the button, wrap. Check it at 320 px, at 200% text and with the longest preset label ("Manual chair + help").
 - Padding review: one inner padding for the bar, and the button inset to match the bar's corner radius.
 
-**4. Edit a device** (`ModeSheet.tsx` becomes `DeviceEditor.tsx`)
+**4. Edit a device** (`ModeSheet.tsx` becomes `DeviceEditor.tsx`). Done. Changes apply as they're made, like the limits always have, so there's Close but no Save.
 - Full screen, not a sheet over the map: name, favourite, type, limits (today's limits section moves across as is), "Remove Cherry" with a confirm step in the page.
 - Changing type keeps the name (today `pick()` overwrites the label).
 - Type tiles get one line each for the powered classes (lightweight, heavy duty, pavement scooter, road scooter).
