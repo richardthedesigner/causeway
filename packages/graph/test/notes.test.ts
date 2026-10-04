@@ -10,6 +10,9 @@ import {
   notesForPlace,
   notesForStretch,
   noteSignals,
+  notesForEntrance,
+  entranceRef,
+  groundWeight,
   relevance,
   resolveNoteEdges,
   confidence,
@@ -161,5 +164,44 @@ describe("note signals for routing", () => {
 
   it("ignores place notes (they show on the place, they don't steer the route)", () => {
     expect(noteSignals([place()], graph, now, null).size).toBe(0);
+  });
+});
+
+describe("wet and dry notes", () => {
+  it("counts a note most in the weather it describes", () => {
+    expect(groundWeight("wet", true)).toBe(1);
+    expect(groundWeight("wet", false)).toBeLessThan(1);
+    expect(groundWeight("dry", true)).toBeLessThan(1);
+    expect(groundWeight(null, true)).toBe(1);
+    expect(groundWeight(undefined, false)).toBe(1);
+  });
+
+  it("makes a 'lethal when wet' note weigh more on a wet day than a dry one", () => {
+    const n = way({ ground: "wet" });
+    const wet = noteSignals([n], graph, now, null, true).get(1)!.score;
+    const dry = noteSignals([n], graph, now, null, false).get(1)!.score;
+    expect(wet).toBeLessThan(dry);
+    expect(dry).toBeLessThan(0);
+  });
+
+  it("doesn't let a dry-day note corroborate a wet-day one", () => {
+    const a = way({ author: "a", ground: "wet" });
+    const b = way({ author: "b", ground: "dry" });
+    const c = way({ author: "c", ground: null });
+    expect(corroborations(a, [a, b, c])).toBe(1);
+  });
+
+  it("rejects an unknown ground value", () => {
+    expect(noteProblem({ text: "ok", sentiment: "good", mobility: null, ground: "slushy" as never })).not.toBeNull();
+  });
+});
+
+describe("entrance notes", () => {
+  it("keep to their own door, and stay off the venue's list", () => {
+    const side = place({ target: { kind: "place", ref: entranceRef(42), name: "Side entrance" } });
+    const venue = place();
+    expect(notesForEntrance([side, venue], 42)).toEqual([side]);
+    expect(notesForEntrance([side, venue], 43)).toEqual([]);
+    expect(notesForPlace([side, venue], { id: "demo:museum", lon: -3.19, lat: 55.948 })).toEqual([venue]);
   });
 });

@@ -152,7 +152,7 @@ Proposal: **accept it, and publish the enriched footway graph under ODbL.** It f
 
 ## D-022 Reports stay on the device until there's a backend decision
 
-**Decided** (interim). 2026-10-04. Problem reports (kind, location, time, optional note and photo) are saved on the device. Sending them anywhere means storing location data from members of the public and running moderation and corroboration, so that waits for Richard's call on the backend (Supabase, D-009 privacy rules). Reports never include the mobility profile. The data shape (`apps/web/src/lib/reports.ts`) matches the `report` table in `db/migrations/0001_graph.sql`.
+**Superseded by D-030** (2026-10-04): Richard decided to share notes and send reports. **Decided** (interim). 2026-10-04. Problem reports (kind, location, time, optional note and photo) are saved on the device. Sending them anywhere means storing location data from members of the public and running moderation and corroboration, so that waits for Richard's call on the backend (Supabase, D-009 privacy rules). Reports never include the mobility profile. The data shape (`apps/web/src/lib/reports.ts`) matches the `report` table in `db/migrations/0001_graph.sql`.
 
 ## D-023 Offline on the web
 
@@ -207,3 +207,18 @@ The wait is half the gap between buses at that hour (UK time), or until the next
 Stops carry OSM's shelter, seat, tactile paving and kerb facts, joined on the NaPTAN code (Edinburgh 815 of 842 stops, Newcastle 147 of 159). Waiting more than three minutes with no seat costs extra for anyone with a rest limit (and an unmapped seat counts as unknown); no shelter costs extra in the rain; a mapped lowered or flush kerb adds a minute for wheelchair users (the ramp is steeper). Directions name what's there: "from Bernard Terrace (shelter and seat)". Kerbs at stops are almost never mapped, so that rule rarely fires.
 
 The route panel lists each bus leg with how often it runs now (timetable) and, in London, the next three live departures from TfL every 30 seconds, labelled as live. Next: live times for Lothian and Go North East (feeds to check), and "space taken" reports.
+
+## D-030 Sharing notes and sending reports: Supabase, anonymous, post-moderated
+
+**Decided** by Richard, 2026-10-04 ("yes, turn sharing on"). Supersedes D-022 and the storage half of D-026. Setup and upkeep: [BACKEND.md](BACKEND.md). Code: `db/migrations/0003_sharing.sql`, `0004_storage.sql`, `apps/web/src/lib/sync.ts`.
+
+- **Where.** Supabase (Postgres + PostGIS), London region, which DATA_MODEL already names as the source of truth. No SDK in the app: plain fetch against its REST endpoints. The build turns sharing on with `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`; without them everything stays on the device.
+- **No accounts.** Anonymous sign-in, only when you first save something. Reading shared notes needs no sign-in. The anonymous id lets you delete your own notes and lets us count different people; it is never shown. Others' notes carry a salted per-person pseudonym (for corroboration), never the id.
+- **Notes show straight away, and come down fast** (post-moderation). Anyone can flag a note as wrong, unkind or about a person; two different people flagging hides it until someone looks. Pre-moderating every note would leave notes invisible for days at this scale, and notes are already framed as "not checked by us".
+- **Photos are pre-moderated.** They go to a private bucket and nobody else sees them until a person has checked them (faces, number plates) and copied them to the public bucket.
+- **Reports are write-only.** They go to triage, not on the map.
+- **Limits, enforced by the database, not the app.** 30 notes a day per person, 1 to 280 characters, row-level security on every table. `scripts/test-db.sh` checks 14 rules on Postgres + PostGIS, in CI.
+- **Privacy.** No profile, ever (D-009). The mobility label is the only health-related fact: opt-in per note, explained on the switch, with a preview of exactly what others will see. That is explicit consent for special category data. A DPIA is still owed before wider launch. Notes keep exact points (they are about places); reports keep the device's accuracy.
+- **Your notes, your call.** "Delete my note" removes it from the server too.
+
+**Owed by people, not code:** a CAPTCHA (Cloudflare Turnstile) on anonymous sign-up before any publicity, someone named to check flags and photos weekly, and the DPIA.

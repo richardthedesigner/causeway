@@ -26,6 +26,8 @@ export interface Report {
   note: string;
   /** Small JPEG data URL, if the person added a photo. */
   photo: string | null;
+  /** Set once the report has been sent for triage (only when sharing is on, D-030). */
+  sentAt?: string;
 }
 
 const KEY = "causewayside.reports.v1";
@@ -44,6 +46,14 @@ export function saveReport(r: Report): boolean {
     return true;
   } catch {
     return false;
+  }
+}
+
+export function markSent(id: string): void {
+  try {
+    localStorage.setItem(KEY, JSON.stringify(loadReports().map((r) => (r.id === id ? { ...r, sentAt: new Date().toISOString() } : r))));
+  } catch {
+    /* tried again next time */
   }
 }
 
