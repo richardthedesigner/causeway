@@ -1,6 +1,6 @@
 /**
  * Notes about places and pavements, kept on this device until there is a
- * backend (D-022, D-024). The shape is `UserNote` from @causeway/graph and
+ * backend (D-022, D-026). The shape is `UserNote` from @causeway/graph and
  * maps one to one onto the `note` table in db/migrations/0002_notes.sql.
  * No profile data is ever stored with a note; the mobility label is opt-in
  * per note.

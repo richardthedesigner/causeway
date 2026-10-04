@@ -1,6 +1,7 @@
 "use client";
 import maplibregl, { type GeoJSONSource, type Map as MLMap } from "maplibre-gl";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { basemapLayers, GLYPHS, loadBasemap, registerProtocols } from "@/lib/basemap";
 import type { Place, PlannedRoute } from "@/lib/plan-types";
 
 interface Props {
@@ -16,6 +17,8 @@ interface Props {
   onMapClick: (lon: number, lat: number) => void;
   /** Live (or preview) position while navigating; the map follows it. */
   me?: { lon: number; lat: number; accuracyM: number } | null;
+  /** City basemap (Protomaps extract) and the bundled glyphs it labels with. */
+  basemap?: { url: string; key: string; glyphs: string; center: [number, number] } | null;
 }
 
 const css = (v: string) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
@@ -36,7 +39,7 @@ const point = (p: { lon: number; lat: number }, props: Record<string, unknown> =
  * attributed pavement or path. A full basemap (Protomaps, D-007) layers
  * underneath in Phase 2b.
  */
-export function MapView({ network, routes, selectedId, from, to, pin, showSlopes, entrances, onMapClick, me }: Props) {
+export function MapView({ network, routes, selectedId, from, to, pin, showSlopes, entrances, onMapClick, me, basemap }: Props) {
   const el = useRef<HTMLDivElement>(null);
   const map = useRef<MLMap | null>(null);
   const ready = useRef(false);
@@ -45,9 +48,10 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
 
   useEffect(() => {
     if (!el.current || map.current) return;
+    registerProtocols(basemap?.glyphs ?? "fonts/glyphs.json");
     const m = new maplibregl.Map({
       container: el.current,
-      style: { version: 8, sources: {}, layers: [{ id: "ground", type: "background", paint: { "background-color": css("--ground") } }] },
+      style: { version: 8, glyphs: GLYPHS, sources: {}, layers: [{ id: "ground", type: "background", paint: { "background-color": css("--ground") } }] },
       center: [-3.1885, 55.9455],
       zoom: 14,
       attributionControl: false,
@@ -71,6 +75,7 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
       m.addLayer({ id: "me-halo", type: "circle", source: "me", paint: { "circle-color": css("--accent"), "circle-opacity": 0.15, "circle-radius": ["interpolate", ["exponential", 2], ["zoom"], 10, ["/", ["get", "acc"], 150], 20, ["*", ["get", "acc"], 6.6]] } });
       m.addLayer({ id: "me", type: "circle", source: "me", paint: { "circle-radius": 9, "circle-color": css("--accent"), "circle-stroke-color": css("--surface"), "circle-stroke-width": 3 } });
       ready.current = true;
+      setMapReady(true);
       m.fire("causeway:refresh");
     });
     m.on("click", (e) => clickRef.current(e.lngLat.lng, e.lngLat.lat));
@@ -90,7 +95,7 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
       (m.getSource("network") as GeoJSONSource).setData(
         fc((network ?? []).map((n) => line(n.coords, { bin: n.bin, c: showSlopes && n.bin >= 0 && n.bin < 5 ? ramp[n.bin] : n.bin === -1 && showSlopes ? css("--unknown") : neutral }))),
       );
-      m.setPaintProperty("network", "line-opacity", showSlopes ? 0.9 : 0.35);
+      m.setPaintProperty("network", "line-opacity", showSlopes ? 0.9 : 0.22);
       const sel = routes.find((r) => r.id === selectedId) ?? routes[0];
       (m.getSource("route") as GeoJSONSource).setData(fc(sel ? [line(sel.coords)] : []));
       (m.getSource("route-alt") as GeoJSONSource).setData(fc(routes.filter((r) => r !== sel).map((r) => line(r.coords))));
@@ -105,6 +110,30 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
       m.off("causeway:refresh", draw);
     };
   }, [network, routes, selectedId, from, to, pin, showSlopes, entrances]);
+
+  // Base map: swap in the city's extract under our own layers.
+  const [mapReady, setMapReady] = useState(false);
+  useEffect(() => {
+    const m = map.current;
+    if (!m || !mapReady || !basemap) return;
+    let cancelled = false;
+    const dark = matchMedia("(prefers-color-scheme: dark)").matches && document.documentElement.dataset.theme !== "light";
+    loadBasemap(basemap.url, basemap.key)
+      .then((url) => {
+        if (cancelled) return;
+        for (const l of m.getStyle().layers ?? []) if ((l as { source?: string }).source === "basemap") m.removeLayer(l.id);
+        if (m.getSource("basemap")) m.removeSource("basemap");
+        m.addSource("basemap", { type: "vector", url, attribution: "© OpenStreetMap contributors, Protomaps" });
+        for (const l of basemapLayers(dark)) if (l.type !== "background") m.addLayer(l, "network");
+        m.jumpTo({ center: basemap.center, zoom: 14 });
+      })
+      .catch(() => {
+        /* No basemap: the footway network still draws the map. */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [basemap, mapReady]);
 
   // Position and follow mode.
   useEffect(() => {

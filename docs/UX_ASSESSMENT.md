@@ -85,7 +85,7 @@ Open: lock-screen progress (Live Activities) and background location need the na
 
 ## Follow-up: user notes (2026-10-04)
 
-Notes (D-024) were checked the same way, in headless Chromium with axe-core 4.10: no violations on the note sheet (from "Getting in", from a street on the route, and from navigation), the route screen with notes in light and dark mode, or "What we don't know" opened with a note under a street.
+Notes (D-026) were checked the same way, in headless Chromium with axe-core 4.10: no violations on the note sheet (from "Getting in", from a street on the route, and from navigation), the route screen with notes in light and dark mode, or "What we don't know" opened with a note under a street.
 
 | Check | Result |
 |---|---|

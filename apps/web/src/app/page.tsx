@@ -17,6 +17,7 @@ import type { Place } from "@/lib/plan-types";
 import { loadProfile, saveProfile } from "@/lib/profile-store";
 import { deleteNote, deviceAuthor, loadNotes } from "@/lib/notes-store";
 import { CITIES, cityById, type City } from "@/lib/cities";
+import { usePlaces } from "@/lib/use-places";
 import { usePlanner, type Conditions } from "@/lib/use-planner";
 
 const PRESET_CONDITIONS: Record<"dry" | "wet" | "ice", Conditions> = {
@@ -40,6 +41,7 @@ export default function Home() {
     }
   }, []);
   const planner = usePlanner(city);
+  const index = usePlaces(city, planner.ready?.places ?? null);
   const [profile, setProfile] = useState<Profile>(PRESETS["manual-wheelchair"]);
   const [modeOpen, setModeOpen] = useState(false);
   const [from, setFrom] = useState<Place>(CITIES[0]!.start);
@@ -138,6 +140,11 @@ export default function Home() {
     const extra = r.tradeoffs.flatMap((t) => (t.route && t.route.id === selected ? [t.route] : []));
     return [...r.routes, ...extra];
   }, [planner.result, selected]);
+  const basemap = useMemo(() => {
+    const b64 = !!process.env.NEXT_PUBLIC_GRAPH_B64;
+    const u = (f: string) => new URL(b64 ? f.replace(/\.pmtiles$/, ".b64.txt") : f, document.baseURI).toString();
+    return typeof document === "undefined" ? null : { url: u(city.basemap), key: city.id, glyphs: u("fonts/glyphs.json"), center: [city.start.lon, city.start.lat] as [number, number] };
+  }, [city]); // eslint-disable-line react-hooks/exhaustive-deps
   const selectedRoute = routes.find((r) => r.id === selected) ?? routes[0] ?? null;
   const entrances =
     planner.result?.status === "ok" ? planner.result.entrances.map((e) => ({ lon: e.lon, lat: e.lat, ok: e.verdict.passable })) : [];
@@ -190,8 +197,14 @@ export default function Home() {
             ))}
           </div>
           <PlaceSearch
+            key={`${city.id}-${view.target}`}
             label={view.target === "to" ? "Where to?" : "Starting from?"}
-            places={planner.ready.places.filter((p) => p.id !== (view.target === "to" ? from.id : to?.id))}
+            index={index}
+            suggestions={planner.ready.places.filter((p) => p.kind !== "Street").slice(0, 8)}
+            near={view.target === "to" ? from : (to ?? from)}
+            bbox={planner.ready.bbox}
+            cityName={city.name}
+            excludeId={view.target === "to" ? from.id : to?.id}
             onPick={pick}
             onUseLocation={view.target === "from" ? useLocation : undefined}
           />
@@ -279,6 +292,7 @@ export default function Home() {
         entrances={view.kind === "route" ? entrances : []}
         onMapClick={navigating ? () => {} : onMapClick}
         me={me}
+        basemap={basemap}
       />
       <div className="absolute top-[calc(1rem+env(safe-area-inset-top,0px))] right-4 z-10 flex flex-col gap-2">
         <Button

@@ -298,8 +298,23 @@ Partnership items for Richard:
 | **TfL lift disruptions v2** | Live lift outages, placed on platforms by line name in the message | As above | V (2026-10-04): 18 outages including Canary Wharf (Jubilee) | **keep**. Integrated (D-020). |
 | **Gateshead Millennium Bridge tilt times** | Closures of the tilting bridge | Unknown | Not found as open data | **partnership-only** (request to Gateshead Council) |
 
+## Base map (2026-10-04)
+
+| Source | Use | Licence | Verified | Verdict |
+|---|---|---|---|---|
+| **Protomaps daily planet build** (`build.protomaps.com/20261004.pmtiles`) | Vector base map cut per city (`data/basemap/*.pmtiles`) | Data ODbL (OpenStreetMap); schema and styles BSD-3 | V (range-read extracts, 2026-10-04) | **keep** (D-024) |
+| **Protomaps basemaps-assets fonts** (Noto Sans) | Map labels, bundled as `data/basemap/fonts/glyphs.json` | OFL | V (2026-10-04) | **keep** |
+
+## Search (2026-10-04)
+
+| Source | Use | Licence | Verified | Verdict |
+|---|---|---|---|---|
+| **OpenStreetMap** (BBBike Edinburgh PBF; OSM API tiles elsewhere) | Bundled search index: places, access tags, addresses, postcodes (`data/places/`) | ODbL | V (2026-10-04): Edinburgh 9,944 places (1,264 with a wheelchair tag), 50,746 addresses, 2,011 postcodes | **keep** (D-025) |
+| **Photon** (`photon.komoot.io/api`) | Live name search when the bundled index has fewer than 5 matches. Bounded to the city | OSM data, ODbL; public instance has a fair-use limit, so self-host before launch | Reachable from the container, 2026-10-04 | **keep**; self-host for scale |
+| **postcodes.io** (`api.postcodes.io/postcodes/{pc}`) | Full postcodes missing from OSM | OGL v3 (ONS Postcode Directory, contains Royal Mail and OS data) | Not reachable from the container; documented API | **keep**; self-hostable |
+
 ## User notes (2026-10-04)
 
 | Source | Use | Licence | Verified | Verdict |
 |---|---|---|---|---|
-| **Causewayside user notes** (`notes`) | People's own experience of a place or a stretch of footway: good, mixed or bad, a few words, a date, optionally a photo and a coarse mobility label. Shown with date and attribution; soft signal in routing | Our own content, **not ODbL**. Kept as a separate layer keyed by OSM way id and our place refs, never written into the graph (D-008, D-024) | n/a (on the device only, D-022) | **keep** |
+| **Causewayside user notes** (`notes`) | People's own experience of a place or a stretch of footway: good, mixed or bad, a few words, a date, optionally a photo and a coarse mobility label. Shown with date and attribution; soft signal in routing | Our own content, **not ODbL**. Kept as a separate layer keyed by OSM way id and our place refs, never written into the graph (D-008, D-026) | n/a (on the device only, D-022) | **keep** |

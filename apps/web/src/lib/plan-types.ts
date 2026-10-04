@@ -11,6 +11,10 @@ export interface Place {
   lat: number;
   /** A building you go into (show "Getting in"); streets and areas are not. */
   venue?: boolean;
+  /** Access facts as the source states them ("Mapped as wheelchair accessible"), never our verdict. */
+  facts?: string[];
+  /** Where the facts come from and how old they are: "OpenStreetMap, checked Mar 2025". */
+  factsSource?: string;
 }
 
 export interface PlannedRoute {

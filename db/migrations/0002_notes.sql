@@ -1,5 +1,5 @@
 -- User notes: people's own experience of a place or a stretch of footway
--- (D-024). Our own content, kept in a separate layer from the ODbL graph
+-- (D-026). Our own content, kept in a separate layer from the ODbL graph
 -- (D-008): no foreign keys into graph_edge or graph_node. Notes point at
 -- OSM way ids (stable across builds) and carry edge ids only as a hint for
 -- the build they were written on. Joined to the graph at query time.

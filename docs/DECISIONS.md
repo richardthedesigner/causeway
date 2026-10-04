@@ -158,7 +158,19 @@ Proposal: **accept it, and publish the enriched footway graph under ODbL.** It f
 
 **Decided.** 2026-10-04. A service worker caches the app and every city graph it has loaded. Because routing runs on the device (D-017), a loaded city keeps working with no signal. It is registered only on https and not inside embedded previews. The native app (D-004) will ship city packs as downloads instead.
 
-## D-024 User access notes: experience, not faults, in their own layer
+## D-024 Base map: Protomaps vector tiles, bundled per city
+
+**Decided.** 2026-10-04. The map under the routes is OpenStreetMap drawn from a Protomaps daily build (20261004), cut to each city's bounding box with `scripts/basemap-extract.py` (HTTP range reads, no full planet download) and shipped as one `.pmtiles` file per city (2 to 9 MB) alongside the graph. Styling uses `@protomaps/basemaps` with a quiet Causewayside flavour so the route and accessibility colours stay the loudest thing on screen; shops and other points of interest are hidden. Fonts are bundled glyphs, so the map needs no tile server, no API key and works offline with the rest of the city (D-023). No Google or Apple map data is used. Credit: "© OpenStreetMap contributors, Protomaps". For whole-country coverage later, the same files can be served from object storage with range requests instead of bundling.
+
+## D-025 Search runs on the device, with live lookups as a top-up
+
+**Decided.** 2026-10-04. Each city ships a search index cut from OpenStreetMap (`scripts/build-places.ts`, `data/places/<area>.json.gz`): named places with their category and any access tags, street addresses and postcode centroids. Edinburgh's is 0.9 MB compressed. Search works offline and never sends what someone is looking for (which can reveal health needs) to a server unless the bundled index comes up short; then Photon is asked for names and postcodes.io for full postcodes. Live results outside the routed area are counted, not shown.
+
+Questions like "accessible toilet" or "step-free café" become a category plus an access filter. The filter is OSM's `wheelchair` tag, shown as "Mapped as wheelchair accessible" with "OpenStreetMap, checked/edited <month year>". We never say "step-free" about a venue: the person's word is used to search, the source's word is shown. Places with no access tags are counted ("37 more have no or different access information"), not hidden silently.
+
+**For Richard:** this repeats OSM's own published access tags for named venues, attributed and dated, in a private preview. It is not our assessment. If you read the brief's "publishing data about named venues' accessibility" as covering this too, it is one flag (`facts`) to switch off before any public launch.
+
+## D-026 User access notes: experience, not faults, in their own layer
 
 **Decided** (interim on storage, like D-022). 2026-10-04. Code: `packages/graph/src/notes.ts`, `apps/web/src/components/NoteSheet.tsx`, `db/migrations/0002_notes.sql`.
 

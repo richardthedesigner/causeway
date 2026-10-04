@@ -10,3 +10,6 @@ apps/web/.next/
 apps/web/out/
 apps/web/public/graph/
 *.tsbuildinfo
+apps/web/public/basemap/
+apps/web/public/fonts/
+apps/web/public/places/
