@@ -11,7 +11,9 @@ Last updated: 2026-10-04.
 | Run the data refresh once by hand: Actions, then data-refresh, then Run workflow on `main` | Proves the weekly refresh works. It has never run, and this project's sessions can't start workflows | 1 minute | [#14](https://github.com/richardthedesigner/causeway/issues/14) |
 | Sign up for free API keys: National Rail, Met Office, Mapillary, BODS, Nexus | Each unlocks a data adapter (live trains, better weather, street photos, live buses) | About 30 minutes | [#9](https://github.com/richardthedesigner/causeway/issues/9) |
 | Decide whether to show OpenStreetMap access tags for named venues at public launch | Saying a named business is or isn't accessible carries reputational and legal risk | A decision | [#11](https://github.com/richardthedesigner/causeway/issues/11) |
-| Apply for the live Street Manager feed, and access to Scotland's roadworks register | Edinburgh has no roadworks data at all; England's is a month old | An application each | [#10](https://github.com/richardthedesigner/causeway/issues/10) |
+| Apply for the live Street Manager feed | England's works data is a month old. (Scotland's roadworks register turned out to be open data, daily, no application needed: [DATA_SURVEY_UK](DATA_SURVEY_UK.md)) | An application | [#10](https://github.com/richardthedesigner/causeway/issues/10) |
+| Send the licence emails in the data survey: Edinburgh council (kerbs, crossings, widths, setts), Glasgow (kerbs, steps), Islington and Southwark, Westminster, Canal & River Trust, Sustrans | Unlocks kerb, width and step data that OSM lacks; the data is public but has no stated licence | About ten short emails | [DATA_SURVEY_UK §7](DATA_SURVEY_UK.md#7-who-to-ask-for-richard) |
+| Apply for an NHS Service Search v3 key and an Edinburgh Festivals type C key; register for Spatial Hub | Each has a long approval lead time | Three applications | [DATA_SURVEY_UK §7](DATA_SURVEY_UK.md#7-who-to-ask-for-richard) |
 | Ask Nexus for Tyne and Wear Metro lift status | Without it, Metro stations reached by lift are always "unknown" for step-free users | An email | [#13](https://github.com/richardthedesigner/causeway/issues/13) |
 | Say what to do with the stray screenshots at the repo root (`step2-*.png`, from another session) | Clutter; move to `docs/ux/` or delete | A word | |
 
@@ -34,6 +36,7 @@ These numbers shape routes but are our estimates, not evidence.
 
 ## Known gaps
 
+- The search indexes hold 29 "Changing Places" toilets that reached us through Overture from AllThePlaces, which scraped them from the Changing Places site (no open licence). Filter them out ([DATA_SURVEY_UK §9](DATA_SURVEY_UK.md#9-a-licensing-problem-we-already-have)).
 - Opening hours don't know bank holidays; the app says "may differ on bank holidays" ([D-039](DECISIONS.md#d-039-open-when-you-get-there)).
 - Weather beyond 48 hours ahead falls back to today's ([D-040](DECISIONS.md#d-040-leaving-later)).
 

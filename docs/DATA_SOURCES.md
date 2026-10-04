@@ -17,7 +17,9 @@ Scope: every external dataset or API we might use for wheelchair-passable routin
 | **S** | Seen only via search-result summaries on 2026-10-04 (secondary). Treat as provisional until someone reads the primary page. |
 | **N** | Not verified this session. Values are "unknown, to verify" unless stated otherwise. |
 
-Network notes for this container: `overpass-api.de`, `download.geofabrik.de`, `api.mapillary.com`, `photon.komoot.io`, `www.street-manager.service.gov.uk`, `datex2.traffic.scotland.org`, `data.edinburghcouncilmaps.info` and `data.edinburghopendata.info` did not respond (proxy). `tfl.gov.uk` terms pages, `wheelmap.org`, `data.bus-data.dft.gov.uk`, `nexus.org.uk` and `data.spatialhub.scot` returned 403. A failed fetch here says nothing about whether the service works.
+Network notes for this container: `overpass-api.de`, `download.geofabrik.de`, `api.mapillary.com`, `photon.komoot.io`, `www.street-manager.service.gov.uk`, `datex2.traffic.scotland.org`, `data.edinburghcouncilmaps.info` and `data.edinburghopendata.info` did not respond (proxy). `tfl.gov.uk` terms pages, `wheelmap.org`, `data.bus-data.dft.gov.uk`, `nexus.org.uk` and `data.spatialhub.scot` returned 403. A failed fetch here says nothing about whether the service works. Update 2026-10-04: `data.edinburghcouncilmaps.info`, `edinburghcouncilmaps.info/arcgis/rest` and the `data.spatialhub.scot` CKAN API now answer; Spatial Hub downloads need a free account and key.
+
+A UK-wide survey of further sources (October 2026), with corrections to this file, is in [DATA_SURVEY_UK.md](DATA_SURVEY_UK.md).
 
 ---
 
@@ -325,7 +327,7 @@ Partnership items for Richard:
 |---|---|---|---|---|
 | **Street Manager open data** (`opendata.manage-roadworks.service.gov.uk/permit/YYYY/MM.zip`) | Footway closures and works for English areas: `close_footway_ref` (`no`, `yes_provide_alternative_route`, `yes_provide_pedestrian_walkway`), `works_location_type`, BNG geometry, dates | OGL v3 | V (2026-09 archive, 1 GB, 2026-10-04): Newcastle 56 works on pavements, 43 closing them | **keep** (D-026). Monthly archive in the build now; live SNS notifications for production |
 | **TfL road disruptions** (`/Road/all/Street/Disruption`) | Live London top-up, kept only when the description mentions the pavement | TfL open data terms | V (300 segments, 2026-10-04) | **keep** |
-| **Scottish Road Works Register** (SRWR, roadworks.scot) | Would cover Edinburgh | Not open | No public feed found | **partnership-only**: ask the Scottish Road Works Commissioner for data access |
+| **Scottish Road Works Register** (SRWR, roadworks.scot) | Edinburgh and all of Scotland: works, closures, footway-only works (`TrafficManagement = Works Entirely On The Footway`), street café permits as polygons, scaffolding, hoardings, events. Daily disruptions export at `downloads.srwr.scot/export/disruptions-daily/` (redirects to a zip with `CurrentActivities.csv`, BNG WKT geometry, USRN) | OGL v3 | V (2026-10-04): City of Edinburgh 2,344 current activities, 344 entirely on the footway, 338 street cafés. The download pages are JavaScript shells, which is why an earlier check found nothing | **keep**: corrected 2026-10-04, see [DATA_SURVEY_UK.md](DATA_SURVEY_UK.md) |
 
 ## Overture places (2026-10-04)
 
