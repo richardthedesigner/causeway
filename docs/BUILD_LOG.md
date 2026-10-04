@@ -2,6 +2,12 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map.
 
+## 2026-10-04 (evening)
+
+**Roadmap** (`docs/ROADMAP.md`)
+- One list of work across features, data, accounts, deployment, security, stability, speed, bloat, updates, reviews and user testing, each with an ID, size, priority, status and owner.
+- `CLAUDE.md` tells every session to read it first and write back to it.
+
 ## 2026-10-04 (after midnight)
 
 **Leaving later** (D-040)
