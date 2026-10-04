@@ -1,5 +1,5 @@
 "use client";
-import { learnPace, PRESETS, type Profile } from "@causeway/profile";
+import { learnPace, type Profile } from "@causeway/profile";
 import { conditionsFromOpenMeteo, openMeteoUrl } from "@causeway/live";
 import { haversine } from "@causeway/graph";
 import { Accessibility, ChevronLeft } from "lucide-react";
@@ -18,7 +18,7 @@ import { CommandGroup, CommandItem } from "@/components/ui/command";
 import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
 import { CITIES, cityById, type City } from "@/lib/cities";
 import type { Place } from "@/lib/plan-types";
-import { loadProfile, saveProfile } from "@/lib/profile-store";
+import { activeDevice, deviceLabel, loadDeviceState, saveDeviceState, SEED_DEVICES, withActiveProfile, type DeviceState } from "@/lib/devices";
 import { addRecent, loadRecents } from "@/lib/recents";
 import { useNotes } from "@/lib/use-notes";
 import { toiletsAlong } from "@/lib/toilets";
@@ -36,8 +36,6 @@ type View = "home" | "from" | "route";
 const CITY_KEY = "causewayside.city.v1";
 const SNAP = { peek: 0.24, half: 0.52, full: 0.94 };
 
-/** Short name for the profile chip in the search bar; the full one is in the sheet. */
-const shortLabel = (p: Profile) => p.label.replace(/^Manual wheelchair/, "Manual chair").replace(/ with someone pushing$/, " + help");
 
 /**
  * One question first: can I get there? The map fills the screen; one sheet
@@ -61,7 +59,10 @@ export default function Home() {
     if (!index) return;
     planner.sendToilets(index.entries.filter((e) => e.cat !== "amenity=toilets" && e.access?.["toilets:wheelchair"] === "yes").map((e) => ({ lon: e.place.lon, lat: e.place.lat, name: e.place.name })));
   }, [index]); // eslint-disable-line react-hooks/exhaustive-deps
-  const [profile, setProfile] = useState<Profile>(PRESETS["manual-wheelchair"]);
+  // Server render and first paint use the seed; the saved devices load on mount.
+  const [devices, setDevices] = useState<DeviceState>({ devices: SEED_DEVICES, activeId: SEED_DEVICES[0]!.id });
+  const device = activeDevice(devices);
+  const profile = device.profile;
   const [modeOpen, setModeOpen] = useState(false);
   const [from, setFrom] = useState<Place>(CITIES[0]!.start);
   const [to, setTo] = useState<Place | null>(null);
@@ -83,7 +84,7 @@ export default function Home() {
   const [recents, setRecents] = useState<Place[]>([]);
   const wide = useWide();
 
-  useEffect(() => setProfile(loadProfile()), []);
+  useEffect(() => setDevices(loadDeviceState()), []);
   useEffect(() => setRecents(loadRecents(city.id)), [city]);
   const shared = useNotes(city.id);
   const cityNotes = shared.notes;
@@ -123,8 +124,11 @@ export default function Home() {
   }, [city]);
 
   const updateProfile = useCallback((p: Profile) => {
-    setProfile(p);
-    saveProfile(p);
+    setDevices((s) => {
+      const next = withActiveProfile(s, p);
+      saveDeviceState(next);
+      return next;
+    });
   }, []);
 
   // Re-plan whenever the journey, the person or the ground changes.
@@ -222,7 +226,7 @@ export default function Home() {
       className="inline-flex min-h-11 max-w-full min-w-0 items-center gap-1.5 rounded-xl bg-accent px-3 text-sm font-bold text-accent-ink"
     >
       <Accessibility aria-hidden className="size-4" strokeWidth={2.6} />
-      <span className="truncate">{shortLabel(profile)}</span>
+      <span className="truncate">{deviceLabel(device)}</span>
     </button>
   );
 
