@@ -89,6 +89,11 @@ export interface Profile {
    * at up to 8 mph, so a street with no pavement is an ordinary road, not a hazard.
    */
   roadLegal?: boolean;
+  /**
+   * How far the battery goes on one charge, in km on the flat. Absent or null
+   * means not set, and no range warning is given: we never guess someone's battery.
+   */
+  maxRangeKm?: number | null;
 }
 
 /** Any powered wheelchair, light or heavy duty. Uses the bus wheelchair space. */

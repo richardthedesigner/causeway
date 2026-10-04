@@ -391,3 +391,12 @@ The visual-impairment preset sets 60 s per 100 m; anyone can turn it on with "Af
 - nothing changed since the last deployed commit except docs, Markdown, workflows or database migrations.
 
 When there is nothing to compare with, it builds. Once DEP-01 makes `main` the production branch, the `main` rule goes and the mirror branch gets it instead.
+
+## D-043 Battery range is a warning, set by the user
+
+**Decided.** 2026-10-04. From tester feedback: lightweight chairs have small batteries.
+- A device can carry `maxRangeKm`, its range on one charge on the flat. It is unset by default, and with no range there is no warning: we never guess someone's battery. The demo Cherry (`?demo=devices`) has 12 km.
+- Battery use is the route's distance on wheels plus each metre climbed counted as 30 m of flat (`CLIMB_FLAT_EQUIVALENT_M`, from a rolling resistance of about 0.03). Train and bus legs don't count. The figure is a starting point; user testing replaces it.
+- Warn only. Over half the range: "you may need to charge before the way back". Over the whole range: "it may not fit on one charge". Both say "about" and "counting the climbs". The router never changes or refuses a route because of range.
+- Rejected: range as a hard limit (a wrong figure would block routes the device can do), and favouring shorter routes near the limit (hard to explain why a route was picked).
+- Still to build: a range field in the device editor.

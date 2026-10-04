@@ -7,7 +7,7 @@
  * wheelchair, and the device button offers setup. `?demo=devices` instead
  * starts as the tester from 2026-10 feedback, with Cherry (a lightweight
  * powerchair that gets stuck on setts and cobbles) and Lulu (a pavement
- * scooter) already saved and favourited.
+ * scooter) already saved and favourited. Cherry has a demo 12 km battery range.
  */
 import { PRESETS, savedDevice, type MobilityPreset, type Profile, type SavedDevice } from "@causeway/profile";
 
@@ -29,7 +29,7 @@ export interface DeviceState {
 export const FIRST_VISIT: DeviceState = { devices: [savedDevice("device-1", "", "manual-wheelchair", {}, true)], activeId: "device-1", fresh: true };
 
 export const SEED_DEVICES: SavedDevice[] = [
-  savedDevice("cherry", "Cherry", "powerchair-light", { surfaces: { ...PRESETS["powerchair-light"].surfaces, sett: null, cobblestone: null } }, true),
+  savedDevice("cherry", "Cherry", "powerchair-light", { surfaces: { ...PRESETS["powerchair-light"].surfaces, sett: null, cobblestone: null }, maxRangeKm: 12 }, true),
   savedDevice("lulu", "Lulu", "mobility-scooter", {}, true),
 ];
 

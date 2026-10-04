@@ -391,6 +391,35 @@ export interface RouteSummary {
   verdict: "passable" | "passable-with-unknowns" | "not-passable";
 }
 
+/** Each metre climbed drains the battery like this many metres on the flat (rolling resistance of about 0.03, small wheels on pavement). A starting point; testing replaces it. */
+export const CLIMB_FLAT_EQUIVALENT_M = 30;
+
+export interface RangeUse {
+  /** Battery use as km on the flat: distance plus the climbs. */
+  km: number;
+  rangeKm: number;
+  /** Over the whole range, or over half of it (so the way back needs a charge). */
+  level: "over" | "over-half" | "ok";
+}
+
+/** How much of the device's battery range a route uses. Null when no range is set. */
+export function rangeUse(r: Route, p: Profile, now: Date = DRY.now): RangeUse | null {
+  const rangeKm = p.maxRangeKm;
+  if (!rangeKm || rangeKm <= 0) return null;
+  const s = summarise(r, now);
+  const km = (s.walkM + s.ascentM * CLIMB_FLAT_EQUIVALENT_M) / 1000;
+  return { km, rangeKm, level: km > rangeKm ? "over" : km > rangeKm / 2 ? "over-half" : "ok" };
+}
+
+/** Plain-English range note, or null when there's nothing to say. */
+export function rangeNote(u: RangeUse | null): string | null {
+  if (!u || u.level === "ok") return null;
+  const km = `About ${u.km < 10 ? u.km.toFixed(1) : Math.round(u.km)} km of battery, counting the climbs.`;
+  return u.level === "over"
+    ? `${km} That's more than your ${u.rangeKm} km range, so it may not fit on one charge.`
+    : `${km} That's over half your ${u.rangeKm} km range, so you may need to charge before the way back.`;
+}
+
 export function summarise(r: Route, now: Date = DRY.now): RouteSummary {
   let ascent = 0,
     descent = 0,
@@ -581,6 +610,8 @@ export function explain(router: Router, chosen: Route, from: GraphNode, to: Grap
   }
   if (sum.worstInclinePct !== null && Math.abs(sum.worstInclinePct) >= p.comfortInclinePct)
     notes.push(`Steepest part ${Math.abs(sum.worstInclinePct)}% ${sum.worstInclinePct > 0 ? "uphill" : "downhill"}${sum.worstInclineAt ? ` on ${sum.worstInclineAt}` : ""}.`);
+  const range = rangeNote(rangeUse(chosen, p, c.now));
+  if (range) notes.push(range);
   if (sum.unknownM > 0) notes.push(`${sum.unknownM} m where we don't have full data, shown dashed on the map.`);
 
   const top = avoided.filter((a) => a.reason.kind === "excluded").slice(0, 2);
