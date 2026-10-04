@@ -18,11 +18,14 @@
     "report:area": "tsx scripts/report-area.ts",
     "build:places": "tsx scripts/build-places.ts",
     "build:works": "tsx scripts/build-works.ts",
-    "build:bus": "tsx scripts/build-bus.ts"
+    "build:bus": "tsx scripts/build-bus.ts",
+    "a11y": "node scripts/a11y-check.mjs"
   },
   "devDependencies": {
     "@types/node": "^26.6.4",
     "@types/proj4": "^2.19.0",
+    "axe-core": "^4.13.0",
+    "playwright": "^1.63.0",
     "tsx": "^4.23.15",
     "typescript": "^5.9.3",
     "vitest": "^5.0.3"

@@ -1,24 +1,37 @@
 "use client";
-import { PRESETS, type MobilityPreset, type Profile } from "@causeway/profile";
+import { PRESETS, type MobilityPreset, type Profile, type SavedDevice } from "@causeway/profile";
+import { useState } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, Minus, Plus } from "lucide-react";
+import { ChevronDown, Minus, Plus, Trash2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
 interface Props {
   open: boolean;
   onOpenChange: (v: boolean) => void;
-  profile: Profile;
+  device: SavedDevice;
   onChange: (p: Profile) => void;
+  onRename: (name: string) => void;
+  onFavourite: (on: boolean) => void;
+  /** Absent when this is the only device: there must always be one to route for. */
+  onRemove?: () => void;
 }
+
+/** One line under the powered types, so the classes the tester asked for are told apart (D-034). */
+const TYPE_HINT: Partial<Record<MobilityPreset, string>> = {
+  "powerchair-light": "Small wheels. Struggles with kerbs, setts and hills",
+  powerchair: "Big wheels and batteries. Copes with rougher ground",
+  "mobility-scooter": "Class 2: 4 mph, pavements only",
+  "mobility-scooter-road": "Class 3: registered, can use the road at 8 mph",
+};
 
 const STEP_LIMIT = 30;
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
 
-/** Thirteen starting points in three short sets, so nobody reads a list of thirteen. */
+/** Thirteen types in three short sets, so nobody reads a list of thirteen. */
 const PRESET_GROUPS: { id: string; label: string; presets: MobilityPreset[] }[] = [
   { id: "walk", label: "Walking", presets: ["walking", "walking-stick", "crutches", "rollator"] },
   { id: "wheels", label: "On wheels", presets: ["manual-wheelchair", "manual-wheelchair-companion", "powerchair-light", "powerchair", "mobility-scooter", "mobility-scooter-road", "pram"] },
@@ -35,20 +48,45 @@ function limitsSummary(p: Profile, steps: number): string {
 
 
 /**
- * "How do you get around?" Pick a starting point, then adjust any limit.
+ * Edit one saved device (D-036 step 4): its name, whether it's a favourite,
+ * its type and its limits. Full screen on a phone, a side panel on wide
+ * screens. Changes apply as they're made, like the limits always have.
  * One engine, per-user numbers: nothing here is a special mode.
  */
-export function ModeSheet({ open, onOpenChange, profile, onChange }: Props) {
+export function DeviceEditor({ open, onOpenChange, device, onChange, onRename, onFavourite, onRemove }: Props) {
+  const profile = device.profile;
+  const [confirming, setConfirming] = useState(false);
   const set = (patch: Partial<Profile>) => onChange({ ...profile, ...patch });
   const pick = (preset: MobilityPreset) => onChange({ ...PRESETS[preset] });
   const custom = JSON.stringify({ ...profile, label: "" }) !== JSON.stringify({ ...PRESETS[profile.preset], label: "" });
   const stepsAllowed = Number.isFinite(profile.maxSteps) ? Math.min(profile.maxSteps, STEP_LIMIT) : STEP_LIMIT;
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent title="How do you get around?" description="Routes are worked out for your limits. Saved on this device only.">
+    <Sheet open={open} onOpenChange={(v) => { setConfirming(false); onOpenChange(v); }}>
+      <SheetContent
+        title={device.name || "How do you get around?"}
+        description="Routes are worked out for these limits. Saved on this device only."
+        className="max-md:inset-0 max-md:max-h-none max-md:max-w-none max-md:rounded-none max-md:pt-[env(safe-area-inset-top,0px)]"
+      >
+        <div className="mb-6 grid gap-4">
+          <label className="grid gap-1.5">
+            <span className="font-bold">Name</span>
+            <input
+              id="device-name"
+              type="text"
+              value={device.name}
+              onChange={(e) => onRename(e.target.value.slice(0, 40))}
+              placeholder={PRESETS[profile.preset].label}
+              autoComplete="off"
+              className="min-h-12 rounded-xl border border-line bg-surface-2 px-3 text-base text-ink focus:border-accent focus:outline-none"
+            />
+            <span className="text-sm text-muted">Optional. For example: Cherry, Dad&apos;s chair, the red one.</span>
+          </label>
+          <Toggle id="device-favourite" label="Favourite" checked={device.favourite} onChange={onFavourite} />
+        </div>
+
         <fieldset className="m-0 border-0 p-0">
-          <legend className="mb-2 text-base font-bold">Start from</legend>
+          <legend className="mb-2 text-base font-bold">Type</legend>
           <div className="grid gap-4" role="radiogroup" aria-label="Start from">
             {PRESET_GROUPS.map((g) => (
               <div key={g.label} role="group" aria-labelledby={`group-${g.id}`} className="grid gap-2">
@@ -71,6 +109,7 @@ export function ModeSheet({ open, onOpenChange, profile, onChange }: Props) {
                         )}
                       >
                         {PRESETS[k].label}
+                        {TYPE_HINT[k] ? <span className={cn("mt-0.5 block text-sm", on ? "text-surface/80" : "text-muted")}>{TYPE_HINT[k]}</span> : null}
                       </button>
                     );
                   })}
@@ -146,6 +185,13 @@ export function ModeSheet({ open, onOpenChange, profile, onChange }: Props) {
               onChange={(v) => set({ surfaces: { ...profile.surfaces, gravel: v ? null : PRESETS[profile.preset].surfaces.gravel ?? 0.6, grass: v ? null : PRESETS[profile.preset].surfaces.grass ?? 0.8 } })}
             />
             <Toggle id="buses" label="Use buses" checked={profile.buses !== false} onChange={(v) => set({ buses: v })} />
+            <Toggle
+              id="crossing-cues"
+              label="Prefer crossings with lights that beep or have a rotating cone"
+              checked={!!profile.crossingCues}
+              onChange={(v) => set({ crossingCues: v ? (PRESETS["visual-impairment"].crossingCues ?? { uncontrolledS: 240, zebraS: 60, silentSignalS: 120, noTactileS: 45 }) : undefined, sharedPathPer100mS: v ? (PRESETS["visual-impairment"].sharedPathPer100mS ?? 60) : undefined })}
+            />
+            <Toggle id="lit-after-dark" label="After dark, prefer streets that are lit" checked={!!profile.litAfterDarkPer100mS} onChange={(v) => set({ litAfterDarkPer100mS: v ? (PRESETS["visual-impairment"].litAfterDarkPer100mS ?? 60) : undefined })} />
             <fieldset className="m-0 grid gap-2 border-0 p-0 py-2">
               <legend className="text-base">Accessible toilet at least every</legend>
               <div role="radiogroup" aria-label="Accessible toilet at least every" className="flex flex-wrap gap-2">
@@ -213,6 +259,29 @@ export function ModeSheet({ open, onOpenChange, profile, onChange }: Props) {
           </Limit>
         </section>
         </details>
+
+        {onRemove ? (
+          <div className="mt-8 grid gap-3 border-t border-line pt-4">
+            {confirming ? (
+              <div role="alert" className="grid gap-3 rounded-2xl border-2 border-stop p-4">
+                <p className="m-0 font-bold">Remove {device.name || PRESETS[profile.preset].label}?</p>
+                <p className="m-0 text-sm text-muted">Its name and limits go from this device. Your other devices stay.</p>
+                <div className="flex flex-wrap gap-2">
+                  <Button className="min-h-12 bg-stop px-4 text-surface" onClick={() => { setConfirming(false); onRemove(); }}>
+                    Remove
+                  </Button>
+                  <Button variant="secondary" className="min-h-12 px-4" onClick={() => setConfirming(false)} autoFocus>
+                    Keep it
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <Button variant="ghost" className="min-h-12 justify-self-start px-3 font-bold text-stop" onClick={() => setConfirming(true)}>
+                <Trash2 aria-hidden className="size-5" /> Remove {device.name || "this device"}
+              </Button>
+            )}
+          </div>
+        ) : null}
       </SheetContent>
     </Sheet>
   );

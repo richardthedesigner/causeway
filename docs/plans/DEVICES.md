@@ -62,43 +62,43 @@ Status: designed and agreed, ready to build on the new UI (D-035). Storyboard: t
 
 Each step is one pull request that can go live on its own.
 
-**1. Devices behind the profile** (`apps/web/src/lib/devices.ts`, `profile-store.ts`, `app/page.tsx`)
+**1. Devices behind the profile** (`apps/web/src/lib/devices.ts`, `app/page.tsx`). Done.
 - Page state holds `devices` and `activeId`; `profile` is the active device's profile. Every profile change writes back to that device.
 - Migration: someone with a saved profile and no devices gets it as one unnamed device. Nobody loses settings.
 - Unit tests: migration, favourites-first ordering, the label rule.
 
-**2. Device button and list** (new `DeviceButton.tsx`, `DeviceMenu.tsx`; replaces `profileChip` in `page.tsx`)
+**2. Device button and list** (`DeviceMenu.tsx`, replacing the chip in `page.tsx`). Done. Until steps 4 and 5, Edit opens today's mode sheet, and Add makes an unnamed manual wheelchair and opens it.
 - Button: the label rule above, chevron, 48 px tall. Accessible name: "Routes are for Cherry, lightweight powerchair. Change device".
 - List: a popover on the top side of the button, as a radio group. Arrow keys move, Enter picks, Escape closes and returns focus to the button.
 - Picking closes the list, re-plans (already reactive on `routeProfile`) and announces "Now using Lulu" in a polite live region, with a short toast.
 - "Edit Cherry" opens step 4's screen. "+ Add a device" opens step 5's flow.
 
-**3. Search bar layout** (`PlaceSearch.tsx`)
+**3. Search bar layout** (`SearchBar.tsx`, used by `PlaceSearch.tsx` and `RoutePanel.tsx`). Done. The bar splits when the field or destination would get narrower than 150 px beside the button.
 - Hide the magnifier when the bar shows a destination.
 - Two-line layout using a container query on the bar: when the bar is narrower than the destination's minimum (about 12 characters) plus the button, wrap. Check it at 320 px, at 200% text and with the longest preset label ("Manual chair + help").
 - Padding review: one inner padding for the bar, and the button inset to match the bar's corner radius.
 
-**4. Edit a device** (`ModeSheet.tsx` becomes `DeviceEditor.tsx`)
+**4. Edit a device** (`ModeSheet.tsx` becomes `DeviceEditor.tsx`). Done. Changes apply as they're made, like the limits always have, so there's Close but no Save.
 - Full screen, not a sheet over the map: name, favourite, type, limits (today's limits section moves across as is), "Remove Cherry" with a confirm step in the page.
 - Changing type keeps the name (today `pick()` overwrites the label).
 - Type tiles get one line each for the powered classes (lightweight, heavy duty, pavement scooter, road scooter).
 
-**5. First visit and add a device** (new `DeviceSetup.tsx`)
+**5. First visit and add a device** (`DeviceSetup.tsx`). Done. `?demo=devices` still starts as Cherry and Lulu, for showing the tester's case, but only when nothing is saved.
 - Three steps with Skip on each: type, name with favourite switch, limits with Done. Skipping everything leaves an unnamed manual wheelchair, the current default.
 - With no devices, the button reads "Set up" and the drawer's peek state shows one line: "Tell us how you get around and we'll plan routes you can actually do."
 - One-time tip after the first save, remembered on the device.
-- **Remove the Cherry and Lulu demo seed** (`SEED_DEVICES`) in this step, because real first visits replace it.
+- **The Cherry and Lulu demo seed no longer loads by default**, because real first visits replace it.
 
-**6. Routes: who it's for and the switch offer** (`RoutePanel.tsx`, `RouteStrip.tsx`, `use-planner.ts`)
+**6. Routes: who it's for and the switch offer** (`RoutePanel.tsx`, `use-planner.ts`, a `fits` request in the routing worker). Done. The borrowed device goes back when navigation ends or the journey changes.
 - "For Cherry" tag on the route verdict.
 - After a switch, compare against the previous device's result and say what changed: time, and anything newly avoided or allowed.
 - When the active device gets no route, plan for each other saved device in the worker. If one fits, offer "Use Lulu for this trip". This extends the existing `once` override from a patch to a whole device; it already clears on a new destination, so it also needs to clear on arrival.
 
-**7. Navigation** (`NavView.tsx`)
+**7. Navigation** (`NavView.tsx`). Done. Pace learned on a journey now goes to the device the route was for, which may be a borrowed one.
 - Bottom bar: device icon button, arrival time, End.
 - Tapping the device opens "Switch device mid-journey?" with the other favourite as the main action and "Keep Cherry" as the second. Switching re-plans from the current position.
 
-**8. "This trip" in the full drawer** (`page.tsx`, `MapChrome.tsx`)
+**8. "This trip" in the full drawer** (`TripSettings.tsx`, `MapChrome.tsx`). Done. The route view gets the same ground picker beside "Worked out for dry ground", since the top chip is gone.
 - At the full snap, under recents: getting around as, weather, buses, toilet spacing.
 - This moves the weather control from the top of the map into the drawer, so every control sits at the bottom. The city picker and layers can follow later.
 
@@ -116,5 +116,5 @@ Each step is one pull request that can go live on its own.
   - **Why the route is long.** Not the data. From Picardy Place it is 1.6 km (23 min) on foot and 3.2 km (48 min) for Cherry, round by Lothian Road. Every short way in is closed to her: setts on Victoria Street, the High Street and Lawnmarket; West Bow at 12.3% and Victoria Terrace at 10.2%, over her 8% limit; steps on Candlemaker Row and the Vennel. With setts as a heavy penalty instead of never, the route is the same, so the hills alone force it.
   - **Why it "struggled".** There is no mapped alternative. Keeping her off street proxies adds about 1.9 km and 26 minutes. Treating every unknown as free changes the route by about 120 m, so the unknown penalties aren't distorting it.
   - **So.** Mapping those pavements in OSM, plus the York Place kerbs, would turn about 1.1 km of unknowns into known ground without shortening the route. "Unmapped for 200 m" doesn't fit this case, because no short unmapped cut is being avoided. The east end of the Grassmarket itself is setts, so where the destination pin sits matters for Cherry. Still open: check the West Bow and Victoria Terrace gradients on the ground, since they decide the route.
-- **Battery range.** Engine and warning done (D-037): `maxRangeKm` on the profile, `rangeUse` and `rangeNote` in the router, and a note on the route when a trip uses over half the range. Still to build: a range field in "Save as a device" (step 2 of the build plan).
+- **Battery range.** Engine and warning done (D-039): `maxRangeKm` on the profile, `rangeUse` and `rangeNote` in the router, and a note on the route when a trip uses over half the range. Still to build: a range field in the device editor.
 - **Speeds.** Road scooters do 8 mph on the road but 4 mph on pavements. The router uses one pace; split it if the pace learning shows it matters.

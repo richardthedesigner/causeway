@@ -75,6 +75,16 @@ export interface Profile {
   /** Has an operator's permit to take this mobility scooter on buses (CPT code: class 2, small enough). */
   busScooterPermit?: boolean;
   /**
+   * Crossing cues, in seconds of detour worth taking to avoid each: crossings with no lights or
+   * zebra, zebras (no signal that traffic has stopped), lights without a beep or rotating cone, and
+   * no tactile paving. Absent: crossings cost nothing extra.
+   */
+  crossingCues?: { uncontrolledS: number; zebraS: number; silentSignalS: number; noTactileS: number };
+  /** Seconds per 100 m to avoid paths shared with cycles. Absent: no preference. */
+  sharedPathPer100mS?: number;
+  /** After dark, seconds per 100 m to avoid streets that aren't lit. Absent: no preference. */
+  litAfterDarkPer100mS?: number;
+  /**
    * Road-legal (class 3) mobility scooter: registered, may use the carriageway
    * at up to 8 mph, so a street with no pavement is an ordinary road, not a hazard.
    */
@@ -389,6 +399,11 @@ export const PRESETS: Record<MobilityPreset, Profile> = {
     maxToiletIntervalM: null,
     uncertaintyTolerance: 0.5,
     companion: false,
+    // Cues a cane or guide dog user relies on (RNIB, Guide Dogs guidance on controlled crossings).
+    crossingCues: { uncontrolledS: 240, zebraS: 60, silentSignalS: 120, noTactileS: 45 },
+    sharedPathPer100mS: 60,
+    // Many with low vision see far less at night (RNIB); lit streets also feel safer.
+    litAfterDarkPer100mS: 60,
   },
 };
 
@@ -416,12 +431,12 @@ export function learnPace(p: Profile, observedMps: number): Profile {
  */
 export interface SavedDevice {
   id: string;
-  /** The user's name for it. Also written to profile.label, which the app shows. */
+  /** The user's name for it, or "" if they never named it. A name is also written to profile.label. */
   name: string;
   favourite: boolean;
   profile: Profile;
 }
 
 export function savedDevice(id: string, name: string, preset: MobilityPreset, overrides: Partial<Profile> = {}, favourite = false): SavedDevice {
-  return { id, name, favourite, profile: profileFrom(preset, { ...overrides, label: name }) };
+  return { id, name, favourite, profile: profileFrom(preset, name ? { ...overrides, label: name } : overrides) };
 }

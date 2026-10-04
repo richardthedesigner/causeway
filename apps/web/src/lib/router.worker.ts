@@ -13,6 +13,7 @@ import {
   diagnose,
   elevationProfile,
   hazardText,
+  isDark,
   entrancesNear,
   explain,
   placeName,
@@ -20,6 +21,7 @@ import {
   summarise,
   toGeoJSON,
   tradeoffs,
+  type Conditions,
   type NavPlan,
   type Route,
 } from "@causeway/router";
@@ -255,10 +257,17 @@ function stretchesOf(r: Route): (Stretch & { m: number })[] {
   return [...by.values()].map((x) => ({ ...x, m: Math.round(x.m) }));
 }
 
+/** Darkness comes from the clock and the city's position, worked out here: the page doesn't need to know. */
+function conditionsOf(r: { wet: boolean; ice: boolean; now: string }): Conditions {
+  const now = new Date(r.now);
+  const [x0, y0, x1, y1] = graph!.meta.bbox;
+  return { wet: r.wet, ice: r.ice, now, dark: isDark(now, (x0 + x1) / 2, (y0 + y1) / 2) };
+}
+
 function plan(req: Extract<WorkerRequest, { type: "plan" }>): PlanResult {
   if (!router || !graph) throw new Error("graph not loaded");
   const p = req.profile;
-  const c = { ...req.conditions, now: new Date(req.conditions.now) };
+  const c = conditionsOf(req.conditions);
   // Notes stay a separate layer: joined to edge ids here, per request, never written into the graph.
   router.noteSignals = noteSignals(req.notes, graph, c.now, mobilityLabelFor(p.preset), c.wet);
   const a = router.snap(req.from.lon, req.from.lat, p, c);
@@ -342,7 +351,7 @@ function plan(req: Extract<WorkerRequest, { type: "plan" }>): PlanResult {
 /** Quick verdicts for places you've been before: one search each, no alternatives or explanations. */
 function check(req: Extract<WorkerRequest, { type: "check" }>): Check[] {
   if (!router) return [];
-  const c = { ...req.conditions, now: new Date(req.conditions.now) };
+  const c = conditionsOf(req.conditions);
   const a = router.snap(req.from.lon, req.from.lat, req.profile, c);
   return req.to.map((pl) => {
     try {
@@ -352,6 +361,20 @@ function check(req: Extract<WorkerRequest, { type: "check" }>): Check[] {
       return { placeId: pl.id, verdict: s.verdict === "passable" ? "passable" : "passable-with-unknowns", minutes: Math.round(s.minutes) };
     } catch {
       return { placeId: pl.id, verdict: "none", minutes: null };
+    }
+  });
+}
+
+/** Minutes for each profile to the one destination, or null where it can't get there. */
+function fits(req: Extract<WorkerRequest, { type: "fits" }>): { key: string; minutes: number | null }[] {
+  if (!router) return [];
+  const c = conditionsOf(req.conditions);
+  return req.profiles.map(({ key, profile }) => {
+    try {
+      const r = router!.route(router!.snap(req.from.lon, req.from.lat, profile, c), router!.snap(req.to.lon, req.to.lat, profile, c), profile, c);
+      return { key, minutes: r ? Math.round(summarise(r, c.now).minutes) : null };
+    } catch {
+      return { key, minutes: null };
     }
   });
 }
@@ -374,6 +397,7 @@ self.onmessage = async (ev: MessageEvent<WorkerRequest>) => {
     }
     else if (m.type === "plan") post({ type: "plan", id: m.id, result: plan(m) });
     else if (m.type === "check") post({ type: "check", id: m.id, checks: check(m) });
+    else if (m.type === "fits") post({ type: "fits", id: m.id, fits: fits(m) });
   } catch (err) {
     post({ type: "error", message: err instanceof Error ? err.message : String(err) });
   }

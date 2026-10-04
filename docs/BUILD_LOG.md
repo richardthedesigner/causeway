@@ -2,7 +2,59 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map.
 
+## 2026-10-04 (after midnight)
+
+**Lit streets after dark** (D-038)
+- The router now knows when it's dark, from the sun's position worked out on the device.
+- After dark, the visual-impairment profile (and anyone who turns on "After dark, prefer streets that are lit") steers off unlit paths. Unmapped lighting costs a little and is named as not mapped.
+- Stockbridge to Dean Village: 714 m unlit by day, 10 m after dark. The route explanation says how much isn't lit.
+
 ## 2026-10-04 (late night)
+
+**"This trip" at the bottom; the ground leaves the top of the map** (D-036 step 8)
+- Swiping the sheet up shows "This trip": getting around as, ground (Dry / Wet / Icy with the weather source), use buses, and accessible toilet spacing.
+- The ground chip is gone from the top of the map; the route has the same three chips beside "Worked out for wet ground". Only the city picker and the map's own buttons stay at the top.
+- That completes the device switcher plan.
+
+**Switching device while navigating** (D-036 step 7)
+- With more than one device, the navigation bar has a device button beside the arrival time. It asks "Switch device mid-journey?" (Switch to Lulu / Keep Cherry) rather than opening the list, so a mis-tap doesn't re-plan.
+- Switching re-plans the rest of the journey from your location and keeps navigating.
+- Fixed: pace learned on a journey went to the active device even when the route was for a device borrowed for this trip.
+
+**Routes say who they're for, and offer another device** (D-036 step 6)
+- Routes carry a "For Cherry" tag once there's more than one device (or the device is named).
+- After switching device with a route on screen, the route says what changed: "9 min quicker than Cherry's route", or "Cherry had no route here."
+- When nothing fits, the heading says "No route for Cherry", and the routing worker checks the other saved devices. Each one that fits gets "Lulu can do this one: 24 min · Use Lulu for this trip".
+- "This trip" isn't saved: the button reads "Lulu, this trip", and it goes back to Cherry when navigation ends, the journey changes or another device is picked. Checked on Castle Esplanade, where Cherry is stopped by 10.2% on Victoria Terrace.
+
+**First visit and Add a device** (D-036 step 5)
+- With nothing saved, the device button reads "Set up" and one line above the bar says why. Routes still work meanwhile, as a manual wheelchair.
+- Setup is three screens, each skippable: what do you use (the six wheeled types with a line each, everything else one tap away), what do you call it (with favourite), and the key limits. "Add a device" uses the same screens.
+- After the first save, a one-time tip points at the button until "Got it".
+- Cherry and Lulu no longer load by default. `?demo=devices` still starts with them when nothing is saved.
+- The accessibility check now walks setup too: 0 violations, light and dark.
+
+**Edit a device** (D-036 step 4)
+- "Edit Cherry" opens a full-screen editor on a phone (a side panel on wide screens): name, favourite, type, limits, and remove.
+- A blank name goes back to calling the device by its type. Changing type keeps the name.
+- The four powered types each get a line saying how they differ ("Small wheels. Struggles with kerbs, setts and hills").
+- Remove asks first, in the page, and isn't offered for the last device.
+
+**One bar for search and route** (D-036 step 3)
+- With a route on screen, the destination and the device button share the same bar as search, with no magnifier. The separate "Routes are for … Change" row is gone; a quiet line says what ground the routes were worked out for.
+- When the field or destination would get narrower than 150 px beside the button, the bar splits: the field keeps the first line and the button goes full width under it. Checked at 320 px and 390 px with "Cherry" and with the longest label, "Manual chair + help".
+- Padding: a 4 px inset all round the button, so its 12 px corners sit inside the bar's 16 px ones.
+
+**Device button and list** (D-036 step 2)
+- The chip in the search bar opens a list of saved devices, upwards: favourites first, a tick on the one in use, then Edit and Add a device. One tap switches and re-plans; "Now using Lulu" shows briefly and is read out.
+- A named device's button shows its name only; an unnamed one keeps its icon and type.
+- The list is drawn on the sheet's outer layer, because the sheet's scrolling body clipped it. Arrow keys, Enter and Escape work; the search list underneath no longer takes those keys.
+- Edit opens today's mode sheet and Add makes an unnamed manual wheelchair, until steps 4 and 5.
+
+**Devices behind the profile** (D-036 step 1)
+- The app now routes for the active saved device; changing limits changes that device. A named device keeps its name when its type or limits change.
+- Someone with settings from before devices keeps them as one unnamed device. The old profile key is still written, so an older build reads the active device.
+- No visible change yet, except that the chip now says "Manual chair + help" correctly (it missed the pushed preset's new label).
 
 **Device switcher designed and planned** (D-036, [plan](plans/DEVICES.md#build-plan-the-device-switcher-d-036))
 - Search and the device button share one bar at the bottom. A named device shows its name; an unnamed type keeps its icon.
@@ -23,6 +75,21 @@ A running record of what was built, newest first. Each entry links the decision 
 - The device switcher and naming screens wait for the UI update; the spec is in the plan.
 
 ## 2026-10-04 (evening)
+
+**Crossings for blind and partially sighted people** (D-037; first committed as a second D-034)
+- Crossing type, beeping lights, rotating cones, tactile paving and shared cycle paths now shape routes for the visual-impairment profile, and for anyone who turns on the new toggle.
+- Directions name the cue at each crossing.
+- Causewayside to Grassmarket goes from 3 uncontrolled crossings to none.
+
+**Offline keeps up with the data** (D-023 update)
+- The service worker used to cache city data permanently on first fetch, so timetables would never update. It also re-downloaded the search index and base map on every visit.
+- City data is now stale-while-revalidate.
+- Checked in a browser: graph, timetables, search, base map and fonts cached, then a route planned with the network off.
+
+**Accessibility check in CI**
+- `pnpm a11y` (`scripts/a11y-check.mjs`) runs axe-core against WCAG 2.2 AA in light and dark on four screens: start, search results, a route with every section open (buses, toilets, notes), and the settings sheet.
+- No violations today. CI runs it on every push and pull request, so a regression fails the build.
+- Axe catches about a third of WCAG issues. Screen reader and switch-access testing with real users is still needed (Phase 2 research).
 
 **Accessible toilets on the way**
 - The route lists accessible toilets within about 80 m: public toilets mapped as wheelchair accessible, and venues mapped with an accessible toilet (marked "Customers").

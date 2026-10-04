@@ -160,6 +160,8 @@ Proposal: **accept it, and publish the enriched footway graph under ODbL.** It f
 
 **Decided.** 2026-10-04. A service worker caches the app and every city graph it has loaded. Because routing runs on the device (D-017), a loaded city keeps working with no signal. It is registered only on https and not inside embedded previews. The native app (D-004) will ship city packs as downloads instead.
 
+
+Update 2026-10-04: city data (graph, bus timetables, search index, base map, fonts) is now stale-while-revalidate. The cached copy is shown at once and a fresh one is fetched in the background, so the weekly data refresh (D-033) reaches people instead of the first download being kept for ever. Pavement works stay network-first, and hashed app code stays cache-first. The cache is renamed `causewayside-v2`, which clears v1. Checked in a browser: everything cached, then a route planned with the network off.
 ## D-024 Base map: Protomaps vector tiles, bundled per city
 
 **Decided.** 2026-10-04. The map under the routes is OpenStreetMap drawn from a Protomaps daily build (20261004), cut to each city's bounding box with `scripts/basemap-extract.py` (HTTP range reads, no full planet download) and shipped as one `.pmtiles` file per city (2 to 9 MB) alongside the graph. Styling uses `@protomaps/basemaps` with a quiet Causewayside flavour so the route and accessibility colours stay the loudest thing on screen; shops and other points of interest are hidden. Fonts are bundled glyphs, so the map needs no tile server, no API key and works offline with the rest of the city (D-023). No Google or Apple map data is used. Credit: "© OpenStreetMap contributors, Protomaps". For whole-country coverage later, the same files can be served from object storage with range requests instead of bundling.
@@ -295,11 +297,64 @@ Bridged: Edinburgh 172 of 446 islands, Newcastle 9 of 24, London 23 of 48. `scri
 - Rejected: a separate switcher at the top of the map (out of reach), and names written on the type tiles (two devices of one type collide).
 
 
-## D-037 Battery range is a warning, set by the user
+## D-037 Crossings for people who cross by sound and touch
+
+**Decided.** 2026-10-04. The visual-impairment profile used to route exactly like walking. Graph nodes at crossings now carry what OSM says about them (`packages/graph/src/crossing-info.ts`):
+- control: lights, zebra, marked, or none;
+- whether the lights beep (`traffic_signals:sound`) or have a rotating cone (`traffic_signals:vibration`);
+- tactile paving;
+- a refuge island.
+
+Footpaths carry whether they're shared with cycles.
+
+**Counts.** Edinburgh: 1,279 crossings (611 with lights, 254 known to beep) and 2,215 shared stretches. Newcastle: 348 crossings. London zones: 263.
+
+**Profile costs** (`crossingCues`, `sharedPathPer100mS`), in seconds of detour worth taking to avoid each:
+
+| What | Seconds |
+|---|---|
+| Crossing with no lights or zebra | 240 |
+| Zebra (nothing tells you traffic has stopped) | 60 |
+| Lights with no beep or cone | 120 |
+| No tactile paving | 45 |
+| Shared path, per 100 m | 60 (halved when segregation isn't mapped) |
+
+**Rules**
+- Unmapped cues are unknown, never assumed, so a crossing with lights and no sound tag is "not known if the lights beep".
+- The visual-impairment preset sets these costs, and a settings toggle lets anyone turn them on.
+- Directions name the cue: "Cross West Preston Street at the lights, which beep and have a rotating cone."
+
+**Example:** Causewayside to Grassmarket. Walking: 3 crossings with no lights or zebra. Visual-impairment route: none, 12 of 13 crossings beep, 9 minutes longer. A test covers three trips.
+
+The numbers are starting points, like the rest of the presets, for Phase 2 research with RNIB and Guide Dogs users.
+
+Snapshots were enriched with `scripts/enrich-crossings.ts`; new builds get the facts directly.
+
+## D-038 Lit streets after dark
+
+**Decided.** 2026-10-04. The graph already carried OSM's `lit` tag on every footway, but routing ignored it. Many people with low vision see far less at night, and an unlit path is harder for everyone to trust.
+
+**How dark is worked out.** On the device, from the clock and the city's position (`packages/router/src/sun.ts`, NOAA's simplified solar position). Dark means the sun is more than 6 degrees below the horizon, the end of civil twilight. No weather or sunset API, so it works offline.
+
+**Cost.** A new profile field, `litAfterDarkPer100mS`: seconds per 100 m worth taking to avoid a stretch that isn't lit.
+- Mapped as unlit: the full amount.
+- Lighting not mapped: a share, by how much this person minds not knowing (`0.5 × (1 − uncertaintyTolerance)`), and named "lighting not mapped", never "unlit".
+- Indoors, covered, and riding a bus: nothing.
+- It's a preference, not a verdict: it never makes a route "unknown" or "no".
+
+The visual-impairment preset sets 60 s per 100 m; anyone can turn it on with "After dark, prefer streets that are lit" in the device settings. The route explanation says how much of the route isn't lit, or isn't mapped.
+
+**Coverage.** Edinburgh: 13,155 stretches lit, 2,010 unlit, 19,224 not mapped. Newcastle: 2,301, 124, 3,882.
+
+**Example.** Stockbridge to Dean Village for the visual-impairment profile: by day, 714 m of 1,134 m is on the unlit Water of Leith walkway; after dark, 10 m of 1,563 m.
+
+**To revisit.** The 60 s figure is a guess, like the crossing weights (#12). Ask low-vision users in Phase 2. Planning a trip for later tonight needs a departure time, which the app doesn't have yet.
+
+## D-039 Battery range is a warning, set by the user
 
 **Decided.** 2026-10-04. From tester feedback: lightweight chairs have small batteries.
-- A device can carry `maxRangeKm`, its range on one charge on the flat. It is unset by default, and with no range there is no warning: we never guess someone's battery. The demo Cherry has 12 km.
+- A device can carry `maxRangeKm`, its range on one charge on the flat. It is unset by default, and with no range there is no warning: we never guess someone's battery. The demo Cherry (`?demo=devices`) has 12 km.
 - Battery use is the route's distance on wheels plus each metre climbed counted as 30 m of flat (`CLIMB_FLAT_EQUIVALENT_M`, from a rolling resistance of about 0.03). Train and bus legs don't count. The figure is a starting point; user testing replaces it.
 - Warn only. Over half the range: "you may need to charge before the way back". Over the whole range: "it may not fit on one charge". Both say "about" and "counting the climbs". The router never changes or refuses a route because of range.
 - Rejected: range as a hard limit (a wrong figure would block routes the device can do), and favouring shorter routes near the limit (hard to explain why a route was picked).
-- Still to build with the device switcher: a range field when saving a device.
+- Still to build: a range field in the device editor.

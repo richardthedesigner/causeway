@@ -5,7 +5,7 @@
  */
 import { confidence, haversine, isKnown, type Graph, type GraphEdge, type GraphNode, type NoteSignal } from "@causeway/graph";
 import type { Profile } from "@causeway/profile";
-import { DRY, entranceVerdict, evaluateEdge, evaluateNode, surfaceLabel, type Conditions, type EdgeContext, type EntranceVerdict, type Evaluation, type Reason } from "./cost.js";
+import { darkCost, DRY, entranceVerdict, evaluateEdge, evaluateNode, surfaceLabel, type Conditions, type EdgeContext, type EntranceVerdict, type Evaluation, type Reason } from "./cost.js";
 
 interface Arc {
   edge: GraphEdge;
@@ -596,6 +596,18 @@ export function explain(router: Router, chosen: Route, from: GraphNode, to: Grap
   }
   const setts = (sum.surfaceMix["setts"] ?? 0) + (sum.surfaceMix["cobbles"] ?? 0);
   if (setts > 20) notes.push(`${setts} m on setts or cobbles.`);
+  if (c.dark && p.litAfterDarkPer100mS) {
+    let unlit = 0,
+      unmapped = 0;
+    for (const s of chosen.steps) {
+      const r = darkCost(s.edge, p, c);
+      if (r?.detail === "not lit") unlit += s.edge.lengthM;
+      else if (r) unmapped += s.edge.lengthM;
+    }
+    const [u, m] = [Math.round(unlit / 10) * 10, Math.round(unmapped / 10) * 10];
+    if (u || m) notes.push(`After dark: ${u ? `${u} m isn't lit` : "no stretch is mapped as unlit"}${m ? `, and lighting isn't mapped for ${m} m` : ""}.`);
+    else notes.push("After dark: every stretch of this route is mapped as lit.");
+  }
   if (sum.worstInclinePct !== null && Math.abs(sum.worstInclinePct) >= p.comfortInclinePct)
     notes.push(`Steepest part ${Math.abs(sum.worstInclinePct)}% ${sum.worstInclinePct > 0 ? "uphill" : "downhill"}${sum.worstInclineAt ? ` on ${sum.worstInclineAt}` : ""}.`);
   const range = rangeNote(rangeUse(chosen, p, c.now));

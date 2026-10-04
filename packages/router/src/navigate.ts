@@ -4,7 +4,7 @@
  * the Expo app and tests. Instructions follow the brief's copy rules: plain,
  * British English, distances rounded to what a person can use.
  */
-import { haversine, isKnown, type GraphEdge } from "@causeway/graph";
+import { haversine, isKnown, type GraphEdge, type GraphNode } from "@causeway/graph";
 import type { Profile } from "@causeway/profile";
 import { surfaceLabel } from "./cost.js";
 import { placeName, toGeoJSON, type Route } from "./router.js";
@@ -121,7 +121,9 @@ export function buildNavPlan(r: Route, p: Profile): NavPlan {
     if (k === "transit") continue;
     if (k === "crossing" && prev.edge.kind !== "crossing") {
       const name = label(s.edge);
-      maneuvers.push({ type: "cross", at, text: `Cross ${name ?? "the road"}.`, short: "Cross" });
+      // What kind of crossing it is, from the first crossing node within the next few steps.
+      const x = r.steps.slice(i, i + 3).find((st) => st.node.crossing)?.node.crossing;
+      maneuvers.push({ type: "cross", at, text: `Cross ${name ?? "the road"}${crossingWords(x)}.`, short: "Cross" });
       continue;
     }
     if (RAIL.has(prev.edge.kind) || prev.edge.kind === "station_link") continue;
@@ -318,4 +320,15 @@ export function stopNote(f: { shelter?: boolean; bench?: boolean } | undefined):
   if (has.length) return ` (${has.join(" and ")}${lacks.length ? `, no ${lacks.join(" or ")}` : ""})`;
   if (lacks.length) return ` (no ${lacks.join(" or ")})`;
   return "";
+}
+
+/** ", at the lights, which beep" from a crossing's mapped control and cues; nothing when unmapped. */
+export function crossingWords(x: GraphNode["crossing"] | undefined): string {
+  if (!x || !isKnown(x.control)) return "";
+  if (x.control.value === "signals") {
+    const cues = [x.sound.value === true ? "beep" : null, x.vibration.value === true ? "have a rotating cone" : null].filter(Boolean);
+    return cues.length ? ` at the lights, which ${cues.join(" and ")}` : " at the lights";
+  }
+  if (x.control.value === "zebra") return " at the zebra crossing";
+  return ", where there are no lights or zebra";
 }

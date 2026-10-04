@@ -16,6 +16,8 @@ export interface Conditions {
   wet: boolean;
   /** Ice or snow: steep and sett sections close for wheeled users. */
   ice: boolean;
+  /** After civil twilight: unlit stretches cost those who asked to avoid them. Absent means daylight. */
+  dark?: boolean;
 }
 
 export const DRY: Conditions = { now: new Date("2026-10-04T12:00:00Z"), wet: false, ice: false };
@@ -191,6 +193,37 @@ export interface EdgeContext {
 const NOTE_MAX_FACTOR = 0.5;
 
 export function evaluateEdge(e: GraphEdge, forward: boolean, p: Profile, c: Conditions, ctx: EdgeContext = {}): Evaluation {
+  const base = evaluateEdgeBase(e, forward, p, c, ctx);
+  if (base.cost === Infinity) return base;
+  const extra: Reason[] = [];
+  // Paths shared with cycles: hard to hear a bike coming. A preference, priced per 100 m.
+  if (p.sharedPathPer100mS && e.sharedWithCycles?.value === true) {
+    const inferred = e.sharedWithCycles.state === "inferred";
+    const pen = Math.round(((p.sharedPathPer100mS * e.lengthM) / 100) * (inferred ? 0.5 : 1));
+    extra.push({ kind: "penalty", attr: "cycles", detail: inferred ? "shared with cycles (probably)" : "shared with cycles", seconds: pen });
+  }
+  const dark = darkCost(e, p, c);
+  if (dark) extra.push(dark);
+  if (!extra.length) return base;
+  return { ...base, cost: base.cost + extra.reduce((t, r) => t + r.seconds, 0), reasons: [...base.reasons, ...extra] };
+}
+
+const INDOORS = new Set<GraphEdge["kind"]>(["transit", "board", "corridor", "elevator", "escalator"]);
+
+/**
+ * After dark, unlit stretches for those who asked to avoid them, priced per 100 m. A preference,
+ * never a verdict: it doesn't make a route unknown. Lighting nobody mapped costs a share of an unlit
+ * stretch, by how much this person minds not knowing.
+ */
+export function darkCost(e: GraphEdge, p: Profile, c: Conditions): Reason | null {
+  if (!c.dark || !p.litAfterDarkPer100mS || INDOORS.has(e.kind) || e.attrs.covered.value === true) return null;
+  const per = (p.litAfterDarkPer100mS * e.lengthM) / 100;
+  if (e.attrs.lit.value === false) return { kind: "penalty", attr: "lit", detail: "not lit", seconds: Math.round(per) };
+  if (!isKnown(e.attrs.lit)) return { kind: "penalty", attr: "lit", detail: "lighting not mapped", seconds: Math.round(per * 0.5 * (1 - p.uncertaintyTolerance)) };
+  return null;
+}
+
+function evaluateEdgeBase(e: GraphEdge, forward: boolean, p: Profile, c: Conditions, ctx: EdgeContext = {}): Evaluation {
   const reasons: Reason[] = [];
   const a = e.attrs;
   let unknownCritical = false;
@@ -375,7 +408,50 @@ export function evaluateEdge(e: GraphEdge, forward: boolean, p: Profile, c: Cond
  * `viaCrossing` tells us whether the user is stepping on or off a crossing,
  * which is where kerb data matters and where its absence is dangerous.
  */
-export function evaluateNode(n: GraphNode, viaCrossing: boolean, p: Profile, _c: Conditions): Evaluation {
+export function evaluateNode(n: GraphNode, viaCrossing: boolean, p: Profile, c: Conditions): Evaluation {
+  const base = evaluateNodeBase(n, viaCrossing, p, c);
+  const cue = crossingCueCost(n, p);
+  if (!cue || base.cost === Infinity) return base;
+  return {
+    passable: base.passable === "yes" && cue.unknown ? "unknown" : base.passable,
+    seconds: base.seconds,
+    cost: base.cost + cue.cost,
+    reasons: [...base.reasons, ...cue.reasons],
+  };
+}
+
+/** What a crossing lacks for someone who crosses by sound and touch, priced by their profile. */
+export function crossingCueCost(n: GraphNode, p: Profile): { cost: number; reasons: Reason[]; unknown: boolean } | null {
+  const x = n.crossing,
+    w = p.crossingCues;
+  if (!x || !w) return null;
+  const reasons: Reason[] = [];
+  let cost = 0,
+    unknown = false;
+  const add = (kind: "penalty" | "unknown", detail: string, s: number) => {
+    const sec = Math.round(s);
+    reasons.push({ kind, attr: "crossing", detail, seconds: sec });
+    cost += sec;
+    if (kind === "unknown") unknown = true;
+  };
+  const doubt = 0.5 * (1 - p.uncertaintyTolerance);
+  if (!isKnown(x.control)) add("unknown", "crossing type not mapped", w.uncontrolledS * doubt);
+  else if (x.control.value === "uncontrolled" || x.control.value === "marked") add("penalty", "no lights or zebra", w.uncontrolledS);
+  else if (x.control.value === "zebra") add("penalty", "zebra: nothing tells you traffic has stopped", w.zebraS);
+  else {
+    const sound = x.sound.value === true,
+      cone = x.vibration.value === true;
+    if (!sound && !cone) {
+      if (x.sound.value === false && x.vibration.value === false) add("penalty", "lights with no beep or rotating cone", w.silentSignalS);
+      else add("unknown", "not known if the lights beep or have a rotating cone", w.silentSignalS * doubt);
+    }
+  }
+  if (x.tactilePaving.value === false) add("penalty", "no tactile paving", w.noTactileS);
+  else if (!isKnown(x.tactilePaving)) add("unknown", "tactile paving not mapped", w.noTactileS * doubt);
+  return { cost, reasons, unknown };
+}
+
+function evaluateNodeBase(n: GraphNode, viaCrossing: boolean, p: Profile, _c: Conditions): Evaluation {
   const reasons: Reason[] = [];
   if (n.kind === "elevator") {
     return { passable: "yes", seconds: LIFT_WAIT_S, cost: LIFT_WAIT_S, reasons: [{ kind: "penalty", attr: "lift", detail: "lift", seconds: 0 }] };

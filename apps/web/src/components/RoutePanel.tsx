@@ -1,5 +1,5 @@
 "use client";
-import { ArrowUpDown, ChevronDown, CircleAlert, CircleCheck, CircleHelp, CircleX, DoorOpen, MapPin, MessageSquarePlus, Share2, SlidersHorizontal, Undo2 } from "lucide-react";
+import { ArrowUpDown, ChevronDown, CircleAlert, CircleCheck, CircleHelp, CircleX, DoorOpen, MapPin, MessageSquarePlus, Share2, Undo2 } from "lucide-react";
 import { entranceRef, notesForEntrance, notesForPlace, notesForStretch, type UserNote } from "@causeway/graph";
 import type { Profile } from "@causeway/profile";
 import { useState } from "react";
@@ -8,6 +8,10 @@ import { BusDepartures } from "@/components/BusDepartures";
 import type { toiletsAlong } from "@/lib/toilets";
 import { ElevationChart } from "@/components/ElevationChart";
 import { NoteList } from "@/components/NoteList";
+import { SearchBar } from "@/components/SearchBar";
+import { GroundPicker } from "@/components/TripSettings";
+import type { Ground } from "@/components/MapChrome";
+import { compareLine } from "@/lib/devices";
 import type { NoteAbout } from "@/components/NoteSheet";
 import { RouteStrip, VerdictPill } from "@/components/RouteStrip";
 import { Button } from "@/components/ui/button";
@@ -29,6 +33,17 @@ interface Props {
   onChangeTo: () => void;
   onSwap: () => void;
   onOpenMode: () => void;
+  /** Who the routes are for: the device button, shown in the destination bar. */
+  device?: React.ReactNode;
+  /** The device these routes were planned for, shown on the route ("For Cherry"). */
+  forLabel?: string;
+  /** The previous device's best time for this journey, after a switch. */
+  compare?: { label: string; minutes: number | null } | null;
+  /** Other saved devices that can make this journey when this one can't. */
+  alternatives?: { id: string; label: string; minutes: number }[];
+  onUseForTrip?: (id: string) => void;
+  /** Change the ground from the route (the top-of-map chip moved into the sheet, D-036 step 8). */
+  onGround?: (g: Ground) => void;
   lifts: LiveLifts;
   /** Street works on pavements in this area; null where there is no feed (Scotland for now). */
   works: WorksSummary | null;
@@ -144,30 +159,31 @@ export function RoutePanel(props: Props) {
             <span className="sr-only">Change start: </span>
             <span className="truncate">{from.name}</span>
           </button>
-          <button type="button" onClick={props.onChangeTo} className="flex min-h-11 min-w-0 items-center gap-3 rounded-xl px-1 text-left hover:bg-surface-2">
-            <MapPin aria-hidden className="size-5 shrink-0 text-accent" strokeWidth={2.6} />
-            <span className="sr-only">Change destination: </span>
-            <span className="truncate text-lg font-bold">{to.name}</span>
-          </button>
         </div>
         <Button variant="ghost" size="icon" onClick={props.onSwap} aria-label="Swap start and destination" className="self-center">
           <ArrowUpDown aria-hidden className="size-6" />
         </Button>
       </section>
 
-      {/* Who and what ground: what every route here was worked out for. */}
-      <button
-        type="button"
-        onClick={props.onOpenMode}
-        aria-label={`Routes are for ${profile.label} on ${groundWord(conditions)}. Change how you get around`}
-        className="flex min-h-12 items-center gap-2 rounded-2xl bg-surface-2 px-4 text-left"
-      >
-        <SlidersHorizontal aria-hidden className="size-5 shrink-0" />
-        <span className="min-w-0 flex-1">
-          <span className="font-bold">{profile.label}</span> <span className="text-muted whitespace-nowrap">· {groundWord(conditions)}</span>
-        </span>
-        <span className="font-bold text-accent">Change</span>
-      </button>
+      {/* The same bar as search: where to, and who the routes are for (D-036). No magnifier once there's a destination. */}
+      <SearchBar
+        main={
+          <button type="button" onClick={props.onChangeTo} className="flex min-h-12 min-w-0 flex-1 items-center gap-2 text-left">
+            <MapPin aria-hidden className="size-5 shrink-0 text-accent" strokeWidth={2.6} />
+            <span className="sr-only">Change destination: </span>
+            <span className="truncate text-lg font-bold">{to.name}</span>
+          </button>
+        }
+        trailing={props.device}
+      />
+      {props.onGround ? (
+        <div className="-mt-1 flex flex-wrap items-center justify-between gap-2 px-1">
+          <span className="text-sm text-muted">Worked out for {groundWord(conditions)}.</span>
+          <GroundPicker ground={conditions.ice ? "ice" : conditions.wet ? "wet" : "dry"} onGround={props.onGround} />
+        </div>
+      ) : (
+        <p className="m-0 -mt-1 px-1 text-sm text-muted">Worked out for {groundWord(conditions)}.</p>
+      )}
 
       {props.once ? (
         <div role="status" className="flex items-start gap-3 rounded-2xl border-2 border-caution bg-caution-soft p-3">
@@ -186,7 +202,9 @@ export function RoutePanel(props: Props) {
         </p>
       ) : null}
 
-      {result?.status === "none" ? <NoFit result={result} to={to} onAllowOnce={props.onAllowOnce} onGoClosest={props.onGoClosest} onOpenMode={props.onOpenMode} /> : null}
+      {result?.status === "none" ? (
+        <NoFit result={result} to={to} forLabel={props.forLabel} alternatives={props.alternatives ?? []} onUseForTrip={props.onUseForTrip} onAllowOnce={props.onAllowOnce} onGoClosest={props.onGoClosest} onOpenMode={props.onOpenMode} />
+      ) : null}
 
       {result?.status === "ok" && sel ? (
         <>
@@ -194,12 +212,16 @@ export function RoutePanel(props: Props) {
             <h2 id="route-h" className="sr-only">
               {selTitle?.title || "Best for you"}
             </h2>
+            {props.forLabel ? <span className="justify-self-start rounded-full border border-line px-3 py-0.5 text-sm font-bold">For {props.forLabel}</span> : null}
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
               <VerdictPill v={sel.summary.verdict} />
               <span className="tabular text-[28px] leading-none font-bold">{Math.round(sel.summary.minutes)} min</span>
               <span className="tabular text-sm text-muted">{meta(sel)}</span>
             </div>
             <RouteStrip strip={sel.strip} />
+            {props.compare && props.compare.label !== props.forLabel ? (
+              <p className={cn("m-0 font-bold", props.compare.minutes === null || Math.round(sel.summary.minutes) < props.compare.minutes ? "text-ok" : "text-ink")}>{compareLine(Math.round(sel.summary.minutes), props.compare)}</p>
+            ) : null}
             {why ? <p className="m-0">{why}</p> : null}
             {extras(sel).length ? <p className="m-0 -mt-1 text-sm text-muted">{extras(sel).join(" · ")}</p> : null}
             {result.door ? (
@@ -387,7 +409,7 @@ export function RoutePanel(props: Props) {
  * Nothing fits. Say what's in the way, then what you can do: go as close as
  * you can, or stretch a limit for this journey only. Never a dead end (D-035).
  */
-function NoFit({ result, to, onAllowOnce, onGoClosest, onOpenMode }: { result: Extract<PlanResult, { status: "none" }>; to: Place; onAllowOnce: Props["onAllowOnce"]; onGoClosest: Props["onGoClosest"]; onOpenMode: () => void }) {
+function NoFit({ result, to, forLabel, alternatives, onUseForTrip, onAllowOnce, onGoClosest, onOpenMode }: { result: Extract<PlanResult, { status: "none" }>; to: Place; forLabel?: string; alternatives: NonNullable<Props["alternatives"]>; onUseForTrip?: (id: string) => void; onAllowOnce: Props["onAllowOnce"]; onGoClosest: Props["onGoClosest"]; onOpenMode: () => void }) {
   const b = result.blockers;
   const named = b.slice(0, 2).map((x) => `${x.detail} on ${x.name}`);
   const cl = result.closest;
@@ -395,7 +417,7 @@ function NoFit({ result, to, onAllowOnce, onGoClosest, onOpenMode }: { result: E
     <section aria-live="polite" aria-labelledby="nofit-h" className="grid gap-3">
       <div className="grid gap-1 rounded-[20px] bg-stop-soft p-4">
         <h2 id="nofit-h" className="m-0 flex items-center gap-2 text-lg font-bold text-stop">
-          <CircleX aria-hidden className="size-6 shrink-0" /> {result.message}
+          <CircleX aria-hidden className="size-6 shrink-0" /> {forLabel ? `No route for ${forLabel}` : result.message}
         </h2>
         {named.length ? (
           <p className="m-0">
@@ -407,6 +429,17 @@ function NoFit({ result, to, onAllowOnce, onGoClosest, onOpenMode }: { result: E
         )}
       </div>
       <h3 className="m-0 font-mono text-xs tracking-[0.08em] text-muted uppercase">What you can do</h3>
+      {onUseForTrip
+        ? alternatives.map((a) => (
+            <button key={a.id} type="button" onClick={() => onUseForTrip(a.id)} className="grid gap-1 rounded-2xl border-2 border-line p-4 text-left hover:border-ink">
+              <span className="font-bold">
+                {a.label} can do this one: {a.minutes} min
+              </span>
+              <span className="text-sm text-muted">Plans this journey for {a.label}. You go back to {forLabel ?? "your device"} when it ends.</span>
+              <span className="font-bold text-accent">Use {a.label} for this trip</span>
+            </button>
+          ))
+        : null}
       {cl ? (
         <button
           type="button"

@@ -1,24 +1,27 @@
 "use client";
-import { learnPace, PRESETS, type Profile } from "@causeway/profile";
+import { learnPace, type Profile } from "@causeway/profile";
 import { conditionsFromOpenMeteo, openMeteoUrl } from "@causeway/live";
 import { haversine } from "@causeway/graph";
-import { Accessibility, ChevronLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { MapChrome, type Ground } from "@/components/MapChrome";
 import { MapView } from "@/components/MapView";
-import { ModeSheet } from "@/components/ModeSheet";
+import { DeviceMenu } from "@/components/DeviceMenu";
+import { DeviceEditor } from "@/components/DeviceEditor";
+import { DeviceSetup } from "@/components/DeviceSetup";
 import { NavView, type Me } from "@/components/NavView";
 import { NoteSheet, type NoteAbout } from "@/components/NoteSheet";
 import { PlaceIcon, PlaceSearch } from "@/components/PlaceSearch";
 import { ReportSheet } from "@/components/ReportSheet";
 import { RoutePanel } from "@/components/RoutePanel";
+import { TripSettings } from "@/components/TripSettings";
 import { VerdictPill } from "@/components/RouteStrip";
 import { Button } from "@/components/ui/button";
 import { CommandGroup, CommandItem } from "@/components/ui/command";
 import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
 import { CITIES, cityById, type City } from "@/lib/cities";
 import type { Place } from "@/lib/plan-types";
-import { loadProfile, saveProfile } from "@/lib/profile-store";
+import { activeDevice, deviceLabel, FIRST_VISIT, loadDeviceState, saveDeviceState, setTip, tipPending, withActive, withActiveName, withActiveProfile, withDeviceProfile, withFavourite, withoutDevice, withSetup, type DeviceState } from "@/lib/devices";
 import { addRecent, loadRecents } from "@/lib/recents";
 import { useNotes } from "@/lib/use-notes";
 import { toiletsAlong } from "@/lib/toilets";
@@ -36,8 +39,6 @@ type View = "home" | "from" | "route";
 const CITY_KEY = "causewayside.city.v1";
 const SNAP = { peek: 0.24, half: 0.52, full: 0.94 };
 
-/** Short name for the profile chip in the search bar; the full one is in the sheet. */
-const shortLabel = (p: Profile) => p.label.replace(/^Manual wheelchair/, "Manual chair").replace(/ with someone pushing$/, " + help");
 
 /**
  * One question first: can I get there? The map fills the screen; one sheet
@@ -61,7 +62,12 @@ export default function Home() {
     if (!index) return;
     planner.sendToilets(index.entries.filter((e) => e.cat !== "amenity=toilets" && e.access?.["toilets:wheelchair"] === "yes").map((e) => ({ lon: e.place.lon, lat: e.place.lat, name: e.place.name })));
   }, [index]); // eslint-disable-line react-hooks/exhaustive-deps
-  const [profile, setProfile] = useState<Profile>(PRESETS["manual-wheelchair"]);
+  // Server render and first paint use the first-visit default; the saved devices load on mount.
+  const [devices, setDevices] = useState<DeviceState>(FIRST_VISIT);
+  const [setup, setSetup] = useState<"first" | "add" | null>(null);
+  const [tip, setTipShown] = useState(false);
+  const device = activeDevice(devices);
+  const profile = device.profile;
   const [modeOpen, setModeOpen] = useState(false);
   const [from, setFrom] = useState<Place>(CITIES[0]!.start);
   const [to, setTo] = useState<Place | null>(null);
@@ -83,7 +89,10 @@ export default function Home() {
   const [recents, setRecents] = useState<Place[]>([]);
   const wide = useWide();
 
-  useEffect(() => setProfile(loadProfile()), []);
+  useEffect(() => {
+    setDevices(loadDeviceState(undefined, { demo: new URLSearchParams(location.search).get("demo") === "devices" }));
+    setTipShown(tipPending());
+  }, []);
   useEffect(() => setRecents(loadRecents(city.id)), [city]);
   const shared = useNotes(city.id);
   const cityNotes = shared.notes;
@@ -93,7 +102,17 @@ export default function Home() {
   const open = (s: number) => setSnap(bigText ? SNAP.full : s);
 
   const ground: Ground = conditions.ice ? "ice" : conditions.wet ? "wet" : "dry";
-  const routeProfile = useMemo(() => (once ? { ...profile, ...once.patch } : profile), [profile, once]);
+  /** A saved device used for this journey only ("Use Lulu for this trip"); never saved. */
+  const [trip, setTrip] = useState<string | null>(null);
+  /** The previous device's best time for this journey, kept when switching so the route can say what changed. */
+  const [compare, setCompare] = useState<{ label: string; minutes: number | null } | null>(null);
+  const routeDevice = devices.devices.find((d) => d.id === trip) ?? device;
+  const routeProfile = useMemo(() => (once ? { ...routeDevice.profile, ...once.patch } : routeDevice.profile), [routeDevice, once]);
+  // A new journey starts with your own device and nothing to compare.
+  useEffect(() => {
+    setTrip(null);
+    setCompare(null);
+  }, [from.id, to?.id, city.id]);
 
   const switchCity = (c: City) => {
     setCity(c);
@@ -122,10 +141,15 @@ export default function Home() {
     return () => ctl.abort();
   }, [city]);
 
-  const updateProfile = useCallback((p: Profile) => {
-    setProfile(p);
-    saveProfile(p);
+  const changeDevices = useCallback((f: (s: DeviceState) => DeviceState) => {
+    setDevices((s) => {
+      // Any saved change ends the first visit.
+      const next = { ...f(s), fresh: false };
+      saveDeviceState(next);
+      return next;
+    });
   }, []);
+  const updateProfile = useCallback((p: Profile) => changeDevices((s) => withActiveProfile(s, p)), [changeDevices]);
 
   // Re-plan whenever the journey, the person or the ground changes.
   useEffect(() => {
@@ -133,6 +157,14 @@ export default function Home() {
     planner.plan(from, to, routeProfile, conditions, cityNotes);
     setSelected(null);
   }, [planner.ready, from, to, routeProfile, conditions, planner.lifts, cityNotes]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Nothing fits for this device: would another saved device get there?
+  const others = devices.devices.filter((d) => d.id !== routeDevice.id);
+  useEffect(() => {
+    if (!planner.ready || !to || planner.result?.status !== "none" || once || !others.length) return planner.fits(from, from, [], conditions);
+    planner.fits(from, to, others.map((d) => ({ key: d.id, profile: d.profile })), conditions);
+  }, [planner.result]); // eslint-disable-line react-hooks/exhaustive-deps
+  const alternatives = planner.result?.status === "none" && planner.fitsResult ? others.flatMap((d) => (planner.fitsResult![d.id] != null ? [{ id: d.id, label: deviceLabel(d), minutes: planner.fitsResult![d.id]! }] : [])) : [];
 
   // Recent places answer "can I get there?" before you search: a verdict for each from where you start.
   useEffect(() => {
@@ -215,15 +247,27 @@ export default function Home() {
   const entrances = useMemo(() => (result?.status === "ok" ? result.entrances.map((e) => ({ lon: e.lon, lat: e.lat, ok: e.verdict.passable })) : []), [result]);
 
   const profileChip = (
-    <button
-      type="button"
-      onClick={() => setModeOpen(true)}
-      aria-label={`Routes are for ${profile.label}. Change`}
-      className="inline-flex min-h-11 max-w-full min-w-0 items-center gap-1.5 rounded-xl bg-accent px-3 text-sm font-bold text-accent-ink"
-    >
-      <Accessibility aria-hidden className="size-4" strokeWidth={2.6} />
-      <span className="truncate">{shortLabel(profile)}</span>
-    </button>
+    <DeviceMenu
+      devices={devices.devices}
+      activeId={devices.activeId}
+      onPick={(id) => {
+        // With a route on screen, remember its time so the new route can say what changed.
+        const r = planner.result;
+        if (to && r) setCompare({ label: deviceLabel(routeDevice), minutes: r.status === "ok" && r.routes[0] ? Math.round(r.routes[0].summary.minutes) : null });
+        setOnce(null);
+        setTrip(null);
+        changeDevices((s) => withActive(s, id));
+      }}
+      tripLabel={trip ? deviceLabel(routeDevice) : undefined}
+      onEdit={() => setModeOpen(true)}
+      onAdd={() => setSetup("add")}
+      onSetup={devices.fresh ? () => setSetup("first") : undefined}
+      tip={tip}
+      onTipSeen={() => {
+        setTipShown(false);
+        setTip("seen");
+      }}
+    />
   );
 
   const recentItems = (
@@ -308,6 +352,7 @@ export default function Home() {
         </p>
       ) : view === "home" ? (
         <div className="grid gap-3 [&>*]:min-w-0">
+          {devices.fresh ? <p className="m-0 rounded-2xl bg-surface-2 px-4 py-3 text-sm">Tell us how you get around and we&apos;ll plan routes you can actually do.</p> : null}
           <PlaceSearch
             key={`${city.id}-to`}
             label="Where to?"
@@ -331,6 +376,17 @@ export default function Home() {
             </button>
           </p>
           <p className="m-0 -mt-2 text-sm text-muted">Or tap the map to drop a pin.</p>
+          <TripSettings
+            deviceLabel={deviceLabel(routeDevice)}
+            onDevice={() => setModeOpen(true)}
+            ground={ground}
+            groundNote={`${conditions.summary}. ${conditions.source}.`}
+            onGround={(g) => setConditions(PRESET_CONDITIONS[g])}
+            buses={profile.buses !== false}
+            onBuses={(v) => updateProfile({ ...profile, buses: v })}
+            toiletEvery={profile.maxToiletIntervalM}
+            onToilets={() => setModeOpen(true)}
+          />
         </div>
       ) : view === "from" ? (
         <div className="grid gap-3 [&>*]:min-w-0">
@@ -373,6 +429,17 @@ export default function Home() {
             setTo(from);
           }}
           onOpenMode={() => setModeOpen(true)}
+          device={profileChip}
+          forLabel={devices.devices.length > 1 || routeDevice.name ? deviceLabel(routeDevice) : undefined}
+          compare={compare}
+          onGround={(g) => setConditions(PRESET_CONDITIONS[g])}
+          alternatives={alternatives}
+          onUseForTrip={(id) => {
+            const r = planner.result;
+            setCompare(r ? { label: deviceLabel(routeDevice), minutes: null } : null);
+            setOnce(null);
+            setTrip(id);
+          }}
           lifts={planner.lifts}
           works={planner.works}
           worksCovered={!!city.works}
@@ -421,9 +488,6 @@ export default function Home() {
         city={city}
         cities={CITIES}
         onCity={switchCity}
-        ground={ground}
-        conditions={conditions}
-        onGround={(g) => setConditions(PRESET_CONDITIONS[g])}
         showSlopes={showSlopes}
         onSlopes={setShowSlopes}
         onLocate={locate}
@@ -434,13 +498,30 @@ export default function Home() {
       {navigating && selectedRoute ? (
         <NavView
           route={selectedRoute}
-          speedMps={profile.speedMps}
+          speedMps={routeProfile.speedMps}
+          device={
+            devices.devices.length > 1
+              ? {
+                  label: deviceLabel(routeDevice),
+                  others: others.map((d) => ({ id: d.id, label: deviceLabel(d) })),
+                  onSwitch: (id) => {
+                    // Re-plan the rest of the journey from where you are, for the device picked.
+                    setOnce(null);
+                    setTrip(null);
+                    changeDevices((s) => withActive(s, id));
+                    if (me) setFrom({ id: `me:${Date.now()}`, name: "Your location", kind: "Current location", lon: me.lon, lat: me.lat });
+                  },
+                }
+              : undefined
+          }
           onEnd={() => {
             setNavigating(false);
+            // A device borrowed for this trip goes back when the journey ends.
+            setTrip(null);
             setMe(null);
           }}
           onPosition={setMe}
-          onPace={(mps) => updateProfile(learnPace(profile, mps))}
+          onPace={(mps) => changeDevices((s) => withDeviceProfile(s, routeDevice.id, learnPace(routeDevice.profile, mps)))}
           onOffRoute={(m) => setFrom({ id: `me:${Date.now()}`, name: "Your location", kind: "Current location", lon: m.lon, lat: m.lat })}
           onNote={(m) => {
             // The stretch of this route nearest to you (or to the destination, in a preview).
@@ -472,7 +553,42 @@ export default function Home() {
           </DrawerContent>
         </Drawer>
       )}
-      <ModeSheet open={modeOpen} onOpenChange={setModeOpen} profile={profile} onChange={updateProfile} />
+      <DeviceSetup
+        open={setup !== null}
+        mode={setup ?? "first"}
+        onDone={(choice) => {
+          const first = !!devices.fresh;
+          setSetup(null);
+          setOnce(null);
+          changeDevices((s) => withSetup(s, choice, `device-${Date.now().toString(36)}`));
+          if (first) {
+            setTip("pending");
+            setTipShown(true);
+          }
+        }}
+        onSkip={() => {
+          // Skipping a first visit keeps today's default and stops asking.
+          if (setup === "first") changeDevices((s) => s);
+          setSetup(null);
+        }}
+      />
+      <DeviceEditor
+        open={modeOpen}
+        onOpenChange={setModeOpen}
+        device={device}
+        onChange={updateProfile}
+        onRename={(name) => changeDevices((s) => withActiveName(s, name))}
+        onFavourite={(on) => changeDevices((s) => withFavourite(s, s.activeId, on))}
+        onRemove={
+          devices.devices.length > 1
+            ? () => {
+                setModeOpen(false);
+                setOnce(null);
+                changeDevices((s) => withoutDevice(s, s.activeId));
+              }
+            : undefined
+        }
+      />
       <NoteSheet choices={noteChoices} onOpenChange={(v) => !v && setNoteChoices(null)} city={city.id} preset={profile.preset} sharing={shared.sharing !== "off"} onSaved={shared.saved} />
       <ReportSheet open={reportAt !== null} onOpenChange={(v) => !v && setReportAt(null)} where={reportAt} city={city.id} sharing={shared.sharing !== "off"} onSaved={shared.saved} />
     </main>

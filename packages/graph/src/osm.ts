@@ -27,6 +27,7 @@ import type {
   Surface,
 } from "./schema.js";
 import { haversine, lineLength } from "./geo.js";
+import { crossingFromTags, sharedWithCyclesFromTags } from "./crossing-info.js";
 
 type Tags = Record<string, string>;
 
@@ -441,6 +442,7 @@ export function buildGraphFromOsm(osm: OsmData, opts: BuildOptions): Graph {
     const n = osm.nodes.get(osmId)!;
     const kerb = kerbFromTags(n.tags, n.timestamp);
     const entrance = entranceFromTags(n.tags, n.timestamp);
+    const crossing = crossingFromTags(n.tags, n.timestamp);
     const kind: GraphNode["kind"] =
       n.tags["highway"] === "elevator"
         ? "elevator"
@@ -460,6 +462,7 @@ export function buildGraphFromOsm(osm: OsmData, opts: BuildOptions): Graph {
       kind,
       ...(kerb ? { kerb } : {}),
       ...(entrance ? { entrance } : {}),
+      ...(crossing ? { crossing } : {}),
       osmId,
     });
     return osmId;
@@ -474,6 +477,7 @@ export function buildGraphFromOsm(osm: OsmData, opts: BuildOptions): Graph {
     const bridge = !!t["bridge"] && t["bridge"] !== "no";
     const movable = t["bridge:movable"] ?? (t["bridge"] === "movable" ? "movable" : undefined);
     const attrs = edgeAttrsFromTags(t, way.timestamp, kind);
+    const sharedWithCycles = ["footway", "pedestrian", "sidewalk", "ramp"].includes(kind) ? sharedWithCyclesFromTags(t, way.timestamp) : undefined;
     const oneway = kind === "escalator" || t["oneway:foot"] === "yes" || (kind !== "street_proxy" && t["oneway"] === "yes" && kind !== "steps");
     // A crossing way tagged kerb=lowered applies to both ends.
     const crossingKerb = kind === "crossing" ? kerbFromTags({ kerb: t["kerb"] ?? "", "kerb:height": t["kerb:height"] ?? "", tactile_paving: t["tactile_paving"] ?? "" }, way.timestamp) : undefined;
@@ -507,6 +511,7 @@ export function buildGraphFromOsm(osm: OsmData, opts: BuildOptions): Graph {
           bidirectional: !oneway,
           attrs: structuredClone(attrs),
           osmWayId: way.id,
+          ...(sharedWithCycles ? { sharedWithCycles } : {}),
         });
       }
       start = i;
