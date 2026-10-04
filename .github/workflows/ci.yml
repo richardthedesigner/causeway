@@ -5,7 +5,7 @@ on:
     branches: [main, claude/sleepy-johnson-mavbrs]
   pull_request:
 
-# Read the code, nothing more (SEC-05).
+# Read the code, nothing more (SEC-03).
 permissions:
   contents: read
 

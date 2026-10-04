@@ -12,7 +12,7 @@ function fakeBrowser(controller: object | null) {
 
 afterEach(() => vi.unstubAllGlobals());
 
-describe("update prompt (DEP-05)", () => {
+describe("update prompt (DEP-04)", () => {
   it("says so when a new version takes over an open page", () => {
     const { sw } = fakeBrowser({});
     const onUpdate = vi.fn();

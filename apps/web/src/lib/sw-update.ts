@@ -1,5 +1,5 @@
 /**
- * Notice when a new build has taken over (DEP-05, D-045). The service worker
+ * Notice when a new build has taken over (DEP-04, D-045). The service worker
  * (public/sw.js) activates a new version straight away, but a page that's
  * already open keeps running the old code until it's reloaded. So: look for
  * a new version when the app comes back to the front and every hour, and

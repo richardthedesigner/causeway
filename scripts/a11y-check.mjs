@@ -70,7 +70,7 @@ for (const scheme of ["light", "dark"]) {
   await page.getByRole("slider", { name: "Range on one charge" }).waitFor();
   await check("device settings, battery range");
 
-  // A new build takes over an open page: the update prompt (DEP-05). The first takeover is a first visit.
+  // A new build takes over an open page: the update prompt (DEP-04). The first takeover is a first visit.
   await page.keyboard.press("Escape");
   await page.evaluate(() => {
     navigator.serviceWorker.dispatchEvent(new Event("controllerchange"));

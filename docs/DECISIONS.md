@@ -380,7 +380,7 @@ The visual-impairment preset sets 60 s per 100 m; anyone can turn it on with "Af
 
 **What we send.** A Content Security Policy that allows only our own origin plus what the app really calls: Supabase (`*.supabase.co`, for sharing and review photos), Open-Meteo, postcodes.io, Photon and TfL, and Google Fonts for the typeface. No framing (`frame-ancestors 'none'`), no plugins, forms only to ourselves. Also HSTS, `nosniff`, a strict referrer policy, `Cross-Origin-Opener-Policy`, and a permissions policy that allows location for this site only and turns off camera, microphone and payment.
 
-**Two compromises.** `script-src` keeps `'unsafe-inline'`: Next's static export writes inline scripts whose hashes change every build (SEC-11 is the follow-up). `style-src` keeps `'unsafe-inline'`: MapLibre, Radix and our own components set inline styles.
+**Two compromises.** `script-src` keeps `'unsafe-inline'`: Next's static export writes inline scripts whose hashes change every build (SEC-13 is the follow-up). `style-src` keeps `'unsafe-inline'`: MapLibre, Radix and our own components set inline styles.
 
 **How we know it doesn't break anything.** The accessibility check and the end-to-end journeys serve the build with the same headers (`scripts/serve-out.mjs`) and fail on anything the policy blocks. A new live data source has to be added to `connect-src`, or those checks fail.
 
@@ -412,6 +412,6 @@ When there is nothing to compare with, it builds. Once DEP-01 makes `main` the p
 
 ## D-045 Saying when a new version is ready
 
-**Decided.** 2026-10-04 (DEP-05). The service worker (D-023) takes over as soon as a new build is installed, but a page that's already open keeps running the old code until it's reloaded. People keep a map open for days.
+**Decided.** 2026-10-04 (DEP-04). The service worker (D-023) takes over as soon as a new build is installed, but a page that's already open keeps running the old code until it's reloaded. People keep a map open for days.
 
 **What we do.** The app looks for a new version when it comes back to the front and every hour. When one takes over, a card says "A new version of Causewayside is ready" with **Reload** and **Later**. It never reloads by itself, and waits while navigating, since a reload mid-journey would drop the route. It is rendered outside `<main>`, which the bottom sheet hides from screen readers.

@@ -12,10 +12,10 @@ The roadmap's next five.
 **Nothing on the phone lost to a change of shape** (D-044, STAB-03)
 - Devices, notes and reports read through `lib/stored.ts`. Old keys are never rewritten; anything unreadable is backed up first.
 
-**A new version is ready** (D-045, DEP-05)
+**A new version is ready** (D-045, DEP-04)
 - A card with Reload and Later when a new build takes over an open page. Never mid-journey.
 
-**Security housekeeping** (SEC-04, SEC-05)
+**Security housekeeping** (SEC-02, SEC-03)
 - `SECURITY.md`: report vulnerabilities privately.
 - GitHub Actions pinned to commit SHAs; CI can only read the code.
 
@@ -33,15 +33,16 @@ From the roadmap's Now list.
 
 **Dependabot** (UPD-01): npm and GitHub Actions, weekly, minor and patch updates grouped.
 
-**Fewer Vercel builds** (D-042, DEP-09): `main` and docs-only changes no longer build.
+**Fewer Vercel builds** (D-042, DEP-03): `main` and docs-only changes no longer build.
 
 **Tidy** (BLOAT-01): the step 2 review screenshots moved from the repo root to `docs/ux/devices/`.
 
 ## 2026-10-04 (evening)
 
-**Roadmap** (`docs/ROADMAP.md`)
-- One list of work across features, data, accounts, deployment, security, stability, speed, bloat, updates, reviews and user testing, each with an ID, size, priority, status and owner.
-- `CLAUDE.md` tells every session to read it first and write back to it.
+**One roadmap** (`docs/ROADMAP.md`, #31 merged with #34)
+- Keeps #34's order: fill the pilot cities from the data survey, then check our guesses with real people. Keeps the read-only Google Doc copy.
+- Every task now has an ID, size, priority, status and owner, across data, research, features, small features, security, stability, speed, bloat, updates, deployment, reviews and work Richard has deferred.
+- `CLAUDE.md` tells every session to read it first, mark its row, and write back to it in the same pull request.
 
 ## 2026-10-04 (after midnight)
 

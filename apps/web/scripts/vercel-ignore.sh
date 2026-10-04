@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Vercel's ignoreCommand (apps/web/vercel.json): exit 0 skips the build, exit 1 builds.
-# Keeps us under the free plan's 100 deployments a day (DEP-09):
+# Keeps us under the free plan's 100 deployments a day (DEP-03):
 #  - main mirrors the production branch commit for commit (mirror-production.yml), so it never needs its own build.
 #  - Changes only to docs, Markdown, workflows or database migrations don't change the app.
 # When in doubt (no earlier commit to compare with), it builds.

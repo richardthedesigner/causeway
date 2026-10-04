@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { watchForUpdate } from "@/lib/sw-update";
 
 /**
- * "A new version is ready" with Reload and Later (DEP-05, D-045). Waits
+ * "A new version is ready" with Reload and Later (DEP-04, D-045). Waits
  * while navigating: a reload mid-journey would drop the route. Rendered on
  * the body, outside <main>, which the bottom sheet hides from screen readers.
  */

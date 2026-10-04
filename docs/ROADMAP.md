@@ -1,192 +1,220 @@
 # Roadmap
 
-The one list of work for Causewayside. Every task, human or Claude, starts here and writes back here. Started 2026-10-04.
+The one list of work for Causewayside: what's next, in what order, how big it is and what state it's in. Every task, human or Claude, starts here and writes back here.
 
-- **Why** a choice was made: [DECISIONS.md](DECISIONS.md). **What** shipped: [BUILD_LOG.md](BUILD_LOG.md). **Detail** for a single item: the linked GitHub issue or plan.
-- This file says what's next, how big it is, and what state it's in.
+This file is the master copy. A read-only copy for sharing and comments lives in Google Drive: [Causewayside roadmap](https://docs.google.com/document/d/1T-RPq188B09LBahJIWPg_Hapm6m_vYbHB88pUzxJXV4/edit). Change this file, then update the Doc to match. Edits made only in the Doc are lost.
+
+Last updated: 2026-10-04.
+
+- What's waiting on Richard, blocked, or a guess: [OPEN_ITEMS.md](OPEN_ITEMS.md)
+- What shipped and when: [BUILD_LOG.md](BUILD_LOG.md) and the phase reports
+- Why: [DECISIONS.md](DECISIONS.md)
+- Every data source we could use, with verdicts: the [UK data survey](DATA_SURVEY_UK.md). Section numbers (§) refer to it.
 
 ## How to use this file
 
 **Before you start any task**
 1. Read **Now** and the section your task belongs to.
-2. If your task is already here, use its ID in your branch, commit messages and PR title (for example `SEC-02: security headers`).
-3. If it isn't here, add it in the right section before you start, with a new ID.
+2. If your task is here, use its ID in commit messages and the PR title (for example `SEC-01: security headers`).
+3. If it isn't, add a row in the right section first, with the next free ID.
 4. Set its status to `doing` and put the date and your branch in Notes.
 
 **When you finish**
-1. Set the status to `done (YYYY-MM-DD)`. Leave the row where it is, so IDs stay findable.
+1. Set the status to `done (YYYY-MM-DD)` in the same pull request. Leave the row where it is, so IDs stay findable.
 2. Add one line to the **Log** at the bottom.
 3. Anything you found but didn't do: add it as a new row. Don't leave it only in a PR or a chat.
 4. If **Now** has fewer than five open items, promote the next most useful ones.
+5. Update the Google Doc copy (see `CLAUDE.md`).
 
 **Fields**
-- **Size:** `S` under an hour or two. `M` a day or so. `L` several days. `XL` a project of its own, which needs a plan in `docs/plans/` first.
+- **Size:** `S` an hour or two. `M` about a day. `L` several days. `XL` a project of its own, which needs a plan in `docs/plans/` first.
 - **Priority:** `now`, `next`, `later`.
-- **Status:** `todo`, `doing`, `blocked`, `done`. Blocked names what it waits on.
-- **Who:** `Claude` (can be done in a session), `Richard` (needs an account, a decision, money or a person), or both.
+- **Status:** `todo`, `doing`, `blocked`, `done`. A blocked row says what it waits on.
+- **Who:** `Claude` (can be done in a session), `Richard` (needs an account, a key, a decision, money or a person), or both. Anything waiting on Richard also has a line in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
-Keep rows to one line. Detail goes in an issue, a plan or the Notes column.
+Keep rows to one line. Detail goes in an issue, a plan, a decision or the Notes column.
+
+## Where we are
+
+| Phase | What | State |
+|---|---|---|
+| 0 | Foundations: data model, honest graph builder, own router, Edinburgh acceptance tests | Done ([report](PHASE0_REPORT.md)) |
+| 1 | The honest graph for central Edinburgh: city-scale OSM and LiDAR, kerb inference, inspector | Done ([report](PHASE1_REPORT.md)) |
+| 2 | App shells and user research | Web app done. Native app, user research and real-device accessibility testing not started |
+| 3 | Live data and the other cities: Newcastle and Gateshead, London zones, weather, TfL lifts | Done ([report](PHASE3_REPORT.md)) |
+| 4 | Navigation and the loop: turn-by-turn, report a problem, offline | First pass done ([report](PHASE4_REPORT.md)) |
+
+The current direction: **fix and fill the pilot cities** with open data that needs no permission, then **check our guesses with real people**. A phone app, whole cities, a reports backend and accounts are deferred by Richard (see **Deferred by Richard**).
 
 ## Now
 
-The next five things to pick up, in order. Each points to its row below.
+The next five things to pick up, in order.
 
-1. **SEC-12**: check the security headers are live on production.
-2. **SEC-06**: `pnpm audit` in CI, failing on high severity.
-3. **STAB-05**: timeouts and fallbacks for every live adapter.
-4. **SEC-09**: check nothing on the device leaks the profile.
-5. **STAB-10**: end-to-end journeys for the device switcher, notes and Leaving later.
+1. **DATA-01**: remove the scraped Changing Places records. It breaks our own no-scraping rule today.
+2. **DATA-02**: Scottish Road Works Register adapter for Edinburgh.
+3. **DATA-03**: TfL station data, with lift outages joined on `LiftUniqueId`.
+4. **DATA-04**: TfL station and line disruptions on transit edges.
+5. **DATA-05**: Street Manager activity archive: skips, scaffolding, hoardings.
 
-## Big features
+## Data and coverage
+
+Fix and fill the pilot cities. DATA-01 to DATA-10 are in order of value per day of work (survey §8).
 
 | ID | Task | Size | Priority | Status | Who | Notes |
 |---|---|---|---|---|---|---|
-| BIG-01 | Native app (Expo) with background location, lock-screen progress and haptics | XL | next | blocked | Richard, Claude | D-004. Waits on Apple and Google developer accounts (HUM-05) |
-| BIG-02 | The whole of Edinburgh, not just the centre | L | next | todo | Claude | D-014. Needs the graph build to run outside a laptop (DEP-06) |
-| BIG-03 | A fourth city (Glasgow, Manchester or Bristol) | L | later | todo | Richard, Claude | Richard picks the city. Check LiDAR or terrain coverage first |
-| BIG-04 | Offline city packs: download a city once, route with no signal | L | next | todo | Claude | D-023 caches what's been loaded. This makes it a choice with a size shown |
-| BIG-05 | Companion page: a live arrival link for someone meeting you | L | later | todo | Claude | D-004 web scope. Destination and time only, never the profile |
-| BIG-06 | Send fixes back to OpenStreetMap from reports and notes | L | later | todo | Richard, Claude | D-008. Needs an OSM account flow and a review step |
-| BIG-07 | Crowd verification: several people confirming the same note | L | later | todo | Claude | Phase 4 "not yet". Builds on D-030 pseudonyms |
-| BIG-08 | Indoor and station routing (lifts, platforms, step-free interchanges) | XL | later | todo | Claude | Start with one big station |
-| BIG-09 | Street-level imagery for complex junctions (Mapillary) | L | later | todo | Claude | Phase 4 "not yet". Licence check under D-008 first |
-| BIG-10 | Multi-stop trips (shop, then toilet, then home) | L | later | todo | Claude | Router already does single A to B |
+| DATA-01 | Remove scraped Changing Places records (29) from the search indexes, and filter them in the Overture build | S | now | todo | Claude | §9, D-028 |
+| DATA-02 | Scottish Road Works Register adapter for Edinburgh: footway works, café tables, scaffolding, hoardings, events | M | now | todo | Claude | §2 #1. SRWR is open (OGL), no application needed. [#10](https://github.com/richardthedesigner/causeway/issues/10) |
+| DATA-03 | TfL station data: platform step and gap, which areas each lift connects, toilets. Join lift outages on `LiftUniqueId` | M | now | todo | Claude | §2 #2 and #3, D-020 |
+| DATA-04 | TfL station and line disruptions on transit edges | M | now | todo | Claude | §2 #4. Closures and planned step-free losses are invisible today |
+| DATA-05 | Street Manager activity archive: skips, scaffolding, hoardings | S | now | todo | Claude | §2 #6, D-027. Same bucket we already read |
+| DATA-06 | Edinburgh Adopted Roads: footway surface and width as a separate layer | M | next | todo | Claude | §2 #5, D-008. Width is known on only 8% of Edinburgh's network |
+| DATA-07 | Weather warnings, floods and gritted footways: prefer gritted pavements in ice, flag riverside paths in floods | M | next | todo | Claude | §2 #7, #8, #10 |
+| DATA-08 | Park entrances (OS Open Greenspace) and OSM Notes | M | next | todo | Claude | §2 #11. Routes end at a gate, not the middle of a park |
+| DATA-09 | Toilet Map daily export with verified dates, accessible and RADAR flags | S | next | todo | Claude | §2 #9 |
+| DATA-10 | Presets on Inclusive Mobility values: rest intervals, kerb tolerance | S | next | todo | Claude | §8, D-013 |
+| DATA-11 | Rebuild the street graphs on the weekly refresh too, not only timetables, works and search | M | next | todo | Claude | [#14](https://github.com/richardthedesigner/causeway/issues/14), D-033. Richard runs the refresh once by hand first (OPEN_ITEMS) |
+| DATA-12 | Edinburgh council data: kerb heights, dropped kerbs and tactile paving, steps, widths, setted streets | L | next | blocked | Richard, Claude | Waits on Richard's licence email. §3, §7 |
+| DATA-13 | Glasgow council data: kerbs, steps with ramps, bus stops, gritting, pavement parking | L | later | blocked | Richard, Claude | Waits on a licence. The richest council data in the UK. §3, §7 |
+| DATA-14 | London borough data: Islington and Southwark (condition, widths, crossings), Westminster (Blue Badge bays), Kensington and Chelsea (tables and chairs) | M | later | blocked | Richard, Claude | Waits on licences. §3, §7 |
+| DATA-15 | Canal & River Trust towpath gates and steps, Sustrans path barriers | M | later | blocked | Richard, Claude | Waits on licences. §3, §7 |
+| DATA-16 | NHS Service Search, Spatial Hub and Edinburgh Festivals data | M | later | blocked | Richard, Claude | Waits on keys with long lead times. §7 |
+| DATA-17 | Met Office DataHub for production weather | S | later | blocked | Richard, Claude | D-011. Waits on a key ([#9](https://github.com/richardthedesigner/causeway/issues/9)) |
+| DATA-18 | Live Street Manager feed for England | M | later | blocked | Richard, Claude | Waits on Richard's application. [#10](https://github.com/richardthedesigner/causeway/issues/10) |
+| DATA-19 | Tyne and Wear Metro lift status | M | later | blocked | Richard, Claude | Waits on Nexus. [#13](https://github.com/richardthedesigner/causeway/issues/13) |
+| DATA-20 | Live bus and tram departures in Edinburgh and Newcastle | M | later | blocked | Claude | [#8](https://github.com/richardthedesigner/causeway/issues/8). Lothian 403, Transport for Edinburgh 522, Nexus needs a key |
+| DATA-21 | Map York Place and the western way into the Grassmarket in OSM (about 1.1 km) | M | later | todo | Richard | [DEVICES.md](plans/DEVICES.md). Turns unknowns into known ground |
+
+## Research: check our guesses with real people
+
+Routes are shaped by numbers we estimated. These need disabled testers in each city before launch (Phase 2).
+
+| ID | Task | Size | Priority | Status | Who | Notes |
+|---|---|---|---|---|---|---|
+| RES-01 | Calibrate costs: gradient limits, unknown-data risk, crossings, unlit streets, bus waits | L | next | todo | Richard, Claude | [#12](https://github.com/richardthedesigner/causeway/issues/12), D-013, D-037, D-038 |
+| RES-02 | Testing with five or more wheelchair and scooter users | L | next | todo | Richard | Feeds RES-01 and the preset numbers |
+| RES-03 | Testing with blind and partially sighted users (crossings, lighting) | L | next | todo | Richard | D-037, D-038 |
+| RES-04 | Follow up with the tester who uses Cherry and Lulu on the device switcher | S | next | todo | Richard | [DEVICES.md](plans/DEVICES.md) |
+| RES-05 | Check inferred kerbs at controlled crossings against what's really there | M | next | todo | Richard | D-015 |
+| RES-06 | Measure gradients on the ground in each city, starting with West Bow and Victoria Terrace | M | next | todo | Richard | Validates LiDAR. Those two decide Cherry's Grassmarket route |
+| RES-07 | Accessibility testing on real devices: VoiceOver, TalkBack, Switch Control, Voice Control | M | next | todo | Richard, Claude | [UX_ASSESSMENT.md](UX_ASSESSMENT.md). axe catches about a third of WCAG issues |
+| RES-08 | Benchmark every acceptance journey against openrouteservice's wheelchair profile | M | later | todo | Claude | D-003 |
+| RES-09 | Choose where to go next with census disability data, Blue Badge statistics and station usage | M | later | todo | Claude | §5 |
 
 ## Features
 
 | ID | Task | Size | Priority | Status | Who | Notes |
 |---|---|---|---|---|---|---|
-| FEAT-01 | Battery range per device (`maxRangeKm`), with a warning on long routes | M | now | done (2026-10-04) | Claude | D-043. PR #26 merged into this branch, then "Warn me about battery range" in the device editor for powered chairs and scooters. PR #26 can be closed |
-| FEAT-02 | Separate road and pavement speeds for road scooters | M | next | todo | Claude | DEVICES.md follow-ups. Only if pace learning shows it matters |
-| FEAT-03 | Live bus and tram departures in Edinburgh and Newcastle | M | next | blocked | Richard, Claude | #8. Waits on API keys (HUM-01) |
-| FEAT-04 | "Report what's there" from "What we don't know" on a route | M | next | todo | Claude | UX_ASSESSMENT open finding |
-| FEAT-05 | Saved places (home, work, a friend's) | M | next | todo | Claude | On the device, like devices (D-009) |
-| FEAT-06 | Leave at / arrive by for journeys with buses, trams and the Metro | M | later | todo | Claude | D-029 is frequency-based today |
-| FEAT-07 | Changing Places toilets as their own search and route option | M | next | todo | Claude | Check the Changing Places data licence |
-| FEAT-08 | Rest points on the route for people with a rest limit (benches, seats) | M | later | todo | Claude | D-018 has the data side |
-| FEAT-09 | Ice and gritting warnings in winter | M | later | todo | Claude | Weather feed plus council gritting routes where open |
-| FEAT-10 | Step-free routes across all of London's Underground, not only the Jubilee line and DLR | L | later | todo | Claude | TfL step-free data. Area size is the limit |
-| FEAT-11 | National Rail stations with Passenger Assist details | M | later | todo | Claude | |
-| FEAT-12 | Shareable route links (open a route someone sent you) | M | later | todo | Claude | D-030 built sharing for notes only |
-| FEAT-13 | Welsh and Scottish Gaelic, with a translation set-up for later languages | L | later | todo | Claude | All copy goes through one place first |
+| FEAT-01 | Battery range per device (`maxRangeKm`), with a warning on long routes | M | next | done (2026-10-04) | Claude | D-043. Range engine from PR #26, and "Warn me about battery range" in the device editor |
+| FEAT-02 | Separate road and pavement speeds for road scooters | M | later | todo | Claude | Only if pace learning shows it matters |
+| FEAT-03 | "Report what's there" from "What we don't know" on a route | M | next | todo | Claude | UX_ASSESSMENT open finding. Reports stay on the device until the backend is back on |
+| FEAT-04 | Saved places (home, work, a friend's) | M | next | todo | Claude | On the device, like devices (D-009) |
+| FEAT-05 | Arrive by a time, as well as leave at one | M | later | todo | Claude | D-040 built "Leaving later" |
+| FEAT-06 | Changing Places toilets as their own search and route option | M | later | blocked | Claude | Needs a licensed source first (DATA-01, §9) |
+| FEAT-07 | Rest points on the route for people with a rest limit (benches, seats) | M | later | todo | Claude | D-018 |
+| FEAT-08 | Offline city packs: download a city once, with its size shown | L | later | todo | Claude | D-023 caches what's been loaded |
+| FEAT-09 | Step-free routes across all of London's Underground, not only the Jubilee line and DLR | L | later | todo | Claude | Builds on DATA-03 |
+| FEAT-10 | National Rail stations with Passenger Assist details | M | later | todo | Claude | Live trains wait on a key ([#9](https://github.com/richardthedesigner/causeway/issues/9)) |
+| FEAT-11 | Shareable route links | M | later | todo | Claude | |
+| FEAT-12 | Companion page: a live arrival link for someone meeting you | L | later | todo | Claude | D-004 web scope. Destination and time only, never the profile |
+| FEAT-13 | ETA from the user's own speed over time | M | later | todo | Claude | Pace learning exists per device (D-036) |
+| FEAT-14 | Multi-stop trips (shop, then toilet, then home) | L | later | todo | Claude | |
+| FEAT-15 | Street-level imagery for complex junctions (Mapillary) | L | later | blocked | Richard, Claude | Licence (D-008) and a key ([#9](https://github.com/richardthedesigner/causeway/issues/9)) |
+| FEAT-16 | Welsh and Scottish Gaelic, with one place for all copy | L | later | todo | Claude | |
+| FEAT-17 | Indoor and station routing (lifts, platforms, step-free interchanges) | XL | later | todo | Claude | Start with one big station |
 
 ## Small features
 
 | ID | Task | Size | Priority | Status | Who | Notes |
 |---|---|---|---|---|---|---|
-| SMALL-01 | Miles or kilometres setting | S | next | todo | Claude | |
-| SMALL-02 | Choose how often navigation speaks (every turn, hazards only, off) | S | next | todo | Claude | |
-| SMALL-03 | Copy the route as text (for a carer or a message) | S | next | todo | Claude | `describeSegments` already writes it |
-| SMALL-04 | Print-friendly route | S | later | todo | Claude | |
+| SMALL-01 | Opening hours that know bank holidays | S | next | todo | Claude | D-039 says "may differ on bank holidays" today |
+| SMALL-02 | Miles or kilometres setting | S | next | todo | Claude | |
+| SMALL-03 | Choose how often navigation speaks (every turn, hazards only, off) | S | next | todo | Claude | |
+| SMALL-04 | Copy the route as text, for a carer or a message | S | next | todo | Claude | `describeSegments` already writes it |
 | SMALL-05 | A high-contrast map style | S | next | todo | Claude | For the low-vision profile |
-| SMALL-06 | Clear "no signal" state, with what still works offline | S | next | todo | Claude | |
-| SMALL-07 | Keyboard shortcuts on desktop (search, swap ends, start) | S | later | todo | Claude | |
-| SMALL-08 | "Why this way?" one tap from the navigation screen | S | later | todo | Claude | |
-| SMALL-09 | Recent journeys, not just recent places | S | later | todo | Claude | `recents.ts` |
-
-## Data and coverage
-
-| ID | Task | Size | Priority | Status | Who | Notes |
-|---|---|---|---|---|---|---|
-| DATA-01 | Rebuild the street graphs automatically, not only timetables, works and search | M | next | todo | Claude | #14. D-033 covers the rest. Close #14 when done |
-| DATA-02 | Replace the guessed numbers in the transit cost model | M | next | todo | Claude | #12 |
-| DATA-03 | Check the West Bow and Victoria Terrace gradients on the ground | S | next | todo | Richard | DEVICES.md: these two decide Cherry's Grassmarket route |
-| DATA-04 | Map York Place and the western way into the Grassmarket in OSM (about 1.1 km) | M | later | todo | Richard | DEVICES.md. Turns unknowns into known ground |
-| DATA-05 | Met Office DataHub for production weather | S | later | blocked | Richard | D-011. Waits on a key (HUM-01) |
-| DATA-06 | Tyne and Wear Metro lift status | M | later | blocked | Richard | #13. Partnership with Nexus |
-| DATA-07 | Live Street Manager, and Scotland's roadworks register | M | later | blocked | Richard | #10 |
-| DATA-08 | Placeholder unknown-risk weights replaced from user testing | M | later | todo | Richard, Claude | D-013. Needs TEST-01 |
-
-## Accounts and sync
-
-Today there are no accounts: profiles and devices stay on the phone (D-009), and sharing uses anonymous sign-in (D-030).
-
-| ID | Task | Size | Priority | Status | Who | Notes |
-|---|---|---|---|---|---|---|
-| ACC-01 | Decide whether to offer optional accounts at all | S | next | todo | Richard | Needs a decision record. Health data makes this a privacy call, not just a feature |
-| ACC-02 | Optional account to sync devices and saved places between phones, encrypted on the device | L | later | blocked | Claude | Waits on ACC-01. The server should never read the profile |
-| ACC-03 | Sign in with a passkey or an email code, no passwords | M | later | blocked | Claude | Waits on ACC-01 |
-| ACC-04 | Keep your anonymous notes when you create an account | S | later | blocked | Claude | Waits on ACC-02 |
-| ACC-05 | Export and delete everything about me, in one place | M | next | todo | Claude | Needed with or without accounts (UK GDPR) |
-
-## Deployment and release
-
-| ID | Task | Size | Priority | Status | Who | Notes |
-|---|---|---|---|---|---|---|
-| DEP-01 | Make `main` the default branch and retire the mirror workflow | S | next | blocked | Richard | GitHub settings, then Vercel's production branch. See `mirror-production.yml` |
-| DEP-02 | Preview deploy for every pull request, linked on the PR | S | next | todo | Richard, Claude | Vercel's Git integration may already do this. Confirm |
-| DEP-03 | A custom domain | S | later | blocked | Richard | Needs a name and payment |
-| DEP-04 | Release notes and version numbers users can see | S | later | todo | Claude | Build log is internal |
-| DEP-05 | Service worker update prompt, so people aren't stuck on an old build | S | now | done (2026-10-04) | Claude | D-045. `UpdatePrompt`: Reload or Later, never during navigation |
-| DEP-06 | Graph builds on a worker (Fly.io or Cloud Run), not a laptop | M | later | todo | Richard, Claude | D-010, "reconsider at Phase 3" |
-| DEP-07 | Privacy-safe error reporting (no locations, no profile) | M | next | todo | Richard, Claude | Choose a tool, decide what's sent, write it in DECISIONS |
-| DEP-08 | Production Supabase set up and checked against BACKEND.md | S | next | todo | Richard | Confirm it's live, migrations 0001 to 0005 applied |
-| DEP-09 | Stay under Vercel's free limit of 100 deployments a day: skip builds for docs-only changes and the mirror branch | S | next | done (2026-10-04) | Claude | D-042. `ignoreCommand` in `apps/web/vercel.json` skips `main` (a mirror) and docs-only changes |
+| SMALL-06 | A clear "no signal" state that says what still works offline | S | next | todo | Claude | |
+| SMALL-07 | Print-friendly route | S | later | todo | Claude | |
+| SMALL-08 | Keyboard shortcuts on desktop (search, swap ends, start) | S | later | todo | Claude | |
+| SMALL-09 | "Why this way?" one tap from the navigation screen | S | later | todo | Claude | |
+| SMALL-10 | Recent journeys, not just recent places | S | later | todo | Claude | `recents.ts` |
+| SMALL-11 | Weather for trips more than 48 hours ahead | S | later | todo | Claude | D-040 falls back to today's |
 
 ## Security and privacy
 
 | ID | Task | Size | Priority | Status | Who | Notes |
 |---|---|---|---|---|---|---|
-| SEC-01 | Security headers and a Content Security Policy (`vercel.json`, since a static export can't set them) | S | now | done (2026-10-04) | Claude | D-041. `apps/web/vercel.json`. The a11y and e2e checks serve the build with the same headers, so a CSP that breaks the app fails CI |
-| SEC-02 | Cloudflare Turnstile on anonymous sign-up | S | next | blocked | Richard | D-030. Before any publicity |
-| SEC-03 | Data protection impact assessment (DPIA) | M | next | blocked | Richard | D-030. Before wider launch |
-| SEC-04 | `SECURITY.md`: how to report a vulnerability | S | now | done (2026-10-04) | Claude | `SECURITY.md`. GitHub private reporting has to be turned on (HUM-06) |
-| SEC-05 | Pin GitHub Actions to commit SHAs and give each workflow the least permissions it needs | S | now | done (2026-10-04) | Claude | Pinned to the latest release in each major, version in a comment. CI has `contents: read` and drops the checkout token |
-| SEC-06 | `pnpm audit` in CI, failing on high severity | S | now | todo | Claude | |
-| SEC-07 | Review row-level security and storage bucket rules against the threat model | M | next | todo | Claude | `db/migrations`, `scripts/test-db.sh` |
-| SEC-08 | Harden `/review`: sign-in rate limits, session length, audit of who can see what | S | later | todo | Claude | |
-| SEC-09 | Check nothing on the device leaks the profile (logs, URLs, error messages, analytics) | S | now | todo | Claude | D-009 |
-| SEC-11 | Drop `'unsafe-inline'` from the CSP's `script-src`: hashes for Next's inline scripts at build time | S | later | todo | Claude | D-041. A static export's inline scripts change every build, so `vercel.json` can't list them by hand |
-| SEC-12 | Check the headers are live on production (`curl -I`) and score them on securityheaders.com | S | now | todo | Claude | D-041. Assumes the Vercel project's root directory is `apps/web` (it detects Next.js, so it must be) |
-| SEC-10 | Name the weekly reviewer for flags, photos and reports | S | next | blocked | Richard | BACKEND.md |
+| SEC-01 | Security headers and a Content Security Policy in `apps/web/vercel.json` (a static export can't set them in Next) | S | now | done (2026-10-04) | Claude | D-041. `apps/web/vercel.json`. `pnpm a11y` and `pnpm e2e` serve the build with the same headers and fail on anything the policy blocks |
+| SEC-02 | `SECURITY.md`: how to report a vulnerability | S | next | done (2026-10-04) | Claude | `SECURITY.md`. Private reporting has to be turned on (SEC-14) |
+| SEC-03 | Pin GitHub Actions to commit SHAs and give each workflow the least permissions it needs | S | next | done (2026-10-04) | Claude | Pinned to the latest release in each major, version in a comment. CI has `contents: read` |
+| SEC-04 | `pnpm audit` in CI, failing on high severity | S | next | todo | Claude | |
+| SEC-05 | Check nothing leaks the profile (logs, URLs, error messages) | S | next | todo | Claude | D-009 |
+| SEC-06 | Export and delete everything about me, in one place | M | next | todo | Claude | UK GDPR. Needed with or without accounts |
+| SEC-07 | Review row-level security and storage bucket rules against a threat model | M | later | todo | Claude | `db/migrations`, `scripts/test-db.sh` |
+| SEC-08 | Harden `/review`: sign-in rate limits, session length | S | later | todo | Claude | |
+| SEC-09 | Cloudflare Turnstile on anonymous sign-up, before any publicity | S | later | blocked | Richard, Claude | D-030 |
+| SEC-10 | Data protection impact assessment (DPIA), before wider launch | M | later | blocked | Richard | D-030 |
+| SEC-12 | Check the headers are live on production (`curl -I`), and score them on securityheaders.com | S | next | todo | Claude | D-041. Production has Vercel login protection on its `vercel.app` URLs, which may need Richard |
+| SEC-13 | Drop `'unsafe-inline'` from the CSP's `script-src`: hashes for Next's inline scripts at build time | S | later | todo | Claude | D-041. They change every build |
+| SEC-14 | Turn on private vulnerability reporting (Settings, then Code security) | S | next | blocked | Richard | `SECURITY.md` points people to it |
+| SEC-11 | Name the weekly reviewer for flags, photos and reports | S | later | blocked | Richard | [BACKEND.md](BACKEND.md). Only once sharing is on |
 
 ## Stability and testing
 
 | ID | Task | Size | Priority | Status | Who | Notes |
 |---|---|---|---|---|---|---|
-| STAB-01 | End-to-end test in the built app: search, route, start, end | M | now | done (2026-10-04) | Claude | `pnpm e2e` (`scripts/e2e.mjs`), in CI. One journey per city. Found and fixed STAB-09 on its first run |
+| STAB-01 | End-to-end test in the built app: search, route, start, end | M | next | done (2026-10-04) | Claude | `pnpm e2e` in CI, one journey per city. Found STAB-09 on its first run |
 | STAB-02 | Screenshot tests for the main screens, light and dark, 320 px and 200% text | M | next | todo | Claude | Replaces hand-checked screenshots |
-| STAB-03 | Version the on-device stores (devices, notes, recents) and migrate old data | S | now | done (2026-10-04) | Claude | D-044. `lib/stored.ts` for devices, notes and reports: version in the key, old keys never rewritten, anything unreadable backed up |
+| STAB-03 | Version the on-device stores (devices, notes, recents) and migrate old data | S | next | done (2026-10-04) | Claude | D-044. `lib/stored.ts` for devices, notes and reports: version in the key, old keys never rewritten, anything unreadable backed up |
 | STAB-04 | Router fuzz test: many random start and end points per city, no crashes, no impossible routes | M | next | todo | Claude | |
-| STAB-05 | Timeouts and fallbacks for every live adapter | S | now | todo | Claude | `packages/live` |
+| STAB-05 | Timeouts and fallbacks for every live adapter | S | next | todo | Claude | `packages/live` |
 | STAB-06 | Data refresh guard: fail the weekly PR if counts drop by more than a set amount | S | next | todo | Claude | D-033 |
-| STAB-07 | Routing worker recovers if it crashes, and says so | S | later | todo | Claude | `router.worker.ts` |
-| STAB-09 | A city opened from last time started from Edinburgh's Causewayside, 537 km away | S | now | done (2026-10-04) | Claude | Found by STAB-01. `page.tsx` now sets the saved city's start too |
-| STAB-10 | End-to-end journeys for the device switcher, notes and Leaving later | S | now | todo | Claude | Extend `scripts/e2e.mjs` |
-| STAB-11 | The device editor's header fills a 320 by 640 screen at 200% text, so the settings are below the fold | S | next | todo | Claude | Found checking FEAT-01. Shrink or scroll the header with the content |
+| STAB-07 | The routing worker recovers if it crashes, and says so | S | later | todo | Claude | `router.worker.ts` |
+| STAB-09 | A city opened from last time started from Edinburgh's Causewayside, 537 km from London | S | next | done (2026-10-04) | Claude | Found by STAB-01. `page.tsx` sets the saved city's start |
+| STAB-10 | End-to-end journeys for the device switcher, notes and Leaving later | S | next | todo | Claude | Extend `scripts/e2e.mjs` |
+| STAB-11 | The device editor's header fills a 320 by 640 screen at 200% text | S | next | todo | Claude | Found checking FEAT-01. Shrink or scroll the header with the content |
 | STAB-08 | Offline test: load a city, cut the network, route | S | later | todo | Claude | D-023 |
 
 ## Speed
 
 | ID | Task | Size | Priority | Status | Who | Notes |
 |---|---|---|---|---|---|---|
-| SPEED-01 | Measure: first load, city load, time to first route, on a mid-range phone | S | next | todo | Claude | Numbers first, then targets |
+| SPEED-01 | Measure first load, city load and time to first route on a mid-range phone | S | next | todo | Claude | Numbers first, then targets |
 | SPEED-02 | Router benchmark in CI, failing if a journey gets much slower | S | next | todo | Claude | Uses the acceptance journeys |
-| SPEED-03 | A compact binary graph format instead of gzipped JSON | L | later | todo | Claude | Only if SPEED-01 shows graph load matters |
-| SPEED-04 | Load the `/review` page and admin code only for reviewers | S | later | todo | Claude | |
-| SPEED-05 | Bundle-size and Lighthouse budgets in CI | S | later | todo | Claude | |
-| SPEED-06 | Smaller search index per city | S | later | todo | Claude | `data/places` |
+| SPEED-03 | Bundle-size and Lighthouse budgets in CI | S | later | todo | Claude | |
+| SPEED-04 | Load the `/review` page's code only for reviewers | S | later | todo | Claude | |
+| SPEED-05 | Smaller search index per city | S | later | todo | Claude | `data/places` |
+| SPEED-06 | A compact binary graph format instead of gzipped JSON | L | later | todo | Claude | Only if SPEED-01 shows graph load matters |
 
 ## Bloat reduction
 
 | ID | Task | Size | Priority | Status | Who | Notes |
 |---|---|---|---|---|---|---|
-| BLOAT-01 | Move the four `step2-*.png` screenshots out of the repo root | S | now | done (2026-10-04) | Claude | Now in `docs/ux/devices/`, linked from DEVICES.md. Moving doesn't shrink `.git` (BLOAT-05) |
-| BLOAT-02 | Unused files, exports and dependencies (run `knip`) | S | next | todo | Claude | |
-| BLOAT-03 | Split `page.tsx` (608 lines) and `RoutePanel.tsx` (592 lines) | M | next | todo | Claude | |
-| BLOAT-07 | Fold `docs/OPEN_ITEMS.md` into this roadmap, or make one link to the other | S | next | todo | Claude | Both list what's waiting on Richard. Two lists drift |
-| BLOAT-04 | Retire superseded scripts (Phase 0 `build-snapshot`, `build-edinburgh`, `spike-edinburgh`) if `build-area` covers them | S | later | todo | Claude | Keep the acceptance snapshot working |
+| BLOAT-01 | Move the four `step2-*.png` screenshots out of the repo root (about 760 KB) | S | next | done (2026-10-04) | Richard, Claude | Moved to `docs/ux/devices/` and linked from DEVICES.md. Delete them if they aren't wanted |
+| BLOAT-02 | Find unused files, exports and dependencies (`knip`) | S | next | todo | Claude | |
+| BLOAT-03 | Split `page.tsx` and `RoutePanel.tsx`, the two largest components | M | next | todo | Claude | About 600 lines each |
+| BLOAT-04 | Retire the Phase 0 scripts (`build-snapshot`, `build-edinburgh`, `spike-edinburgh`) if `build-area` covers them | S | later | todo | Claude | Keep the acceptance snapshot working |
 | BLOAT-05 | Keep the 18 MB base map out of git history (release assets or LFS) | M | later | todo | Richard, Claude | `.git` is 52 MB and grows with every refresh |
-| BLOAT-06 | Archive old UX screenshots in `docs/ux` that no doc links to | S | later | todo | Claude | |
+| BLOAT-06 | Archive UX screenshots in `docs/ux` that no doc links to | S | later | todo | Claude | |
 
 ## Updates
 
 | ID | Task | Size | Priority | Status | Who | Notes |
 |---|---|---|---|---|---|---|
-| UPD-01 | Dependabot (or Renovate) for npm and GitHub Actions, grouped weekly | S | now | done (2026-10-04) | Claude | `.github/dependabot.yml`: npm and Actions, Mondays, minor and patch grouped. MapLibre and Next.js majors left to UPD-02 and UPD-03 |
+| UPD-01 | Dependabot for npm and GitHub Actions, grouped weekly | S | now | done (2026-10-04) | Claude | `.github/dependabot.yml`. MapLibre and Next.js majors left to UPD-02 and UPD-03 |
 | UPD-02 | MapLibre GL 4.7 to 5 | M | next | todo | Claude | Pinned at 4.7.1. Check the Protomaps style still renders |
 | UPD-03 | Next.js to the current major | M | later | todo | Claude | Static export must keep working |
 | UPD-04 | Keep Node in CI on the current LTS | S | later | todo | Claude | `engines` says 22 |
+
+## Deployment and release
+
+| ID | Task | Size | Priority | Status | Who | Notes |
+|---|---|---|---|---|---|---|
+| DEP-01 | Make `main` the default and production branch, and retire the mirror workflow | S | next | blocked | Richard | GitHub and Vercel settings. See `mirror-production.yml` |
+| DEP-02 | Stay under Vercel's free limit of 100 deployments a day | S | next | done (2026-10-04) | Claude | `apps/web/vercel.json` turns off `claude/*` previews (3decc02) |
+| DEP-03 | Skip Vercel builds for docs-only changes on `main` | S | later | done (2026-10-04) | Claude | D-042. `ignoreCommand` in `apps/web/vercel.json`: also skips `main`, which mirrors production |
+| DEP-04 | A service worker update prompt, so nobody is stuck on an old build | S | next | done (2026-10-04) | Claude | D-045. `UpdatePrompt`: Reload or Later, never during navigation |
+| DEP-05 | Privacy-safe error reporting (no locations, no profile) | M | later | todo | Richard, Claude | Choose a tool and record it in DECISIONS |
+| DEP-06 | Release notes and version numbers users can see | S | later | todo | Claude | The build log is internal |
+| DEP-07 | A custom domain | S | later | blocked | Richard | Needs a name and payment |
 
 ## Reviews
 
@@ -194,40 +222,34 @@ Repeat on the cadence shown. When one is done, set it back to `todo` with the ne
 
 | ID | Task | Size | Priority | Status | Who | Notes |
 |---|---|---|---|---|---|---|
-| REV-01 | Accessibility review with real VoiceOver and TalkBack, not just axe | M | next | todo | Richard, Claude | Monthly |
+| REV-01 | Docs freshness: README status line, UX_ASSESSMENT, OPEN_ITEMS, this file | S | next | todo | Claude | Monthly |
 | REV-02 | Security review of the whole repo | M | next | todo | Claude | Quarterly |
 | REV-03 | Code review of the largest and most-changed files | S | next | todo | Claude | Monthly |
-| REV-04 | Decisions review: anything marked placeholder or "reconsider" (D-010, D-013) | S | later | todo | Richard, Claude | Quarterly |
-| REV-05 | Data licence and attribution review | S | later | todo | Claude | Each new source, and yearly. DATA_SOURCES.md |
-| REV-06 | Docs freshness: README status line, UX_ASSESSMENT open findings, this file | S | next | todo | Claude | Monthly. Some UX_ASSESSMENT rows are already fixed |
-| REV-07 | Dependency review: what we pull in and why | S | later | todo | Claude | Quarterly |
+| REV-04 | Decisions review: anything marked as a guess or "reconsider" (D-010, D-013, D-037, D-038) | S | later | todo | Richard, Claude | Quarterly |
+| REV-05 | Data licence and attribution review | S | later | todo | Claude | Each new source, and yearly. [DATA_SOURCES.md](DATA_SOURCES.md) |
+| REV-06 | Dependency review: what we pull in and why | S | later | todo | Claude | Quarterly |
 
-## User testing and research
+## Deferred by Richard
 
-| ID | Task | Size | Priority | Status | Who | Notes |
-|---|---|---|---|---|---|---|
-| TEST-01 | A round of testing with five or more wheelchair and scooter users | L | next | todo | Richard | Feeds DATA-08 and the preset numbers |
-| TEST-02 | Testing with blind and partially sighted users (D-037 crossings, D-038 lighting) | L | next | todo | Richard | |
-| TEST-03 | Follow up with the tester who uses Cherry and Lulu on the device switcher | S | next | todo | Richard | DEVICES.md |
-
-## Waiting on Richard
-
-Decisions and accounts only Richard can give. Each one unblocks rows above.
+Not now, on purpose, until Richard says otherwise. Each needs a decision from him first ([OPEN_ITEMS.md](OPEN_ITEMS.md#deferred-by-richard)).
 
 | ID | Task | Size | Priority | Status | Who | Notes |
 |---|---|---|---|---|---|---|
-| HUM-01 | Free API keys for the next data adapters | S | next | todo | Richard | #9. Unblocks FEAT-03, DATA-05 |
-| HUM-02 | Venue access tags at public launch | S | next | todo | Richard | #11 |
-| HUM-03 | Scotland's roadworks register (SRWR) request | S | later | todo | Richard | #10. Unblocks DATA-07 |
-| HUM-04 | Nexus lift status | S | later | todo | Richard | #13. Unblocks DATA-06 |
-| HUM-06 | Turn on private vulnerability reporting (Settings, then Code security) | S | next | todo | Richard | `SECURITY.md` points people to it |
-| HUM-05 | Apple and Google developer accounts | S | next | todo | Richard | Unblocks BIG-01 |
+| DEF-01 | Native app (Expo): lock-screen progress, background location, haptics | XL | later | blocked | Richard, Claude | D-004. Needs Apple and Google developer accounts |
+| DEF-02 | Whole cities, starting with all of Edinburgh | L | later | blocked | Richard, Claude | D-014. Needs a build worker (DEF-03) |
+| DEF-03 | Graph builds on a worker (Fly.io or Cloud Run) with normal network access | M | later | blocked | Richard, Claude | D-010 |
+| DEF-04 | Reports backend: store and moderate public reports | L | later | blocked | Richard, Claude | D-022, D-030 |
+| DEF-05 | Send fixes back to OpenStreetMap from reports and notes | L | later | blocked | Richard, Claude | D-008. Needs DEF-04 |
+| DEF-06 | Crowd verification: several people confirming the same note | L | later | blocked | Claude | Needs DEF-04 |
+| DEF-07 | Optional accounts: sync devices and saved places between phones, encrypted on the device, sign in with a passkey or email code | L | later | blocked | Richard, Claude | Health data makes this a privacy decision first (D-009) |
+| DEF-08 | Opt-in surface sensing from the accelerometer | L | later | blocked | Claude | Needs DEF-01 and a privacy review |
+| DEF-09 | Beyond the pilot cities: Glasgow first (once DATA-13 is licensed), then Wales | XL | later | blocked | Richard, Claude | §5 |
 
 ## Log
 
 Newest first. One line per change: date, ID, what happened, link.
 
-- 2026-10-04: FEAT-01, SEC-05, SEC-04, STAB-03 and DEP-05 done (branch `claude/clever-fermat-ij543q`, PR #33). PR #26 merged into the branch; battery range is now D-043. Added STAB-11, BLOAT-07, HUM-06. Now promoted SEC-12, SEC-06, STAB-05, SEC-09, STAB-10.
-- 2026-10-04: BLOAT-01, SEC-01, UPD-01, STAB-01 and DEP-09 done (branch `claude/clever-fermat-ij543q`). STAB-01's first run found STAB-09, fixed. FEAT-01 is in PR #26. Added SEC-11, SEC-12, STAB-10. Now promoted SEC-05, SEC-04, STAB-03, DEP-05.
-- 2026-10-04: DEP-09 added after Vercel refused a preview for hitting the daily deployment limit.
-- 2026-10-04: Roadmap created from the build log, decisions, plans and open issues.
+- 2026-10-04: SEC-01, SEC-02, SEC-03, STAB-01, STAB-03, STAB-09, UPD-01, FEAT-01, DEP-03, DEP-04 and BLOAT-01 done in PR #33 (branch `claude/clever-fermat-ij543q`), carried over from the earlier roadmap's IDs. Added SEC-12 to SEC-14, STAB-10, STAB-11. Now: DATA-01 to DATA-05.
+- 2026-10-04: Merged the two roadmaps (#31 and #34) into this one. Kept #34's order, phases and Drive copy; added IDs, sizes and owners across every area. Gateshead walking (#7) and Overture duplicates (#15) were already closed.
+- 2026-10-04: DEP-02 done: Vercel no longer builds `claude/*` branches (3decc02).
+- 2026-10-04: Roadmap created (#34), from the UK data survey.
