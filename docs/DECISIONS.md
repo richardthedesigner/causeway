@@ -118,3 +118,21 @@ Proposal: **accept it, and publish the enriched footway graph under ODbL.** It f
 ## D-015 Infer dropped kerbs at UK controlled crossings
 
 **Decided.** 2026-10-04. OSM records a kerb at about 1% of crossings, so without this nearly every manual-wheelchair route carries unknown crossings. UK guidance (DfT tactile paving guidance 2021; Inclusive Mobility 2021) requires dropped kerbs with blister paving at signal-controlled and zebra crossings. So where OSM says a crossing is controlled, or has tactile paving, and says nothing about the kerb, we set the kerb to `lowered` with state **inferred**, source `derived`, height unknown and the rule as its method. Uncontrolled crossings without tactile paving get nothing. A mapped kerb always wins. The router lets an inferred dropped kerb through but charges a cautious user a small risk penalty (30 s at zero tolerance), and the inspector shows it as inferred. Risk: old or substandard crossings. Phase 2 user testing and council dropped-kerb data are the check.
+
+## D-016 Build order: web shell first, Expo second
+
+**Decided.** 2026-10-04. D-004 stands (Expo is the primary product). The first app screen is built in `apps/web` (Next.js, static export) because it can be built, tested (axe, Playwright) and shown from this environment, and because the web shell is needed anyway for share links and planning. All logic lives in the shared packages, so the Expo app reuses the router, profile and live adapters unchanged.
+
+## D-017 Routing runs on the device
+
+**Decided.** 2026-10-04. The web app loads the city graph (3.4 MB gzip for central Edinburgh) into a Web Worker and routes there. The profile, which is health data, never leaves the device: no server sees it, which satisfies D-009 by construction. It also works offline once loaded, and costs nothing to host. Server-side routing (for whole cities and transit, D-003) is added when the graph outgrows the phone.
+
+## D-018 Entrances, doors and rest points
+
+**Decided.** 2026-10-04. Entrances (`entrance`, `door`, `automatic_door`, `door:width`, `step_count`, `wheelchair`, `ramp`), benches and toilets are extracted from OSM. Entrances on the footway network can exclude a route (a manual revolving door, steps over the user's limit, a door narrower than their minimum width). Every entrance near a venue destination gets a verdict for this user under "Getting in". An entrance is never called accessible when the step is unknown. Coverage is very thin (1 of 963 Old Town entrances has an `automatic_door` tag), so this is a crowd-verification and partner-data priority (Euan's Guide, AccessAble: Richard's call).
+
+## D-019 Live weather and TfL lift outages (adapters)
+
+**Decided.** 2026-10-04. `packages/live`:
+- **Weather**: Open-Meteo, fetched by the user's browser (unreachable from the build container). It decides `wet` (rain now or over 0.2 mm in 3 hours) and `ice` (snow, freezing rain, or at or below 1°C after precipitation in 12 hours). The user can always override, and the app says where the setting came from. Non-commercial terms apply (D-011).
+- **TfL lift disruptions**: parsed and tested against a real response recorded 2026-10-04 (18 outages). Outages become `closed` live states on lift edges, expiring after 15 minutes unless refreshed, so a stale closure never outlives its feed. Mapping TfL lift IDs to graph edges needs the London station graph (Phase 3).

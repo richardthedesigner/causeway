@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildGraphFromOsm, classifyWay, parseIncline, parseKerbHeightCm, parseOsmXml } from "@causeway/graph";
+import { buildGraphFromOsm, classifyWay, parseIncline, parseKerbHeightCm, parseOsmXml } from "@causeway/graph/node";
 
 describe("tag parsing", () => {
   it("reads incline in percent and degrees", () => {

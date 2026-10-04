@@ -17,7 +17,7 @@ import {
   type GraphEdge,
   type GraphNode,
   type InclineCheck,
-} from "@causeway/graph";
+} from "@causeway/graph/node";
 import { PRESETS } from "@causeway/profile";
 import { Router, summarise } from "@causeway/router";
 import { EDINBURGH_JOURNEYS } from "./journeys.js";

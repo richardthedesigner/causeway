@@ -7,7 +7,7 @@
  * scaled by (1 - uncertaintyTolerance): a cautious user pays more to avoid
  * the unknown, an adventurous one barely notices it.
  */
-import { confidence, isKnown, type GraphEdge, type GraphNode, type Surface } from "@causeway/graph";
+import { confidence, isKnown, type EntranceInfo, type GraphEdge, type GraphNode, type Surface } from "@causeway/graph";
 import type { Profile } from "@causeway/profile";
 
 export interface Conditions {
@@ -208,6 +208,10 @@ export function evaluateNode(n: GraphNode, viaCrossing: boolean, p: Profile, _c:
   if (n.kind === "elevator") {
     return { passable: "yes", seconds: LIFT_WAIT_S, cost: LIFT_WAIT_S, reasons: [{ kind: "penalty", attr: "lift", detail: "lift", seconds: 0 }] };
   }
+  if (n.entrance) {
+    const v = entranceVerdict(n.entrance, p);
+    if (v.passable === "no") return { passable: "no", seconds: Infinity, cost: Infinity, reasons: [{ kind: "excluded", attr: "entrance", detail: v.detail, seconds: Infinity }] };
+  }
   if (n.kerb) {
     const t = n.kerb.type.value;
     const h = isKnown(n.kerb.heightCm) ? n.kerb.heightCm.value : t === "raised" ? 12 : t === "flush" ? 0 : t === "lowered" ? 2 : null;
@@ -238,6 +242,39 @@ export function evaluateNode(n: GraphNode, viaCrossing: boolean, p: Profile, _c:
     return { passable: "unknown", seconds: 0, cost: s, reasons: [{ kind: "unknown", attr: "kerb", detail: "kerb at crossing not mapped", seconds: s }] };
   }
   return { passable: "yes", seconds: 0, cost: 0, reasons };
+}
+
+export interface EntranceVerdict {
+  passable: "yes" | "no" | "unknown";
+  /** Plain language: "automatic sliding door, step-free", "revolving door", "door type not known". */
+  detail: string;
+}
+
+/**
+ * Can this user get through this door? Unknown stays unknown: we never call
+ * an entrance accessible because nothing says otherwise.
+ */
+export function entranceVerdict(en: EntranceInfo, p: Profile): EntranceVerdict {
+  const wheeled = WHEELED(p);
+  const door = en.door.value;
+  const auto = en.automatic.value;
+  const isAuto = auto !== null && auto !== "no";
+  const parts: string[] = [];
+  if (isAuto) parts.push(auto === "button" ? "push-button automatic door" : "automatic door");
+  else if (door) parts.push(door === "no" ? "open doorway" : `${door} door`);
+  if (isKnown(en.stepCount)) parts.push(en.stepCount.value === 0 ? "step-free" : `${en.stepCount.value} step${en.stepCount.value === 1 ? "" : "s"}`);
+  if (isKnown(en.widthM)) parts.push(`${en.widthM.value} m wide`);
+  if (en.wheelchair.value === "yes") parts.push("marked wheelchair accessible");
+
+  if (en.wheelchair.value === "no" && wheeled) return { passable: "no", detail: "marked not wheelchair accessible" };
+  if (door === "revolving" && !isAuto && (wheeled || p.maxSteps < 3)) return { passable: "no", detail: "revolving door" };
+  if (isKnown(en.stepCount) && en.stepCount.value > p.maxSteps) return { passable: "no", detail: `${en.stepCount.value} steps at the door` };
+  if (isKnown(en.widthM) && en.widthM.value < p.minWidthM) return { passable: "no", detail: `door ${en.widthM.value} m wide` };
+
+  const stepFree = en.wheelchair.value === "yes" || en.stepCount.value === 0 || en.ramp.value === true;
+  if (wheeled && !stepFree) return { passable: "unknown", detail: parts.length ? `${parts.join(", ")}; step at the door not known` : "door and step not known" };
+  if (!door && !isAuto && wheeled) return { passable: "unknown", detail: parts.length ? `${parts.join(", ")}; door type not known` : "door type not known" };
+  return { passable: "yes", detail: parts.join(", ") || (en.wheelchair.value === "yes" ? "wheelchair accessible" : "entrance") };
 }
 
 const WET_SLIPPERY: ReadonlySet<string> = new Set(["sett", "cobblestone", "metal", "wood", "paving_stones"]);

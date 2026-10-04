@@ -16,6 +16,7 @@ export type MobilityPreset =
   | "powerchair"
   | "mobility-scooter"
   | "rollator"
+  | "walking-stick"
   | "crutches"
   | "pram"
   | "fatigue"
@@ -217,6 +218,25 @@ export const PRESETS: Record<MobilityPreset, Profile> = {
     maxRestIntervalM: 300,
     maxToiletIntervalM: null,
     uncertaintyTolerance: 0.4,
+    companion: false,
+  },
+  "walking-stick": {
+    preset: "walking-stick",
+    label: "Walking stick",
+    speedMps: 1.0,
+    maxInclineUpPct: 14,
+    maxInclineDownPct: 12,
+    comfortInclinePct: 6,
+    maxCrossSlopePct: 8,
+    maxKerbCm: 15,
+    minWidthM: 0.7,
+    maxSteps: 30,
+    escalators: true,
+    surfaces: { ...ANY, sett: 0.3, cobblestone: 0.5, gravel: 0.4, grass: 0.5 },
+    wetSurfaceSensitivity: 1.8,
+    maxRestIntervalM: 500,
+    maxToiletIntervalM: null,
+    uncertaintyTolerance: 0.6,
     companion: false,
   },
   crutches: {

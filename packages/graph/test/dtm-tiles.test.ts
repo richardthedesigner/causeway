@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { os1km, osGridSquare, scotlandQuadrant } from "@causeway/graph";
+import { os1km, osGridSquare, scotlandQuadrant } from "@causeway/graph/node";
 
 describe("OS grid naming", () => {
   it("names Edinburgh's 100 km square", () => {

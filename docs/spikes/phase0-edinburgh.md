@@ -51,7 +51,7 @@ Conditions: dry. Profiles are presets from `packages/profile`; real users set th
 
 - 76 m on setts or cobbles.
 - Steepest part 7.9% uphill on King's Stables Road.
-- 798 m where we don't have full data. Tap to see where.
+- 798 m where we don't have full data, shown dashed on the map.
 
 Avoided on the direct route:
 
@@ -112,7 +112,7 @@ Trade-offs offered:
 **Why this way?** Avoids West Bow (12.4% downhill) and The News Steps (124 steps). Adds 27 minutes.
 
 - Steepest part 8.5% uphill on Grassmarket.
-- 798 m where we don't have full data. Tap to see where.
+- 798 m where we don't have full data, shown dashed on the map.
 
 Avoided on the direct route:
 
@@ -170,7 +170,7 @@ Trade-offs offered:
 **Why this way?** Avoids West Bow (12.4% downhill) and The News Steps (124 steps). Adds 23 minutes.
 
 - Steepest part 8.8% uphill on Waverley Bridge.
-- 840 m where we don't have full data. Tap to see where.
+- 840 m where we don't have full data, shown dashed on the map.
 
 Avoided on the direct route:
 
@@ -260,7 +260,7 @@ Trade-offs offered:
 
 - 219 m on setts or cobbles.
 - Steepest part 7.3% downhill on Victoria Street.
-- 199 m where we don't have full data. Tap to see where.
+- 199 m where we don't have full data, shown dashed on the map.
 
 Avoided on the direct route:
 
@@ -291,7 +291,7 @@ Trade-offs offered:
 
 - 219 m on setts or cobbles.
 - Steepest part 7.3% downhill on Victoria Street.
-- 199 m where we don't have full data. Tap to see where.
+- 199 m where we don't have full data, shown dashed on the map.
 
 Avoided on the direct route:
 
@@ -321,7 +321,7 @@ Trade-offs offered:
 **Why this way?** Avoids Fisher's Close (4 steps) and Victoria Terrace (10.2% downhill). Adds 1 minute.
 
 - 219 m on setts or cobbles.
-- 199 m where we don't have full data. Tap to see where.
+- 199 m where we don't have full data, shown dashed on the map.
 
 Avoided on the direct route:
 
@@ -376,7 +376,7 @@ Trade-offs offered:
 
 - Uses 3 lifts.
 - Steepest part 6.3% uphill on North Bridge.
-- 338 m where we don't have full data. Tap to see where.
+- 338 m where we don't have full data, shown dashed on the map.
 
 Avoided on the direct route:
 
@@ -410,7 +410,7 @@ Trade-offs offered:
 
 - Uses 3 lifts.
 - Steepest part 6.3% uphill on North Bridge.
-- 338 m where we don't have full data. Tap to see where.
+- 338 m where we don't have full data, shown dashed on the map.
 
 Avoided on the direct route:
 
@@ -443,7 +443,7 @@ Trade-offs offered:
 **Why this way?** Avoids Scotsman Steps (steps). Adds 11 minutes.
 
 - Uses 3 lifts.
-- 338 m where we don't have full data. Tap to see where.
+- 338 m where we don't have full data, shown dashed on the map.
 
 Avoided on the direct route:
 

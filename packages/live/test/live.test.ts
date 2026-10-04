@@ -1,0 +1,63 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { describe, expect, it } from "vitest";
+import { conditionsFromOpenMeteo, parseLiftDisruptions, toLiveStates, type OpenMeteoResponse } from "@causeway/live";
+
+describe("TfL lift disruptions", () => {
+  // Real response recorded 2026-10-04.
+  const raw = JSON.parse(readFileSync(join(import.meta.dirname, "fixtures/tfl-lifts-2026-10-04.json"), "utf8"));
+  const outages = parseLiftDisruptions(raw, "2026-10-04T12:00:00Z");
+
+  it("parses every disruption in the recorded feed", () => {
+    expect(outages).toHaveLength(raw.length);
+    expect(outages.every((o) => o.liftIds.length > 0)).toBe(true);
+  });
+
+  it("pulls the station name out of the message", () => {
+    expect(outages.find((o) => o.stationId === "940GZZLUWYP")?.stationName).toBe("Wembley Park");
+  });
+
+  it("closes the mapped lift edges, and the closure expires on its own", () => {
+    const o = outages.find((x) => x.stationId === "940GZZLUWYP")!;
+    const states = toLiveStates([o], new Map([[o.liftIds[0]!, [42]]]), 15);
+    const s = states.get(42)!;
+    expect(s.status).toBe("closed");
+    expect(Date.parse(s.validUntil) - Date.parse(s.validFrom)).toBe(15 * 60_000);
+  });
+
+  it("rejects a malformed feed rather than reporting no outages", () => {
+    expect(() => parseLiftDisruptions({ error: "x" }, "2026-10-04T12:00:00Z")).toThrow();
+  });
+});
+
+describe("weather to conditions", () => {
+  const now = new Date("2026-10-04T12:00:00Z");
+  const hourly = (p: number[], t: number[]) => ({
+    time: p.map((_, i) => new Date(now.getTime() - (p.length - 1 - i) * 3_600_000).toISOString()),
+    precipitation: p,
+    temperature_2m: t,
+  });
+  // Shape follows Open-Meteo's documented forecast response; values are synthetic.
+  const base = (over: Partial<OpenMeteoResponse["current"]>, h = hourly([0, 0, 0], [12, 12, 12])): OpenMeteoResponse => ({
+    current: { time: now.toISOString(), temperature_2m: 12, precipitation: 0, weather_code: 1, ...over },
+    hourly: h,
+  });
+
+  it("is dry when nothing has fallen", () => {
+    const c = conditionsFromOpenMeteo(base({}), now);
+    expect([c.wet, c.ice, c.summary]).toEqual([false, false, "Dry"]);
+  });
+  it("is wet after recent rain even if it has stopped", () => {
+    const c = conditionsFromOpenMeteo(base({}, hourly([0, 1.5, 0], [12, 12, 12])), now);
+    expect(c.wet).toBe(true);
+    expect(c.ice).toBe(false);
+  });
+  it("is icy when it rained and the temperature fell to freezing", () => {
+    const c = conditionsFromOpenMeteo(base({ temperature_2m: 2 }, hourly([1, 0, 0], [3, 1, 0])), now);
+    expect(c.ice).toBe(true);
+    expect(c.wet).toBe(true);
+  });
+  it("treats snow as ice", () => {
+    expect(conditionsFromOpenMeteo(base({ weather_code: 73 }), now).ice).toBe(true);
+  });
+});

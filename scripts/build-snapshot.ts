@@ -3,7 +3,7 @@
  *   pnpm build:snapshot
  */
 import { join } from "node:path";
-import { saveSnapshot } from "@causeway/graph";
+import { saveSnapshot } from "@causeway/graph/node";
 import { buildEdinburgh } from "./build-edinburgh.js";
 
 const { graph: g, stats } = await buildEdinburgh();

@@ -6,7 +6,7 @@
  */
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { isKnown, loadSnapshot } from "@causeway/graph";
+import { isKnown, loadSnapshot } from "@causeway/graph/node";
 import { PRESETS, type MobilityPreset } from "@causeway/profile";
 import { describeSegments, elevationProfile, explain, Router, summarise, toGeoJSON, tradeoffs } from "@causeway/router";
 import { EDINBURGH_JOURNEYS } from "./journeys.js";

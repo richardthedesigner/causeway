@@ -1,0 +1,277 @@
+"use client";
+import { PRESETS, type Profile } from "@causeway/profile";
+import { conditionsFromOpenMeteo, openMeteoUrl } from "@causeway/live";
+import { Mountain, SlidersHorizontal } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { MapView } from "@/components/MapView";
+import { ModeSheet } from "@/components/ModeSheet";
+import { PlaceSearch } from "@/components/PlaceSearch";
+import { RoutePanel } from "@/components/RoutePanel";
+import { Button } from "@/components/ui/button";
+import { Drawer, DrawerContent, DrawerDescription, DrawerTitle } from "@/components/ui/drawer";
+import type { Place } from "@/lib/plan-types";
+import { loadProfile, saveProfile } from "@/lib/profile-store";
+import { usePlanner, type Conditions } from "@/lib/use-planner";
+
+const CAUSEWAYSIDE: Place = { id: "causewayside", name: "Causewayside", kind: "Southside / demo address", lon: -3.1812, lat: 55.9385 };
+const PRESET_CONDITIONS: Record<"dry" | "wet" | "ice", Conditions> = {
+  dry: { wet: false, ice: false, summary: "Dry", source: "Set by you" },
+  wet: { wet: true, ice: false, summary: "Wet: setts and slabs are slippery", source: "Set by you" },
+  ice: { wet: true, ice: true, summary: "Icy: steep and sett sections ruled out", source: "Set by you" },
+};
+
+type View = { kind: "search"; target: "from" | "to" } | { kind: "route" };
+
+export default function Home() {
+  const planner = usePlanner();
+  const [profile, setProfile] = useState<Profile>(PRESETS["manual-wheelchair"]);
+  const [modeOpen, setModeOpen] = useState(false);
+  const [from, setFrom] = useState<Place>(CAUSEWAYSIDE);
+  const [to, setTo] = useState<Place | null>(null);
+  const [view, setView] = useState<View>({ kind: "search", target: "to" });
+  const [selected, setSelected] = useState<string | null>(null);
+  const [conditions, setConditions] = useState<Conditions>({ ...PRESET_CONDITIONS.dry, summary: "Checking the weather", source: "Open-Meteo" });
+  const [showSlopes, setShowSlopes] = useState(false);
+  const [snap, setSnap] = useState<number | string | null>(0.5);
+  const [geoError, setGeoError] = useState<string | null>(null);
+  const wide = useWide();
+
+  useEffect(() => setProfile(loadProfile()), []);
+  // Large text leaves little room at half height: open the sheet fully instead.
+  useEffect(() => {
+    if (parseFloat(getComputedStyle(document.documentElement).fontSize) >= 20) setSnap(0.94);
+  }, []);
+
+  // Live weather sets the default conditions; the user can override.
+  useEffect(() => {
+    const ctl = new AbortController();
+    fetch(openMeteoUrl(55.9486, -3.1999), { signal: ctl.signal })
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then((j) => {
+        const c = conditionsFromOpenMeteo(j);
+        setConditions({ wet: c.wet, ice: c.ice, summary: c.summary, source: `From Open-Meteo at ${c.observedAt.slice(11, 16)} UTC` });
+      })
+      .catch(() => setConditions({ ...PRESET_CONDITIONS.dry, summary: "Couldn't check the weather, so we're assuming dry", source: "Change it if the ground is wet or icy" }));
+    return () => ctl.abort();
+  }, []);
+
+  const updateProfile = useCallback((p: Profile) => {
+    setProfile(p);
+    saveProfile(p);
+  }, []);
+
+  // Re-plan whenever the journey, the person or the ground changes.
+  useEffect(() => {
+    if (!planner.ready || !to) return;
+    planner.plan(from, to, profile, conditions);
+    setSelected(null);
+  }, [planner.ready, from, to, profile, conditions]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const pick = (p: Place) => {
+    if (view.kind === "search" && view.target === "from") setFrom(p);
+    else setTo(p);
+    setView({ kind: "route" });
+    setSnap(0.5);
+  };
+
+  const useLocation = () => {
+    navigator.geolocation?.getCurrentPosition(
+      (pos) => pick({ id: "me", name: "Your location", kind: "Current location", lon: pos.coords.longitude, lat: pos.coords.latitude }),
+      () => setGeoError("Couldn't get your location. Type where you're starting from instead."),
+      { enableHighAccuracy: true, timeout: 10_000 },
+    );
+  };
+
+  // A stray tap must never wipe a route: a tap proposes a pin, and the user confirms it.
+  const [pin, setPin] = useState<Place | null>(null);
+  const onMapClick = (lon: number, lat: number) => {
+    if (!planner.ready) return;
+    const [x0, y0, x1, y1] = planner.ready.bbox;
+    if (lon < x0 || lon > x1 || lat < y0 || lat > y1) return;
+    setPin({ id: `pin:${lon.toFixed(5)},${lat.toFixed(5)}`, name: "Dropped pin", kind: `${lat.toFixed(4)}, ${lon.toFixed(4)}`, lon, lat });
+    setSnap(0.5);
+  };
+
+  const routes = useMemo(() => {
+    const r = planner.result;
+    if (r?.status !== "ok") return [];
+    const extra = r.tradeoffs.flatMap((t) => (t.route && t.route.id === selected ? [t.route] : []));
+    return [...r.routes, ...extra];
+  }, [planner.result, selected]);
+  const entrances =
+    planner.result?.status === "ok" ? planner.result.entrances.map((e) => ({ lon: e.lon, lat: e.lat, ok: e.verdict.passable })) : [];
+
+  const body = (
+    <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]">
+      {pin ? (
+        <section aria-live="polite" aria-label="Dropped pin" className="mb-4 grid gap-3 rounded-2xl border-2 border-accent p-4">
+          <p className="m-0">
+            <span className="font-bold">Dropped pin</span>
+            <span className="block text-sm text-muted">{pin.kind}</span>
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="primary"
+              onClick={() => {
+                setTo(pin);
+                setPin(null);
+                setView({ kind: "route" });
+              }}
+            >
+              Directions here
+            </Button>
+            <Button onClick={() => setPin(null)}>Cancel</Button>
+          </div>
+        </section>
+      ) : null}
+      {planner.error && !planner.ready ? (
+        <p role="alert" className="m-0 py-4">
+          The map data didn&apos;t load ({planner.error}). Check your connection and reload.
+        </p>
+      ) : !planner.ready ? (
+        <p className="m-0 py-4 text-muted" aria-live="polite">
+          Loading central Edinburgh…
+        </p>
+      ) : view.kind === "search" ? (
+        <div className="grid gap-4 pt-1">
+          <PlaceSearch
+            label={view.target === "to" ? "Where to?" : "Starting from?"}
+            places={planner.ready.places.filter((p) => p.id !== (view.target === "to" ? from.id : to?.id))}
+            onPick={pick}
+            onUseLocation={view.target === "from" ? useLocation : undefined}
+          />
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <Button onClick={() => setModeOpen(true)} aria-label={`Getting around as ${profile.label}. Change`}>
+              <SlidersHorizontal aria-hidden className="size-5" /> {profile.label}
+            </Button>
+            {to ? (
+              <Button variant="ghost" onClick={() => setView({ kind: "route" })}>
+                Back to route
+              </Button>
+            ) : null}
+          </div>
+          {geoError ? (
+            <p role="alert" className="m-0">
+              {geoError}
+            </p>
+          ) : null}
+          <p className="m-0 text-sm text-muted">{view.target === "to" ? `Or tap the map to drop a pin. Starting from ${from.name}.` : "Or pick a street or place."}</p>
+        </div>
+      ) : to ? (
+        <RoutePanel
+          from={from}
+          to={to}
+          profile={profile}
+          conditions={conditions}
+          result={planner.result}
+          planning={planner.planning}
+          selectedId={selected}
+          onSelect={setSelected}
+          onChangeFrom={() => setView({ kind: "search", target: "from" })}
+          onChangeTo={() => setView({ kind: "search", target: "to" })}
+          onSwap={() => {
+            setFrom(to);
+            setTo(from);
+          }}
+          onOpenMode={() => setModeOpen(true)}
+          onConditions={(k) => setConditions(PRESET_CONDITIONS[k])}
+        />
+      ) : null}
+      <footer className="mt-8 grid gap-2 border-t border-line pt-4 text-sm text-muted">
+        <p className="m-0">
+          Map data © OpenStreetMap contributors (ODbL). Terrain: LiDAR for Scotland, Open Government Licence v3.0. Pavement data built{" "}
+          {planner.ready?.builtAt.slice(0, 10) ?? ""}. Covers central Edinburgh only.
+        </p>
+      </footer>
+    </div>
+  );
+
+  // The name earns its space on the first screen only; on a route, the route is the content.
+  const header =
+    view.kind === "search" ? (
+      <header className="px-4 pt-1 pb-3">
+        <DrawerOrH1 wide={wide}>Causewayside</DrawerOrH1>
+        <SubOrDesc wide={wide}>Routes worked out for how you get around.</SubOrDesc>
+      </header>
+    ) : (
+      <header className="px-4 pt-1 pb-2">
+        <DrawerOrH1 wide={wide} small>
+          Directions
+        </DrawerOrH1>
+      </header>
+    );
+
+  return (
+    <main className="fixed inset-0">
+      <MapView
+        network={planner.ready?.network ?? null}
+        routes={view.kind === "route" ? routes : []}
+        selectedId={selected}
+        from={from}
+        to={view.kind === "route" ? to : null}
+        pin={pin}
+        showSlopes={showSlopes}
+        entrances={view.kind === "route" ? entrances : []}
+        onMapClick={onMapClick}
+      />
+      <div className="absolute top-[calc(1rem+env(safe-area-inset-top,0px))] right-4 z-10 flex flex-col gap-2">
+        <Button
+          aria-pressed={showSlopes}
+          onClick={() => setShowSlopes((v) => !v)}
+          className={showSlopes ? "border-ink bg-ink text-surface shadow-md" : "bg-surface shadow-md"}
+        >
+          <Mountain aria-hidden className="size-5" /> Slopes
+        </Button>
+        {showSlopes ? (
+          <ul aria-label="Slope key" className="m-0 grid list-none gap-1 rounded-2xl border border-line bg-surface p-3 text-sm shadow-md">
+            {[["--g0", "0 to 3%"], ["--g1", "3 to 5%"], ["--g2", "5 to 8%"], ["--g3", "8 to 12%"], ["--g4", "Over 12%"]].map(([c, l]) => (
+              <li key={l} className="flex items-center gap-2">
+                <span aria-hidden className="inline-block h-1.5 w-6 rounded-full" style={{ background: `var(${c})` }} />
+                {l}
+              </li>
+            ))}
+            <li className="flex items-center gap-2">
+              <span aria-hidden className="inline-block h-0 w-6 border-t-2 border-dotted border-unknown" />
+              Not known
+            </li>
+          </ul>
+        ) : null}
+      </div>
+      {wide ? (
+        <aside aria-label="Directions" className="absolute top-4 bottom-4 left-4 z-10 flex w-[420px] flex-col rounded-[var(--radius)] border border-line bg-surface shadow-[0_8px_40px_rgb(0_0_0/0.16)]">
+          <div className="pt-4">{header}</div>
+          {body}
+        </aside>
+      ) : (
+        <Drawer open modal={false} dismissible={false} snapPoints={[0.22, 0.5, 0.94]} activeSnapPoint={snap} setActiveSnapPoint={setSnap}>
+          <DrawerContent aria-describedby={undefined}>
+            {header}
+            {body}
+          </DrawerContent>
+        </Drawer>
+      )}
+      <ModeSheet open={modeOpen} onOpenChange={setModeOpen} profile={profile} onChange={updateProfile} />
+    </main>
+  );
+}
+
+function DrawerOrH1({ wide, small, children }: { wide: boolean; small?: boolean; children: React.ReactNode }) {
+  const cls = small ? "m-0 text-base font-bold text-muted" : "m-0 text-2xl font-bold";
+  return wide ? <h1 className={cls}>{children}</h1> : <DrawerTitle className={cls}>{children}</DrawerTitle>;
+}
+function SubOrDesc({ wide, children }: { wide: boolean; children: React.ReactNode }) {
+  return wide ? <p className="m-0 text-muted">{children}</p> : <DrawerDescription className="m-0 text-muted">{children}</DrawerDescription>;
+}
+
+function useWide() {
+  const [wide, setWide] = useState(false);
+  useEffect(() => {
+    const mq = matchMedia("(min-width: 768px)");
+    const on = () => setWide(mq.matches);
+    on();
+    mq.addEventListener("change", on);
+    return () => mq.removeEventListener("change", on);
+  }, []);
+  return wide;
+}
+

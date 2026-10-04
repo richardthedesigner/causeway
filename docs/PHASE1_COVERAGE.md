@@ -100,7 +100,7 @@ Largest disagreements (candidates for a survey or an OSM fix):
 
 ## Router at area scale
 
-200 random origin and destination pairs, manual wheelchair profile, single thread: p50 25 ms, p95 130 ms, max 166 ms. Routes found: 145 of 200 (the rest have no step-free path within the limits, or start in a disconnected fragment).
+200 random origin and destination pairs, manual wheelchair profile, single thread: p50 32 ms, p95 145 ms, max 203 ms. Routes found: 145 of 200 (the rest have no step-free path within the limits, or start in a disconnected fragment).
 
 ## Acceptance journeys on the area graph (manual wheelchair)
 

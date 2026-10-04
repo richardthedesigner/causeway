@@ -1,7 +1,4 @@
+// Browser-safe: types, attribute model, geometry. Build-time code lives in "@causeway/graph/node".
 export * from "./attribute.js";
 export * from "./schema.js";
 export * from "./geo.js";
-export * from "./osm.js";
-export * from "./terrain.js";
-export * from "./snapshot.js";
-export * from "./dtm-tiles.js";

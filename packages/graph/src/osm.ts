@@ -11,6 +11,11 @@
 import { XMLParser } from "fast-xml-parser";
 import { attr, unknownAttr, type Attr } from "./attribute.js";
 import type {
+  Amenity,
+  AutomaticDoor,
+  DoorType,
+  Entrance,
+  EntranceInfo,
   EdgeAttrs,
   EdgeKind,
   Graph,
@@ -267,6 +272,46 @@ const levelOf = (t: Tags): number => {
   return Number.isFinite(n) ? n : 0;
 };
 
+const DOORS: ReadonlySet<string> = new Set(["hinged", "sliding", "revolving", "swinging", "folding", "overhead", "no"]);
+const AUTO: ReadonlySet<string> = new Set(["yes", "no", "button", "motion", "floor", "continuous", "slowdown_button"]);
+
+export function entranceFromTags(t: Tags, ts: string): EntranceInfo | undefined {
+  if (!t["entrance"] && !t["door"] && !t["automatic_door"] && t["railway"] !== "subway_entrance") return undefined;
+  const door = t["door"] ? (DOORS.has(t["door"]) ? (t["door"] as DoorType) : "other") : null;
+  const auto = t["automatic_door"] && AUTO.has(t["automatic_door"]) ? (t["automatic_door"] as AutomaticDoor) : null;
+  const wc = t["wheelchair"];
+  const steps = t["step_count"] !== undefined ? Number(t["step_count"]) : null;
+  return {
+    entrance: osmAttr(t["entrance"] ?? (t["railway"] === "subway_entrance" ? "subway" : null), ts, "OSM entrance tag"),
+    door: osmAttr(door, ts, "OSM door tag"),
+    automatic: osmAttr(auto, ts, "OSM automatic_door tag"),
+    widthM: osmAttr(parseMetres(t["door:width"] ?? t["width"]), ts, "OSM door:width tag"),
+    stepCount: osmAttr(Number.isFinite(steps) ? steps : null, ts, "OSM step_count tag"),
+    wheelchair: osmAttr(wc === "yes" || wc === "limited" || wc === "no" ? wc : null, ts, "OSM wheelchair tag"),
+    ramp: osmAttr(yesNo(t["ramp"]) ?? yesNo(t["ramp:wheelchair"]), ts, "OSM ramp tag"),
+  };
+}
+
+function amenityFromNode(n: OsmNode): Amenity | undefined {
+  const t = n.tags;
+  const kind = t["amenity"] === "bench" || t["leisure"] === "picnic_table" ? "bench" : t["amenity"] === "toilets" ? (t["changing_places"] === "yes" ? "changing_places" : "toilets") : null;
+  if (!kind) return undefined;
+  const wc = t["wheelchair"] ?? t["toilets:wheelchair"];
+  const details: Record<string, Attr<string>> = {};
+  for (const k of ["backrest", "armrest", "changing_table", "toilets:wheelchair", "centralkey", "fee", "opening_hours", "access"]) {
+    if (t[k]) details[k] = attr(t[k], "reported", "osm", n.timestamp, `OSM ${k} tag`);
+  }
+  return {
+    id: n.id,
+    lon: n.lon,
+    lat: n.lat,
+    kind,
+    wheelchair: osmAttr(wc === "yes" || wc === "limited" || wc === "no" ? wc : null, n.timestamp, "OSM wheelchair tag"),
+    details,
+    osmId: n.id,
+  };
+}
+
 export interface BuildOptions {
   name: string;
   bbox: [number, number, number, number];
@@ -352,6 +397,7 @@ export function buildGraphFromOsm(osm: OsmData, opts: BuildOptions): Graph {
     if (existing) return existing.id;
     const n = osm.nodes.get(osmId)!;
     const kerb = kerbFromTags(n.tags, n.timestamp);
+    const entrance = entranceFromTags(n.tags, n.timestamp);
     const kind: GraphNode["kind"] =
       n.tags["highway"] === "elevator"
         ? "elevator"
@@ -370,6 +416,7 @@ export function buildGraphFromOsm(osm: OsmData, opts: BuildOptions): Graph {
       level,
       kind,
       ...(kerb ? { kerb } : {}),
+      ...(entrance ? { entrance } : {}),
       osmId,
     });
     return osmId;
@@ -441,6 +488,18 @@ export function buildGraphFromOsm(osm: OsmData, opts: BuildOptions): Graph {
   splitLiftsByLevel(nodes, edges, () => edgeId++);
   inferNames(edges, osm);
 
+  const [minLon, minLat, maxLon, maxLat] = opts.bbox;
+  const inBox = (n: OsmNode) => n.lon >= minLon && n.lon <= maxLon && n.lat >= minLat && n.lat <= maxLat;
+  const entrances: Entrance[] = [];
+  const amenities: Amenity[] = [];
+  for (const n of osm.nodes.values()) {
+    if (!inBox(n)) continue;
+    const info = entranceFromTags(n.tags, n.timestamp);
+    if (info) entrances.push({ ...info, id: n.id, lon: n.lon, lat: n.lat, level: levelOf(n.tags), name: n.tags["name"] ?? n.tags["ref"] ?? null, osmId: n.id });
+    const a = amenityFromNode(n);
+    if (a) amenities.push(a);
+  }
+
   return {
     meta: {
       name: opts.name,
@@ -457,6 +516,8 @@ export function buildGraphFromOsm(osm: OsmData, opts: BuildOptions): Graph {
     },
     nodes: [...nodes.values()],
     edges,
+    entrances,
+    amenities,
   };
 }
 

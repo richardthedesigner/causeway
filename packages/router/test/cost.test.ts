@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { attr, unknownAttr, type EdgeAttrs, type GraphEdge, type GraphNode } from "@causeway/graph";
+import { attr, unknownAttr, type EdgeAttrs, type EntranceInfo, type GraphEdge, type GraphNode } from "@causeway/graph";
 import { PRESETS } from "@causeway/profile";
-import { DRY, evaluateEdge, evaluateNode } from "@causeway/router";
+import { DRY, entranceVerdict, evaluateEdge, evaluateNode } from "@causeway/router";
 
 const baseAttrs = (): EdgeAttrs => ({
   incline: attr(0, "inferred", "lidar-scotland", "2022-01-01T00:00:00Z"),
@@ -95,5 +95,38 @@ describe("evaluateNode", () => {
 
   it("flags an unmapped kerb at a crossing as unknown, not fine", () => {
     expect(evaluateNode(node(), true, manual, DRY).passable).toBe("unknown");
+  });
+});
+
+describe("entranceVerdict", () => {
+  const en = (over: Partial<EntranceInfo> = {}): EntranceInfo => ({
+    entrance: attr("main", "reported", "osm", null),
+    door: unknownAttr(),
+    automatic: unknownAttr(),
+    widthM: unknownAttr(),
+    stepCount: unknownAttr(),
+    wheelchair: unknownAttr(),
+    ramp: unknownAttr(),
+    ...over,
+  });
+
+  it("never calls an entrance accessible when the step is unknown", () => {
+    const v = entranceVerdict(en({ automatic: attr("motion", "reported", "osm", null) }), manual);
+    expect(v.passable).toBe("unknown");
+    expect(v.detail).toMatch(/automatic door/);
+  });
+  it("is step-free with an automatic door", () => {
+    const v = entranceVerdict(en({ automatic: attr("yes", "reported", "osm", null), stepCount: attr(0, "reported", "osm", null) }), manual);
+    expect(v).toEqual({ passable: "yes", detail: "automatic door, step-free" });
+  });
+  it("rules out a manual revolving door for a wheelchair, not for walking", () => {
+    const revolving = en({ door: attr("revolving", "reported", "osm", null), stepCount: attr(0, "reported", "osm", null) });
+    expect(entranceVerdict(revolving, manual).passable).toBe("no");
+    expect(entranceVerdict(revolving, walking).passable).toBe("yes");
+  });
+  it("respects the user's step limit", () => {
+    const twoSteps = en({ stepCount: attr(2, "reported", "osm", null) });
+    expect(entranceVerdict(twoSteps, manual).passable).toBe("no");
+    expect(entranceVerdict(twoSteps, PRESETS["walking-stick"]).passable).not.toBe("no");
   });
 });

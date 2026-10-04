@@ -55,6 +55,45 @@ export interface KerbInfo {
   tactilePaving: Attr<boolean>;
 }
 
+export type DoorType = "hinged" | "sliding" | "revolving" | "swinging" | "folding" | "overhead" | "no" | "other";
+export type AutomaticDoor = "yes" | "no" | "button" | "motion" | "floor" | "continuous" | "slowdown_button";
+
+/** A way into a building or station. Mostly on building outlines, so usually not part of the footway network. */
+export interface EntranceInfo {
+  /** OSM entrance=*: main, secondary, service, emergency, staircase, yes... */
+  entrance: Attr<string>;
+  door: Attr<DoorType>;
+  automatic: Attr<AutomaticDoor>;
+  widthM: Attr<number>;
+  stepCount: Attr<number>;
+  wheelchair: Attr<"yes" | "limited" | "no">;
+  /** Ramp or kerb at the door, if tagged. */
+  ramp: Attr<boolean>;
+}
+
+export interface Entrance extends EntranceInfo {
+  id: number;
+  lon: number;
+  lat: number;
+  level: number;
+  name: string | null;
+  osmId: number;
+}
+
+export type AmenityKind = "bench" | "toilets" | "changing_places";
+
+/** Rest points and toilets: for rest- and toilet-aware routing and the map layer. */
+export interface Amenity {
+  id: number;
+  lon: number;
+  lat: number;
+  kind: AmenityKind;
+  wheelchair: Attr<"yes" | "limited" | "no">;
+  /** Bench backrest / armrest, toilet changing table, RADAR key: free-form facts with source. */
+  details: Record<string, Attr<string>>;
+  osmId: number;
+}
+
 export type NodeKind = "junction" | "kerb" | "crossing" | "entrance" | "elevator" | "endpoint";
 
 export interface GraphNode {
@@ -67,6 +106,8 @@ export interface GraphNode {
   level: number;
   kind: NodeKind;
   kerb?: KerbInfo;
+  /** Present when this network node is a building or station entrance. */
+  entrance?: EntranceInfo;
   /** OSM node id when the node maps 1:1 to OSM. */
   osmId?: number;
 }
@@ -135,4 +176,7 @@ export interface Graph {
   };
   nodes: GraphNode[];
   edges: GraphEdge[];
+  /** All entrances in the area, on the network or not. */
+  entrances?: Entrance[];
+  amenities?: Amenity[];
 }

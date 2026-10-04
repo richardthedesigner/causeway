@@ -9,7 +9,7 @@ import {
   type Graph,
   type OsmData,
   type TerrainStats,
-} from "@causeway/graph";
+} from "@causeway/graph/node";
 import { cached, EDINBURGH_OLD_TOWN as AREA, osmTileUrl, toArrayBuffer } from "./sources.js";
 
 /**

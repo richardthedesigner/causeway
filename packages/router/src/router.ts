@@ -5,7 +5,7 @@
  */
 import { confidence, haversine, isKnown, type Graph, type GraphEdge, type GraphNode } from "@causeway/graph";
 import type { Profile } from "@causeway/profile";
-import { DRY, evaluateEdge, evaluateNode, surfaceLabel, type Conditions, type Evaluation, type Reason } from "./cost.js";
+import { DRY, entranceVerdict, evaluateEdge, evaluateNode, surfaceLabel, type Conditions, type EntranceVerdict, type Evaluation, type Reason } from "./cost.js";
 
 interface Arc {
   edge: GraphEdge;
@@ -361,13 +361,18 @@ export function explain(router: Router, chosen: Route, from: GraphNode, to: Grap
   if (setts > 20) notes.push(`${setts} m on setts or cobbles.`);
   if (sum.worstInclinePct !== null && Math.abs(sum.worstInclinePct) >= p.comfortInclinePct)
     notes.push(`Steepest part ${Math.abs(sum.worstInclinePct)}% ${sum.worstInclinePct > 0 ? "uphill" : "downhill"}${sum.worstInclineAt ? ` on ${sum.worstInclineAt}` : ""}.`);
-  if (sum.unknownM > 0) notes.push(`${sum.unknownM} m where we don't have full data. Tap to see where.`);
+  if (sum.unknownM > 0) notes.push(`${sum.unknownM} m where we don't have full data, shown dashed on the map.`);
 
   const top = avoided.filter((a) => a.reason.kind === "excluded").slice(0, 2);
-  const lead = top.length ? top : avoided.slice(0, 1);
+  const penalties = avoided.filter((a) => a.reason.kind === "penalty").slice(0, 1);
+  const lead = top.length ? top : penalties;
+  const extra = addedMinutes > 0 ? `Adds ${addedMinutes} minute${addedMinutes === 1 ? "" : "s"}.` : "No extra time.";
+  // An unknown is never presented as the reason a street is bad: we say we steered towards known ground.
   const headline = lead.length
-    ? `Avoids ${lead.map((a) => `${a.name} (${a.reason.detail})`).join(" and ")}. ${addedMinutes > 0 ? `Adds ${addedMinutes} minute${addedMinutes === 1 ? "" : "s"}.` : "No extra time."}`
-    : "This is the most direct route that fits your settings.";
+    ? `Avoids ${lead.map((a) => `${a.name} (${a.reason.detail})`).join(" and ")}. ${extra}`
+    : avoided.length
+      ? `Takes streets we have better data for. ${extra}`
+      : "This is the most direct route that fits your settings.";
   return { headline, avoided, addedMinutes, notes };
 }
 
@@ -477,4 +482,39 @@ export function tradeoffs(router: Router, chosen: Route, from: GraphNode, to: Gr
     }
   }
   return out;
+}
+
+// ---------------------------------------------------------------- arrival
+
+export interface EntranceOption {
+  lon: number;
+  lat: number;
+  name: string | null;
+  distanceM: number;
+  verdict: EntranceVerdict;
+  /** "OSM node 123, 2024-05-01": every access fact shows its source on request. */
+  source: string;
+}
+
+/**
+ * Entrances within `radiusM` of a destination, best for this user first.
+ * Phase 2 routes to the chosen entrance rather than to the building's centre.
+ */
+export function entrancesNear(g: Graph, lon: number, lat: number, p: Profile, radiusM = 40): EntranceOption[] {
+  const rank = { yes: 0, unknown: 1, no: 2 } as const;
+  // Service and emergency doors are not a way in for visitors.
+  const NOT_FOR_VISITORS = new Set(["service", "emergency", "exit", "staircase"]);
+  return (g.entrances ?? [])
+    .filter((e) => !NOT_FOR_VISITORS.has(e.entrance.value ?? ""))
+    .map((e) => ({ e, d: haversine([lon, lat], [e.lon, e.lat]) }))
+    .filter(({ d }) => d <= radiusM)
+    .map(({ e, d }) => ({
+      lon: e.lon,
+      lat: e.lat,
+      name: e.name,
+      distanceM: Math.round(d),
+      verdict: entranceVerdict(e, p),
+      source: `OpenStreetMap node ${e.osmId}${e.door.observedAt ? `, ${e.door.observedAt.slice(0, 10)}` : ""}`,
+    }))
+    .sort((a, b) => rank[a.verdict.passable] - rank[b.verdict.passable] || a.distanceM - b.distanceM);
 }

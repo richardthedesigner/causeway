@@ -14,7 +14,7 @@ import {
   registerOsgb,
   saveSnapshot,
   toOsgb,
-} from "@causeway/graph";
+} from "@causeway/graph/node";
 import { cached, CACHE, EDINBURGH_OLD_TOWN, toArrayBuffer } from "./sources.js";
 
 export const EDINBURGH_CENTRAL = {

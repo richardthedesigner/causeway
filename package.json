@@ -12,7 +12,9 @@
     "build:snapshot": "tsx scripts/build-snapshot.ts",
     "spike": "tsx scripts/spike-edinburgh.ts",
     "build:central": "tsx scripts/build-edinburgh-central.ts",
-    "report:central": "tsx scripts/report-edinburgh-central.ts"
+    "report:central": "tsx scripts/report-edinburgh-central.ts",
+    "web:build": "pnpm --filter @causeway/web build",
+    "web:dev": "pnpm --filter @causeway/web dev"
   },
   "devDependencies": {
     "@types/node": "^26.6.4",

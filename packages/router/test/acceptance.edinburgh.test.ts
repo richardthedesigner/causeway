@@ -4,7 +4,7 @@
  */
 import { join } from "node:path";
 import { beforeAll, describe, expect, it } from "vitest";
-import { loadSnapshot } from "@causeway/graph";
+import { loadSnapshot } from "@causeway/graph/node";
 import { PRESETS } from "@causeway/profile";
 import { DRY, evaluateEdge, explain, Router, summarise, tradeoffs, type Route } from "@causeway/router";
 import { EDINBURGH_JOURNEYS } from "../../../scripts/journeys.js";

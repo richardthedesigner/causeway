@@ -16,9 +16,12 @@
     "baseUrl": ".",
     "paths": {
       "@causeway/graph": ["packages/graph/src/index.ts"],
+      "@causeway/graph/node": ["packages/graph/src/node.ts"],
       "@causeway/profile": ["packages/profile/src/index.ts"],
-      "@causeway/router": ["packages/router/src/index.ts"]
+      "@causeway/router": ["packages/router/src/index.ts"],
+      "@causeway/live": ["packages/live/src/index.ts"]
     }
   },
-  "include": ["packages/*/src/**/*.ts", "packages/*/test/**/*.ts", "scripts/**/*.ts", "vitest.config.ts"]
+  "include": ["packages/*/src/**/*.ts", "packages/*/test/**/*.ts", "scripts/**/*.ts", "vitest.config.ts"],
+  "exclude": ["apps"]
 }

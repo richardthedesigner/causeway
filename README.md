@@ -10,7 +10,9 @@ Accessibility-first wayfinding. It gets a wheelchair user from A to B on a route
 |---|---|
 | `packages/graph` | Graph schema, attribute and confidence model, OSM ingest, LiDAR terrain, snapshots |
 | `packages/profile` | User profile and presets (health data: on device by default) |
-| `packages/router` | Per-user cost, routing, alternatives, trade-offs, "Why this way?" |
+| `packages/router` | Per-user cost, routing, alternatives, trade-offs, "Why this way?", entrances |
+| `packages/live` | Live data adapters: weather (Open-Meteo), TfL lift disruptions |
+| `apps/web` | The app: map, search, mode and limits, routes (router runs on the device) |
 | `scripts/` | Graph build, Edinburgh spike, acceptance journeys |
 | `data/snapshots/` | Frozen graphs for reproducible acceptance tests |
 | `db/migrations/` | PostGIS source of truth |
@@ -24,6 +26,8 @@ pnpm test                    # unit + acceptance tests on the committed snapshot
 CAUSEWAY_LIVE=1 pnpm test    # also rebuild from today's OSM and re-run the journeys
 pnpm build:snapshot          # rebuild data/snapshots/edinburgh-old-town.graph.json.gz
 pnpm spike                   # regenerate docs/spikes/phase0-edinburgh.{md,geojson}
+pnpm web:dev                 # the app at http://localhost:3000 (central Edinburgh)
+pnpm web:build               # static export in apps/web/out
 
 # Phase 1: central Edinburgh (needs pip install osmium)
 curl -o .data-cache/Edinburgh.osm.pbf https://download.bbbike.org/osm/bbbike/Edinburgh/Edinburgh.osm.pbf

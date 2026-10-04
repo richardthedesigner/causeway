@@ -6,3 +6,7 @@ node_modules/
 !.env.example
 coverage/
 .DS_Store
+apps/web/.next/
+apps/web/out/
+apps/web/public/graph/
+*.tsbuildinfo
