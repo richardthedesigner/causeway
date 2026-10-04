@@ -4,6 +4,13 @@ A running record of what was built, newest first. Each entry links the decision 
 
 ## 2026-10-04 (evening)
 
+**Fewer Overture duplicates** (D-028 update, #15)
+- Same address plus a shared name word or the same kind of place counts as one venue.
+- 483 fewer duplicates across the three cities.
+- Wrong categories from Overture are still open.
+
+**CI on the production branch**: CI now runs on pushes to the production branch too. Before, only `main` was tested, and the mirror's pushes don't trigger workflows.
+
 **Weekly data refresh** (D-033, #14)
 - A GitHub Actions workflow rebuilds timetables, works and the search index.
 - It tests the result and opens a PR with a count table.

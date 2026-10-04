@@ -200,6 +200,8 @@ Next adapters, in order of value: Overture places (more venues and addresses; re
 
 **Decided.** 2026-10-04. OSM has the access tags but misses many venues (Newcastle: 2,214 OSM places against 5,376 in Overture). Overture places are added to each city's search index when they are confident (0.7 and over), open, somewhere people go, and not already in OSM under a similar name within 75 m (word overlap, "&" read as "and", and spelling variants within 40 m). They show with their category and address and no access line, and an "accessible" search never lists them, because nothing says they are. When names tie, OSM ranks first.
 
+Update (issue #15): an Overture place is also a duplicate when an OSM place within 40 m has the same house number and street and either shares a name word or is the same kind of place. An address alone isn't enough, because one building can hold many businesses. This removed 409 more duplicates in Edinburgh, 58 in Newcastle and 16 in London.
+
 ## D-029 Buses: frequency-based, built from open timetables, honest about the wheelchair space
 
 **Decided.** 2026-10-04. Buses come from the Bus Open Data Service GTFS downloads (England and Scotland, no key, OGL; `pnpm build:bus`). For each route direction we keep the stops inside the area, the typical ride time between stops and how many buses leave each stop in each hour on a typical weekday, Saturday and Sunday. The app adds them to the graph when a city loads (`addBus`), so timetables refresh without rebuilding streets.
