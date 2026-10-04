@@ -234,6 +234,8 @@ export default function Home() {
           onOpenMode={() => setModeOpen(true)}
           onConditions={(k) => setConditions(PRESET_CONDITIONS[k])}
           lifts={planner.lifts}
+          works={planner.works}
+          worksCovered={!!city.works}
           onStart={() => setNavigating(true)}
         />
       ) : null}

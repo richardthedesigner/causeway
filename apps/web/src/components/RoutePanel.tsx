@@ -4,7 +4,7 @@ import type { Profile } from "@causeway/profile";
 import { useState } from "react";
 import { ElevationChart } from "@/components/ElevationChart";
 import { Button } from "@/components/ui/button";
-import type { Place, PlannedRoute, PlanResult } from "@/lib/plan-types";
+import type { Place, PlannedRoute, PlanResult, WorksSummary } from "@/lib/plan-types";
 import type { Conditions, LiveLifts } from "@/lib/use-planner";
 import { cn } from "@/lib/utils";
 
@@ -23,6 +23,10 @@ interface Props {
   onOpenMode: () => void;
   onConditions: (c: "dry" | "wet" | "ice") => void;
   lifts: LiveLifts;
+  /** Street works on pavements in this area; null where there is no feed (Scotland for now). */
+  works: WorksSummary | null;
+  /** The city has a works feed at all. */
+  worksCovered: boolean;
   onStart: () => void;
 }
 
@@ -121,6 +125,13 @@ export function RoutePanel(props: Props) {
               <p className="m-0 text-sm text-caution">Couldn&apos;t get live lift status from TfL. Check before you travel.</p>
             ) : props.lifts.state === "loading" ? (
               <p className="m-0 text-sm text-muted">Checking lifts with TfL…</p>
+            ) : null}
+            {props.works ? (
+              <p className="m-0 text-sm text-muted">
+                Pavement works: {props.works.closedNow + props.works.affectedNow === 0 ? "none known in this area today" : `${props.works.closedNow} closing a pavement (avoided) and ${props.works.affectedNow} on one (counted as unknown)`}. From {props.works.sources.join(" and ")}.
+              </p>
+            ) : !props.worksCovered ? (
+              <p className="m-0 text-sm text-muted">No open roadworks feed here yet, so pavement closures aren&apos;t shown.</p>
             ) : null}
           </section>
 

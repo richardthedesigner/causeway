@@ -312,3 +312,11 @@ Partnership items for Richard:
 | **OpenStreetMap** (BBBike Edinburgh PBF; OSM API tiles elsewhere) | Bundled search index: places, access tags, addresses, postcodes (`data/places/`) | ODbL | V (2026-10-04): Edinburgh 9,944 places (1,264 with a wheelchair tag), 50,746 addresses, 2,011 postcodes | **keep** (D-025) |
 | **Photon** (`photon.komoot.io/api`) | Live name search when the bundled index has fewer than 5 matches. Bounded to the city | OSM data, ODbL; public instance has a fair-use limit, so self-host before launch | Reachable from the container, 2026-10-04 | **keep**; self-host for scale |
 | **postcodes.io** (`api.postcodes.io/postcodes/{pc}`) | Full postcodes missing from OSM | OGL v3 (ONS Postcode Directory, contains Royal Mail and OS data) | Not reachable from the container; documented API | **keep**; self-hostable |
+
+## Roadworks (2026-10-04)
+
+| Source | Use | Licence | Verified | Verdict |
+|---|---|---|---|---|
+| **Street Manager open data** (`opendata.manage-roadworks.service.gov.uk/permit/YYYY/MM.zip`) | Footway closures and works for English areas: `close_footway_ref` (`no`, `yes_provide_alternative_route`, `yes_provide_pedestrian_walkway`), `works_location_type`, BNG geometry, dates | OGL v3 | V (2026-09 archive, 1 GB, 2026-10-04): Newcastle 56 works on pavements, 43 closing them | **keep** (D-026). Monthly archive in the build now; live SNS notifications for production |
+| **TfL road disruptions** (`/Road/all/Street/Disruption`) | Live London top-up, kept only when the description mentions the pavement | TfL open data terms | V (300 segments, 2026-10-04) | **keep** |
+| **Scottish Road Works Register** (SRWR, roadworks.scot) | Would cover Edinburgh | Not open | No public feed found | **partnership-only**: ask the Scottish Road Works Commissioner for data access |

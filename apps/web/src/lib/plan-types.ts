@@ -1,5 +1,6 @@
 import type { Conditions, EntranceOption, NavPlan, RouteSummary } from "@causeway/router";
 import type { Profile } from "@causeway/profile";
+import type { WorksObservation } from "@causeway/live";
 
 export interface Place {
   id: string;
@@ -61,12 +62,26 @@ export interface LiftOutageMsg {
 }
 
 export type WorkerRequest =
-  | { type: "init"; graphUrl: string; networkUrl?: string; places: Place[] }
+  | { type: "init"; graphUrl: string; networkUrl?: string; worksUrl?: string; places: Place[] }
+  | { type: "works-live"; works: WorksObservation[]; fetchedAt: string }
   | { type: "live"; outages: LiftOutageMsg[] }
   | { type: "plan"; id: number; from: Place; to: Place; profile: Profile; conditions: Omit<Conditions, "now"> & { now: string } };
 
 export type WorkerResponse =
   | { type: "ready"; places: Place[]; network: { coords: [number, number][]; bin: number }[]; bbox: [number, number, number, number]; builtAt: string }
   | { type: "error"; message: string }
+  | { type: "works"; summary: WorksSummary }
   | { type: "live"; applied: number; fetchedAt: string }
   | { type: "plan"; id: number; result: PlanResult };
+
+/** Street works on pavements in the loaded area, for the "what we know right now" line. */
+export interface WorksSummary {
+  /** Works on pavements going on now: closed, and on the pavement but not closing it. */
+  closedNow: number;
+  affectedNow: number;
+  /** Planned later (still within their dates when they start). */
+  upcoming: number;
+  sources: string[];
+  /** When the newest feed was read. */
+  asOf: string;
+}
