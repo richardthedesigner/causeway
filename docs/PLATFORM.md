@@ -1,6 +1,6 @@
 # Platform recommendation
 
-**Status: proposed, awaiting Richard's sign-off (D-004).** Nothing past the spike is built until then.
+**Status: decided (D-004), 2026-10-04.** Richard delegated the call.
 
 ## Recommendation
 
@@ -28,7 +28,7 @@ One shared TypeScript core and two shells:
 
 ## What it costs
 
-- **shadcn on native is a port, not shadcn.** react-native-reusables copies shadcn's API and owned-source model, styled with NativeWind (Tailwind). We keep one token file that drives both Tailwind configs, so the re-theme is shared. Component substitutions on native: Drawer (vaul) becomes `@gorhom/bottom-sheet` with snap points; Command (cmdk) becomes a custom list on the reusables primitives; Sonner becomes a native toast. **This is a partial deviation from "shadcn for all UI chrome" and needs Richard's explicit acceptance.**
+- **shadcn on native is a port, not shadcn.** react-native-reusables copies shadcn's API and owned-source model, styled with NativeWind (Tailwind). We keep one token file that drives both Tailwind configs, so the re-theme is shared. Component substitutions on native: Drawer (vaul) becomes `@gorhom/bottom-sheet` with snap points; Command (cmdk) becomes a custom list on the reusables primitives; Sonner becomes a native toast. This is a partial deviation from "shadcn for all UI chrome", accepted as part of D-004.
 - Two shells to keep at quality. Mitigation: the web app's scope is deliberately narrow (share, plan, debug, marketing); navigation is native only.
 - App Store review and release cadence. Mitigation: Expo EAS updates for JS-only fixes.
 

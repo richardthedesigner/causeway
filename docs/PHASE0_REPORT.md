@@ -51,7 +51,7 @@ Other acceptance checks:
 
 ## Decisions needing Richard
 
-1. **Platform (D-004)**: shared core + Expo app + Next.js web. This includes accepting react-native-reusables as the shadcn equivalent on native. *Blocks Phase 2 UI.*
+1. **Platform (D-004)**: decided 2026-10-04 (delegated): shared core + Expo app + Next.js web, with react-native-reusables as the shadcn equivalent on native.
 2. **ODbL strategy (D-008)**: publish the enriched footway graph under ODbL; keep partner and licensed data in separate layers. Depends on question 4 below.
 3. **Routing engine (D-003)**: own router over PostGIS, OpenTripPlanner for transit, GraphHopper as the fallback. Not blocking, but he should know.
 4. **Paid data**: OS NGD pavement widths (premium), Met Office DataHub for production weather.

@@ -14,7 +14,7 @@ Status key: **Decided** (reversible, logged per "high autonomy"), **Proposed** (
 - `packages/profile`: user profile and presets.
 - `packages/router`: cost model, routing, summaries, explanations, trade-offs.
 - `scripts/`: data builds and the spike. `db/migrations/`: PostGIS source of truth.
-- App packages (`apps/mobile`, `apps/web`) arrive after D-004 is signed off.
+- App packages (`apps/mobile`, `apps/web`) arrive in Phase 2 (D-004).
 
 The core packages have no DOM, Node-only or React dependencies on their hot path, so the same router can run on a server, in a worker, or on the phone (see D-003, D-004). Node 22, TypeScript strict, Vitest.
 
@@ -58,9 +58,9 @@ Hard requirements from the brief, scored:
 
 ## D-004 Platform
 
-**Proposed. Needs Richard's sign-off before building past the spike.** Full write-up: [PLATFORM.md](PLATFORM.md).
+**Decided.** 2026-10-04. Richard delegated the call ("you decide"). Full write-up: [PLATFORM.md](PLATFORM.md).
 
-Recommendation: a **shared TypeScript core** (graph, profile, router) used by **an Expo (React Native) app as the primary product** and **a Next.js web app** for share links, place pages, desktop planning and the debug map. The deciding criteria are background location, Live Activities on the lock screen, haptics and offline storage. A PWA cannot meet the brief's navigation bar on iOS. The cost: shadcn survives fully on web, and on native only through react-native-reusables (the shadcn port for NativeWind). That is a partial deviation from "shadcn for all UI chrome" and Richard needs to accept it.
+Recommendation: a **shared TypeScript core** (graph, profile, router) used by **an Expo (React Native) app as the primary product** and **a Next.js web app** for share links, place pages, desktop planning and the debug map. The deciding criteria are background location, Live Activities on the lock screen, haptics and offline storage. A PWA cannot meet the brief's navigation bar on iOS. The cost: shadcn survives fully on web, and on native only through react-native-reusables (the shadcn port for NativeWind). That is a partial deviation from "shadcn for all UI chrome", accepted as part of this decision.
 
 ## D-005 Terrain: LiDAR for Scotland Phase 5 + OSTN15
 
