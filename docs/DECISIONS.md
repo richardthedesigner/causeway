@@ -202,6 +202,8 @@ Next adapters, in order of value: Overture places (more venues and addresses; re
 
 **Decided.** 2026-10-04. OSM has the access tags but misses many venues (Newcastle: 2,214 OSM places against 5,376 in Overture). Overture places are added to each city's search index when they are confident (0.7 and over), open, somewhere people go, and not already in OSM under a similar name within 75 m (word overlap, "&" read as "and", and spelling variants within 40 m). They show with their category and address and no access line, and an "accessible" search never lists them, because nothing says they are. When names tie, OSM ranks first.
 
+Update (DATA-01, survey §9): AllThePlaces labels its output CC0, but some of its spiders scrape sites with no open licence (Changing Places, NHS inform, nhs.uk), which breaks rule 5 in DATA_SOURCES.md. Its records don't say which spider made them, so an Overture place whose only source is AllThePlaces is left out when it's a toilet, a pharmacy or a health service (`scrapedOnly` in `scripts/overture-merge.ts`). The same place from another source, or mapped in OSM with `changing_places=yes`, stays. This removed 29 "Changing Places" records and 24 GP, dentist, hospital and pharmacy records from the committed indexes.
+
 Update (issue #15): an Overture place is also a duplicate when an OSM place within 40 m has the same house number and street and either shares a name word or is the same kind of place. An address alone isn't enough, because one building can hold many businesses. This removed 409 more duplicates in Edinburgh, 58 in Newcastle and 16 in London.
 
 ## D-029 Buses: frequency-based, built from open timetables, honest about the wheelchair space
