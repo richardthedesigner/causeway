@@ -182,6 +182,12 @@ export function RoutePanel(props: Props) {
 
           <div className="grid gap-1">
             <p className="m-0">{result.headline}</p>
+            {result.door ? (
+              <p className="m-0 flex items-start gap-1.5 text-sm text-muted">
+                <DoorOpen aria-hidden className="mt-0.5 size-4 shrink-0" />
+                Takes you to {result.door.name ? `the ${result.door.name} entrance` : "an entrance"} that fits your settings ({result.door.detail}).
+              </p>
+            ) : null}
             {liveLine ? <p className={cn("m-0 text-sm", props.lifts.state === "failed" ? "text-caution" : "text-muted")}>{liveLine}</p> : null}
           </div>
 
@@ -328,9 +334,10 @@ export function RoutePanel(props: Props) {
 /** Who and what ground: the two things that change every route. */
 function Settings({ profile, onOpenMode, onConditions, weather }: Props & { weather: "dry" | "wet" | "ice" }) {
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <Button onClick={onOpenMode} aria-label={`Routes are for ${profile.label}. Change`} className="h-auto min-w-0 max-w-full px-4 py-2 text-left">
-        <SlidersHorizontal aria-hidden className="size-5 shrink-0" /> <span className="truncate">{profile.label}</span>
+    // Sized to share one row on a 390 px phone; wraps at large text sizes rather than truncating.
+    <div className="flex flex-wrap items-center gap-1.5 text-sm">
+      <Button onClick={onOpenMode} aria-label={`Routes are for ${profile.label}. Change`} className="h-auto min-w-0 max-w-full gap-1.5 px-2.5 py-2 text-left text-sm">
+        <SlidersHorizontal aria-hidden className="size-4 shrink-0" /> <span>{profile.label}</span>
       </Button>
       <div role="radiogroup" aria-label="Ground" className="flex gap-0.5 rounded-full border border-line p-0.5">
         {(["dry", "wet", "ice"] as const).map((k) => (
@@ -340,7 +347,7 @@ function Settings({ profile, onOpenMode, onConditions, weather }: Props & { weat
             role="radio"
             aria-checked={weather === k}
             onClick={() => onConditions(k)}
-            className={cn("min-h-12 min-w-12 rounded-full px-3 text-base", weather === k ? "bg-ink text-surface" : "text-ink")}
+            className={cn("min-h-12 min-w-12 rounded-full px-2.5 text-sm", weather === k ? "bg-ink text-surface" : "text-ink")}
           >
             {k === "dry" ? "Dry" : k === "wet" ? "Wet" : "Icy"}
           </button>

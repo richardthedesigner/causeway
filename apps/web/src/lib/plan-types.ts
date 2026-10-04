@@ -52,6 +52,8 @@ export type PlanResult =
       avoided: { name: string; detail: string }[];
       tradeoffs: Tradeoff[];
       entrances: EntranceOption[];
+      /** The entrance the route ends at, when one near a building fits this person; null means the building's centre. */
+      door: { name: string | null; osmId: number; detail: string } | null;
     }
   | { status: "none"; message: string; walkingHeadline: string | null };
 
