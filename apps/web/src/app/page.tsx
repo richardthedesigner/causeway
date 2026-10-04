@@ -20,7 +20,7 @@ import { CommandGroup, CommandItem } from "@/components/ui/command";
 import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
 import { CITIES, cityById, type City } from "@/lib/cities";
 import type { Place } from "@/lib/plan-types";
-import { activeDevice, deviceLabel, FIRST_VISIT, loadDeviceState, saveDeviceState, setTip, tipPending, withActive, withActiveName, withActiveProfile, withFavourite, withoutDevice, withSetup, type DeviceState } from "@/lib/devices";
+import { activeDevice, deviceLabel, FIRST_VISIT, loadDeviceState, saveDeviceState, setTip, tipPending, withActive, withActiveName, withActiveProfile, withDeviceProfile, withFavourite, withoutDevice, withSetup, type DeviceState } from "@/lib/devices";
 import { addRecent, loadRecents } from "@/lib/recents";
 import { useNotes } from "@/lib/use-notes";
 import { toiletsAlong } from "@/lib/toilets";
@@ -488,7 +488,22 @@ export default function Home() {
       {navigating && selectedRoute ? (
         <NavView
           route={selectedRoute}
-          speedMps={profile.speedMps}
+          speedMps={routeProfile.speedMps}
+          device={
+            devices.devices.length > 1
+              ? {
+                  label: deviceLabel(routeDevice),
+                  others: others.map((d) => ({ id: d.id, label: deviceLabel(d) })),
+                  onSwitch: (id) => {
+                    // Re-plan the rest of the journey from where you are, for the device picked.
+                    setOnce(null);
+                    setTrip(null);
+                    changeDevices((s) => withActive(s, id));
+                    if (me) setFrom({ id: `me:${Date.now()}`, name: "Your location", kind: "Current location", lon: me.lon, lat: me.lat });
+                  },
+                }
+              : undefined
+          }
           onEnd={() => {
             setNavigating(false);
             // A device borrowed for this trip goes back when the journey ends.
@@ -496,7 +511,7 @@ export default function Home() {
             setMe(null);
           }}
           onPosition={setMe}
-          onPace={(mps) => updateProfile(learnPace(profile, mps))}
+          onPace={(mps) => changeDevices((s) => withDeviceProfile(s, routeDevice.id, learnPace(routeDevice.profile, mps)))}
           onOffRoute={(m) => setFrom({ id: `me:${Date.now()}`, name: "Your location", kind: "Current location", lon: m.lon, lat: m.lat })}
           onNote={(m) => {
             // The stretch of this route nearest to you (or to the destination, in a preview).

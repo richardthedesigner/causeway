@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { PRESETS, savedDevice } from "@causeway/profile";
-import { activeDevice, compareLine, defaultDevice, deviceLabel, loadDeviceState, orderDevices, saveDeviceState, SEED_DEVICES, withActive, withActiveName, withActiveProfile, withFavourite, withoutDevice, withSetup } from "../src/lib/devices";
+import { activeDevice, compareLine, defaultDevice, deviceLabel, loadDeviceState, orderDevices, saveDeviceState, SEED_DEVICES, withActive, withActiveName, withActiveProfile, withDeviceProfile, withFavourite, withoutDevice, withSetup } from "../src/lib/devices";
 
 /** An in-memory stand-in for localStorage. */
 function memory(init: Record<string, string> = {}) {
@@ -143,5 +143,13 @@ describe("device rules", () => {
     expect(compareLine(21, { label: "Cherry", minutes: 19 })).toBe("2 min longer than Cherry's route.");
     expect(compareLine(19, { label: "Cherry", minutes: 19 })).toBe("Same time as Cherry's route.");
     expect(compareLine(14, { label: "Cherry", minutes: null })).toBe("Cherry had no route here.");
+  });
+
+  it("changes a device that isn't the active one, keeping its name", () => {
+    const s = { devices: SEED_DEVICES, activeId: "cherry" };
+    const next = withDeviceProfile(s, "lulu", { ...SEED_DEVICES[1]!.profile, speedMps: 2.1, label: "whatever" });
+    expect(next.devices[1]!.profile).toMatchObject({ speedMps: 2.1, label: "Lulu" });
+    expect(next.devices[0]).toBe(SEED_DEVICES[0]);
+    expect(next.activeId).toBe("cherry");
   });
 });

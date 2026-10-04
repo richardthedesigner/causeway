@@ -4,6 +4,11 @@ A running record of what was built, newest first. Each entry links the decision 
 
 ## 2026-10-04 (late night)
 
+**Switching device while navigating** (D-036 step 7)
+- With more than one device, the navigation bar has a device button beside the arrival time. It asks "Switch device mid-journey?" (Switch to Lulu / Keep Cherry) rather than opening the list, so a mis-tap doesn't re-plan.
+- Switching re-plans the rest of the journey from your location and keeps navigating.
+- Fixed: pace learned on a journey went to the active device even when the route was for a device borrowed for this trip.
+
 **Routes say who they're for, and offer another device** (D-036 step 6)
 - Routes carry a "For Cherry" tag once there's more than one device (or the device is named).
 - After switching device with a route on screen, the route says what changed: "9 min quicker than Cherry's route", or "Cherry had no route here."

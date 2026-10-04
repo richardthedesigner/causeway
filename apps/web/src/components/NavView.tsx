@@ -1,6 +1,6 @@
 "use client";
 import { hazardText, Navigator, type Progress } from "@causeway/router";
-import { AlertTriangle, ArrowUp, CornerUpLeft, CornerUpRight, Flag, MessageSquarePlus, TrainFront, TriangleAlert, Volume2, VolumeX } from "lucide-react";
+import { Accessibility, AlertTriangle, ArrowUp, CornerUpLeft, CornerUpRight, Flag, MessageSquarePlus, TrainFront, TriangleAlert, Volume2, VolumeX } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { RouteStrip } from "@/components/RouteStrip";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,8 @@ interface Props {
   onNote: (me: Me | null) => void;
   /** Called at the end of a live journey with the person's moving speed, to calibrate their ETA. */
   onPace: (observedMps: number) => void;
+  /** Who this route is for, and the other saved devices. Switching mid-journey asks first (D-036 step 7). */
+  device?: { label: string; others: { id: string; label: string }[]; onSwitch: (id: string) => void };
 }
 
 const fmt = (m: number) => (m >= 1000 ? `${(m / 1000).toFixed(1)} km` : `${Math.max(0, Math.round(m / 10) * 10)} m`);
@@ -39,7 +41,8 @@ const AHEAD_M = 300;
  * that moves along the route. Instructions are also in a live region for
  * screen readers; speech is opt-in so it never talks over one.
  */
-export function NavView({ route, speedMps, onEnd, onOffRoute, onPosition, onReport, onNote, onPace }: Props) {
+export function NavView({ route, speedMps, onEnd, onOffRoute, onPosition, onReport, onNote, onPace, device }: Props) {
+  const [asking, setAsking] = useState(false);
   const nav = useRef(new Navigator(route.nav));
   const [p, setP] = useState<Progress | null>(null);
   const [mode, setMode] = useState<"locating" | "live" | "preview">("locating");
@@ -183,7 +186,42 @@ export function NavView({ route, speedMps, onEnd, onOffRoute, onPosition, onRepo
         {mode !== "live" ? (
           <p className="m-0 text-sm text-muted">{mode === "locating" ? "Finding your location…" : "Preview: moving along the route for you. Live location isn't available here."}</p>
         ) : null}
+        {asking && device ? (
+          <div role="group" aria-labelledby="switch-h" className="grid gap-2 rounded-2xl border-2 border-ink p-3">
+            <p id="switch-h" className="m-0 font-bold">
+              Switch device mid-journey?
+            </p>
+            <p className="m-0 text-sm text-muted">The rest of the route will be re-planned from here for the device you pick.</p>
+            {device.others.map((o) => (
+              <Button
+                key={o.id}
+                variant="primary"
+                className="rounded-2xl"
+                onClick={() => {
+                  setAsking(false);
+                  device.onSwitch(o.id);
+                }}
+              >
+                Switch to {o.label}
+              </Button>
+            ))}
+            <Button className="rounded-2xl" onClick={() => setAsking(false)} autoFocus>
+              Keep {device.label}
+            </Button>
+          </div>
+        ) : null}
         <div className="flex items-center gap-3">
+          {device && device.others.length ? (
+            <Button
+              size="icon"
+              aria-label={`Routes are for ${device.label}. Switch device`}
+              aria-expanded={asking}
+              onClick={() => setAsking((v) => !v)}
+              className="size-14 shrink-0 rounded-2xl"
+            >
+              <Accessibility aria-hidden className="size-6" />
+            </Button>
+          ) : null}
           <div className="min-w-0 flex-1">
             <p className="tabular m-0 text-[28px] leading-none font-bold">
               <span className="sr-only">Arrive at </span>
