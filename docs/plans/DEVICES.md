@@ -67,7 +67,7 @@ Each step is one pull request that can go live on its own.
 - Migration: someone with a saved profile and no devices gets it as one unnamed device. Nobody loses settings.
 - Unit tests: migration, favourites-first ordering, the label rule.
 
-**2. Device button and list** (new `DeviceButton.tsx`, `DeviceMenu.tsx`; replaces `profileChip` in `page.tsx`)
+**2. Device button and list** (`DeviceMenu.tsx`, replacing the chip in `page.tsx`). Done. Until steps 4 and 5, Edit opens today's mode sheet, and Add makes an unnamed manual wheelchair and opens it.
 - Button: the label rule above, chevron, 48 px tall. Accessible name: "Routes are for Cherry, lightweight powerchair. Change device".
 - List: a popover on the top side of the button, as a radio group. Arrow keys move, Enter picks, Escape closes and returns focus to the button.
 - Picking closes the list, re-plans (already reactive on `routeProfile`) and announces "Now using Lulu" in a polite live region, with a short toast.

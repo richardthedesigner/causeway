@@ -4,6 +4,12 @@ A running record of what was built, newest first. Each entry links the decision 
 
 ## 2026-10-04 (late night)
 
+**Device button and list** (D-036 step 2)
+- The chip in the search bar opens a list of saved devices, upwards: favourites first, a tick on the one in use, then Edit and Add a device. One tap switches and re-plans; "Now using Lulu" shows briefly and is read out.
+- A named device's button shows its name only; an unnamed one keeps its icon and type.
+- The list is drawn on the sheet's outer layer, because the sheet's scrolling body clipped it. Arrow keys, Enter and Escape work; the search list underneath no longer takes those keys.
+- Edit opens today's mode sheet and Add makes an unnamed manual wheelchair, until steps 4 and 5.
+
 **Devices behind the profile** (D-036 step 1)
 - The app now routes for the active saved device; changing limits changes that device. A named device keeps its name when its type or limits change.
 - Someone with settings from before devices keeps them as one unnamed device. The old profile key is still written, so an older build reads the active device.
