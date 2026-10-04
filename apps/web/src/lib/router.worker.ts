@@ -144,7 +144,24 @@ function toPlanned(r: Route, start: Parameters<typeof elevationProfile>[1], id: 
       const w = busWait(sv.perHour, now);
       return { stopId: sv.stopId ?? "", stopName: (s.edge.name ?? "").split(", ")[0]!, route: sv.route, headsign: sv.headsign, perHour: w?.perHour ?? 0 };
     });
+  const rides: PlannedRoute["rides"] = [];
+  let ride: PlannedRoute["rides"][number] | null = null;
+  for (const s of r.steps) {
+    if (s.edge.kind === "board" && s.forward) {
+      const sv = s.edge.service;
+      const line = (s.edge.name ?? "").split(", ").slice(1).join(", ");
+      // Short labels for the map: "8", "Tram", "Metro", "Jubilee".
+      const label = sv ? (sv.mode === "bus" ? sv.route : sv.mode === "tram" ? "Tram" : "Metro") : line.replace(/ line$/, "").replace(/ towards .*/, "");
+      ride = { coords: [s.edge.geometry[0]!], label };
+    } else if (s.edge.kind === "transit" && ride) {
+      ride.coords.push(s.forward ? s.edge.geometry[s.edge.geometry.length - 1]! : s.edge.geometry[0]!);
+    } else if (s.edge.kind === "board" && !s.forward && ride) {
+      if (ride.coords.length > 1) rides.push(ride);
+      ride = null;
+    }
+  }
   return {
+    rides,
     nav: buildNavPlan(r, p),
     unknowns,
     busLegs,

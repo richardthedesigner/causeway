@@ -60,7 +60,7 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
     map.current = m;
     m.on("load", () => {
       const empty = fc([]);
-      for (const id of ["network", "route-alt", "route", "unknown", "markers", "entrances", "me"]) m.addSource(id, { type: "geojson", data: empty });
+      for (const id of ["network", "route-alt", "route", "unknown", "rides", "ride-labels", "markers", "entrances", "me"]) m.addSource(id, { type: "geojson", data: empty });
       m.addLayer({ id: "network", type: "line", source: "network", paint: { "line-color": ["get", "c"], "line-width": ["interpolate", ["linear"], ["zoom"], 12, 0.8, 17, 3.5], "line-opacity": 0.9 }, layout: { "line-cap": "round" } });
       m.addLayer({ id: "network-steps", type: "line", source: "network", filter: ["==", ["get", "bin"], 5], paint: { "line-color": css("--muted"), "line-width": ["interpolate", ["linear"], ["zoom"], 12, 1.5, 17, 6], "line-dasharray": [0.25, 0.5], "line-opacity": 0.8 } });
       m.addLayer({ id: "route-alt", type: "line", source: "route-alt", paint: { "line-color": css("--route-alt"), "line-width": 7 }, layout: { "line-cap": "round", "line-join": "round" } });
@@ -68,6 +68,16 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
       m.addLayer({ id: "route", type: "line", source: "route", paint: { "line-color": css("--route"), "line-width": 7 }, layout: { "line-cap": "round", "line-join": "round" } });
       // Unknown stretches: same colour, broken line, so it reads without colour.
       m.addLayer({ id: "unknown", type: "line", source: "unknown", paint: { "line-color": css("--surface"), "line-width": 3, "line-dasharray": [1, 1.5] } });
+      // Rides: a dotted line over the route (you're carried, not walking), with the route number where you board.
+      m.addLayer({ id: "ride-casing", type: "line", source: "rides", paint: { "line-color": css("--surface"), "line-width": 9 }, layout: { "line-cap": "round", "line-join": "round" } });
+      m.addLayer({ id: "ride", type: "line", source: "rides", paint: { "line-color": css("--route"), "line-width": 5, "line-dasharray": [0.1, 1.8] }, layout: { "line-cap": "round", "line-join": "round" } });
+      m.addLayer({
+        id: "ride-labels",
+        type: "symbol",
+        source: "ride-labels",
+        layout: { "text-field": ["get", "label"], "text-font": ["Noto Sans Medium"], "text-size": 14, "text-offset": [0, -1.4], "text-allow-overlap": true },
+        paint: { "text-color": css("--surface"), "text-halo-color": css("--route"), "text-halo-width": 6 },
+      });
       m.addLayer({ id: "entrances", type: "circle", source: "entrances", paint: { "circle-radius": 7, "circle-color": ["get", "c"], "circle-stroke-color": css("--surface"), "circle-stroke-width": 2 } });
       m.addLayer({ id: "markers", type: "circle", source: "markers", paint: { "circle-radius": ["match", ["get", "end"], 1, 11, 2, 10, 8], "circle-color": ["match", ["get", "end"], 1, css("--stop"), 2, css("--surface"), css("--ink")], "circle-stroke-color": ["match", ["get", "end"], 2, css("--accent"), css("--surface")], "circle-stroke-width": ["match", ["get", "end"], 2, 4, 3] } });
       // Location: accuracy halo (metres to pixels at this latitude) and a dot.
@@ -99,6 +109,8 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
       (m.getSource("route") as GeoJSONSource).setData(fc(sel ? [line(sel.coords)] : []));
       (m.getSource("route-alt") as GeoJSONSource).setData(fc(routes.filter((r) => r !== sel).map((r) => line(r.coords))));
       (m.getSource("unknown") as GeoJSONSource).setData(fc(sel ? sel.unknownCoords.map((c) => line(c)) : []));
+      (m.getSource("rides") as GeoJSONSource).setData(fc(sel ? sel.rides.map((r) => line(r.coords)) : []));
+      (m.getSource("ride-labels") as GeoJSONSource).setData(fc(sel ? sel.rides.map((r) => point({ lon: r.coords[0]![0], lat: r.coords[0]![1] }, { label: r.label })) : []));
       (m.getSource("markers") as GeoJSONSource).setData(fc([...(from ? [point(from, { end: 0 })] : []), ...(to ? [point(to, { end: 1 })] : []), ...(pin ? [point(pin, { end: 2 })] : [])]));
       const ec = { yes: css("--ok"), unknown: css("--unknown"), no: css("--stop") };
       (m.getSource("entrances") as GeoJSONSource).setData(fc(entrances.map((e) => point(e, { c: ec[e.ok] }))));
@@ -122,6 +134,10 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
     m.setPaintProperty("route-alt", "line-color", css("--route-alt"));
     m.setPaintProperty("route-casing", "line-color", css("--surface"));
     m.setPaintProperty("route", "line-color", css("--route"));
+    m.setPaintProperty("ride-casing", "line-color", css("--surface"));
+    m.setPaintProperty("ride", "line-color", css("--route"));
+    m.setPaintProperty("ride-labels", "text-color", css("--surface"));
+    m.setPaintProperty("ride-labels", "text-halo-color", css("--route"));
     m.setPaintProperty("unknown", "line-color", css("--surface"));
     m.setPaintProperty("entrances", "circle-stroke-color", css("--surface"));
     m.setPaintProperty("markers", "circle-color", ["match", ["get", "end"], 1, css("--stop"), 2, css("--surface"), css("--ink")]);

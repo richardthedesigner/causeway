@@ -4,6 +4,8 @@ A running record of what was built, newest first. Each entry links the decision 
 
 ## 2026-10-04 (evening)
 
+**Rides drawn apart from walking:** bus, tram, Metro and train legs are dotted on the map, labelled where you board ("37", "Tram", "Metro", "Jubilee"). Walking stays a solid line, so you can see at a glance how much you push or walk. The labels follow theme changes.
+
 **Fewer Overture duplicates** (D-028 update, #15)
 - Same address plus a shared name word or the same kind of place counts as one venue.
 - 483 fewer duplicates across the three cities.

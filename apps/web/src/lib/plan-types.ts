@@ -30,6 +30,8 @@ export interface PlannedRoute {
   minutesExtra: number;
   /** Turn-by-turn plan for this route (manoeuvres, hazards, geometry). */
   nav: NavPlan;
+  /** Rides (bus, tram, Metro, train), drawn apart from the walking and labelled where you board. */
+  rides: { coords: [number, number][]; label: string }[];
   /** Bus legs, for the departures line: stop, route, buses an hour now (timetable). */
   busLegs: { stopId: string; stopName: string; route: string; headsign: string | null; perHour: number }[];
   /** Where the data is missing, by street, so the user can judge it. */
