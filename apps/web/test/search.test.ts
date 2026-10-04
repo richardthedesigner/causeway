@@ -26,6 +26,17 @@ describe("search", () => {
     expect(search(index, "grassmarket", nearMound).hits[0]?.place.name).toBe("Grassmarket");
   });
 
+  it("ignores spaces that differ from the place name", () => {
+    expect(search(index, "grass market", nearMound).hits[0]?.place.name).toBe("Grassmarket");
+    expect(search(index, "grass mar", nearMound).hits[0]?.place.name).toBe("Grassmarket");
+    expect(search(index, "GRASS  MARKET", nearMound).hits[0]?.place.name).toBe("Grassmarket");
+    expect(search(index, "bankstreet", nearMound).hits.some((h) => h.place.name === "Bank Street")).toBe(true);
+  });
+
+  it("doesn't match words run together from the middle of a name", () => {
+    expect(search(index, "smarket", nearMound).hits.some((h) => h.place.name === "Grassmarket")).toBe(false);
+  });
+
   it("lists only toilets mapped as wheelchair accessible, nearest first, and counts the rest", () => {
     const { hits, hiddenNotMapped } = search(index, "accessible toilet", nearMound);
     expect(hits.length).toBeGreaterThan(3);
