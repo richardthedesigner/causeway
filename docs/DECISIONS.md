@@ -296,3 +296,36 @@ Bridged: Edinburgh 172 of 446 islands, Newcastle 9 of 24, London 23 of 48. `scri
 - "Just this trip" switching, and a confirm step before switching mid-journey, are both in.
 - Rejected: a separate switcher at the top of the map (out of reach), and names written on the type tiles (two devices of one type collide).
 
+
+## D-034 Crossings for people who cross by sound and touch
+
+**Decided.** 2026-10-04. The visual-impairment profile used to route exactly like walking. Graph nodes at crossings now carry what OSM says about them (`packages/graph/src/crossing-info.ts`):
+- control: lights, zebra, marked, or none;
+- whether the lights beep (`traffic_signals:sound`) or have a rotating cone (`traffic_signals:vibration`);
+- tactile paving;
+- a refuge island.
+
+Footpaths carry whether they're shared with cycles.
+
+**Counts.** Edinburgh: 1,279 crossings (611 with lights, 254 known to beep) and 2,215 shared stretches. Newcastle: 348 crossings. London zones: 263.
+
+**Profile costs** (`crossingCues`, `sharedPathPer100mS`), in seconds of detour worth taking to avoid each:
+
+| What | Seconds |
+|---|---|
+| Crossing with no lights or zebra | 240 |
+| Zebra (nothing tells you traffic has stopped) | 60 |
+| Lights with no beep or cone | 120 |
+| No tactile paving | 45 |
+| Shared path, per 100 m | 60 (halved when segregation isn't mapped) |
+
+**Rules**
+- Unmapped cues are unknown, never assumed, so a crossing with lights and no sound tag is "not known if the lights beep".
+- The visual-impairment preset sets these costs, and a settings toggle lets anyone turn them on.
+- Directions name the cue: "Cross West Preston Street at the lights, which beep and have a rotating cone."
+
+**Example:** Causewayside to Grassmarket. Walking: 3 crossings with no lights or zebra. Visual-impairment route: none, 12 of 13 crossings beep, 9 minutes longer. A test covers three trips.
+
+The numbers are starting points, like the rest of the presets, for Phase 2 research with RNIB and Guide Dogs users.
+
+Snapshots were enriched with `scripts/enrich-crossings.ts`; new builds get the facts directly.

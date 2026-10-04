@@ -146,6 +146,12 @@ export function ModeSheet({ open, onOpenChange, profile, onChange }: Props) {
               onChange={(v) => set({ surfaces: { ...profile.surfaces, gravel: v ? null : PRESETS[profile.preset].surfaces.gravel ?? 0.6, grass: v ? null : PRESETS[profile.preset].surfaces.grass ?? 0.8 } })}
             />
             <Toggle id="buses" label="Use buses" checked={profile.buses !== false} onChange={(v) => set({ buses: v })} />
+            <Toggle
+              id="crossing-cues"
+              label="Prefer crossings with lights that beep or have a rotating cone"
+              checked={!!profile.crossingCues}
+              onChange={(v) => set({ crossingCues: v ? (PRESETS["visual-impairment"].crossingCues ?? { uncontrolledS: 240, zebraS: 60, silentSignalS: 120, noTactileS: 45 }) : undefined, sharedPathPer100mS: v ? (PRESETS["visual-impairment"].sharedPathPer100mS ?? 60) : undefined })}
+            />
             <fieldset className="m-0 grid gap-2 border-0 p-0 py-2">
               <legend className="text-base">Accessible toilet at least every</legend>
               <div role="radiogroup" aria-label="Accessible toilet at least every" className="flex flex-wrap gap-2">

@@ -105,6 +105,19 @@ export interface Amenity {
 
 export type NodeKind = "junction" | "kerb" | "crossing" | "entrance" | "elevator" | "endpoint";
 
+/** A crossing's control and its non-visual cues, from OSM (crossing-info.ts). */
+export interface CrossingInfo {
+  /** "signals": lights; "zebra": priority crossing; "marked": painted but no priority; "uncontrolled": none. */
+  control: Attr<"signals" | "zebra" | "marked" | "uncontrolled">;
+  /** Signals that beep (traffic_signals:sound). */
+  sound: Attr<boolean>;
+  /** A rotating cone under the push button (traffic_signals:vibration). */
+  vibration: Attr<boolean>;
+  tactilePaving: Attr<boolean>;
+  /** A refuge island in the middle. */
+  island: Attr<boolean>;
+}
+
 export interface GraphNode {
   id: number;
   lon: number;
@@ -117,6 +130,8 @@ export interface GraphNode {
   kerb?: KerbInfo;
   /** Present when this network node is a building or station entrance. */
   entrance?: EntranceInfo;
+  /** At a crossing: what kind, and the cues a blind or partially sighted person uses. */
+  crossing?: CrossingInfo;
   /** OSM node id when the node maps 1:1 to OSM. */
   osmId?: number;
 }
@@ -185,6 +200,8 @@ export interface GraphEdge {
   osmWayId?: number;
   /** Stable reference for non-OSM edges, e.g. "board:jubilee:940GZZLUCYF", so live feeds can find them. */
   ref?: string;
+  /** A path shared with cycles (OSM bicycle=designated or yes without segregated=yes). */
+  sharedWithCycles?: Attr<boolean>;
   /** Scheduled service on board and ride edges (buses): route, how often, how long. */
   service?: BusService;
 }

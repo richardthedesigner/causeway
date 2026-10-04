@@ -75,6 +75,14 @@ export interface Profile {
   /** Has an operator's permit to take this mobility scooter on buses (CPT code: class 2, small enough). */
   busScooterPermit?: boolean;
   /**
+   * Crossing cues, in seconds of detour worth taking to avoid each: crossings with no lights or
+   * zebra, zebras (no signal that traffic has stopped), lights without a beep or rotating cone, and
+   * no tactile paving. Absent: crossings cost nothing extra.
+   */
+  crossingCues?: { uncontrolledS: number; zebraS: number; silentSignalS: number; noTactileS: number };
+  /** Seconds per 100 m to avoid paths shared with cycles. Absent: no preference. */
+  sharedPathPer100mS?: number;
+  /**
    * Road-legal (class 3) mobility scooter: registered, may use the carriageway
    * at up to 8 mph, so a street with no pavement is an ordinary road, not a hazard.
    */
@@ -384,6 +392,9 @@ export const PRESETS: Record<MobilityPreset, Profile> = {
     maxToiletIntervalM: null,
     uncertaintyTolerance: 0.5,
     companion: false,
+    // Cues a cane or guide dog user relies on (RNIB, Guide Dogs guidance on controlled crossings).
+    crossingCues: { uncontrolledS: 240, zebraS: 60, silentSignalS: 120, noTactileS: 45 },
+    sharedPathPer100mS: 60,
   },
 };
 

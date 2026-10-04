@@ -35,6 +35,11 @@ A running record of what was built, newest first. Each entry links the decision 
 
 ## 2026-10-04 (evening)
 
+**Crossings for blind and partially sighted people** (D-034)
+- Crossing type, beeping lights, rotating cones, tactile paving and shared cycle paths now shape routes for the visual-impairment profile, and for anyone who turns on the new toggle.
+- Directions name the cue at each crossing.
+- Causewayside to Grassmarket goes from 3 uncontrolled crossings to none.
+
 **Offline keeps up with the data** (D-023 update)
 - The service worker used to cache city data permanently on first fetch, so timetables would never update. It also re-downloaded the search index and base map on every visit.
 - City data is now stale-while-revalidate.
