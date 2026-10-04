@@ -52,7 +52,7 @@ jobs:
         continue-on-error: true
       - name: Pavement works
         run: |
-          rm -f .data-cache/sm-permit-*.json
+          rm -f .data-cache/sm-permit-*.json .data-cache/sm-activity-*.json
           pnpm build:works
         continue-on-error: true
 

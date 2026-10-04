@@ -46,7 +46,8 @@ export interface StreetManagerPermit {
   proposed_end: string | null;
 }
 
-const title = (s: string | null) => (s ? s.toLowerCase().replace(/\b[a-z]/g, (c) => c.toUpperCase()).replace(/\s+\(.*\)$/, "") : null);
+// Capitals after a space or hyphen only, so "STOREY'S GATE" reads "Storey's Gate".
+const title = (s: string | null) => (s ? s.toLowerCase().replace(/(^|[\s-])[a-z]/g, (c) => c.toUpperCase()).replace(/\s+\(.*\)$/, "") : null);
 
 /** Parse WKT POINT / LINESTRING / POLYGON coordinates (any CRS) into pairs. */
 export function wktPoints(wkt: string): [number, number][] {
@@ -87,6 +88,78 @@ export function streetManagerObservations(permits: StreetManagerPermit[], fromOs
       start: p.start,
       end,
       observedAt: p.event_time,
+    });
+  }
+  return out;
+}
+
+/** A Street Manager activity event (skips, scaffolding, hoardings), reduced by scripts/streetmanager-extract.py. */
+export interface StreetManagerActivity {
+  ref: string;
+  event_time: string;
+  event_type: string;
+  geom: string;
+  street: string | null;
+  activity: string | null;
+  details: string | null;
+  location_type: string | null;
+  cancelled: string | null;
+  start_date: string | null;
+  start_time: string | null;
+  end_date: string | null;
+  end_time: string | null;
+}
+
+const ACTIVITY: Record<string, string> = {
+  skips: "A skip",
+  scaffolding: "Scaffolding",
+  hoarding: "A hoarding",
+  crane_mobile_platform: "A crane or mobile platform",
+  compound: "A works compound",
+  event: "An event",
+  section50: "Private works under licence",
+  section58: "Works",
+};
+
+/** A date, with its time if given; with no end time, the end is the end of that day. */
+const at = (date: string | null, time: string | null, end: boolean): string | null => {
+  if (!date) return null;
+  const day = date.slice(0, 10);
+  if (time) {
+    const t = /T(\d\d:\d\d)/.exec(time)?.[1] ?? /^(\d\d:\d\d)/.exec(time)?.[1];
+    if (t) return new Date(`${day}T${t}:00Z`).toISOString();
+  }
+  return new Date(Date.parse(`${day}T00:00:00Z`) + (end ? 86_400_000 - 1000 : 0)).toISOString();
+};
+
+/**
+ * Street Manager activities (DATA-05): skips, scaffolding, hoardings, cranes,
+ * events and the like. Only those on the footway or a footpath are kept. The
+ * archive doesn't say whether the pavement is closed, so each one is "on the
+ * pavement" (counted as unknown, D-027), never "closed".
+ */
+export function streetManagerActivityObservations(acts: StreetManagerActivity[], fromOsgb: (e: number, n: number) => [number, number], now: Date): WorksObservation[] {
+  const out: WorksObservation[] = [];
+  for (const a of acts) {
+    if (a.event_type === "ACTIVITY_CANCELLED" || /^yes$/i.test(a.cancelled ?? "")) continue;
+    if (!a.location_type || !/foot/i.test(a.location_type)) continue;
+    const start = at(a.start_date, a.start_time, false);
+    const end = at(a.end_date, a.end_time, true);
+    if (!start || !end || Date.parse(end) <= now.getTime()) continue;
+    const pts = wktPoints(a.geom).map(([e, n]) => fromOsgb(e, n));
+    if (!pts.length) continue;
+    const what = ACTIVITY[a.activity ?? ""] ?? "An obstruction";
+    const detail = a.details && a.details.trim() && !new RegExp(`^${(a.activity ?? "").replace(/_/g, " ")}$`, "i").test(a.details.trim()) ? ` (${a.details.trim()})` : "";
+    out.push({
+      id: `sma:${a.ref}`,
+      source: "Street Manager",
+      geometry: pts.map(([x, y]) => [Math.round(x * 1e6) / 1e6, Math.round(y * 1e6) / 1e6]),
+      footway: "affected",
+      description: `${what} on the pavement${detail}`,
+      street: title(a.street),
+      start,
+      end,
+      observedAt: a.event_time,
     });
   }
   return out;
