@@ -11,9 +11,9 @@ Conditions: dry. Profiles are presets from `packages/profile`; real users set th
 | Profile | Time | Distance | Ascent | Steepest | Setts | Steps | Lifts | Unknown | Verdict | Via |
 |---|---|---|---|---|---|---|---|---|---|---|
 | Walking | 14 min | 907 m | 14.4 m | 25.1% up | 286 m | 6 | 0 | 0 m | passable | Market Street / The News Steps / St Giles' Street / Lawnmarket / Fisher's Close / Victoria Terrace / Victoria Street / West Bow / Grassmarket |
-| Manual wheelchair | 47 min | 2517 m | 27.7 m | 7.9% up | 76 m | 0 | 0 | 801 m | passable-with-unknowns | North Ramp / Waverley Bridge / Princes Street / The Mound / Castle Street / Lothian Road / King's Stables Road / Castle Terrace / McCrae's Place / Grindlay Street / Spittal Street / Lady Lawson Street / West Port / Grassmarket |
-| Manual wheelchair, pushed | 41 min | 2413 m | 27 m | 8.5% up | 13 m | 0 | 0 | 801 m | passable-with-unknowns | North Ramp / Waverley Bridge / Princes Street / The Mound / Castle Street / Lothian Road / King's Stables Road / Castle Terrace / McCrae's Place / Grindlay Street / Spittal Street / Lady Lawson Street / West Port / Grassmarket |
-| Powerchair | 32 min | 2414 m | 27 m | 8.8% up | 13 m | 0 | 0 | 793 m | passable-with-unknowns | North Ramp / Waverley Bridge / Princes Street / The Mound / Castle Street / Lothian Road / King's Stables Road / Castle Terrace / McCrae's Place / Grindlay Street / Spittal Street / Lady Lawson Street / West Port / Grassmarket |
+| Manual wheelchair | 47 min | 2517 m | 27.7 m | 7.9% up | 76 m | 0 | 0 | 798 m | passable-with-unknowns | North Ramp / Waverley Bridge / Princes Street / The Mound / Castle Street / Lothian Road / King's Stables Road / Castle Terrace / McCrae's Place / Grindlay Street / Spittal Street / Lady Lawson Street / West Port / Grassmarket |
+| Manual wheelchair, pushed | 41 min | 2423 m | 26.5 m | 8.5% up | 13 m | 0 | 0 | 798 m | passable-with-unknowns | North Ramp / Waverley Bridge / The Mound / Princes Street / Castle Street / Lothian Road / King's Stables Road / Castle Terrace / McCrae's Place / Grindlay Street / Spittal Street / Lady Lawson Street / West Port / Grassmarket |
+| Powerchair | 34 min | 2541 m | 27.4 m | 8.8% up | 19 m | 0 | 0 | 840 m | passable-with-unknowns | North Ramp / Waverley Bridge / The Mound / Princes Street / Castle Street / Lothian Road / King's Stables Road / Castle Terrace / McCrae's Place / Grindlay Street / Spittal Street / Lady Lawson Street / West Port / Grassmarket |
 
 ### Walking
 
@@ -51,7 +51,7 @@ Conditions: dry. Profiles are presets from `packages/profile`; real users set th
 
 - 76 m on setts or cobbles.
 - Steepest part 7.9% uphill on King's Stables Road.
-- 801 m where we don't have full data. Tap to see where.
+- 798 m where we don't have full data. Tap to see where.
 
 Avoided on the direct route:
 
@@ -112,7 +112,7 @@ Trade-offs offered:
 **Why this way?** Avoids West Bow (12.4% downhill) and The News Steps (124 steps). Adds 27 minutes.
 
 - Steepest part 8.5% uphill on Grassmarket.
-- 801 m where we don't have full data. Tap to see where.
+- 798 m where we don't have full data. Tap to see where.
 
 Avoided on the direct route:
 
@@ -133,10 +133,10 @@ Trade-offs offered:
 2. Platform 19, 116 m, level, some details unknown.
 3. North Ramp, 10 m, level, tarmac, some details unknown.
 4. Waverley Bridge, 64 m, uphill about 4%, tarmac, some details unknown.
-5. a path by Waverley Bridge, 9 m, level, concrete.
-6. Waverley Bridge, 18 m, uphill about 8%, paving slabs.
-7. Princes Street, 181 m, level, paving slabs.
-8. The Mound, 59 m, level, paving slabs.
+5. a path by Waverley Bridge, 13 m, level, concrete.
+6. Path, 208 m, level, tarmac.
+7. a path by The Mound, 49 m, level, tarmac.
+8. The Mound, 7 m, level, paving slabs.
 9. Princes Street, 52 m, level, paving slabs.
 10. Cross The Mound.
 11. The Mound, 6 m, downhill about 2%, paving slabs.
@@ -167,10 +167,10 @@ Trade-offs offered:
 
 ### Powerchair
 
-**Why this way?** Avoids West Bow (12.4% downhill) and The News Steps (124 steps). Adds 22 minutes.
+**Why this way?** Avoids West Bow (12.4% downhill) and The News Steps (124 steps). Adds 23 minutes.
 
 - Steepest part 8.8% uphill on Waverley Bridge.
-- 793 m where we don't have full data. Tap to see where.
+- 840 m where we don't have full data. Tap to see where.
 
 Avoided on the direct route:
 
@@ -193,35 +193,34 @@ Trade-offs offered:
 4. Waverley Bridge, 33 m, uphill about 6%, concrete.
 5. a path by Waverley Bridge, 9 m, level, paving slabs.
 6. Waverley Bridge, 4 m, uphill about 8%, tarmac.
-7. a path by Waverley Bridge, 9 m, level, concrete.
-8. Waverley Bridge, 18 m, uphill about 8%, paving slabs.
-9. Princes Street, 181 m, level, paving slabs.
-10. The Mound, 59 m, level, paving slabs.
-11. Princes Street, 52 m, level, paving slabs.
-12. Cross The Mound.
-13. The Mound, 6 m, downhill about 2%, paving slabs.
-14. Princes Street, 266 m, level, paving slabs.
-15. Castle Street, 102 m, level, paving slabs.
-16. Princes Street, 212 m, level, paving slabs.
-17. Lothian Road, 194 m, level, paving slabs.
-18. Cross King's Stables Road.
-19. King's Stables Road, 12 m, level, paving slabs.
-20. Cross Castle Terrace.
-21. Castle Terrace, 39 m, level, tarmac, some details unknown.
-22. Cross Castle Terrace.
-23. Castle Terrace, 106 m, uphill about 3%, paving slabs.
-24. Lothian Road, 41 m, uphill about 4%, paving slabs.
-25. McCrae's Place, 60 m, uphill about 4%, paving slabs.
-26. McCrae's Place, 24 m, level, paving slabs.
-27. Grindlay Street, 164 m, level, paving slabs, some details unknown.
-28. Spittal Street, 55 m, downhill about 3%, tarmac, some details unknown.
-29. Lady Lawson Street, 116 m, uphill about 5%, tarmac, some details unknown.
-30. West Port, 214 m, downhill about 5%, tarmac, some details unknown.
-31. West Port, 14 m, level, tarmac.
-32. Grassmarket, 13 m, uphill about 2%, setts.
-33. Grassmarket, 40 m, downhill about 3%, paving slabs.
-34. a path by Grassmarket, 4 m, uphill about 2%, paving slabs.
-35. Grassmarket, 117 m, uphill about 4%, paving slabs.
+7. a path by Waverley Bridge, 13 m, level, concrete.
+8. Path, 208 m, level, tarmac.
+9. a path by The Mound, 44 m, level, tarmac.
+10. The Mound, 127 m, level, paving slabs.
+11. The Mound, 56 m, downhill about 2%, tarmac, some details unknown.
+12. a path by The Mound, 19 m, downhill about 2%, paving slabs.
+13. Princes Street, 263 m, level, paving slabs.
+14. Castle Street, 102 m, level, paving slabs.
+15. Princes Street, 212 m, level, paving slabs.
+16. Lothian Road, 194 m, level, paving slabs.
+17. Cross King's Stables Road.
+18. King's Stables Road, 12 m, level, paving slabs.
+19. Cross Castle Terrace.
+20. Castle Terrace, 39 m, level, tarmac, some details unknown.
+21. Cross Castle Terrace.
+22. Castle Terrace, 106 m, uphill about 3%, paving slabs.
+23. Lothian Road, 41 m, uphill about 4%, paving slabs.
+24. McCrae's Place, 60 m, uphill about 4%, paving slabs.
+25. McCrae's Place, 24 m, level, paving slabs.
+26. Grindlay Street, 164 m, level, paving slabs, some details unknown.
+27. Spittal Street, 55 m, downhill about 3%, tarmac, some details unknown.
+28. Lady Lawson Street, 116 m, uphill about 5%, tarmac, some details unknown.
+29. West Port, 214 m, downhill about 5%, tarmac, some details unknown.
+30. West Port, 14 m, level, tarmac.
+31. Grassmarket, 13 m, uphill about 2%, setts.
+32. Grassmarket, 40 m, downhill about 3%, paving slabs.
+33. a path by Grassmarket, 4 m, uphill about 2%, paving slabs.
+34. Grassmarket, 117 m, uphill about 4%, paving slabs.
 
 </details>
 
@@ -352,7 +351,7 @@ Trade-offs offered:
 | Walking | 4 min | 191 m | 9.2 m | 24.2% up | 0 m | 3 | 0 | 0 m | passable | Market Street / Fleshmarket Close |
 | Manual wheelchair | 19 min | 798 m | 14.8 m | 6.3% up | 3 m | 0 | 3 | 338 m | passable-with-unknowns | Market Street / Princes Street / North Bridge / High Street / Hunter Square |
 | Manual wheelchair, pushed | 17 min | 798 m | 14.8 m | 6.3% up | 3 m | 0 | 3 | 338 m | passable-with-unknowns | Market Street / Princes Street / North Bridge / High Street / Hunter Square |
-| Powerchair | 15 min | 981 m | 22.7 m | 10.1% up | 3 m | 0 | 0 | 187 m | passable-with-unknowns | Market Street / Waverley Bridge / North Ramp / Princes Street / North Bridge / High Street / Hunter Square |
+| Powerchair | 14 min | 798 m | 14.8 m | 6.3% up | 3 m | 0 | 3 | 338 m | passable-with-unknowns | Market Street / Princes Street / North Bridge / High Street / Hunter Square |
 
 ### Walking
 
@@ -443,8 +442,8 @@ Trade-offs offered:
 
 **Why this way?** Avoids Scotsman Steps (steps). Adds 11 minutes.
 
-- Steepest part 10.1% uphill on Waverley Bridge.
-- 187 m where we don't have full data. Tap to see where.
+- Uses 3 lifts.
+- 338 m where we don't have full data. Tap to see where.
 
 Avoided on the direct route:
 
@@ -454,20 +453,21 @@ Avoided on the direct route:
 
 Trade-offs offered:
 
-- Keep under 9%: Nothing steeper than 9%. Adds 0 min.
+- Fewer unknowns: 187 m unknown instead of 338 m. Adds 0 min.
 
 <details><summary>Spoken route (non-visual mode)</summary>
 
 1. Market Street, 70 m, uphill about 2%, tarmac, some details unknown.
-2. Market Street, 150 m, level, paving slabs.
-3. Waverley Bridge, 105 m, level, paving slabs, some details unknown.
-4. North Ramp, 26 m, level, paving slabs, some details unknown.
-5. Waverley Bridge, 60 m, uphill about 7%, concrete.
-6. Princes Street, 188 m, level, concrete.
-7. North Bridge, 336 m, uphill about 3%, paving slabs.
-8. High Street, 19 m, uphill about 3%, paving slabs.
-9. Hunter Square, 25 m, uphill about 5%, paving slabs.
-10. High Street, 3 m, uphill about 4%, setts.
+2. Market Street, 20 m, level, paving slabs, some details unknown.
+3. a path by Market Street, 11 m, level, some details unknown.
+4. Path, 177 m, level, some details unknown.
+5. Take the lift.
+6. Path, 65 m, level, paving slabs, some details unknown.
+7. Princes Street, 73 m, level, concrete.
+8. North Bridge, 336 m, uphill about 3%, paving slabs.
+9. High Street, 19 m, uphill about 3%, paving slabs.
+10. Hunter Square, 25 m, uphill about 5%, paving slabs.
+11. High Street, 3 m, uphill about 4%, setts.
 
 </details>
 
@@ -482,4 +482,4 @@ Footway network: 74.1 km.
 | Surface | 76.2% |
 | Width | 2.3% |
 | Separately mapped pavement (not a street centreline stand-in) | 72.4% |
-| Crossings with both kerbs known | 1% of 207 |
+| Crossings with both kerbs known | 20% of 207 |
