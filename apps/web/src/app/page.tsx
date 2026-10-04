@@ -10,6 +10,7 @@ import { DeviceMenu } from "@/components/DeviceMenu";
 import { DeviceEditor } from "@/components/DeviceEditor";
 import { DeviceSetup } from "@/components/DeviceSetup";
 import { NavView, type Me } from "@/components/NavView";
+import { UpdatePrompt } from "@/components/UpdatePrompt";
 import { NoteSheet, type NoteAbout } from "@/components/NoteSheet";
 import { PlaceIcon, PlaceSearch } from "@/components/PlaceSearch";
 import { ReportSheet } from "@/components/ReportSheet";
@@ -514,6 +515,7 @@ export default function Home() {
         credit={`${city.credit} Pavement data built ${planner.ready?.builtAt.slice(0, 10) ?? ""}.`}
         minimal={navigating}
       />
+      <UpdatePrompt navigating={navigating} />
       {navigating && selectedRoute ? (
         <NavView
           route={selectedRoute}

@@ -2,7 +2,7 @@
  * WCAG 2.2 AA check of the built app with axe-core, light and dark, on the
  * screens people use most: start, search results, a route with buses and
  * toilets (every section open), first-visit setup, the device list and the
- * device settings, with a battery range.
+ * device settings, with a battery range, and the update prompt.
  *   pnpm web:build && pnpm a11y
  * Exits 1 on any violation, or anything the Content Security Policy blocks. Runs in CI (.github/workflows/ci.yml).
  */
@@ -69,6 +69,15 @@ for (const scheme of ["light", "dark"]) {
   await page.getByRole("switch", { name: "Warn me about battery range" }).click();
   await page.getByRole("slider", { name: "Range on one charge" }).waitFor();
   await check("device settings, battery range");
+
+  // A new build takes over an open page: the update prompt (DEP-05). The first takeover is a first visit.
+  await page.keyboard.press("Escape");
+  await page.evaluate(() => {
+    navigator.serviceWorker.dispatchEvent(new Event("controllerchange"));
+    navigator.serviceWorker.dispatchEvent(new Event("controllerchange"));
+  });
+  await page.getByRole("button", { name: "Reload" }).waitFor();
+  await check("update prompt");
 }
 await browser.close();
 server.close();
