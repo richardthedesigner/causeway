@@ -199,7 +199,7 @@ export function NavView({ route, speedMps, onEnd, onOffRoute, onPosition, onRepo
               reportPace();
               onEnd();
             }}
-            className="rounded-2xl border-stop bg-stop px-8 text-white hover:brightness-110"
+            className="rounded-2xl border-stop bg-stop px-8 text-stop-ink hover:brightness-110"
           >
             End
           </Button>

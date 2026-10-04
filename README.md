@@ -2,10 +2,11 @@
 
 Accessibility-first wayfinding. It gets a wheelchair user from A to B on a route they can actually complete, by modelling every footway's gradient, camber, surface, width, kerbs, steps and live state, scoring it against the user's own limits, and saying so when it doesn't know.
 
-**Status: Phase 4 (a working web app for central Edinburgh, Newcastle and Gateshead, and two London zones).** Routing on the device for each person's limits. Walking, buses, trams, the Tyne and Wear Metro, and step-free Jubilee line and DLR, with live lift and roadworks data where it's open. Search, a base map, navigation and access notes are all in.
+**Status: Phase 4 (a working web app for central Edinburgh, Newcastle and Gateshead, and two London zones).** Routing on the device for each person's limits. Walking, buses, trams, the Tyne and Wear Metro, and step-free Jubilee line and DLR, with live lift and roadworks data where it's open. Search, a base map, navigation and access notes are all in. Every screen answers "can I get there?" first: [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md).
 
 - What changed and when: [docs/BUILD_LOG.md](docs/BUILD_LOG.md)
 - Why: [docs/DECISIONS.md](docs/DECISIONS.md)
+- How it looks and behaves: [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md)
 - Where the data comes from: [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md)
 - What's open, including actions for Richard: [GitHub issues](https://github.com/richardthedesigner/causeway/issues)
 
