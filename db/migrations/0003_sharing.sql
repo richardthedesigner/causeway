@@ -8,6 +8,23 @@
 -- Reports are write-only for the public: they go to triage, not to a feed.
 -- No profile data, ever (D-009).
 
+-- On Supabase the auth schema, auth.uid() and the anon and authenticated
+-- roles already exist. On a plain Postgres (CI, local builds) create the
+-- minimum so the rules below can be defined and tested. auth.uid() reads the
+-- same JWT claim Supabase's does.
+do $$
+begin
+  if not exists (select 1 from pg_roles where rolname = 'anon') then create role anon nologin; end if;
+  if not exists (select 1 from pg_roles where rolname = 'authenticated') then create role authenticated nologin; end if;
+  if not exists (select 1 from pg_namespace where nspname = 'auth') then
+    create schema auth;
+    create function auth.uid() returns uuid language sql stable as
+      'select nullif(current_setting(''request.jwt.claim.sub'', true), '''')::uuid';
+    grant usage on schema auth to anon, authenticated;
+  end if;
+end $$;
+grant usage on schema public to anon, authenticated;
+
 -- ---------------------------------------------------------------- areas
 insert into area (id, name, bounds) values
   ('edinburgh', 'Central Edinburgh', st_makeenvelope(-3.25, 55.92, -3.15, 55.975, 4326)),
