@@ -4,6 +4,24 @@ A running record of what was built, newest first. Each entry links the decision 
 
 ## 2026-10-04 (evening)
 
+**Fewer Overture duplicates** (D-028 update, #15)
+- Same address plus a shared name word or the same kind of place counts as one venue.
+- 483 fewer duplicates across the three cities.
+- Overture categories now come from its taxonomy ("Bakery", not "Casual eatery"), mapped to OSM tags through the hierarchy.
+- #15 closed.
+
+**CI on the production branch**: CI now runs on pushes to the production branch too. Before, only `main` was tested, and the mirror's pushes don't trigger workflows.
+
+**Weekly data refresh** (D-033, #14)
+- A GitHub Actions workflow rebuilds timetables, works and the search index.
+- It tests the result and opens a PR with a count table.
+- The bus and works builds now work out their sample days and archive month from today's date (they were hard-coded).
+
+**Footway islands joined** (D-032, closes #7)
+- `bridgeIslands` joins small islands of footway to the street across gaps of up to 15 m, with unknown attributes.
+- It skips platforms, bridges and height steps.
+- 204 connectors across the three areas. Gateshead Interchange is reachable, so the Metro is useful there.
+
 **Trams and the Tyne and Wear Metro** (D-031, commit `b3a4bf8`)
 - Edinburgh Trams and the Metro come from the same open timetables as the buses, each line tagged with its mode.
 - Metro stations below street level count as unknown for step-free users: Nexus has no open lift status (#13).

@@ -25,7 +25,21 @@ const OVERTURE_TO_OSM: Record<string, string> = {
   theatre: "amenity=theatre",
   post_office: "amenity=post_office",
   place_of_worship: "amenity=place_of_worship",
+  park: "leisure=park",
+  hair_salon: "shop=hairdresser",
+  clothing_store: "shop=clothes",
+  bakery: "shop=bakery",
+  coffee_shop_and_cafe: "amenity=cafe",
+  gym: "leisure=fitness_centre",
+  church: "amenity=place_of_worship",
+  mosque: "amenity=place_of_worship",
 };
+
+/** The OSM tag for an Overture place: its own category if we map it, else the nearest broader one in its taxonomy. */
+function osmCategory(o: { c: string | null; h?: string[] }): string | null {
+  for (const k of [o.c, ...[...(o.h ?? [])].reverse()]) if (k && OVERTURE_TO_OSM[k]) return OVERTURE_TO_OSM[k]!;
+  return null;
+}
 
 const STOP = new Set(["the", "and", "ltd", "limited", "of", "edinburgh", "newcastle", "london", "co", "uk", "plc", "cafe", "bar", "restaurant", "shop", "store"]);
 /** Name words for matching: "&" reads as "and", accents and punctuation go, filler words go. */
@@ -68,6 +82,16 @@ function sameName(a: Set<string>, b: Set<string>, metres: number): boolean {
   return shared / (a.size + b.size - shared) >= 0.5 && metres < 75;
 }
 
+/** "30 Grindlay Street", normalised, from an address line ("30 Grindlay St, EH3 9AX"); null without a house number. */
+export function streetAddress(ad: string | null): string | null {
+  if (!ad) return null;
+  const first = ad.split(",")[0]!.toLowerCase().replace(/\./g, "").trim();
+  const m = first.match(/^(\d+[a-z]?(?:-\d+[a-z]?)?)\s+(.+)$/);
+  if (!m) return null;
+  const street = m[2]!.replace(/\bst$/, "street").replace(/\brd$/, "road").replace(/\bave?$/, "avenue").replace(/\bpl$/, "place").replace(/\bsq$/, "square").replace(/\bter$/, "terrace").replace(/\s+/g, " ");
+  return `${m[1]} ${street}`;
+}
+
 /** Things nobody walks to: services that come to you, and uncategorised records. */
 const NOT_VISITABLE = new Set(["home_service", "b2b_office_and_professional_service", "corporate_or_business_office", "media_service", "technical_service", "design_service", "event_or_party_service"]);
 
@@ -76,16 +100,16 @@ const NOT_VISITABLE = new Set(["home_service", "b2b_office_and_professional_serv
  * already in OSM under a similar name within 75 m. Category kept as "overture=<basic_category>" unless it maps
  * to an OSM tag, so category searches find both.
  */
-export function mergeOverture(osm: { n: string; x: number; y: number }[], ov: { id: string; n: string; c: string | null; x: number; y: number; ad: string | null; conf: number | null }[]) {
+export function mergeOverture(osm: { n: string; x: number; y: number; ad?: string; c?: string }[], ov: { id: string; n: string; c: string | null; h?: string[]; x: number; y: number; ad: string | null; conf: number | null }[]) {
   const cell = (x: number, y: number) => `${Math.round(x * 500)}:${Math.round(y * 500)}`;
-  const grid = new Map<string, { n: string; x: number; y: number }[]>();
+  const grid = new Map<string, { n: string; x: number; y: number; ad?: string; c?: string }[]>();
   for (const p of osm) {
     if (!p.n) continue;
     const k = cell(p.x, p.y);
     grid.set(k, [...(grid.get(k) ?? []), p]);
   }
   const near = (x: number, y: number) => {
-    const out: { n: string; x: number; y: number }[] = [];
+    const out: { n: string; x: number; y: number; ad?: string; c?: string }[] = [];
     const [cx, cy] = [Math.round(x * 500), Math.round(y * 500)];
     for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) out.push(...(grid.get(`${cx + i}:${cy + j}`) ?? []));
     return out;
@@ -93,12 +117,22 @@ export function mergeOverture(osm: { n: string; x: number; y: number }[], ov: { 
   const metres = (a: { x: number; y: number }, b: { x: number; y: number }) => Math.hypot((a.x - b.x) * Math.cos((a.y * Math.PI) / 180), a.y - b.y) * 111_320;
   const added: { n: string; c: string; x: number; y: number; ad?: string; id: string; src: "overture" }[] = [];
   for (const o of ov) {
-    if ((o.conf ?? 0) < 0.7 || !o.n || !o.c || NOT_VISITABLE.has(o.c)) continue;
+    if ((o.conf ?? 0) < 0.7 || !o.n || !o.c || [o.c, ...(o.h ?? [])].some((k) => NOT_VISITABLE.has(k))) continue;
     const n = tokens(o.n);
     if (!n.size) continue;
-    const dup = near(o.x, o.y).some((p) => sameName(n, tokens(p.n), metres(o, p)));
+    const addr = streetAddress(o.ad);
+    const cat = osmCategory(o);
+    // Same name nearby; or the same address next door and either a shared name word or the same kind of place
+    // ("The george hotel" and "The InterContinental Edinburgh - The George"). An address alone isn't enough:
+    // one building can hold many businesses.
+    const dup = near(o.x, o.y).some((p) => {
+      const pt = tokens(p.n);
+      if (sameName(n, pt, metres(o, p))) return true;
+      if (addr === null || addr !== streetAddress(p.ad ?? null) || metres(o, p) >= 40) return false;
+      return [...n].some((w) => pt.has(w)) || (cat !== null && cat === p.c);
+    });
     if (dup) continue;
-    added.push({ n: o.n, c: (o.c && OVERTURE_TO_OSM[o.c]) ?? `overture=${o.c ?? "place"}`, x: o.x, y: o.y, ad: o.ad ?? undefined, id: `ov${o.id}`, src: "overture" });
+    added.push({ n: o.n, c: cat ?? `overture=${o.c ?? "place"}`, x: o.x, y: o.y, ad: o.ad ?? undefined, id: `ov${o.id}`, src: "overture" });
   }
   return added;
 }

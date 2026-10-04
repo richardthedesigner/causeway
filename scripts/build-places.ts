@@ -43,7 +43,7 @@ const data = JSON.parse(readFileSync(out, "utf8")) as { places: { n: string; c: 
 const OVERTURE_RELEASE = "2026-09-23.1";
 const ovOut = join(CACHE, `${area.name}.overture-${OVERTURE_RELEASE}.json`);
 if (!existsSync(ovOut)) execFileSync("python3", [join(ROOT, "scripts/overture-places.py"), JSON.stringify({ release: OVERTURE_RELEASE, zones, out: ovOut })], { stdio: "inherit" });
-const overture = JSON.parse(readFileSync(ovOut, "utf8")) as { id: string; n: string; c: string | null; x: number; y: number; ad: string | null; conf: number | null }[];
+const overture = JSON.parse(readFileSync(ovOut, "utf8")) as { id: string; n: string; c: string | null; h?: string[]; x: number; y: number; ad: string | null; conf: number | null }[];
 const before = data.places.length;
 data.places.push(...mergeOverture(data.places, overture));
 console.log(`${data.places.length - before} places added from Overture ${OVERTURE_RELEASE}`);
