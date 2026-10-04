@@ -285,3 +285,12 @@ Bridged: Edinburgh 172 of 446 islands, Newcastle 9 of 24, London 23 of 48. `scri
 - **Hazards ahead, not at the spot.** Navigation shows the next hazard up to 300 m ahead; it still announces at 60 m.
 - **Thumb reach.** Search at the bottom; on phones Start is pinned to the bottom of the screen at any sheet height.
 - Recent places live on the device only, like the profile.
+
+## D-036 Switch device from the search bar, at the bottom
+
+**Decided.** 2026-10-04. Build plan: [plans/DEVICES.md](plans/DEVICES.md#build-plan-the-device-switcher-d-036).
+- The device button stays inside the search bar (D-035), in the bottom drawer. No control a user must tap sits at the top of the screen: it's out of reach one-handed and from a chair-mounted phone.
+- A named device shows its name; an unnamed type shows its icon and type. The list of devices opens upwards from the button.
+- "Just this trip" switching, and a confirm step before switching mid-journey, are both in.
+- Rejected: a separate switcher at the top of the map (out of reach), and names written on the type tiles (two devices of one type collide).
+

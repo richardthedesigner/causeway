@@ -2,6 +2,12 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map.
 
+## 2026-10-04 (late night)
+
+**Device switcher designed and planned** (D-036, [plan](plans/DEVICES.md#build-plan-the-device-switcher-d-036))
+- Search and the device button share one bar at the bottom. A named device shows its name; an unnamed type keeps its icon.
+- Eight steps, each its own pull request, from devices behind the profile to a "This trip" section in the drawer. The demo seed goes when first-visit setup ships.
+
 ## 2026-10-04 (night)
 
 **New app UI: "can I get there?" first** (D-035, commit `e2c2a1d`)
