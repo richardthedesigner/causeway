@@ -50,11 +50,13 @@ The current direction: **fix and fill the pilot cities** with open data that nee
 
 The next five things to pick up, in order.
 
-1. **DATA-01**: remove the scraped Changing Places records. It breaks our own no-scraping rule today.
-2. **DATA-02**: Scottish Road Works Register adapter for Edinburgh.
-3. **DATA-03**: TfL station data, with lift outages joined on `LiftUniqueId`.
-4. **DATA-04**: TfL station and line disruptions on transit edges.
-5. **DATA-05**: Street Manager activity archive: skips, scaffolding, hoardings.
+1. **DATA-07**: weather warnings, floods and gritted footways.
+2. **DATA-08**: park entrances (OS Open Greenspace) and OSM Notes.
+3. **DATA-09**: Toilet Map daily export with verified dates.
+4. **DATA-10**: presets on Inclusive Mobility values.
+5. **DATA-11**: rebuild the street graphs on the weekly refresh too.
+
+DATA-02 (SRWR for Edinburgh) is next in value but blocked: its download site doesn't answer the cloud build container.
 
 ## Data and coverage
 
@@ -62,17 +64,17 @@ Fix and fill the pilot cities. DATA-01 to DATA-10 are in order of value per day 
 
 | ID | Task | Size | Priority | Status | Who | Notes |
 |---|---|---|---|---|---|---|
-| DATA-01 | Remove scraped Changing Places records (29) from the search indexes, and filter them in the Overture build | S | now | todo | Claude | §9, D-028 |
-| DATA-02 | Scottish Road Works Register adapter for Edinburgh: footway works, café tables, scaffolding, hoardings, events | M | now | todo | Claude | §2 #1. SRWR is open (OGL), no application needed. [#10](https://github.com/richardthedesigner/causeway/issues/10) |
-| DATA-03 | TfL station data: platform step and gap, which areas each lift connects, toilets. Join lift outages on `LiftUniqueId` | M | now | todo | Claude | §2 #2 and #3, D-020 |
-| DATA-04 | TfL station and line disruptions on transit edges | M | now | todo | Claude | §2 #4. Closures and planned step-free losses are invisible today |
-| DATA-05 | Street Manager activity archive: skips, scaffolding, hoardings | S | now | todo | Claude | §2 #6, D-027. Same bucket we already read |
-| DATA-06 | Edinburgh Adopted Roads: footway surface and width as a separate layer | M | next | todo | Claude | §2 #5, D-008. Width is known on only 8% of Edinburgh's network |
-| DATA-07 | Weather warnings, floods and gritted footways: prefer gritted pavements in ice, flag riverside paths in floods | M | next | todo | Claude | §2 #7, #8, #10 |
-| DATA-08 | Park entrances (OS Open Greenspace) and OSM Notes | M | next | todo | Claude | §2 #11. Routes end at a gate, not the middle of a park |
-| DATA-09 | Toilet Map daily export with verified dates, accessible and RADAR flags | S | next | todo | Claude | §2 #9 |
-| DATA-10 | Presets on Inclusive Mobility values: rest intervals, kerb tolerance | S | next | todo | Claude | §8, D-013 |
-| DATA-11 | Rebuild the street graphs on the weekly refresh too, not only timetables, works and search | M | next | todo | Claude | [#14](https://github.com/richardthedesigner/causeway/issues/14), D-033. Richard runs the refresh once by hand first (OPEN_ITEMS) |
+| DATA-01 | Remove scraped Changing Places records (29) from the search indexes, and filter them in the Overture build | S | now | done (2026-10-04) | Claude | D-028. `scrapedOnly()` in the Overture merge; 53 records stripped from the indexes (29 Changing Places, 24 GP, dentist, hospital and pharmacy) |
+| DATA-02 | Scottish Road Works Register adapter for Edinburgh: footway works, café tables, scaffolding, hoardings, events | M | now | blocked | Claude | §2 #1. SRWR is open (OGL), but `downloads.srwr.scot` resets every TLS connection from the cloud build container (2026-10-04). Build it from a laptop or a runner the site answers. [#10](https://github.com/richardthedesigner/causeway/issues/10) |
+| DATA-03 | TfL station data: platform step and gap, which areas each lift connects, toilets. Join lift outages on `LiftUniqueId` | M | now | done (2026-10-04) | Claude | D-020. `scripts/tfl-station-access.ts`; `applyStationAccess` and `stepFreeLines`. 10 northern Jubilee stations now known not step-free |
+| DATA-04 | TfL station and line disruptions on transit edges | M | now | done (2026-10-04) | Claude | D-020. `packages/live/src/tfl-disruptions.ts`, refreshed with the lifts. Rides get refs at load (`refRides`) |
+| DATA-05 | Street Manager activity archive: skips, scaffolding, hoardings | S | now | done (2026-10-04) | Claude | D-027. Activity archive in `pnpm build:works`: 9 in Newcastle, 5 in London, all "on the pavement" |
+| DATA-06 | Edinburgh Adopted Roads: footway surface and width as a separate layer | M | next | done (2026-10-04) | Claude | D-046. `pnpm build:footways`, `data/council/`. Widths on pavement edges 1,731 to 8,707 |
+| DATA-07 | Weather warnings, floods and gritted footways: prefer gritted pavements in ice, flag riverside paths in floods | M | now | todo | Claude | §2 #7, #8, #10 |
+| DATA-08 | Park entrances (OS Open Greenspace) and OSM Notes | M | now | todo | Claude | §2 #11. Routes end at a gate, not the middle of a park |
+| DATA-09 | Toilet Map daily export with verified dates, accessible and RADAR flags | S | now | todo | Claude | §2 #9 |
+| DATA-10 | Presets on Inclusive Mobility values: rest intervals, kerb tolerance | S | now | todo | Claude | §8, D-013 |
+| DATA-11 | Rebuild the street graphs on the weekly refresh too, not only timetables, works and search | M | now | todo | Claude | [#14](https://github.com/richardthedesigner/causeway/issues/14), D-033. Richard runs the refresh once by hand first (OPEN_ITEMS) |
 | DATA-12 | Edinburgh council data: kerb heights, dropped kerbs and tactile paving, steps, widths, setted streets | L | next | blocked | Richard, Claude | Waits on Richard's licence email. §3, §7 |
 | DATA-13 | Glasgow council data: kerbs, steps with ramps, bus stops, gritting, pavement parking | L | later | blocked | Richard, Claude | Waits on a licence. The richest council data in the UK. §3, §7 |
 | DATA-14 | London borough data: Islington and Southwark (condition, widths, crossings), Westminster (Blue Badge bays), Kensington and Chelsea (tables and chairs) | M | later | blocked | Richard, Claude | Waits on licences. §3, §7 |
@@ -82,6 +84,9 @@ Fix and fill the pilot cities. DATA-01 to DATA-10 are in order of value per day 
 | DATA-18 | Live Street Manager feed for England | M | later | blocked | Richard, Claude | Waits on Richard's application. [#10](https://github.com/richardthedesigner/causeway/issues/10) |
 | DATA-19 | Tyne and Wear Metro lift status | M | later | blocked | Richard, Claude | Waits on Nexus. [#13](https://github.com/richardthedesigner/causeway/issues/13) |
 | DATA-20 | Live bus and tram departures in Edinburgh and Newcastle | M | later | blocked | Claude | [#8](https://github.com/richardthedesigner/causeway/issues/8). Lothian 403, Transport for Edinburgh 522, Nexus needs a key |
+| DATA-22 | Should the council's pavement surface win over OSM on streets drawn as one line? | S | next | blocked | Richard, Claude | D-046. They disagree on 2,822 of 6,341 edges; OSM wins today. A decision, then a one-line change |
+| DATA-23 | TfL station toilets in the toilet layer and search (65 at our stations, with RADAR and accessible flags) | S | next | todo | Claude | Data is already in `network.json` (DATA-03) |
+| DATA-24 | Rebuild the council footway layer on the weekly refresh | S | later | todo | Claude | `pnpm build:footways`. Keyed by OSM way and nodes, so it needs rerunning after a graph rebuild |
 | DATA-21 | Map York Place and the western way into the Grassmarket in OSM (about 1.1 km) | M | later | todo | Richard | [DEVICES.md](plans/DEVICES.md). Turns unknowns into known ground |
 
 ## Research: check our guesses with real people
@@ -249,6 +254,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 
 Newest first. One line per change: date, ID, what happened, link.
 
+- 2026-10-04: DATA-01, DATA-03, DATA-04, DATA-05 and DATA-06 done in PR #33. DATA-02 blocked (SRWR unreachable from the cloud). Added DATA-22 to DATA-24. Now: DATA-07 to DATA-11.
 - 2026-10-04: SEC-01, SEC-02, SEC-03, STAB-01, STAB-03, STAB-09, UPD-01, FEAT-01, DEP-03, DEP-04 and BLOAT-01 done in PR #33 (branch `claude/clever-fermat-ij543q`), carried over from the earlier roadmap's IDs. Added SEC-12 to SEC-14, STAB-10, STAB-11. Now: DATA-01 to DATA-05.
 - 2026-10-04: Merged the two roadmaps (#31 and #34) into this one. Kept #34's order, phases and Drive copy; added IDs, sizes and owners across every area. Gateshead walking (#7) and Overture duplicates (#15) were already closed.
 - 2026-10-04: DEP-02 done: Vercel no longer builds `claude/*` branches (3decc02).

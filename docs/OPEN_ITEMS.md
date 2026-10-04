@@ -15,12 +15,14 @@ Last updated: 2026-10-04.
 | Send the licence emails in the data survey: Edinburgh council (kerbs, crossings, widths, setts), Glasgow (kerbs, steps), Islington and Southwark, Westminster, Canal & River Trust, Sustrans | Unlocks kerb, width and step data that OSM lacks; the data is public but has no stated licence | About ten short emails | [DATA_SURVEY_UK §7](DATA_SURVEY_UK.md#7-who-to-ask-for-richard) |
 | Apply for an NHS Service Search v3 key and an Edinburgh Festivals type C key; register for Spatial Hub | Each has a long approval lead time | Three applications | [DATA_SURVEY_UK §7](DATA_SURVEY_UK.md#7-who-to-ask-for-richard) |
 | Ask Nexus for Tyne and Wear Metro lift status | Without it, Metro stations reached by lift are always "unknown" for step-free users | An email | [#13](https://github.com/richardthedesigner/causeway/issues/13) |
+| Decide whether Edinburgh council's pavement surface should win over OSM on streets drawn as one line | They disagree on 2,822 edges; OSM wins today, and on those streets OSM's tag may describe the road, not the pavement | A decision | [D-046](DECISIONS.md#d-046-council-footway-data-as-a-separate-layer), ROADMAP DATA-22 |
 | Turn on private vulnerability reporting: Settings, then Code security | `SECURITY.md` sends people there; until it's on they have nowhere private to report | 1 minute | [ROADMAP](ROADMAP.md) SEC-14 |
 
 ## Blocked outside the project
 
 | What | Blocker | Link |
 |---|---|---|
+| Edinburgh roadworks from the Scottish Road Works Register | `downloads.srwr.scot` resets every secure connection from the cloud build container. It's open (OGL); it needs building from somewhere the site answers | ROADMAP DATA-02, [#10](https://github.com/richardthedesigner/causeway/issues/10) |
 | Live bus and tram departures for Edinburgh and Newcastle | Lothian's API refuses (403), Transport for Edinburgh's open data is down (522), Nexus needs a key (401). Timetable frequencies are used meanwhile | [#8](https://github.com/richardthedesigner/causeway/issues/8) |
 
 ## Guesses to check with users (Phase 2 research)

@@ -2,6 +2,23 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
+## 2026-10-04 (late night)
+
+Data for the pilot cities, from the roadmap's Now list.
+
+**No scraped records** (D-028, DATA-01)
+- AllThePlaces-only toilets and health services left out of the Overture merge; 29 "Changing Places" and 24 GP, dentist, hospital and pharmacy records removed from the search indexes.
+
+**London stations, line by line** (D-020, DATA-03, DATA-04)
+- TfL's station data says which lines are step-free from the street, the platform-to-train step and gap, and which lift serves what. A lift outage now closes only the lines it really cuts off.
+- Line closures (by station, with TfL's dates) and plain station messages (closed, not calling, no step-free access) act on the rail graph. The route panel names a closure in force.
+
+**Skips, scaffolding and hoardings** (D-027, DATA-05)
+- Street Manager's activity archive adds obstructions on English pavements, counted as unknown.
+
+**Edinburgh pavement widths and surfaces** (D-046, DATA-06)
+- The council's Adopted Roads footways, as a separate layer joined at load. Widths known on 8,707 pavement edges, up from 1,731.
+
 ## 2026-10-04 (night)
 
 The roadmap's next five.
