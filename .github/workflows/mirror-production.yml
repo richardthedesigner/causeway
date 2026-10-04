@@ -1,14 +1,19 @@
 name: mirror-production
 # main is the working branch, but the repo's default branch (and so Vercel's
-# production branch) is still claude/sleepy-johnson-mavbrs. Keep it equal to
-# main so production always serves main. Fast-forward only: if the old branch
-# ever diverges, this fails instead of overwriting anything.
+# production branch) is still claude/sleepy-johnson-mavbrs, and new work still
+# lands there. Keep the two equal in both directions so either can be pushed
+# to. Fast-forward only: if they ever diverge, this fails instead of
+# overwriting anything, and the branches need merging by hand.
+# Pushes made with GITHUB_TOKEN don't trigger workflows, so this can't loop.
 on:
   push:
-    branches: [main]
+    branches: [main, claude/sleepy-johnson-mavbrs]
 
 permissions:
   contents: write
+
+concurrency:
+  group: mirror-production
 
 jobs:
   mirror:
@@ -17,4 +22,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - run: git push origin HEAD:refs/heads/claude/sleepy-johnson-mavbrs
+      - name: Fast-forward the other branch
+        run: |
+          if [ "$GITHUB_REF_NAME" = main ]; then target=claude/sleepy-johnson-mavbrs; else target=main; fi
+          git push origin "HEAD:refs/heads/$target"
