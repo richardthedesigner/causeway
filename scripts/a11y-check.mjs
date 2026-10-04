@@ -1,7 +1,7 @@
 /**
  * WCAG 2.2 AA check of the built app with axe-core, light and dark, on the
  * screens people use most: start, search results, a route with buses and
- * toilets (every section open), and the "How do you get around?" sheet.
+ * toilets (every section open), the device list and the device settings.
  *   pnpm web:build && pnpm a11y
  * Exits 1 on any violation. Runs in CI (.github/workflows/ci.yml).
  */
@@ -58,9 +58,13 @@ for (const scheme of ["light", "dark"]) {
   for (const d of await page.locator("details").all()) await d.evaluate((el) => (el.open = true));
   await check("route, all sections open");
 
-  await page.getByRole("button", { name: /Routes are for|Getting around as/ }).first().click();
-  await page.getByRole("dialog", { name: "How do you get around?" }).waitFor();
-  await check("How do you get around?");
+  // The device button in the bar opens the device list (D-036); Edit opens the device's settings.
+  await page.getByRole("button", { name: /Routes are for/ }).first().click();
+  await page.getByRole("menu", { name: "Getting around as" }).waitFor();
+  await check("device list");
+  await page.getByRole("menuitem", { name: /^Edit/ }).click();
+  await page.getByRole("dialog").filter({ hasText: "Your limits" }).waitFor();
+  await check("device settings");
 }
 await browser.close();
 server.close();
