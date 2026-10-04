@@ -6,7 +6,7 @@ Accessibility-first wayfinding. It gets a wheelchair user from A to B on a route
 
 - What changed and when: [docs/BUILD_LOG.md](docs/BUILD_LOG.md)
 - Why: [docs/DECISIONS.md](docs/DECISIONS.md)
-- How it looks and behaves: [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md)
+- How it looks and behaves: [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md), and in [Figma](https://www.figma.com/design/fXQDly3nwKL9NufpZW1wPa)
 - Where the data comes from: [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md)
 - What's open, including actions for Richard: [GitHub issues](https://github.com/richardthedesigner/causeway/issues)
 

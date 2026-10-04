@@ -208,4 +208,11 @@ Run on every change to the UI:
 
 ## Figma
 
-The tokens, components and the four main screens are also in Figma, for design work before code. The link is in the README. Figma follows the code, not the other way round.
+[Causewayside design system](https://www.figma.com/design/fXQDly3nwKL9NufpZW1wPa) (private to Richard's team). Figma follows the code, not the other way round.
+
+- **Variables:** `Color` collection with Light and Dark modes (26 tokens, each with its `var(--…)` code syntax), and `Space & radius`.
+- **Text styles:** the type ramp above, in Atkinson Hyperlegible.
+- **Components:** Verdict pill (3 variants), Button (Primary, Secondary, Danger), Map chip, Map button, Search bar, Route strip, Route card, Other way row, Nothing fits panel, Option card, Allowed once banner, Instruction card, Coming up card. Fills, strokes and radii are bound to the variables; each has a description pointing to its code.
+- **Screens:** Home, Route, Nothing fits, Navigating, and Route in dark mode, built from those components. The maps are placeholders.
+
+When a token or component changes in code, update the Figma variable or component to match.
