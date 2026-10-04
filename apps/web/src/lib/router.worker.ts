@@ -356,6 +356,20 @@ function check(req: Extract<WorkerRequest, { type: "check" }>): Check[] {
   });
 }
 
+/** Minutes for each profile to the one destination, or null where it can't get there. */
+function fits(req: Extract<WorkerRequest, { type: "fits" }>): { key: string; minutes: number | null }[] {
+  if (!router) return [];
+  const c = { ...req.conditions, now: new Date(req.conditions.now) };
+  return req.profiles.map(({ key, profile }) => {
+    try {
+      const r = router!.route(router!.snap(req.from.lon, req.from.lat, profile, c), router!.snap(req.to.lon, req.to.lat, profile, c), profile, c);
+      return { key, minutes: r ? Math.round(summarise(r, c.now).minutes) : null };
+    } catch {
+      return { key, minutes: null };
+    }
+  });
+}
+
 self.onmessage = async (ev: MessageEvent<WorkerRequest>) => {
   const m = ev.data;
   try {
@@ -374,6 +388,7 @@ self.onmessage = async (ev: MessageEvent<WorkerRequest>) => {
     }
     else if (m.type === "plan") post({ type: "plan", id: m.id, result: plan(m) });
     else if (m.type === "check") post({ type: "check", id: m.id, checks: check(m) });
+    else if (m.type === "fits") post({ type: "fits", id: m.id, fits: fits(m) });
   } catch (err) {
     post({ type: "error", message: err instanceof Error ? err.message : String(err) });
   }

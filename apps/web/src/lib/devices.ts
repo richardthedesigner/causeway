@@ -3,10 +3,11 @@
  * the app routes for the active one. Same privacy rules as the profile: on
  * this device only, guarded storage, works without it.
  *
- * DEMO SEED: until first-visit setup ships (plan step 5), someone with
- * nothing saved starts as if they had already saved and favourited the two
- * devices from tester feedback (2026-10): Cherry, a lightweight powerchair
- * that gets stuck on setts and cobbles, and Lulu, a pavement scooter.
+ * Someone with nothing saved starts "fresh": routes use an unnamed manual
+ * wheelchair, and the device button offers setup. `?demo=devices` instead
+ * starts as the tester from 2026-10 feedback, with Cherry (a lightweight
+ * powerchair that gets stuck on setts and cobbles) and Lulu (a pavement
+ * scooter) already saved and favourited.
  */
 import { PRESETS, savedDevice, type MobilityPreset, type Profile, type SavedDevice } from "@causeway/profile";
 
@@ -20,7 +21,12 @@ type Store = Pick<Storage, "getItem" | "setItem">;
 export interface DeviceState {
   devices: SavedDevice[];
   activeId: string;
+  /** Nothing saved yet: first visit. Any saved change ends it. */
+  fresh?: boolean;
 }
+
+/** What a first visitor routes as until they set up or skip: today's default. */
+export const FIRST_VISIT: DeviceState = { devices: [savedDevice("device-1", "", "manual-wheelchair", {}, true)], activeId: "device-1", fresh: true };
 
 export const SEED_DEVICES: SavedDevice[] = [
   savedDevice("cherry", "Cherry", "powerchair-light", { surfaces: { ...PRESETS["powerchair-light"].surfaces, sett: null, cobblestone: null } }, true),
@@ -63,7 +69,7 @@ export function defaultDevice(list: SavedDevice[]): SavedDevice | undefined {
 
 /** What the device button says: the name for a named device, otherwise the type, shortened to fit the search bar. */
 export function deviceLabel(d: SavedDevice): string {
-  if (d.name) return d.name;
+  if (d.name.trim()) return d.name.trim();
   return d.profile.label.replace(/^Manual wheelchair/, "Manual chair").replace(/, pushed$/, " + help");
 }
 
@@ -71,7 +77,7 @@ export function deviceLabel(d: SavedDevice): string {
  * Load devices and the active one. Someone with a profile from before
  * devices keeps it, as one unnamed device; nobody loses their settings.
  */
-export function loadDeviceState(store: Store | undefined = defaultStore()): DeviceState {
+export function loadDeviceState(store: Store | undefined = defaultStore(), { demo = false } = {}): DeviceState {
   let devices: SavedDevice[] | null = null;
   const raw = read(store, DEVICES_KEY);
   if (raw) {
@@ -95,7 +101,8 @@ export function loadDeviceState(store: Store | undefined = defaultStore()): Devi
     } catch {
       legacy = null;
     }
-    devices = legacy ? [{ id: "device-1", name: "", favourite: true, profile: legacy }] : SEED_DEVICES;
+    if (!legacy) return demo ? { devices: SEED_DEVICES, activeId: SEED_DEVICES[0]!.id } : FIRST_VISIT;
+    devices = [{ id: "device-1", name: "", favourite: true, profile: legacy }];
   }
   const stored = read(store, ACTIVE_KEY);
   const activeId = devices.some((d) => d.id === stored) ? stored! : defaultDevice(devices)!.id;
@@ -124,7 +131,7 @@ export function activeDevice(state: DeviceState): SavedDevice {
 export function withActiveProfile(state: DeviceState, profile: Profile): DeviceState {
   return {
     ...state,
-    devices: state.devices.map((d) => (d.id === state.activeId ? { ...d, profile: d.name ? { ...profile, label: d.name } : profile } : d)),
+    devices: state.devices.map((d) => (d.id === state.activeId ? { ...d, profile: d.name.trim() ? { ...profile, label: d.name.trim() } : profile } : d)),
   };
 }
 
@@ -132,7 +139,61 @@ export function withActive(state: DeviceState, id: string): DeviceState {
   return state.devices.some((d) => d.id === id) ? { ...state, activeId: id } : state;
 }
 
-/** Add an unnamed device and make it the one in use. Naming it comes with first-visit setup (plan step 5). */
-export function withNewDevice(state: DeviceState, id: string, preset: MobilityPreset = "manual-wheelchair"): DeviceState {
-  return { devices: [...state.devices, savedDevice(id, "", preset)], activeId: id };
+/** Rename the active device. A blank name goes back to calling it by its type. */
+export function withActiveName(state: DeviceState, raw: string): DeviceState {
+  const name = raw.replace(/\s+/g, " ").trimStart();
+  return {
+    ...state,
+    devices: state.devices.map((d) =>
+      d.id === state.activeId ? { ...d, name, profile: { ...d.profile, label: name.trim() || PRESETS[d.profile.preset].label } } : d,
+    ),
+  };
+}
+
+export function withFavourite(state: DeviceState, id: string, favourite: boolean): DeviceState {
+  return { ...state, devices: state.devices.map((d) => (d.id === id ? { ...d, favourite } : d)) };
+}
+
+/** Remove a device. The last one can't go: there must always be one to route for. */
+export function withoutDevice(state: DeviceState, id: string): DeviceState {
+  const devices = state.devices.filter((d) => d.id !== id);
+  if (!devices.length) return state;
+  return { devices, activeId: state.activeId === id ? defaultDevice(devices)!.id : state.activeId };
+}
+
+export interface SetupChoice {
+  preset: MobilityPreset;
+  name: string;
+  favourite: boolean;
+}
+
+/**
+ * Save what setup chose. On a first visit it replaces the stand-in device;
+ * otherwise it's added. Either way it becomes the device in use.
+ */
+export function withSetup(state: DeviceState, choice: SetupChoice, id: string): DeviceState {
+  const name = choice.name.replace(/\s+/g, " ").trim();
+  const device = savedDevice(id, name, choice.preset, {}, choice.favourite);
+  return { devices: state.fresh ? [device] : [...state.devices, device], activeId: id };
+}
+
+const TIP_KEY = "causewayside.tip.devices.v1";
+/** The one-time "tap to switch" tip: shown after the first device is saved, until dismissed. */
+export function tipPending(store: Store | undefined = defaultStore()): boolean {
+  return read(store, TIP_KEY) === "pending";
+}
+export function setTip(state: "pending" | "seen", store: Store | undefined = defaultStore()) {
+  try {
+    store?.setItem(TIP_KEY, state);
+  } catch {
+    /* the tip may show again; harmless */
+  }
+}
+
+/** What changed after switching device, for the route: "7 min quicker than Cherry's route". */
+export function compareLine(minutes: number, prev: { label: string; minutes: number | null }): string {
+  if (prev.minutes === null) return `${prev.label} had no route here.`;
+  const d = minutes - prev.minutes;
+  if (d === 0) return `Same time as ${prev.label}'s route.`;
+  return `${Math.abs(d)} min ${d < 0 ? "quicker" : "longer"} than ${prev.label}'s route.`;
 }

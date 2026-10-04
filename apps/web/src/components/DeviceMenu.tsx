@@ -13,6 +13,13 @@ interface Props {
   onPick: (id: string) => void;
   onEdit: () => void;
   onAdd: () => void;
+  /** First visit: the button reads "Set up" and opens setup instead of the list. */
+  onSetup?: () => void;
+  /** A device borrowed for this journey only: the button says "Lulu, this trip". */
+  tripLabel?: string;
+  /** Show the one-time tip that the button switches device. */
+  tip?: boolean;
+  onTipSeen?: () => void;
 }
 
 const typeOf = (d: SavedDevice) => PRESETS[d.profile.preset].label;
@@ -22,7 +29,7 @@ const typeOf = (d: SavedDevice) => PRESETS[d.profile.preset].label;
  * shows its name; an unnamed one its icon and type. The list opens upwards,
  * so a thumb on the button never covers it.
  */
-export function DeviceMenu({ devices, activeId, onPick, onEdit, onAdd }: Props) {
+export function DeviceMenu({ devices, activeId, onPick, onEdit, onAdd, onSetup, tripLabel, tip, onTipSeen }: Props) {
   const panel = useRef<HTMLDivElement>(null);
   const { open, setOpen, toggle, root } = useMenu(panel);
   /**
@@ -38,7 +45,7 @@ export function DeviceMenu({ devices, activeId, onPick, onEdit, onAdd }: Props) 
   const isOpen = open === "device";
 
   useLayoutEffect(() => {
-    if (!isOpen && !said) return;
+    if (!isOpen && !said && !tip) return;
     const place = () => {
       const host = root.current?.closest<HTMLElement>("[data-vaul-drawer]") ?? document.body;
       const r = root.current?.getBoundingClientRect();
@@ -48,7 +55,7 @@ export function DeviceMenu({ devices, activeId, onPick, onEdit, onAdd }: Props) 
     place();
     window.addEventListener("resize", place);
     return () => window.removeEventListener("resize", place);
-  }, [isOpen, said]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isOpen, said, tip]); // eslint-disable-line react-hooks/exhaustive-deps
   // Opening puts focus on the device in use; arrow keys move through the list.
   useEffect(() => {
     if (isOpen && at) panel.current?.querySelector<HTMLElement>('[aria-checked="true"]')?.focus();
@@ -77,7 +84,7 @@ export function DeviceMenu({ devices, activeId, onPick, onEdit, onAdd }: Props) 
   };
   const pick = (d: SavedDevice) => {
     close();
-    if (d.id === activeId) return;
+    if (d.id === activeId && !tripLabel) return;
     onPick(d.id);
     setSaid(`Now using ${deviceLabel(d)}`);
   };
@@ -113,19 +120,28 @@ export function DeviceMenu({ devices, activeId, onPick, onEdit, onAdd }: Props) 
 
   return (
     <div ref={root} onKeyDown={keep} className="relative max-w-full min-w-0">
+      {onSetup ? (
+        <button type="button" data-menu="device" onClick={onSetup} aria-label="Set up how you get around" className="inline-flex min-h-12 items-center rounded-xl bg-accent px-4 text-sm font-bold text-accent-ink">
+          Set up
+        </button>
+      ) : (
       <button
         type="button"
         data-menu="device"
         aria-haspopup="menu"
         aria-expanded={isOpen}
-        onClick={() => toggle("device")}
-        aria-label={`Routes are for ${deviceLabel(active)}${active.name ? `, ${typeOf(active)}` : ""}. Change device`}
+        onClick={() => {
+          if (tip) onTipSeen?.();
+          toggle("device");
+        }}
+        aria-label={tripLabel ? `Routes are for ${tripLabel}, this trip only. Change device` : `Routes are for ${deviceLabel(active)}${active.name ? `, ${typeOf(active)}` : ""}. Change device`}
         className="inline-flex min-h-12 max-w-full min-w-0 items-center gap-1.5 rounded-xl bg-accent px-3 text-sm font-bold text-accent-ink"
       >
-        {active.name ? null : <Accessibility aria-hidden className="size-4 shrink-0" strokeWidth={2.6} />}
-        <span className="truncate">{deviceLabel(active)}</span>
+        {active.name || tripLabel ? null : <Accessibility aria-hidden className="size-4 shrink-0" strokeWidth={2.6} />}
+        <span className="truncate">{tripLabel ? `${tripLabel}, this trip` : deviceLabel(active)}</span>
         <ChevronUp aria-hidden className={cn("size-4 shrink-0 transition-transform", !isOpen && "rotate-180")} strokeWidth={2.6} />
       </button>
+      )}
 
       {isOpen && at ? createPortal(
         <div
@@ -154,6 +170,17 @@ export function DeviceMenu({ devices, activeId, onPick, onEdit, onAdd }: Props) 
       <p role="status" aria-live="polite" className="sr-only">
         {said ?? ""}
       </p>
+      {tip && at && !isOpen && !said && !onSetup
+        ? createPortal(
+            <div role="note" style={{ bottom: at.bottom, right: at.right }} className="absolute z-[60] flex w-64 max-w-[calc(100vw-2rem)] items-start gap-2 rounded-xl bg-accent p-3 text-sm text-accent-ink shadow-lg">
+              <p className="m-0 flex-1">Tap {deviceLabel(active)} to switch device or add another.</p>
+              <button type="button" onClick={onTipSeen} className="-m-1 min-h-11 shrink-0 rounded-lg px-2 font-bold underline">
+                Got it
+              </button>
+            </div>,
+            at.host,
+          )
+        : null}
       {said && at && !isOpen
         ? createPortal(
             <p aria-hidden style={{ bottom: at.bottom, right: at.right }} className="absolute z-[60] m-0 w-max max-w-[calc(100vw-2rem)] rounded-xl bg-ink px-3 py-2 text-sm font-bold text-surface shadow-lg">

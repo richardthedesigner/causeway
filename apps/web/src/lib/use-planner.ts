@@ -38,6 +38,9 @@ export function usePlanner(city: City) {
   const [works, setWorks] = useState<WorksSummary | null>(null);
   const checkSeq = useRef(0);
   const [checks, setChecks] = useState<Record<string, Check>>({});
+  const fitsSeq = useRef(0);
+  /** Other saved devices' minutes for the current journey, keyed by device id; null where it can't get there. */
+  const [fitsResult, setFits] = useState<Record<string, number | null> | null>(null);
 
   useEffect(() => {
     setReady(null);
@@ -77,6 +80,8 @@ export function usePlanner(city: City) {
         setPlanning(false);
       } else if (m.type === "check" && m.id === checkSeq.current) {
         setChecks(Object.fromEntries(m.checks.map((x) => [x.placeId, x])));
+      } else if (m.type === "fits" && m.id === fitsSeq.current) {
+        setFits(Object.fromEntries(m.fits.map((f) => [f.key, f.minutes])));
       } else if (m.type === "plan" && m.id === seq.current) {
         setResult(m.result);
         setPlanning(false);
@@ -110,5 +115,13 @@ export function usePlanner(city: City) {
     worker.current.postMessage({ type: "check", id, from, to, profile, conditions: { wet: c.wet, ice: c.ice, now: new Date().toISOString() } } satisfies WorkerRequest);
   }, []);
 
-  return { ready, error, result, planning, plan, lifts, works, checks, check, sendToilets, clear: () => setResult(null) };
+  /** Ask whether each of these devices could make the journey (latest request wins). */
+  const fits = useCallback((from: Place, to: Place, profiles: { key: string; profile: Profile }[], c: Conditions) => {
+    const id = ++fitsSeq.current;
+    setFits(null);
+    if (!worker.current || !profiles.length) return;
+    worker.current.postMessage({ type: "fits", id, from, to, profiles, conditions: { wet: c.wet, ice: c.ice, now: new Date().toISOString() } } satisfies WorkerRequest);
+  }, []);
+
+  return { ready, error, result, planning, plan, lifts, works, checks, check, fits, fitsResult, sendToilets, clear: () => setResult(null) };
 }

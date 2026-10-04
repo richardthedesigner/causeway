@@ -297,7 +297,7 @@ Bridged: Edinburgh 172 of 446 islands, Newcastle 9 of 24, London 23 of 48. `scri
 - Rejected: a separate switcher at the top of the map (out of reach), and names written on the type tiles (two devices of one type collide).
 
 
-## D-034 Crossings for people who cross by sound and touch
+## D-037 Crossings for people who cross by sound and touch
 
 **Decided.** 2026-10-04. The visual-impairment profile used to route exactly like walking. Graph nodes at crossings now carry what OSM says about them (`packages/graph/src/crossing-info.ts`):
 - control: lights, zebra, marked, or none;

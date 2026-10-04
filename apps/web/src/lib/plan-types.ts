@@ -119,7 +119,9 @@ export type WorkerRequest =
       /** Notes on this device, without photos. Soft signals for the cost model only. */
       notes: UserNote[];
     }
-  | { type: "check"; id: number; from: Place; to: Place[]; profile: Profile; conditions: Omit<Conditions, "now"> & { now: string } };
+  | { type: "check"; id: number; from: Place; to: Place[]; profile: Profile; conditions: Omit<Conditions, "now"> & { now: string } }
+  /** Can each of these saved devices make this journey? For "Lulu can do this one" (D-036). */
+  | { type: "fits"; id: number; from: Place; to: Place; profiles: { key: string; profile: Profile }[]; conditions: Omit<Conditions, "now"> & { now: string } };
 
 export type WorkerResponse =
   | { type: "ready"; places: Place[]; network: { coords: [number, number][]; bin: number }[]; bbox: [number, number, number, number]; builtAt: string; buses: { stops: number; lines: number; source: string } | null }
@@ -127,7 +129,8 @@ export type WorkerResponse =
   | { type: "works"; summary: WorksSummary }
   | { type: "live"; applied: number; fetchedAt: string }
   | { type: "plan"; id: number; result: PlanResult }
-  | { type: "check"; id: number; checks: Check[] };
+  | { type: "check"; id: number; checks: Check[] }
+  | { type: "fits"; id: number; fits: { key: string; minutes: number | null }[] };
 
 /** Street works on pavements in the loaded area, for the "what we know right now" line. */
 export interface WorksSummary {

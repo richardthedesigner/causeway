@@ -4,6 +4,25 @@ A running record of what was built, newest first. Each entry links the decision 
 
 ## 2026-10-04 (late night)
 
+**Routes say who they're for, and offer another device** (D-036 step 6)
+- Routes carry a "For Cherry" tag once there's more than one device (or the device is named).
+- After switching device with a route on screen, the route says what changed: "9 min quicker than Cherry's route", or "Cherry had no route here."
+- When nothing fits, the heading says "No route for Cherry", and the routing worker checks the other saved devices. Each one that fits gets "Lulu can do this one: 24 min · Use Lulu for this trip".
+- "This trip" isn't saved: the button reads "Lulu, this trip", and it goes back to Cherry when navigation ends, the journey changes or another device is picked. Checked on Castle Esplanade, where Cherry is stopped by 10.2% on Victoria Terrace.
+
+**First visit and Add a device** (D-036 step 5)
+- With nothing saved, the device button reads "Set up" and one line above the bar says why. Routes still work meanwhile, as a manual wheelchair.
+- Setup is three screens, each skippable: what do you use (the six wheeled types with a line each, everything else one tap away), what do you call it (with favourite), and the key limits. "Add a device" uses the same screens.
+- After the first save, a one-time tip points at the button until "Got it".
+- Cherry and Lulu no longer load by default. `?demo=devices` still starts with them when nothing is saved.
+- The accessibility check now walks setup too: 0 violations, light and dark.
+
+**Edit a device** (D-036 step 4)
+- "Edit Cherry" opens a full-screen editor on a phone (a side panel on wide screens): name, favourite, type, limits, and remove.
+- A blank name goes back to calling the device by its type. Changing type keeps the name.
+- The four powered types each get a line saying how they differ ("Small wheels. Struggles with kerbs, setts and hills").
+- Remove asks first, in the page, and isn't offered for the last device.
+
 **One bar for search and route** (D-036 step 3)
 - With a route on screen, the destination and the device button share the same bar as search, with no magnifier. The separate "Routes are for … Change" row is gone; a quiet line says what ground the routes were worked out for.
 - When the field or destination would get narrower than 150 px beside the button, the bar splits: the field keeps the first line and the button goes full width under it. Checked at 320 px and 390 px with "Cherry" and with the longest label, "Manual chair + help".
@@ -40,7 +59,7 @@ A running record of what was built, newest first. Each entry links the decision 
 
 ## 2026-10-04 (evening)
 
-**Crossings for blind and partially sighted people** (D-034)
+**Crossings for blind and partially sighted people** (D-037; first committed as a second D-034)
 - Crossing type, beeping lights, rotating cones, tactile paving and shared cycle paths now shape routes for the visual-impairment profile, and for anyone who turns on the new toggle.
 - Directions name the cue at each crossing.
 - Causewayside to Grassmarket goes from 3 uncontrolled crossings to none.

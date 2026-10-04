@@ -1,7 +1,8 @@
 /**
  * WCAG 2.2 AA check of the built app with axe-core, light and dark, on the
  * screens people use most: start, search results, a route with buses and
- * toilets (every section open), the device list and the device settings.
+ * toilets (every section open), first-visit setup, the device list and the
+ * device settings.
  *   pnpm web:build && pnpm a11y
  * Exits 1 on any violation. Runs in CI (.github/workflows/ci.yml).
  */
@@ -58,7 +59,19 @@ for (const scheme of ["light", "dark"]) {
   for (const d of await page.locator("details").all()) await d.evaluate((el) => (el.open = true));
   await check("route, all sections open");
 
-  // The device button in the bar opens the device list (D-036); Edit opens the device's settings.
+  // A first visit: the device button reads "Set up" and opens setup (D-036 step 5).
+  await page.getByRole("button", { name: "Set up how you get around" }).first().click();
+  await page.getByRole("dialog", { name: "What do you use?" }).waitFor();
+  await check("setup: what do you use?");
+  await page.getByRole("radio", { name: /Powerchair, lightweight/ }).click();
+  await page.getByRole("button", { name: "Next" }).click();
+  await page.getByLabel("Name").fill("Cherry");
+  await check("setup: name");
+  await page.getByRole("button", { name: "Next" }).click();
+  await check("setup: limits");
+  await page.getByRole("button", { name: "Save Cherry" }).click();
+
+  // Then the device button opens the device list; Edit opens the device's settings.
   await page.getByRole("button", { name: /Routes are for/ }).first().click();
   await page.getByRole("menu", { name: "Getting around as" }).waitFor();
   await check("device list");
