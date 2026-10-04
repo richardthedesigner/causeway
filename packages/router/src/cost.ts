@@ -257,6 +257,9 @@ function evaluateEdgeBase(e: GraphEdge, forward: boolean, p: Profile, c: Conditi
   }
   if (e.kind === "board" || e.kind === "interchange") {
     const seconds = e.kind === "board" ? (forward ? BOARD_WAIT_S : ALIGHT_S) : e.lengthM / Math.min(p.speedMps, 1.2) + 60;
+    if (needsStepFree(p) && isKnown(a.stepCount) && a.stepCount.value > 0) {
+      return exclude("steps", a.stepCount.method?.split(": ").slice(1).join(": ") || "no step-free route to the platform");
+    }
     if (needsStepFree(p) && !isKnown(a.stepCount)) {
       const s = UNKNOWN_STATION_S * (1 - p.uncertaintyTolerance);
       return { passable: "unknown", seconds, cost: seconds + s, reasons: [...reasons, { kind: "unknown", attr: "station", detail: "step-free access not confirmed", seconds: s }] };

@@ -4,7 +4,7 @@
  */
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { addTransit, bridgeIslands, buildGraphFromOsm, enrichWithTerrain, type TransitNetwork, loadChunkedDtm, parseOsmXml, registerOsgb, saveSnapshot, toOsgb, type OsmData } from "@causeway/graph/node";
+import { addTransit, applyStationAccess, bridgeIslands, buildGraphFromOsm, enrichWithTerrain, type TransitNetwork, loadChunkedDtm, parseOsmXml, registerOsgb, saveSnapshot, toOsgb, type OsmData } from "@causeway/graph/node";
 import { AREAS } from "./areas.js";
 import { cached, CACHE, EDINBURGH_OLD_TOWN, osmTileUrl, toArrayBuffer } from "./sources.js";
 
@@ -44,6 +44,7 @@ log(`islands: ${islands.islands}, bridged ${islands.bridged}`);
 if (area.transit) {
   const net = JSON.parse(readFileSync(join(ROOT, area.transit), "utf8")) as TransitNetwork;
   const { stationNode, platformNode } = addTransit(g, net);
+  applyStationAccess(g, net);
   log(`transit: ${stationNode.size} stations, ${platformNode.size} platforms, ${g.edges.filter((e) => e.kind === "station_link").length} street links`);
 }
 

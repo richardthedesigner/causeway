@@ -3,7 +3,7 @@
  * Routing runs on the device, in a worker. The profile (health data) never
  * leaves the phone: it arrives here with each request and is not stored.
  */
-import { addBus, isKnown, mobilityLabelFor, noteSignals, type Graph, type GraphEdge, type Stretch, type TransitNetwork, type BusNetwork } from "@causeway/graph";
+import { addBus, applyStationAccess, isKnown, mobilityLabelFor, noteSignals, type Graph, type GraphEdge, type Stretch, type TransitNetwork, type BusNetwork } from "@causeway/graph";
 import { applyEdgeStates, applyLiveStates, liftOutageStates, worksStates, type WorksObservation } from "@causeway/live";
 import { PRESETS, type Profile } from "@causeway/profile";
 import {
@@ -75,8 +75,10 @@ async function load(url: string, networkUrl: string | undefined, worksUrl: strin
       buses = null;
     }
   }
-  router = new Router(graph);
   network = networkUrl ? ((await (await fetch(networkUrl)).json()) as TransitNetwork) : null;
+  // TfL's per-line step-free facts go on the board edges before the router indexes the graph (DATA-03).
+  if (network) applyStationAccess(graph, network);
+  router = new Router(graph);
   post({ type: "ready", places: places(graph, demo, network), network: networkLines(graph), bbox: graph.meta.bbox, builtAt: graph.meta.builtAt, buses });
   if (worksUrl) {
     try {
