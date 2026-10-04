@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { PRESETS, savedDevice } from "@causeway/profile";
-import { activeDevice, defaultDevice, deviceLabel, loadDeviceState, orderDevices, saveDeviceState, SEED_DEVICES, withActive, withActiveProfile } from "../src/lib/devices";
+import { activeDevice, defaultDevice, deviceLabel, loadDeviceState, orderDevices, saveDeviceState, SEED_DEVICES, withActive, withActiveProfile, withNewDevice } from "../src/lib/devices";
 
 /** An in-memory stand-in for localStorage. */
 function memory(init: Record<string, string> = {}) {
@@ -86,5 +86,16 @@ describe("device rules", () => {
     expect(activeDevice(next).profile.label).toBe("Cherry");
     expect(activeDevice(next).profile.preset).toBe("powerchair");
     expect(next.devices[1]).toBe(SEED_DEVICES[1]);
+  });
+
+  it("adds an unnamed device and switches to it", () => {
+    const next = withNewDevice({ devices: SEED_DEVICES, activeId: "cherry" }, "d9");
+    expect(next.devices.map((d) => d.id)).toEqual(["cherry", "lulu", "d9"]);
+    expect(activeDevice(next)).toMatchObject({ name: "", favourite: false, profile: { preset: "manual-wheelchair", label: "Manual wheelchair" } });
+  });
+
+  it("ignores a switch to a device that isn't saved", () => {
+    const s = { devices: SEED_DEVICES, activeId: "cherry" };
+    expect(withActive(s, "nope")).toBe(s);
   });
 });

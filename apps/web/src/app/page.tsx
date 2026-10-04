@@ -2,10 +2,11 @@
 import { learnPace, type Profile } from "@causeway/profile";
 import { conditionsFromOpenMeteo, openMeteoUrl } from "@causeway/live";
 import { haversine } from "@causeway/graph";
-import { Accessibility, ChevronLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { MapChrome, type Ground } from "@/components/MapChrome";
 import { MapView } from "@/components/MapView";
+import { DeviceMenu } from "@/components/DeviceMenu";
 import { ModeSheet } from "@/components/ModeSheet";
 import { NavView, type Me } from "@/components/NavView";
 import { NoteSheet, type NoteAbout } from "@/components/NoteSheet";
@@ -18,7 +19,7 @@ import { CommandGroup, CommandItem } from "@/components/ui/command";
 import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
 import { CITIES, cityById, type City } from "@/lib/cities";
 import type { Place } from "@/lib/plan-types";
-import { activeDevice, deviceLabel, loadDeviceState, saveDeviceState, SEED_DEVICES, withActiveProfile, type DeviceState } from "@/lib/devices";
+import { activeDevice, loadDeviceState, saveDeviceState, SEED_DEVICES, withActive, withActiveProfile, withNewDevice, type DeviceState } from "@/lib/devices";
 import { addRecent, loadRecents } from "@/lib/recents";
 import { useNotes } from "@/lib/use-notes";
 import { toiletsAlong } from "@/lib/toilets";
@@ -123,13 +124,14 @@ export default function Home() {
     return () => ctl.abort();
   }, [city]);
 
-  const updateProfile = useCallback((p: Profile) => {
+  const changeDevices = useCallback((f: (s: DeviceState) => DeviceState) => {
     setDevices((s) => {
-      const next = withActiveProfile(s, p);
+      const next = f(s);
       saveDeviceState(next);
       return next;
     });
   }, []);
+  const updateProfile = useCallback((p: Profile) => changeDevices((s) => withActiveProfile(s, p)), [changeDevices]);
 
   // Re-plan whenever the journey, the person or the ground changes.
   useEffect(() => {
@@ -219,15 +221,20 @@ export default function Home() {
   const entrances = useMemo(() => (result?.status === "ok" ? result.entrances.map((e) => ({ lon: e.lon, lat: e.lat, ok: e.verdict.passable })) : []), [result]);
 
   const profileChip = (
-    <button
-      type="button"
-      onClick={() => setModeOpen(true)}
-      aria-label={`Routes are for ${profile.label}. Change`}
-      className="inline-flex min-h-11 max-w-full min-w-0 items-center gap-1.5 rounded-xl bg-accent px-3 text-sm font-bold text-accent-ink"
-    >
-      <Accessibility aria-hidden className="size-4" strokeWidth={2.6} />
-      <span className="truncate">{deviceLabel(device)}</span>
-    </button>
+    <DeviceMenu
+      devices={devices.devices}
+      activeId={devices.activeId}
+      onPick={(id) => {
+        setOnce(null);
+        changeDevices((s) => withActive(s, id));
+      }}
+      onEdit={() => setModeOpen(true)}
+      onAdd={() => {
+        setOnce(null);
+        changeDevices((s) => withNewDevice(s, `device-${Date.now().toString(36)}`));
+        setModeOpen(true);
+      }}
+    />
   );
 
   const recentItems = (
