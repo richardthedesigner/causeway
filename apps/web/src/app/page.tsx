@@ -8,14 +8,14 @@ import { ModeSheet } from "@/components/ModeSheet";
 import { NavView, type Me } from "@/components/NavView";
 import { NoteSheet, type NoteAbout } from "@/components/NoteSheet";
 import { ReportSheet } from "@/components/ReportSheet";
-import { haversine, type UserNote } from "@causeway/graph";
+import { haversine } from "@causeway/graph";
 import { PlaceSearch } from "@/components/PlaceSearch";
 import { RoutePanel } from "@/components/RoutePanel";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerDescription, DrawerTitle } from "@/components/ui/drawer";
 import type { Place } from "@/lib/plan-types";
 import { loadProfile, saveProfile } from "@/lib/profile-store";
-import { deleteNote, deviceAuthor, loadNotes } from "@/lib/notes-store";
+import { useNotes } from "@/lib/use-notes";
 import { CITIES, cityById, type City } from "@/lib/cities";
 import { usePlaces } from "@/lib/use-places";
 import { usePlanner, type Conditions } from "@/lib/use-planner";
@@ -56,17 +56,12 @@ export default function Home() {
   const [navigating, setNavigating] = useState(false);
   const [me, setMe] = useState<Me | null>(null);
   const [reportAt, setReportAt] = useState<{ lon: number; lat: number; accuracyM: number | null; label: string } | null>(null);
-  const [notes, setNotes] = useState<UserNote[]>([]);
-  const [author, setAuthor] = useState("");
   const [noteChoices, setNoteChoices] = useState<NoteAbout[] | null>(null);
   const wide = useWide();
 
   useEffect(() => setProfile(loadProfile()), []);
-  useEffect(() => {
-    setNotes(loadNotes());
-    setAuthor(deviceAuthor());
-  }, []);
-  const cityNotes = useMemo(() => notes.filter((n) => n.city === city.id), [notes, city.id]);
+  const shared = useNotes(city.id);
+  const cityNotes = shared.notes;
   // Large text leaves little room at half height: open the sheet fully instead.
   useEffect(() => {
     if (parseFloat(getComputedStyle(document.documentElement).fontSize) >= 20) setSnap(0.94);
@@ -249,13 +244,11 @@ export default function Home() {
           worksCovered={!!city.works}
           onStart={() => setNavigating(true)}
           notes={cityNotes}
-          author={author}
+          author={shared.author}
+          onFlagNote={shared.sharing === "off" ? undefined : shared.flag}
           builtAt={planner.ready.builtAt}
           onAddNote={setNoteChoices}
-          onDeleteNote={(id) => {
-            deleteNote(id);
-            setNotes(loadNotes());
-          }}
+          onDeleteNote={(id) => void shared.remove(id)}
         />
       ) : null}
       <footer className="mt-8 grid gap-2 border-t border-line pt-4 text-sm text-muted">
@@ -360,8 +353,8 @@ export default function Home() {
         </Drawer>
       )}
       <ModeSheet open={modeOpen} onOpenChange={setModeOpen} profile={profile} onChange={updateProfile} />
-      <NoteSheet choices={noteChoices} onOpenChange={(v) => !v && setNoteChoices(null)} city={city.id} preset={profile.preset} onSaved={() => setNotes(loadNotes())} />
-      <ReportSheet open={reportAt !== null} onOpenChange={(v) => !v && setReportAt(null)} where={reportAt} city={city.id} />
+      <NoteSheet choices={noteChoices} onOpenChange={(v) => !v && setNoteChoices(null)} city={city.id} preset={profile.preset} sharing={shared.sharing !== "off"} onSaved={shared.saved} />
+      <ReportSheet open={reportAt !== null} onOpenChange={(v) => !v && setReportAt(null)} where={reportAt} city={city.id} sharing={shared.sharing !== "off"} onSaved={shared.saved} />
     </main>
   );
 }

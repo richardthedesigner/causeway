@@ -22,12 +22,14 @@ interface Props {
   /** The profile preset id. Only its coarse label is ever offered, and only if the person switches it on. */
   preset: string;
   onSaved: (n: UserNote) => void;
+  /** Notes are shared with other people when sharing is on (D-028). */
+  sharing?: boolean;
 }
 
 const ICON = { good: Smile, mixed: Meh, bad: Frown } as const;
 
 /** Three taps plus typing: open, how was it, Save. A photo and how you get around are optional. */
-export function NoteSheet({ choices, onOpenChange, city, preset, onSaved }: Props) {
+export function NoteSheet({ choices, onOpenChange, city, preset, onSaved, sharing }: Props) {
   const [pick, setPick] = useState(0);
   const [picking, setPicking] = useState(false);
   const about = choices ? (choices[pick] ?? choices[0] ?? null) : null;
@@ -79,14 +81,16 @@ export function NoteSheet({ choices, onOpenChange, city, preset, onSaved }: Prop
   const where = about?.target.name ?? "";
   return (
     <Sheet open={choices !== null} onOpenChange={reset}>
-      <SheetContent title="Add a note" description="Saved on this phone for now.">
+      <SheetContent title="Add a note" description={sharing ? "Shared with other Causewayside users, with the date. You can delete it any time." : "Saved on this phone for now."}>
         {done === "saved" ? (
           <div className="grid gap-4" role="status">
             <p className="m-0 flex items-center gap-2 text-lg font-bold">
               <Check aria-hidden className="size-6 text-ok" /> Saved. Thank you.
             </p>
             <p className="m-0 text-muted">
-              It&apos;s kept on this phone and already shapes your own routes. When notes can be shared, others will see it from &ldquo;a Causewayside user&rdquo;, with the date.
+              {sharing
+                ? "It's shared now. Others see it from \u201ca Causewayside user\u201d, with the date. Photos are checked by a person before anyone else sees them."
+                : "It's kept on this phone and already shapes your own routes. When notes can be shared, others will see it from \u201ca Causewayside user\u201d, with the date."}
             </p>
             <Button variant="primary" size="lg" onClick={() => reset(false)}>
               Done
@@ -200,7 +204,7 @@ export function NoteSheet({ choices, onOpenChange, city, preset, onSaved }: Prop
             </div>
             <label className="flex min-h-12 cursor-pointer items-center gap-3">
               <Camera aria-hidden className="size-6" />
-              <span>{photo ? "Photo added" : "Add a photo (optional)"}</span>
+              <span>{photo ? "Photo added" : "Add a photo (optional)"}{sharing && !photo ? <span className="block text-sm text-muted">Checked by a person before anyone else sees it.</span> : null}</span>
               <input
                 id="note-photo"
                 type="file"

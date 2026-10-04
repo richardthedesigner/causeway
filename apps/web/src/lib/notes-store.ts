@@ -7,25 +7,33 @@
  */
 import type { UserNote } from "@causeway/graph";
 
+/** A note on this device. `sharedAt` is set once the server has it (only when sharing is on, D-028). */
+export type LocalNote = UserNote & { sharedAt?: string };
+
 const KEY = "causewayside.notes.v1";
 const AUTHOR_KEY = "causewayside.author.v1";
 
-export function loadNotes(): UserNote[] {
+export function loadNotes(): LocalNote[] {
   try {
     const v = JSON.parse(localStorage.getItem(KEY) ?? "[]");
-    return Array.isArray(v) ? (v as UserNote[]) : [];
+    return Array.isArray(v) ? (v as LocalNote[]) : [];
   } catch {
     return [];
   }
 }
 
-export function saveNote(n: UserNote): boolean {
+export function saveNote(n: LocalNote): boolean {
   try {
     localStorage.setItem(KEY, JSON.stringify([n, ...loadNotes().filter((o) => o.id !== n.id)].slice(0, 200)));
     return true;
   } catch {
     return false;
   }
+}
+
+export function markShared(id: string): void {
+  const n = loadNotes().find((o) => o.id === id);
+  if (n) saveNote({ ...n, sharedAt: new Date().toISOString() });
 }
 
 export function deleteNote(id: string): boolean {

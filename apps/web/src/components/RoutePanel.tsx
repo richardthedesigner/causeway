@@ -9,6 +9,7 @@ import type { NoteAbout } from "@/components/NoteSheet";
 import { Button } from "@/components/ui/button";
 import type { Place, PlannedRoute, PlanResult, WorksSummary } from "@/lib/plan-types";
 import type { Conditions, LiveLifts } from "@/lib/use-planner";
+import type { FlagReason } from "@/lib/sync";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -38,6 +39,8 @@ interface Props {
   /** Open the note sheet with these subjects to choose from, most likely first. */
   onAddNote: (choices: NoteAbout[]) => void;
   onDeleteNote: (id: string) => void;
+  /** Present when notes are shared: flag someone else's note. */
+  onFlagNote?: (id: string, reason: FlagReason) => Promise<boolean>;
 }
 
 const dist = (m: number) => (m >= 1000 ? `${(m / 1000).toFixed(1)} km` : `${m} m`);
@@ -222,14 +225,14 @@ export function RoutePanel(props: Props) {
                         <span className="pl-7 text-sm text-muted">
                           {e.distanceM} m from the pin / {e.source}
                         </span>
-                        <PeopleSay notes={notesForEntrance(notes, e.osmId)} all={notes} author={author} onDelete={props.onDeleteNote} className="pl-7" />
+                        <PeopleSay notes={notesForEntrance(notes, e.osmId)} all={notes} author={author} onDelete={props.onDeleteNote} onFlag={props.onFlagNote} className="pl-7" />
                       </li>
                     ))}
                   </ul>
                 ) : (
                   <p className="m-0 text-muted">No entrances mapped near this point. Check with the venue before you go.</p>
                 )}
-                <PeopleSay notes={placeNotes} all={notes} author={author} onDelete={props.onDeleteNote} title="What people say about the place" />
+                <PeopleSay notes={placeNotes} all={notes} author={author} onDelete={props.onDeleteNote} onFlag={props.onFlagNote} title="What people say about the place" />
               </More>
             ) : null}
 
@@ -243,7 +246,7 @@ export function RoutePanel(props: Props) {
               ) : (
                 <p className="m-0 text-muted">Nothing else to flag on this route.</p>
               )}
-              <PeopleSay notes={routeNotes} all={notes} author={author} onDelete={props.onDeleteNote} title="Notes from people on this route" hint="Their own experience, not checked by us. Notes nudge your routes but never rule a street in or out." />
+              <PeopleSay notes={routeNotes} all={notes} author={author} onDelete={props.onDeleteNote} onFlag={props.onFlagNote} title="Notes from people on this route" hint="Their own experience, not checked by us. Notes nudge your routes but never rule a street in or out." />
             </More>
 
             {others.length || tradeoffMessages.length ? (
@@ -275,7 +278,7 @@ export function RoutePanel(props: Props) {
                         {u.name} <span className="tabular text-muted">/ {u.m} m</span>
                       </span>
                       <span className="text-sm text-muted">{u.what}</span>
-                      <PeopleSay notes={stretchNotes(u.name)} all={notes} author={author} onDelete={props.onDeleteNote} title="What people say (not checked by us)" className="mt-2" />
+                      <PeopleSay notes={stretchNotes(u.name)} all={notes} author={author} onDelete={props.onDeleteNote} onFlag={props.onFlagNote} title="What people say (not checked by us)" className="mt-2" />
                     </li>
                   ))}
                 </ul>
@@ -368,13 +371,31 @@ function More({ title, aside, icon, children }: { title: string; aside?: string;
   );
 }
 
-function PeopleSay({ notes, all, author, onDelete, title, hint, className }: { notes: UserNote[]; all: UserNote[]; author: string; onDelete: (id: string) => void; title?: string; hint?: string; className?: string }) {
+function PeopleSay({
+  notes,
+  all,
+  author,
+  onDelete,
+  onFlag,
+  title,
+  hint,
+  className,
+}: {
+  notes: UserNote[];
+  all: UserNote[];
+  author: string;
+  onDelete: (id: string) => void;
+  onFlag?: (id: string, reason: FlagReason) => Promise<boolean>;
+  title?: string;
+  hint?: string;
+  className?: string;
+}) {
   if (!notes.length) return null;
   return (
     <div className={cn("grid gap-2", className)}>
       {title ? <h3 className="m-0 text-base font-bold">{title}</h3> : null}
       <p className="m-0 text-sm text-muted">{hint ?? "Their own experience, not checked by us."}</p>
-      <NoteList notes={notes} all={all} author={author} onDelete={onDelete} />
+      <NoteList notes={notes} all={all} author={author} onDelete={onDelete} onFlag={onFlag} />
     </div>
   );
 }
