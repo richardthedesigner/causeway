@@ -100,6 +100,8 @@ export interface Profile {
 export const isPowerchair = (p: Pick<Profile, "preset">) => p.preset === "powerchair" || p.preset === "powerchair-light";
 /** Any mobility scooter, pavement or road. */
 export const isScooter = (p: Pick<Profile, "preset">) => p.preset === "mobility-scooter" || p.preset === "mobility-scooter-road";
+/** Runs on a battery, so a range on one charge means something (D-043). */
+export const hasBattery = (p: Pick<Profile, "preset">) => isPowerchair(p) || isScooter(p);
 
 const SMOOTH: SurfaceTolerance = {
   asphalt: 0,

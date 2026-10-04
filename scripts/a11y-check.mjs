@@ -2,7 +2,7 @@
  * WCAG 2.2 AA check of the built app with axe-core, light and dark, on the
  * screens people use most: start, search results, a route with buses and
  * toilets (every section open), first-visit setup, the device list and the
- * device settings.
+ * device settings, with a battery range.
  *   pnpm web:build && pnpm a11y
  * Exits 1 on any violation, or anything the Content Security Policy blocks. Runs in CI (.github/workflows/ci.yml).
  */
@@ -64,6 +64,11 @@ for (const scheme of ["light", "dark"]) {
   await page.getByRole("menuitem", { name: /^Edit/ }).click();
   await page.getByRole("dialog").filter({ hasText: "Your limits" }).waitFor();
   await check("device settings");
+  // Cherry is a powerchair, so the limits offer a battery range (D-043).
+  await page.getByText("Your limits", { exact: true }).first().click();
+  await page.getByRole("switch", { name: "Warn me about battery range" }).click();
+  await page.getByRole("slider", { name: "Range on one charge" }).waitFor();
+  await check("device settings, battery range");
 }
 await browser.close();
 server.close();

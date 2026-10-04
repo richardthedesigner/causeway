@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { PRESETS, savedDevice } from "@causeway/profile";
-import { activeDevice, compareLine, defaultDevice, deviceLabel, loadDeviceState, orderDevices, saveDeviceState, SEED_DEVICES, withActive, withActiveName, withActiveProfile, withDeviceProfile, withFavourite, withoutDevice, withSetup } from "../src/lib/devices";
+import { activeDevice, compareLine, defaultDevice, deviceLabel, loadDeviceState, orderDevices, saveDeviceState, SEED_DEVICES, withActive, withActiveName, withActiveProfile, withDeviceProfile, withFavourite, withoutDevice, withSetup, presetProfile } from "../src/lib/devices";
 
 /** An in-memory stand-in for localStorage. */
 function memory(init: Record<string, string> = {}) {
@@ -151,5 +151,22 @@ describe("device rules", () => {
     expect(next.devices[1]!.profile).toMatchObject({ speedMps: 2.1, label: "Lulu" });
     expect(next.devices[0]).toBe(SEED_DEVICES[0]);
     expect(next.activeId).toBe("cherry");
+  });
+});
+
+describe("battery range across a change of type (D-043)", () => {
+  const cherry = SEED_DEVICES[0]!.profile;
+  it("keeps the range on another powered type, and on reset", () => {
+    expect(cherry.maxRangeKm).toBe(12);
+    expect(presetProfile(cherry, "powerchair").maxRangeKm).toBe(12);
+    expect(presetProfile(cherry, "mobility-scooter-road").maxRangeKm).toBe(12);
+    expect(presetProfile(cherry, "powerchair-light")).toEqual({ ...PRESETS["powerchair-light"], maxRangeKm: 12 });
+  });
+  it("drops it for a type with no battery", () => {
+    expect(presetProfile(cherry, "manual-wheelchair").maxRangeKm).toBeUndefined();
+    expect(presetProfile(cherry, "walking")).toEqual(PRESETS.walking);
+  });
+  it("never invents one", () => {
+    expect(presetProfile(PRESETS["manual-wheelchair"], "powerchair").maxRangeKm).toBeUndefined();
   });
 });

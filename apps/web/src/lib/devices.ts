@@ -9,7 +9,7 @@
  * powerchair that gets stuck on setts and cobbles) and Lulu (a pavement
  * scooter) already saved and favourited. Cherry has a demo 12 km battery range.
  */
-import { PRESETS, savedDevice, type MobilityPreset, type Profile, type SavedDevice } from "@causeway/profile";
+import { hasBattery, PRESETS, savedDevice, type MobilityPreset, type Profile, type SavedDevice } from "@causeway/profile";
 
 const DEVICES_KEY = "causewayside.devices.v1";
 const ACTIVE_KEY = "causewayside.device.active.v1";
@@ -202,3 +202,20 @@ export function compareLine(minutes: number, prev: { label: string; minutes: num
   if (d === 0) return `Same time as ${prev.label}'s route.`;
   return `${Math.abs(d)} min ${d < 0 ? "quicker" : "longer"} than ${prev.label}'s route.`;
 }
+
+/**
+ * A device's limits after picking a type (or resetting to it). The battery range
+ * isn't a limit the type sets: it's the person's own figure, so it carries over
+ * to another powered type and goes when the type has no battery (D-043).
+ */
+export function presetProfile(current: Profile, preset: MobilityPreset): Profile {
+  const next: Profile = { ...PRESETS[preset] };
+  if (current.maxRangeKm && hasBattery(next)) next.maxRangeKm = current.maxRangeKm;
+  return next;
+}
+
+/** Range choices in the editor, in km on one charge. */
+export const RANGE_MIN_KM = 3;
+export const RANGE_MAX_KM = 60;
+/** A starting figure when someone turns the range on: a typical lightweight powerchair. */
+export const RANGE_DEFAULT_KM = 15;
