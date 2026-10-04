@@ -5,7 +5,8 @@
  * DEMO SEED: until the device switcher ships, the app starts as if the user
  * had already saved and favourited the two devices from tester feedback
  * (2026-10): Lulu, a pavement scooter, and Cherry, a lightweight powerchair
- * that gets stuck on setts and cobbles. Remove SEED_DEVICES when onboarding
+ * that gets stuck on setts and cobbles, with a demo 12 km battery range.
+ * Remove SEED_DEVICES when onboarding
  * creates the first device.
  */
 import { PRESETS, savedDevice, type SavedDevice } from "@causeway/profile";
@@ -13,7 +14,7 @@ import { PRESETS, savedDevice, type SavedDevice } from "@causeway/profile";
 const KEY = "causewayside.devices.v1";
 
 export const SEED_DEVICES: SavedDevice[] = [
-  savedDevice("cherry", "Cherry", "powerchair-light", { surfaces: { ...PRESETS["powerchair-light"].surfaces, sett: null, cobblestone: null } }, true),
+  savedDevice("cherry", "Cherry", "powerchair-light", { surfaces: { ...PRESETS["powerchair-light"].surfaces, sett: null, cobblestone: null }, maxRangeKm: 12 }, true),
   savedDevice("lulu", "Lulu", "mobility-scooter", {}, true),
 ];
 
