@@ -21,7 +21,7 @@ export interface City {
   credit: string;
 }
 
-const OSM = "Map data © OpenStreetMap contributors (ODbL). Base map: Protomaps.";
+const OSM = "Map data © OpenStreetMap contributors (ODbL). Base map: Protomaps. Extra places: Overture Maps Foundation (CDLA Permissive 2.0).";
 
 export const CITIES: City[] = [
   {

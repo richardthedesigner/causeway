@@ -8,6 +8,7 @@ import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node
 import { gzipSync } from "node:zlib";
 import { join } from "node:path";
 import { AREAS } from "./areas.js";
+import { mergeOverture } from "./overture-merge.js";
 import { cached, CACHE, osmTileUrl } from "./sources.js";
 
 const area = AREAS[process.argv[2] ?? ""];
@@ -36,6 +37,16 @@ if ("file" in area.osm) {
 mkdirSync(join(ROOT, "data/places"), { recursive: true });
 const out = join(ROOT, "data/places", `${area.name}.json`);
 execFileSync("python3", [join(ROOT, "scripts/places-extract.py"), JSON.stringify({ inputs, zones, out })], { stdio: "inherit" });
-const data = JSON.parse(readFileSync(out, "utf8"));
-writeFileSync(`${out}.gz`, gzipSync(JSON.stringify({ area: area.name, source, builtAt: new Date().toISOString().slice(0, 10), zones, ...data })));
+const data = JSON.parse(readFileSync(out, "utf8")) as { places: { n: string; c: string; x: number; y: number; [k: string]: unknown }[] };
+
+// Overture adds the venues OSM hasn't mapped (no access tags; they fill search, nothing else).
+const OVERTURE_RELEASE = "2026-09-23.1";
+const ovOut = join(CACHE, `${area.name}.overture-${OVERTURE_RELEASE}.json`);
+if (!existsSync(ovOut)) execFileSync("python3", [join(ROOT, "scripts/overture-places.py"), JSON.stringify({ release: OVERTURE_RELEASE, zones, out: ovOut })], { stdio: "inherit" });
+const overture = JSON.parse(readFileSync(ovOut, "utf8")) as { id: string; n: string; c: string | null; x: number; y: number; ad: string | null; conf: number | null }[];
+const before = data.places.length;
+data.places.push(...mergeOverture(data.places, overture));
+console.log(`${data.places.length - before} places added from Overture ${OVERTURE_RELEASE}`);
+writeFileSync(`${out}.gz`, gzipSync(JSON.stringify({ area: area.name, source: `${source}; Overture Maps places ${OVERTURE_RELEASE}`, builtAt: new Date().toISOString().slice(0, 10), zones, ...data })));
 rmSync(out);
+
