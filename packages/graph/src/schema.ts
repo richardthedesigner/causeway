@@ -1,3 +1,4 @@
+import type { BusService } from "./bus.js";
 /**
  * Pedestrian graph schema. Modelled on OpenSidewalks (UW TCAT): footways are
  * first-class edges, each side of a street is its own edge, crossings and
@@ -29,7 +30,7 @@ export type EdgeKind =
    * unknown by construction, and the edge is never presented as verified.
    */
   | "street_proxy"
-  /** Street to a rail station (transit.ts). */
+  /** Street to a rail station (transit.ts) or to a bus stop's flag (bus.ts). */
   | "station_link"
   /** Station concourse to a line's platform: where step-free access and lift outages live. */
   | "board"
@@ -184,6 +185,8 @@ export interface GraphEdge {
   osmWayId?: number;
   /** Stable reference for non-OSM edges, e.g. "board:jubilee:940GZZLUCYF", so live feeds can find them. */
   ref?: string;
+  /** Scheduled service on board and ride edges (buses): route, how often, how long. */
+  service?: BusService;
 }
 
 export interface Graph {

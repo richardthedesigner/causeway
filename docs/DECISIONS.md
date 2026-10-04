@@ -197,3 +197,11 @@ Next adapters, in order of value: Overture places (more venues and addresses; re
 ## D-028 Overture fills search gaps; OSM stays the source of access facts
 
 **Decided.** 2026-10-04. OSM has the access tags but misses many venues (Newcastle: 2,214 OSM places against 5,376 in Overture). Overture places are added to each city's search index when they are confident (0.7 and over), open, somewhere people go, and not already in OSM under a similar name within 75 m (word overlap, "&" read as "and", and spelling variants within 40 m). They show with their category and address and no access line, and an "accessible" search never lists them, because nothing says they are. When names tie, OSM ranks first.
+
+## D-029 Buses: frequency-based, built from open timetables, honest about the wheelchair space
+
+**Decided.** 2026-10-04. Buses come from the Bus Open Data Service GTFS downloads (England and Scotland, no key, OGL; `pnpm build:bus`). For each route direction we keep the stops inside the area, the typical ride time between stops and how many buses leave each stop in each hour on a typical weekday, Saturday and Sunday. The app adds them to the graph when a city loads (`addBus`), so timetables refresh without rebuilding streets.
+
+The wait is half the gap between buses at that hour (UK time), or until the next hour's first bus; with nothing within 30 minutes, the route isn't offered. Every UK local bus is low-floor with a ramp and one wheelchair space (PSVAR 2000), so boarding counts as step-free, but the space can be taken: wheelchair users' routes carry the expected extra wait for the next bus (15% chance, a working guess until reports exist). Mobility scooters are left off buses unless the user says they have an operator's permit, because most operators only carry small scooters that way. Buses can be turned off in settings.
+
+Next: live departures (TfL arrivals in London now; Lothian and Go North East have feeds to check), real-time "space taken" reports, and kerb height at the stop from OSM where it's mapped.

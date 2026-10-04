@@ -11,3 +11,4 @@ mkdirSync("public/places", { recursive: true });
 for (const n of ["edinburgh-central", "newcastle-gateshead", "london-jubilee"]) copyFileSync(`../../data/places/${n}.json.gz`, `public/places/${n}.json.gz`);
 mkdirSync("public/live", { recursive: true });
 for (const n of ["newcastle-gateshead", "london-jubilee"]) copyFileSync(`../../data/live/${n}.works.json`, `public/live/${n}.works.json`);
+for (const n of ["edinburgh-central", "newcastle-gateshead", "london-jubilee"]) copyFileSync(`../../data/transit/${n}/bus.json`, `public/graph/${n}-bus.json`);

@@ -43,6 +43,61 @@ export interface Evaluation {
 
 const WHEELED = (p: Profile) => p.maxSteps === 0;
 
+/** Getting off a bus: the ramp, and a moment to get clear of the stop. */
+const BUS_ALIGHT_S = 30;
+/** Longest wait we'll quote: beyond this the timetable, not an average, is what matters. */
+const BUS_MAX_WAIT_S = 30 * 60;
+/** Chance the one wheelchair space is taken when the bus arrives (a working guess until reports exist). */
+const BUS_SPACE_TAKEN = 0.15;
+
+const UK_TIME = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", hour: "numeric", minute: "numeric", hourCycle: "h23", weekday: "short" });
+
+/** UK local hour, minute and day type for a moment. */
+export function ukClock(d: Date): { hour: number; minute: number; day: "wd" | "sa" | "su" } {
+  const parts = Object.fromEntries(UK_TIME.formatToParts(d).map((x) => [x.type, x.value]));
+  const day = parts.weekday === "Sat" ? "sa" : parts.weekday === "Sun" ? "su" : "wd";
+  return { hour: Number(parts.hour) % 24, minute: Number(parts.minute), day };
+}
+
+/** Expected wait for a bus from departures per hour: half the gap now, or until the first one next hour. */
+export function busWait(perHour: { wd: number[]; sa: number[]; su: number[] } | undefined, now: Date): { seconds: number; perHour: number } | null {
+  if (!perHour) return null;
+  const { hour, minute, day } = ukClock(now);
+  const n = perHour[day][hour] ?? 0;
+  if (n > 0) return { seconds: Math.max(60, 3600 / (2 * n)), perHour: n };
+  const next = perHour[day][(hour + 1) % 24] ?? 0;
+  if (next > 0) return { seconds: (60 - minute) * 60 + 3600 / (2 * next), perHour: next };
+  return null;
+}
+
+/** Uses the bus's wheelchair space: one per bus, first come. */
+const needsWheelchairSpace = (p: Profile) => p.preset === "manual-wheelchair" || p.preset === "manual-wheelchair-companion" || p.preset === "powerchair";
+
+function evaluateBus(e: GraphEdge, forward: boolean, p: Profile, c: Conditions, reasons: Reason[], unknownCritical: boolean): Evaluation {
+  const s = e.service!;
+  const passable = unknownCritical ? "unknown" : "yes";
+  const exclude = (detail: string): Evaluation => ({ passable: "no", seconds: Infinity, cost: Infinity, reasons: [...reasons, { kind: "excluded", attr: "bus", detail, seconds: Infinity }] });
+  if (p.buses === false) return exclude("buses are turned off in your settings");
+  if (e.kind === "transit") {
+    const seconds = s.runS ?? e.lengthM / 5;
+    return { passable, seconds, cost: seconds, reasons: [...reasons, { kind: "penalty", attr: "transit", detail: e.name ?? "bus", seconds: 0 }] };
+  }
+  if (e.kind !== "board") return { passable, seconds: 0, cost: 0, reasons };
+  if (!forward) return { passable, seconds: BUS_ALIGHT_S, cost: BUS_ALIGHT_S, reasons };
+  if (p.preset === "mobility-scooter" && !p.busScooterPermit) return exclude("most buses only take small scooters, with a permit from the operator");
+  const wait = busWait(s.perHour, c.now);
+  if (!wait || wait.seconds > BUS_MAX_WAIT_S) return exclude(`no ${s.route} bus from here at this time`);
+  const out: Reason[] = [...reasons, { kind: "penalty", attr: "bus-wait", detail: `about ${wait.perHour} an hour`, seconds: 0 }];
+  let cost = wait.seconds;
+  if (needsWheelchairSpace(p)) {
+    // If the space is taken you wait for the next one: priced as the expected extra wait.
+    const extra = Math.round(BUS_SPACE_TAKEN * (3600 / wait.perHour));
+    out.push({ kind: "penalty", attr: "bus-space", detail: "the wheelchair space may be in use, so you might need the next bus", seconds: extra });
+    cost += extra;
+  }
+  return { passable, seconds: wait.seconds, cost, reasons: out };
+}
+
 /** Seconds of detour a fully cautious user would accept to avoid one unknown, per 100 m. */
 const UNKNOWN_RISK_PER_100M: Record<string, number> = {
   incline: 60,
@@ -114,6 +169,9 @@ export function evaluateEdge(e: GraphEdge, forward: boolean, p: Profile, c: Cond
       unknownCritical = true;
     }
   }
+
+  // Buses: frequency-based waits, and who a bus can carry.
+  if (e.service?.mode === "bus") return evaluateBus(e, forward, p, c, reasons, unknownCritical);
 
   // Rail: rides, boarding and interchanges.
   if (e.kind === "transit") {

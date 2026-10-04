@@ -332,3 +332,10 @@ Partnership items for Richard:
 | Source | Use | Licence | Verified | Verdict |
 |---|---|---|---|---|
 | **Overture Maps places**, release 2026-09-23.1 (`overturemaps-us-west-2.s3.amazonaws.com/release/.../theme=places/`) | Venues OSM hasn't mapped, added to search only (`scripts/overture-places.py`, `scripts/overture-merge.ts`). Read over HTTPS with DuckDB; row-group bounding boxes keep it to seconds per city | CDLA Permissive 2.0; some records also Apache 2.0 (Foursquare) or CC0 (AllThePlaces). Credit "Overture Maps Foundation" | V (2026-10-04): Edinburgh 7,966 added, Newcastle 2,378, London zones 1,298 | **keep**. Confidence 0.7 and over, open places only, no home or business-to-business services. Never a source of access facts: they carry none |
+
+## Buses (2026-10-04)
+
+| Source | Use | Licence | Verified | Verdict |
+|---|---|---|---|---|
+| **Bus Open Data Service GTFS** (`data.bus-data.dft.gov.uk/timetable/download/gtfs-file/<region>/`: scotland 204 MB, north_east 40 MB, london 301 MB) | Stops, ride times, departures per hour (`data/transit/<area>/bus.json`) | OGL v3 | V (2026-10-04, no key needed): Edinburgh 842 stops and 189 route directions (Lothian, Lothian Country, Stagecoach...), Newcastle 159 and 186, London zones 40 and 58 | **keep** (D-029) |
+| **TfL StopPoint arrivals** (`/StopPoint/{id}/Arrivals`) | Live London departures (next step) | TfL open data terms | Reachable, 2026-10-04 | **keep** |

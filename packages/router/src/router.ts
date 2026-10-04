@@ -55,6 +55,16 @@ export class Router {
     this.indexBenches();
   }
 
+  /**
+   * Fastest straight-line speed anywhere in the graph, for the A* estimate: with rides on
+   * board, the walking pace would overestimate and miss trains and buses.
+   */
+  private fastest(p: Profile): number {
+    if (this.hasRides === undefined) this.hasRides = this.graph.edges.some((e) => e.kind === "transit");
+    return this.hasRides ? Math.max(p.speedMps, 15) : p.speedMps;
+  }
+  private hasRides: boolean | undefined;
+
   private indexBenches() {
     const benches = (this.graph.amenities ?? []).filter((a) => a.kind === "bench");
     if (!benches.length) return;
@@ -128,7 +138,7 @@ export class Router {
     c: Conditions = DRY,
     edgePenalty?: Map<number, number>,
   ): Route | null {
-    const vmax = p.speedMps;
+    const vmax = this.fastest(p);
     const h = (n: GraphNode) => haversine([n.lon, n.lat], [to.lon, to.lat]) / vmax;
     const g = new Map<number, number>([[from.id, 0]]);
     const prev = new Map<number, Step>();
@@ -182,7 +192,7 @@ export class Router {
   routeWithRests(from: GraphNode, to: GraphNode, p: Profile, c: Conditions = DRY, maxGapM = p.maxRestIntervalM ?? 400): Route | null {
     const B = 8;
     const bucketM = maxGapM / B;
-    const vmax = p.speedMps;
+    const vmax = this.fastest(p);
     const h = (n: GraphNode) => haversine([n.lon, n.lat], [to.lon, to.lat]) / vmax;
     type Lab = { node: number; gap: number; cost: number; prev: Lab | null; step: Step | null };
     const best = new Map<string, number>();
@@ -549,7 +559,10 @@ export function describeSegments(r: Route): string[] {
   let ri = 0;
   for (const s of r.steps) {
     const k = s.edge.kind;
-    if (k === "station_link") {
+    if (k === "station_link" && s.edge.ref?.startsWith("link:bus:")) {
+      // The few metres to the stop flag: the boarding instruction names the stop.
+      continue;
+    } else if (k === "station_link") {
       flush();
       out.push(s.forward ? `Leave ${s.edge.name} station.` : `Go into ${s.edge.name} station.`);
     } else if (k === "board" && s.forward) {

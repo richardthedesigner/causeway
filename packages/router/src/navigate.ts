@@ -89,6 +89,7 @@ export function buildNavPlan(r: Route, p: Profile): NavPlan {
       if (k === "elevator") maneuvers.push({ type: "lift", at, text: "Take the lift.", short: "Lift" });
       continue;
     }
+    if (k === "station_link" && s.edge.ref?.startsWith("link:bus:")) continue;
     if (k === "station_link") {
       maneuvers.push(s.forward ? { type: "leave-station", at, text: `Leave ${s.edge.name} station.`, short: "Leave station" } : { type: "enter-station", at, text: `Go into ${s.edge.name} station.`, short: "Station" });
       continue;
@@ -99,7 +100,12 @@ export function buildNavPlan(r: Route, p: Profile): NavPlan {
         let j = i + 1;
         while (j < r.steps.length && r.steps[j]!.edge.kind === "transit") j++;
         const to = r.steps[j]?.edge.kind === "board" ? (r.steps[j]!.edge.name ?? "").split(", ")[0] : null;
-        maneuvers.push({ type: "board", at, text: `Take the ${line}${to ? ` to ${to}` : ""} from ${station}.`, short: line ?? "Train" });
+        const bus = s.edge.service?.mode === "bus" ? s.edge.service : null;
+        maneuvers.push(
+          bus
+            ? { type: "board", at, text: `Take the ${bus.route} bus${bus.headsign ? ` towards ${bus.headsign}` : ""} from ${station}.${to ? ` Get off at ${to}.` : ""}`, short: `${bus.route} bus` }
+            : { type: "board", at, text: `Take the ${line}${to ? ` to ${to}` : ""} from ${station}.`, short: line ?? "Train" },
+        );
       } else maneuvers.push({ type: "alight", at, text: `Get off at ${station}.`, short: `Get off at ${station}` });
       continue;
     }

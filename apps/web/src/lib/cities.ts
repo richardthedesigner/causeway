@@ -10,6 +10,8 @@ export interface City {
   basemap: string;
   /** Search index: places with access tags, addresses, postcodes (scripts/build-places.ts). */
   index: string;
+  /** Bus network from BODS GTFS (scripts/build-bus.ts). */
+  bus?: string;
   /** Street works on pavements (scripts/build-works.ts). England only: Scotland has no open feed yet. */
   works?: string;
   /** Rail network for live lift outages (London only for now). */
@@ -21,7 +23,7 @@ export interface City {
   credit: string;
 }
 
-const OSM = "Map data © OpenStreetMap contributors (ODbL). Base map: Protomaps. Extra places: Overture Maps Foundation (CDLA Permissive 2.0).";
+const OSM = "Map data © OpenStreetMap contributors (ODbL). Base map: Protomaps. Extra places: Overture Maps Foundation (CDLA Permissive 2.0). Bus timetables: Bus Open Data Service, Open Government Licence v3.0.";
 
 export const CITIES: City[] = [
   {
@@ -31,6 +33,7 @@ export const CITIES: City[] = [
     graph: "graph/edinburgh-central.graph.json.gz",
     basemap: "basemap/edinburgh-central.pmtiles",
     index: "places/edinburgh-central.json.gz",
+    bus: "graph/edinburgh-central-bus.json",
     liveLifts: false,
     weatherAt: [55.9486, -3.1999],
     start: { id: "causewayside", name: "Causewayside", kind: "Southside / demo address", lon: -3.1812, lat: 55.9385 },
@@ -51,6 +54,7 @@ export const CITIES: City[] = [
     graph: "graph/newcastle-gateshead.graph.json.gz",
     basemap: "basemap/newcastle-gateshead.pmtiles",
     index: "places/newcastle-gateshead.json.gz",
+    bus: "graph/newcastle-gateshead-bus.json",
     works: "live/newcastle-gateshead.works.json",
     liveLifts: false,
     weatherAt: [54.97, -1.607],
@@ -70,6 +74,7 @@ export const CITIES: City[] = [
     graph: "graph/london-jubilee.graph.json.gz",
     basemap: "basemap/london-jubilee.pmtiles",
     index: "places/london-jubilee.json.gz",
+    bus: "graph/london-jubilee-bus.json",
     works: "live/london-jubilee.works.json",
     network: "graph/london-network.json",
     liveLifts: true,
