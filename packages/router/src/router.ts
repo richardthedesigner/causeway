@@ -35,6 +35,8 @@ export class Router {
   /** Connected component per node (ignoring direction and profile). */
   private readonly component = new Map<number, number>();
   private mainComponent = -1;
+  /** Edge id to distance from its midpoint to the nearest bench (only when the graph has benches). */
+  readonly benchM = new Map<number, number>();
 
   constructor(readonly graph: Graph) {
     for (const n of graph.nodes) this.nodes.set(n.id, n);
@@ -43,6 +45,24 @@ export class Router {
       this.arc(e.to, { edge: e, forward: false, to: e.from });
     }
     this.labelComponents();
+    this.indexBenches();
+  }
+
+  private indexBenches() {
+    const benches = (this.graph.amenities ?? []).filter((a) => a.kind === "bench");
+    if (!benches.length) return;
+    const CELL = 0.002; // about 200 m
+    const grid = new Map<string, [number, number][]>();
+    const key = (x: number, y: number) => `${Math.floor(x / CELL)}:${Math.floor(y / CELL)}`;
+    for (const b of benches) (grid.get(key(b.lon, b.lat)) ?? grid.set(key(b.lon, b.lat), []).get(key(b.lon, b.lat))!).push([b.lon, b.lat]);
+    for (const e of this.graph.edges) {
+      const mid = e.geometry[Math.floor(e.geometry.length / 2)]!;
+      const cx = Math.floor(mid[0] / CELL),
+        cy = Math.floor(mid[1] / CELL);
+      let best = Infinity;
+      for (let dx = -2; dx <= 2; dx++) for (let dy = -2; dy <= 2; dy++) for (const b of grid.get(`${cx + dx}:${cy + dy}`) ?? []) best = Math.min(best, haversine(mid, b));
+      this.benchM.set(e.id, best);
+    }
   }
 
   /**
@@ -116,7 +136,7 @@ export class Router {
       const gu = g.get(u)!;
       for (const a of this.out.get(u) ?? []) {
         if (closed.has(a.to)) continue;
-        const ev = evaluateEdge(a.edge, a.forward, p, c);
+        const ev = evaluateEdge(a.edge, a.forward, p, c, { benchM: this.benchM.get(a.edge.id) });
         if (ev.cost === Infinity) continue;
         const v = this.nodes.get(a.to)!;
         const nv = evaluateNode(v, a.edge.kind === "crossing", p, c);
@@ -141,6 +161,63 @@ export class Router {
     return {
       steps,
       cost: steps.reduce((t, s) => t + s.eval.cost + s.nodeEval.cost, 0),
+      seconds: steps.reduce((t, s) => t + s.eval.seconds + s.nodeEval.seconds, 0),
+      lengthM: steps.reduce((t, s) => t + s.edge.lengthM, 0),
+    };
+  }
+
+  /**
+   * Route that never goes more than `maxGapM` without passing a mapped bench
+   * (within 30 m of the edge). Resource-constrained A*: the state is the node
+   * plus distance since the last bench, in eight buckets. Null when no such
+   * route exists in the mapped data.
+   */
+  routeWithRests(from: GraphNode, to: GraphNode, p: Profile, c: Conditions = DRY, maxGapM = p.maxRestIntervalM ?? 400): Route | null {
+    const B = 8;
+    const bucketM = maxGapM / B;
+    const vmax = p.speedMps;
+    const h = (n: GraphNode) => haversine([n.lon, n.lat], [to.lon, to.lat]) / vmax;
+    type Lab = { node: number; gap: number; cost: number; prev: Lab | null; step: Step | null };
+    const best = new Map<string, number>();
+    const heap = new MinHeap();
+    const labels: Lab[] = [{ node: from.id, gap: 0, cost: 0, prev: null, step: null }];
+    heap.push(0, h(from));
+    const closed = new Set<string>();
+    let goal: Lab | null = null;
+    while (heap.size) {
+      const li = heap.pop()!;
+      const L = labels[li]!;
+      const key = `${L.node}:${Math.floor(L.gap / bucketM)}`;
+      if (closed.has(key)) continue;
+      closed.add(key);
+      if (L.node === to.id) {
+        goal = L;
+        break;
+      }
+      for (const a of this.out.get(L.node) ?? []) {
+        const benchHere = (this.benchM.get(a.edge.id) ?? Infinity) <= 30;
+        const gap = RAIL.has(a.edge.kind) ? 0 : benchHere ? 0 : L.gap + a.edge.lengthM;
+        if (gap > maxGapM) continue;
+        const ev = evaluateEdge(a.edge, a.forward, p, c);
+        if (ev.cost === Infinity) continue;
+        const v = this.nodes.get(a.to)!;
+        const nv = evaluateNode(v, a.edge.kind === "crossing", p, c);
+        if (nv.cost === Infinity) continue;
+        const cost = L.cost + ev.cost + nv.cost;
+        const k = `${a.to}:${Math.floor(gap / bucketM)}`;
+        if (cost >= (best.get(k) ?? Infinity)) continue;
+        best.set(k, cost);
+        labels.push({ node: a.to, gap, cost, prev: L, step: { edge: a.edge, forward: a.forward, eval: ev, node: v, nodeEval: nv } });
+        heap.push(labels.length - 1, cost + h(v));
+      }
+    }
+    if (!goal) return null;
+    const steps: Step[] = [];
+    for (let l: Lab | null = goal; l && l.step; l = l.prev) steps.push(l.step);
+    steps.reverse();
+    return {
+      steps,
+      cost: goal.cost,
       seconds: steps.reduce((t, s) => t + s.eval.seconds + s.nodeEval.seconds, 0),
       lengthM: steps.reduce((t, s) => t + s.edge.lengthM, 0),
     };
@@ -405,6 +482,18 @@ export function explain(router: Router, chosen: Route, from: GraphNode, to: Grap
     const live = router.graph.meta.liveFeeds?.some((f) => f.endsWith("lifts"));
     notes.push(`Uses ${sum.lifts === 1 ? "a lift" : `${sum.lifts} lifts`}.${live ? "" : " We have no live lift status here, so check before you set off."}`);
   }
+  if (p.maxRestIntervalM) {
+    const rs = restStats(router.graph, chosen);
+    notes.push(
+      rs.longestWithoutBenchM <= p.maxRestIntervalM
+        ? `A mapped bench at least every ${p.maxRestIntervalM} m (${rs.benches} along the way).`
+        : `Longest stretch without a mapped bench: ${Math.round(rs.longestWithoutBenchM / 10) * 10} m (you asked for ${p.maxRestIntervalM} m). Not every bench is mapped.`,
+    );
+  }
+  if (p.maxToiletIntervalM) {
+    const t = restStats(router.graph, chosen).toilets.filter((x) => x.wheelchair === "yes" || x.changingPlaces);
+    notes.push(t.length ? `${t.length} accessible toilet${t.length === 1 ? "" : "s"} mapped near the route.` : "No accessible toilets mapped near this route.");
+  }
   for (const b of sum.movableBridges) {
     const verb = b.type === "tilt" ? "tilting" : b.type === "swing" ? "swing" : "movable";
     notes.push(`Crosses ${b.name}, a ${verb} bridge. It closes for a few minutes while it moves for boats. We don't have its timetable yet.`);
@@ -518,7 +607,7 @@ export function toGeoJSON(r: Route, props: Record<string, unknown> = {}) {
 // ------------------------------------------------------------- trade-offs
 
 export interface Tradeoff {
-  id: "smoother" | "gentler" | "more-certain";
+  id: "smoother" | "gentler" | "more-certain" | "more-benches";
   label: string;
   /** null when no route exists with this constraint: we say so rather than hide it. */
   route: Route | null;
@@ -555,6 +644,31 @@ export function tradeoffs(router: Router, chosen: Route, from: GraphNode, to: Gr
       route: r,
       message: r ? `Nothing steeper than ${cap}%. Adds ${mins(r)} min.` : `No way there stays under ${cap}%.`,
     });
+  }
+  if (p.maxRestIntervalM) {
+    const gap = restStats(router.graph, chosen).longestWithoutBenchM;
+    if (gap > p.maxRestIntervalM) {
+      // Try the user's interval first, then relax: shorter worst gaps are still worth offering.
+      let best: { r: Route; gap: number } | null = null;
+      for (const f of [1, 1.5, 2, 3]) {
+        const r = router.routeWithRests(from, to, p, c, p.maxRestIntervalM * f);
+        if (r) {
+          const g2 = restStats(router.graph, r).longestWithoutBenchM;
+          if (g2 < gap * 0.85) best = { r, gap: g2 };
+          break;
+        }
+      }
+      out.push({
+        id: "more-benches",
+        label: "More benches",
+        route: best?.r ?? null,
+        message: !best
+          ? `No way there has mapped benches closer together than this. Not every bench is mapped.`
+          : best.gap <= p.maxRestIntervalM
+            ? `A mapped bench at least every ${p.maxRestIntervalM} m. Adds ${mins(best.r)} min.`
+            : `Longest stretch without a bench ${Math.round(best.gap / 10) * 10} m instead of ${Math.round(gap / 10) * 10} m. Adds ${mins(best.r)} min.`,
+      });
+    }
   }
   if (sum.unknownM > 0) {
     const r = router.route(from, to, { ...p, uncertaintyTolerance: 0 }, c);
@@ -599,4 +713,48 @@ export function entrancesNear(g: Graph, lon: number, lat: number, p: Profile, ra
       source: `OpenStreetMap node ${e.osmId}${e.door.observedAt ? `, ${e.door.observedAt.slice(0, 10)}` : ""}`,
     }))
     .sort((a, b) => rank[a.verdict.passable] - rank[b.verdict.passable] || a.distanceM - b.distanceM);
+}
+
+// ------------------------------------------------------------- rest stops
+
+export interface RestStats {
+  /** Longest stretch of the route with no mapped bench within 25 m. */
+  longestWithoutBenchM: number;
+  benches: number;
+  /** Toilets within 60 m of the route, in order along it. */
+  toilets: { at: number; wheelchair: "yes" | "limited" | "no" | null; changingPlaces: boolean }[];
+}
+
+/** Benches and toilets along a route, from what OSM has mapped (never complete; say so in copy). */
+export function restStats(g: Graph, r: Route): RestStats {
+  const coords = toGeoJSON(r).geometry.coordinates;
+  const cum = [0];
+  for (let i = 1; i < coords.length; i++) cum.push(cum[i - 1]! + haversine(coords[i - 1]!, coords[i]!));
+  const along = (pt: [number, number], within: number): number | null => {
+    let best: { d: number; at: number } | null = null;
+    for (let i = 0; i < coords.length - 1; i++) {
+      const a = coords[i]!,
+        b = coords[i + 1]!;
+      const k = Math.cos((pt[1] * Math.PI) / 180);
+      const ax = (a[0] - pt[0]) * k, ay = a[1] - pt[1], bx = (b[0] - pt[0]) * k, by = b[1] - pt[1];
+      const dx = bx - ax, dy = by - ay;
+      const len2 = dx * dx + dy * dy;
+      const t = len2 === 0 ? 0 : Math.max(0, Math.min(1, -(ax * dx + ay * dy) / len2));
+      const d = Math.hypot(ax + t * dx, ay + t * dy) * 111_320;
+      if (d <= within && (!best || d < best.d)) best = { d, at: cum[i]! + t * (cum[i + 1]! - cum[i]!) };
+    }
+    return best?.at ?? null;
+  };
+  const [minX, minY, maxX, maxY] = coords.reduce(([a, b, c, d], [x, y]) => [Math.min(a, x), Math.min(b, y), Math.max(c, x), Math.max(d, y)], [Infinity, Infinity, -Infinity, -Infinity]);
+  const near = (g.amenities ?? []).filter((a) => a.lon >= minX - 0.001 && a.lon <= maxX + 0.001 && a.lat >= minY - 0.001 && a.lat <= maxY + 0.001);
+  const benchAt = near.filter((a) => a.kind === "bench").map((a) => along([a.lon, a.lat], 25)).filter((x): x is number => x !== null).sort((a, b) => a - b);
+  const stops = [0, ...benchAt, cum[cum.length - 1] ?? 0];
+  let gap = 0;
+  for (let i = 1; i < stops.length; i++) gap = Math.max(gap, stops[i]! - stops[i - 1]!);
+  const toilets = near
+    .filter((a) => a.kind !== "bench")
+    .map((a) => ({ at: along([a.lon, a.lat], 60), wheelchair: a.wheelchair.value, changingPlaces: a.kind === "changing_places" }))
+    .filter((t): t is { at: number; wheelchair: "yes" | "limited" | "no" | null; changingPlaces: boolean } => t.at !== null)
+    .sort((a, b) => a.at - b.at);
+  return { longestWithoutBenchM: Math.round(gap), benches: benchAt.length, toilets };
 }

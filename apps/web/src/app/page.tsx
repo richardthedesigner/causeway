@@ -1,5 +1,5 @@
 "use client";
-import { PRESETS, type Profile } from "@causeway/profile";
+import { learnPace, PRESETS, type Profile } from "@causeway/profile";
 import { conditionsFromOpenMeteo, openMeteoUrl } from "@causeway/live";
 import { Mountain, SlidersHorizontal } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -293,6 +293,7 @@ export default function Home() {
             setMe(null);
           }}
           onPosition={setMe}
+          onPace={(mps) => updateProfile(learnPace(profile, mps))}
           onOffRoute={(m) => setFrom({ id: `me:${Date.now()}`, name: "Your location", kind: "Current location", lon: m.lon, lat: m.lat })}
           onReport={(m) => setReportAt(m ? { lon: m.lon, lat: m.lat, accuracyM: m.accuracyM, label: "your location" } : to ? { lon: to.lon, lat: to.lat, accuracyM: null, label: to.name } : null)}
         />

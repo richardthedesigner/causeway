@@ -33,8 +33,10 @@ export interface Profile {
   /** Display label; the user can rename it ("Dad's chair"). */
   label: string;
 
-  /** Comfortable speed on the flat, metres per second. Learned over time in Phase 4. */
+  /** Comfortable speed on the flat, metres per second. Learned from completed journeys (paceSamples). */
   speedMps: number;
+  /** How many journeys the speed has been learned from (0 or absent: the preset's figure). */
+  paceSamples?: number;
 
   /** Steepest sustained uphill gradient the user can manage, percent. Beyond this: excluded. */
   maxInclineUpPct: number;
@@ -319,4 +321,17 @@ export const PRESETS: Record<MobilityPreset, Profile> = {
 
 export function profileFrom(preset: MobilityPreset, overrides: Partial<Profile> = {}): Profile {
   return { ...PRESETS[preset], ...overrides };
+}
+
+/**
+ * Blend an observed moving speed into the profile. Early journeys count for
+ * more; the figure is bounded so one odd trip (a lift ride, a bus) can't
+ * wreck the estimate.
+ */
+export function learnPace(p: Profile, observedMps: number): Profile {
+  if (!Number.isFinite(observedMps) || observedMps < 0.2 || observedMps > 3) return p;
+  const n = p.paceSamples ?? 0;
+  const w = Math.max(0.2, 1 / (n + 2));
+  const speed = Math.min(2.5, Math.max(0.3, p.speedMps * (1 - w) + observedMps * w));
+  return { ...p, speedMps: Math.round(speed * 100) / 100, paceSamples: n + 1 };
 }

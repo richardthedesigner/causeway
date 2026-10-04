@@ -20,6 +20,8 @@ interface Props {
   onOffRoute: (me: Me) => void;
   onPosition: (me: Me | null) => void;
   onReport: (me: Me | null) => void;
+  /** Called at the end of a live journey with the person's moving speed, to calibrate their ETA. */
+  onPace: (observedMps: number) => void;
 }
 
 const fmt = (m: number) => (m >= 1000 ? `${(m / 1000).toFixed(1)} km` : `${Math.max(0, Math.round(m / 10) * 10)} m`);
@@ -30,7 +32,7 @@ const fmt = (m: number) => (m >= 1000 ? `${(m / 1000).toFixed(1)} km` : `${Math.
  * everything in the bottom third, instructions also in a live region for
  * screen readers. Speech is opt-in so it never talks over a screen reader.
  */
-export function NavView({ route, speedMps, onEnd, onOffRoute, onPosition, onReport }: Props) {
+export function NavView({ route, speedMps, onEnd, onOffRoute, onPosition, onReport, onPace }: Props) {
   const nav = useRef(new Navigator(route.nav));
   const [p, setP] = useState<Progress | null>(null);
   const [mode, setMode] = useState<"locating" | "live" | "preview">("locating");
@@ -38,6 +40,8 @@ export function NavView({ route, speedMps, onEnd, onOffRoute, onPosition, onRepo
   const [said, setSaid] = useState<string>("");
   const me = useRef<Me | null>(null);
   const offSent = useRef(false);
+  // Moving time and distance, live fixes only (a preview teaches us nothing about the person).
+  const pace = useRef({ lastT: 0, lastAlong: 0, movingS: 0, movedM: 0, reported: false });
 
   useEffect(() => {
     nav.current = new Navigator(route.nav);
@@ -49,6 +53,18 @@ export function NavView({ route, speedMps, onEnd, onOffRoute, onPosition, onRepo
     onPosition(m);
     const pr = nav.current.update(m.lon, m.lat, m.accuracyM);
     setP(pr);
+    if (mode === "live") {
+      const now = Date.now(), pc = pace.current;
+      const dt = (now - pc.lastT) / 1000, dd = pr.along - pc.lastAlong;
+      // Count only intervals where they were actually moving (not waiting at a crossing or for a lift).
+      if (pc.lastT && dt > 0 && dt < 30 && dd > 0.5 && dd / dt < 3) {
+        pc.movingS += dt;
+        pc.movedM += dd;
+      }
+      pc.lastT = now;
+      pc.lastAlong = pr.along;
+      if (pr.arrived) reportPace();
+    }
     if (pr.announce) {
       setSaid(pr.announce);
       if (speak && "speechSynthesis" in window) {
@@ -62,6 +78,13 @@ export function NavView({ route, speedMps, onEnd, onOffRoute, onPosition, onRepo
     if (pr.offRoute && !offSent.current && mode === "live") {
       offSent.current = true;
       onOffRoute(m);
+    }
+  };
+  const reportPace = () => {
+    const pc = pace.current;
+    if (!pc.reported && pc.movedM >= 300 && pc.movingS > 0) {
+      pc.reported = true;
+      onPace(pc.movedM / pc.movingS);
     }
   };
   const feedRef = useRef(feed);
@@ -146,7 +169,15 @@ export function NavView({ route, speedMps, onEnd, onOffRoute, onPosition, onRepo
           {Math.max(1, Math.round(remaining / speedMps / 60))} min / {fmt(remaining)} to go
         </p>
         <div className="flex flex-wrap items-center gap-2">
-          <Button variant="primary" size="lg" onClick={onEnd} className="flex-1">
+          <Button
+            variant="primary"
+            size="lg"
+            onClick={() => {
+              reportPace();
+              onEnd();
+            }}
+            className="flex-1"
+          >
             <X aria-hidden className="size-5" /> End
           </Button>
           <Button size="lg" aria-pressed={speak} onClick={() => setSpeak((v) => !v)} className={speak ? "border-ink bg-ink text-surface" : ""}>

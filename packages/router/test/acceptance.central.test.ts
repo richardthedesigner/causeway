@@ -29,3 +29,19 @@ describe("central Edinburgh journeys, manual wheelchair", () => {
     });
   }
 });
+
+describe("rest stops", () => {
+  it("offers a route with shorter stretches between benches for someone who needs to rest", async () => {
+    const { restStats, tradeoffs } = await import("@causeway/router");
+    const p = PRESETS.rollator;
+    const a = router.snap(-3.1812, 55.9385, p);
+    const b = router.snap(-3.1925, 55.9405, p);
+    const r = router.route(a, b, p)!;
+    const gap = restStats(router.graph, r).longestWithoutBenchM;
+    const more = tradeoffs(router, r, a, b, p).find((t) => t.id === "more-benches");
+    expect(more).toBeDefined();
+    expect(more!.route).not.toBeNull();
+    expect(restStats(router.graph, more!.route!).longestWithoutBenchM).toBeLessThan(gap);
+    expect(more!.message).toMatch(/bench/);
+  });
+});

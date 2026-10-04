@@ -76,7 +76,12 @@ export function speedFactor(p: Profile, gradePct: number): number {
 /** Signed value as traversed: incline flips when walking an edge backwards. */
 const signed = (v: number, forward: boolean) => (forward ? v : -v);
 
-export function evaluateEdge(e: GraphEdge, forward: boolean, p: Profile, c: Conditions): Evaluation {
+export interface EdgeContext {
+  /** Straight-line distance from the edge's midpoint to the nearest mapped bench, metres. */
+  benchM?: number;
+}
+
+export function evaluateEdge(e: GraphEdge, forward: boolean, p: Profile, c: Conditions, ctx: EdgeContext = {}): Evaluation {
   const reasons: Reason[] = [];
   const a = e.attrs;
   let unknownCritical = false;
@@ -221,6 +226,13 @@ export function evaluateEdge(e: GraphEdge, forward: boolean, p: Profile, c: Cond
     reasons.push({ kind: "penalty", attr: "crossing", detail: "crossing", seconds: 0 });
   }
 
+  // Rest points: prefer edges you can actually sit down on (a mapped bench within 30 m, the same test the route report uses).
+  if (p.maxRestIntervalM && ctx.benchM !== undefined && ctx.benchM > 30 && e.kind !== "crossing" && !RAIL_KINDS.has(e.kind)) {
+    const s = seconds * Math.min(1, 300 / p.maxRestIntervalM) * 0.6;
+    penalty += s;
+    reasons.push({ kind: "penalty", attr: "rest", detail: "no bench nearby", seconds: s });
+  }
+
   return {
     passable: unknownCritical ? "unknown" : "yes",
     seconds,
@@ -307,6 +319,8 @@ export function entranceVerdict(en: EntranceInfo, p: Profile): EntranceVerdict {
   if (!door && !isAuto && wheeled) return { passable: "unknown", detail: parts.length ? `${parts.join(", ")}; door type not known` : "door type not known" };
   return { passable: "yes", detail: parts.join(", ") || (en.wheelchair.value === "yes" ? "wheelchair accessible" : "entrance") };
 }
+
+const RAIL_KINDS: ReadonlySet<string> = new Set(["transit", "board", "interchange", "station_link"]);
 
 const WET_SLIPPERY: ReadonlySet<string> = new Set(["sett", "cobblestone", "metal", "wood", "paving_stones"]);
 

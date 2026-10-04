@@ -130,3 +130,15 @@ describe("entranceVerdict", () => {
     expect(entranceVerdict(twoSteps, PRESETS["walking-stick"]).passable).not.toBe("no");
   });
 });
+
+describe("learnPace", () => {
+  it("moves towards the observed pace, more at first, and ignores nonsense", async () => {
+    const { learnPace } = await import("@causeway/profile");
+    const p = { ...manual, speedMps: 1.0, paceSamples: 0 };
+    const once = learnPace(p, 0.7);
+    expect(once.speedMps).toBeLessThan(1.0);
+    expect(once.speedMps).toBeGreaterThan(0.7);
+    expect(once.paceSamples).toBe(1);
+    expect(learnPace(p, 12).speedMps).toBe(1.0); // a bus ride is not a pace
+  });
+});

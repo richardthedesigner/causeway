@@ -135,6 +135,11 @@ export function ModeSheet({ open, onOpenChange, profile, onChange }: Props) {
             />
           </div>
 
+          <p className="m-0 text-sm text-muted">
+            Your pace: {(profile.speedMps * 3.6).toFixed(1)} km/h on the flat
+            {profile.paceSamples ? `, learned from ${profile.paceSamples} journey${profile.paceSamples === 1 ? "" : "s"}` : ", a starting figure. It adjusts as you use navigation"}.
+          </p>
+
           <Limit
             label="When we don't know"
             value={profile.uncertaintyTolerance < 0.25 ? "Avoid unknowns" : profile.uncertaintyTolerance > 0.75 ? "Happy to risk it" : "Some risk is fine"}
