@@ -716,7 +716,7 @@ export interface EntranceOption {
 
 /**
  * Entrances within `radiusM` of a destination, best for this user first.
- * Phase 2 routes to the chosen entrance rather than to the building's centre.
+ * The app routes to the first one that fits ("yes"), falling back to the building's centre.
  */
 export function entrancesNear(g: Graph, lon: number, lat: number, p: Profile, radiusM = 40): EntranceOption[] {
   const rank = { yes: 0, unknown: 1, no: 2 } as const;

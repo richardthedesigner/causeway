@@ -52,7 +52,7 @@ Severity: **critical** (blocks the task), **serious** (likely to cause errors or
 | "What we don't know" has no "Report what's there" action yet. | Moderate | Phase 4 report-an-issue loop. |
 | The map has no basemap (buildings, labels, water): it is drawn from our footway graph only. Legible, but not yet "a beautiful map". | Moderate | Protomaps basemap (D-007) in Phase 2b. |
 | The map colours don't switch live if the system theme changes mid-session. | Minor | Re-read tokens on `prefers-color-scheme` change. |
-| The mode sheet is long: eleven presets before the limits. | Minor | Test with users; consider grouping (walking aids / wheels / other). |
+| The mode sheet is long: eleven presets before the limits. | Minor | Fixed 2026-10-04: three groups (Walking, On wheels, Other needs); limits fold into one row that shows the key numbers and opens by itself once changed. |
 | Search covers demo places and street names only. | Moderate | Geocoder (Photon + OS Open Names, D-006). |
 
 ## Against the brief's principles
@@ -97,3 +97,11 @@ Notes (D-026) were checked the same way, in headless Chromium with axe-core 4.10
 | Screen readers | Street buttons read "Add a note about Victoria Street"; delete buttons name the place. The switch's description says exactly what others will see. |
 
 Open: on a phone at half height, "Getting in" and the street buttons are below the fold until the sheet is pulled up (as for the rest of the route detail). Real-device VoiceOver and TalkBack checks are still to do.
+
+## Follow-up: polish (2026-10-04)
+
+| Change | Check |
+|---|---|
+| Profile and ground controls share one row on a 390 px phone (they wrap at large text rather than truncate). | Measured: same row at 390 px. |
+| Mode sheet: presets in three groups; "Your limits" folds into a row showing uphill, kerb and steps. The whole sheet fits one phone screen. | axe: no violations. |
+| A building destination routes to the best entrance that fits your settings, and says so ("Takes you to an entrance that fits your settings (sliding door, marked wheelchair accessible)"). Falls back to the building's centre if no entrance fits or none is reachable. | axe: no violations. |

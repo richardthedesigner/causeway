@@ -3,7 +3,7 @@
  * category data; D-009). localStorage can be unavailable, so every access is
  * guarded and the app works without it.
  */
-import { PRESETS, type MobilityPreset, type Profile } from "@causeway/profile";
+import { PRESETS, type Profile } from "@causeway/profile";
 
 const KEY = "causewayside.profile.v1";
 
@@ -29,16 +29,3 @@ export function saveProfile(p: Profile) {
   }
 }
 
-export const PRESET_ORDER: MobilityPreset[] = [
-  "walking",
-  "walking-stick",
-  "crutches",
-  "rollator",
-  "manual-wheelchair",
-  "manual-wheelchair-companion",
-  "powerchair",
-  "mobility-scooter",
-  "pram",
-  "fatigue",
-  "visual-impairment",
-];
