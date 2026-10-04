@@ -3,8 +3,8 @@
  * Routing runs on the device, in a worker. The profile (health data) never
  * leaves the phone: it arrives here with each request and is not stored.
  */
-import { isKnown, type Graph, type GraphEdge, type TransitNetwork } from "@causeway/graph";
-import { applyLiveStates, liftOutageStates } from "@causeway/live";
+import { isKnown, mobilityLabelFor, noteSignals, type Graph, type GraphEdge, type Stretch, type TransitNetwork } from "@causeway/graph";
+import { applyEdgeStates, applyLiveStates, liftOutageStates, worksStates, type WorksObservation } from "@causeway/live";
 import { PRESETS, type Profile } from "@causeway/profile";
 import {
   buildNavPlan,
@@ -12,6 +12,7 @@ import {
   elevationProfile,
   entrancesNear,
   explain,
+  placeName,
   Router,
   summarise,
   toGeoJSON,
@@ -24,10 +25,34 @@ declare const self: DedicatedWorkerGlobalScope;
 let router: Router | null = null;
 let graph: Graph | null = null;
 let network: TransitNetwork | null = null;
+/** Works from the area's built file and from live feeds, kept apart so a refresh replaces only its own. */
+let fileWorks: { works: WorksObservation[]; source: string; builtAt: string } | null = null;
+let liveWorks: { works: WorksObservation[]; fetchedAt: string } | null = null;
+const WORKS_SOURCES = ["Street Manager", "TfL road disruptions"];
+
+function applyWorks() {
+  if (!graph) return;
+  const all = [...(fileWorks?.works ?? []), ...(liveWorks?.works ?? [])];
+  const now = new Date();
+  applyEdgeStates(graph, worksStates(all, graph.edges, now), WORKS_SOURCES);
+  const t = now.getTime();
+  const current = all.filter((w) => Date.parse(w.start) <= t && Date.parse(w.end) > t);
+  const sources = [fileWorks ? fileWorks.source : null, liveWorks ? "TfL road disruptions (live)" : null].filter((s): s is string => !!s);
+  post({
+    type: "works",
+    summary: {
+      closedNow: current.filter((w) => w.footway === "closed").length,
+      affectedNow: current.filter((w) => w.footway === "affected").length,
+      upcoming: all.filter((w) => Date.parse(w.start) > t).length,
+      sources,
+      asOf: liveWorks?.fetchedAt ?? fileWorks?.builtAt ?? now.toISOString(),
+    },
+  });
+}
 
 const post = (m: WorkerResponse) => self.postMessage(m);
 
-async function load(url: string, networkUrl: string | undefined, demo: Place[]) {
+async function load(url: string, networkUrl: string | undefined, worksUrl: string | undefined, demo: Place[]) {
   const res = await fetch(url);
   if (!res.ok || !res.body) throw new Error(`graph: HTTP ${res.status}`);
   // Hosts that won't serve .gz get the same bytes as base64 text (the private preview build).
@@ -37,6 +62,14 @@ async function load(url: string, networkUrl: string | undefined, demo: Place[]) 
   router = new Router(graph);
   network = networkUrl ? ((await (await fetch(networkUrl)).json()) as TransitNetwork) : null;
   post({ type: "ready", places: places(graph, demo, network), network: networkLines(graph), bbox: graph.meta.bbox, builtAt: graph.meta.builtAt });
+  if (worksUrl) {
+    try {
+      fileWorks = (await (await fetch(worksUrl)).json()) as { works: WorksObservation[]; source: string; builtAt: string };
+      applyWorks();
+    } catch {
+      /* no works file: routes stand without it, and the panel says nothing about works */
+    }
+  }
 }
 
 /** Search index: demo places plus every street name in the graph (tagged names only, never borrowed ones). */
@@ -96,6 +129,7 @@ function toPlanned(r: Route, start: Parameters<typeof elevationProfile>[1], id: 
   return {
     nav: buildNavPlan(r, p),
     unknowns,
+    stretches: stretchesOf(r),
     id,
     label,
     coords: toGeoJSON(r).geometry.coordinates,
@@ -107,10 +141,29 @@ function toPlanned(r: Route, start: Parameters<typeof elevationProfile>[1], id: 
   };
 }
 
+const RAIL_KINDS = new Set(["transit", "board", "interchange", "station_link", "elevator"]);
+
+/** The route's named stretches in the order you reach them (a street you come back to joins its first visit). */
+function stretchesOf(r: Route): (Stretch & { m: number })[] {
+  const by = new Map<string, Stretch & { m: number }>();
+  for (const s of r.steps) {
+    if (RAIL_KINDS.has(s.edge.kind)) continue;
+    const name = placeName(s.edge);
+    const cur = by.get(name) ?? by.set(name, { name, edgeIds: [], osmWayIds: [], points: [], m: 0 }).get(name)!;
+    cur.edgeIds.push(s.edge.id);
+    if (s.edge.osmWayId !== undefined && !cur.osmWayIds.includes(s.edge.osmWayId)) cur.osmWayIds.push(s.edge.osmWayId);
+    cur.points.push(s.edge.geometry[Math.floor(s.edge.geometry.length / 2)]!);
+    cur.m += s.edge.lengthM;
+  }
+  return [...by.values()].map((x) => ({ ...x, m: Math.round(x.m) }));
+}
+
 function plan(req: Extract<WorkerRequest, { type: "plan" }>): PlanResult {
   if (!router || !graph) throw new Error("graph not loaded");
   const p = req.profile;
   const c = { ...req.conditions, now: new Date(req.conditions.now) };
+  // Notes stay a separate layer: joined to edge ids here, per request, never written into the graph.
+  router.noteSignals = noteSignals(req.notes, graph, c.now, mobilityLabelFor(p.preset));
   const a = router.snap(req.from.lon, req.from.lat, p, c);
   const b = router.snap(req.to.lon, req.to.lat, p, c);
   const alts = router.alternatives(a, b, p, c, 3);
@@ -172,7 +225,11 @@ function plan(req: Extract<WorkerRequest, { type: "plan" }>): PlanResult {
 self.onmessage = async (ev: MessageEvent<WorkerRequest>) => {
   const m = ev.data;
   try {
-    if (m.type === "init") await load(m.graphUrl, m.networkUrl, m.places);
+    if (m.type === "init") await load(m.graphUrl, m.networkUrl, m.worksUrl, m.places);
+    else if (m.type === "works-live") {
+      liveWorks = { works: m.works, fetchedAt: m.fetchedAt };
+      applyWorks();
+    }
     else if (m.type === "live") {
       if (!graph || !network) return;
       for (const e of graph.edges) if (e.live?.affects === "step-free") delete e.live;

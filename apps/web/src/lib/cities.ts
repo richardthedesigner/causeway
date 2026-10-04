@@ -10,6 +10,8 @@ export interface City {
   basemap: string;
   /** Search index: places with access tags, addresses, postcodes (scripts/build-places.ts). */
   index: string;
+  /** Street works on pavements (scripts/build-works.ts). England only: Scotland has no open feed yet. */
+  works?: string;
   /** Rail network for live lift outages (London only for now). */
   network?: string;
   liveLifts: boolean;
@@ -49,6 +51,7 @@ export const CITIES: City[] = [
     graph: "graph/newcastle-gateshead.graph.json.gz",
     basemap: "basemap/newcastle-gateshead.pmtiles",
     index: "places/newcastle-gateshead.json.gz",
+    works: "live/newcastle-gateshead.works.json",
     liveLifts: false,
     weatherAt: [54.97, -1.607],
     start: { id: "grey-street", name: "Grey Street", kind: "City centre", lon: -1.6123, lat: 54.9722 },
@@ -67,6 +70,7 @@ export const CITIES: City[] = [
     graph: "graph/london-jubilee.graph.json.gz",
     basemap: "basemap/london-jubilee.pmtiles",
     index: "places/london-jubilee.json.gz",
+    works: "live/london-jubilee.works.json",
     network: "graph/london-network.json",
     liveLifts: true,
     weatherAt: [51.502, -0.07],

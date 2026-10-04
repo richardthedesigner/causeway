@@ -1,9 +1,10 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { fetchLiftOutages } from "@causeway/live";
+import { fetchLiftOutages, fetchTflStreetWorks } from "@causeway/live";
+import type { UserNote } from "@causeway/graph";
 import type { Profile } from "@causeway/profile";
 import type { City } from "./cities";
-import type { Place, PlanResult, WorkerRequest, WorkerResponse } from "./plan-types";
+import type { Place, PlanResult, WorkerRequest, WorkerResponse, WorksSummary } from "./plan-types";
 
 export interface Conditions {
   wet: boolean;
@@ -34,12 +35,14 @@ export function usePlanner(city: City) {
   const [result, setResult] = useState<PlanResult | null>(null);
   const [planning, setPlanning] = useState(false);
   const [lifts, setLifts] = useState<LiveLifts>({ state: "none" });
+  const [works, setWorks] = useState<WorksSummary | null>(null);
 
   useEffect(() => {
     setReady(null);
     setResult(null);
     setError(null);
     setLifts({ state: city.liveLifts ? "loading" : "none" });
+    setWorks(null);
     const w = new Worker(new URL("./router.worker.ts", import.meta.url), { type: "module" });
     worker.current = w;
     let timer: ReturnType<typeof setInterval> | undefined;
@@ -47,15 +50,25 @@ export function usePlanner(city: City) {
       fetchLiftOutages()
         .then((outages) => w.postMessage({ type: "live", outages } satisfies WorkerRequest))
         .catch(() => setLifts({ state: "failed" }));
+    // TfL street disruptions top up the Street Manager file in London; a failure leaves the file's works in place.
+    const refreshWorks = () =>
+      fetchTflStreetWorks()
+        .then((works) => w.postMessage({ type: "works-live", works, fetchedAt: new Date().toISOString() } satisfies WorkerRequest))
+        .catch(() => undefined);
     w.onmessage = (ev: MessageEvent<WorkerResponse>) => {
       const m = ev.data;
       if (m.type === "ready") {
         setReady(m);
         if (city.liveLifts) {
           refreshLifts();
-          timer = setInterval(refreshLifts, LIFT_REFRESH_MS);
+          refreshWorks();
+          timer = setInterval(() => {
+            refreshLifts();
+            refreshWorks();
+          }, LIFT_REFRESH_MS);
         }
-      } else if (m.type === "live") setLifts({ state: "ok", closed: m.applied, at: m.fetchedAt });
+      } else if (m.type === "works") setWorks(m.summary);
+      else if (m.type === "live") setLifts({ state: "ok", closed: m.applied, at: m.fetchedAt });
       else if (m.type === "error") {
         setError(m.message);
         setPlanning(false);
@@ -65,20 +78,20 @@ export function usePlanner(city: City) {
       }
     };
     const url = (f: string) => new URL(process.env.NEXT_PUBLIC_GRAPH_B64 && f.endsWith(".gz") ? f.replace(".json.gz", ".b64.txt") : f, document.baseURI).toString();
-    w.postMessage({ type: "init", graphUrl: url(city.graph), networkUrl: city.network ? url(city.network) : undefined, places: city.places } satisfies WorkerRequest);
+    w.postMessage({ type: "init", graphUrl: url(city.graph), networkUrl: city.network ? url(city.network) : undefined, worksUrl: city.works ? url(city.works) : undefined, places: city.places } satisfies WorkerRequest);
     return () => {
       clearInterval(timer);
       w.terminate();
     };
   }, [city]);
 
-  const plan = useCallback((from: Place, to: Place, profile: Profile, c: Conditions) => {
+  const plan = useCallback((from: Place, to: Place, profile: Profile, c: Conditions, notes: UserNote[] = []) => {
     if (!worker.current) return;
     setPlanning(true);
     setError(null);
     const id = ++seq.current;
-    worker.current.postMessage({ type: "plan", id, from, to, profile, conditions: { wet: c.wet, ice: c.ice, now: new Date().toISOString() } } satisfies WorkerRequest);
+    worker.current.postMessage({ type: "plan", id, from, to, profile, conditions: { wet: c.wet, ice: c.ice, now: new Date().toISOString() }, notes: notes.map((n) => ({ ...n, photo: null })) } satisfies WorkerRequest);
   }, []);
 
-  return { ready, error, result, planning, plan, lifts, clear: () => setResult(null) };
+  return { ready, error, result, planning, plan, lifts, works, clear: () => setResult(null) };
 }
