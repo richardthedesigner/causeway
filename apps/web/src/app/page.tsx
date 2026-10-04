@@ -43,6 +43,11 @@ export default function Home() {
   }, []);
   const planner = usePlanner(city);
   const index = usePlaces(city, planner.ready?.places ?? null);
+  // Venues with an accessible toilet go to the router, so "Past more toilets" can use them (public ones are in the graph).
+  useEffect(() => {
+    if (!index) return;
+    planner.sendToilets(index.entries.filter((e) => e.cat !== "amenity=toilets" && e.access?.["toilets:wheelchair"] === "yes").map((e) => ({ lon: e.place.lon, lat: e.place.lat, name: e.place.name })));
+  }, [index]); // eslint-disable-line react-hooks/exhaustive-deps
   const [profile, setProfile] = useState<Profile>(PRESETS["manual-wheelchair"]);
   const [modeOpen, setModeOpen] = useState(false);
   const [from, setFrom] = useState<Place>(CITIES[0]!.start);

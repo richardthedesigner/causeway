@@ -9,7 +9,7 @@ A running record of what was built, newest first. Each entry links the decision 
 - Each shows Changing Places, RADAR key, fee and opening hours where mapped, and they appear as WC labels on the map.
 - New setting: "Accessible toilet at least every" (don't mind, 500 m, 1 km, 2 km). The route says when its longest gap is longer than that.
 - The search index now keeps the `centralkey`, `changing_places`, `fee`, `opening_hours` and `access` tags.
-- Not yet: steering the route towards toilets (benches already steer, D-019).
+- Steering: when the longest gap is over your setting, a "Past more toilets" option is offered. It uses the same constrained search as benches (D-019): a toilet counts within 80 m of the path, and venue toilets from search are passed to the router. Closes #17.
 
 **Navigation on buses and trams**
 - During a ride, the off-route limit widens from 25 m to 150 m. The ride is drawn stop to stop in straight lines, but the bus follows the road, so riders were being told they were off route mid-ride.

@@ -85,6 +85,11 @@ export function usePlanner(city: City) {
     };
   }, [city]);
 
+  /** Hand the worker the venue toilets from the search index (once per city). */
+  const sendToilets = useCallback((points: { lon: number; lat: number; name: string }[]) => {
+    worker.current?.postMessage({ type: "toilets", points } satisfies WorkerRequest);
+  }, []);
+
   const plan = useCallback((from: Place, to: Place, profile: Profile, c: Conditions, notes: UserNote[] = []) => {
     if (!worker.current) return;
     setPlanning(true);
@@ -93,5 +98,5 @@ export function usePlanner(city: City) {
     worker.current.postMessage({ type: "plan", id, from, to, profile, conditions: { wet: c.wet, ice: c.ice, now: new Date().toISOString() }, notes: notes.map((n) => ({ ...n, photo: null })) } satisfies WorkerRequest);
   }, []);
 
-  return { ready, error, result, planning, plan, lifts, works, clear: () => setResult(null) };
+  return { ready, error, result, planning, plan, lifts, works, sendToilets, clear: () => setResult(null) };
 }

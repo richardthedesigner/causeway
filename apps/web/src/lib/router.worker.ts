@@ -277,6 +277,7 @@ self.onmessage = async (ev: MessageEvent<WorkerRequest>) => {
   const m = ev.data;
   try {
     if (m.type === "init") await load(m.graphUrl, m.networkUrl, m.worksUrl, m.busUrl, m.places);
+    else if (m.type === "toilets") router?.addToilets(m.points);
     else if (m.type === "works-live") {
       liveWorks = { works: m.works, fetchedAt: m.fetchedAt };
       applyWorks();
