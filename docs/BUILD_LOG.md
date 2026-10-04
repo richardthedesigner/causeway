@@ -2,6 +2,20 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
+## 2026-10-04 (evening, tester follow-ups)
+
+**Battery range** (D-041)
+- A device can have a battery range (`maxRangeKm`), unset by default. Battery use is the distance on wheels plus each metre climbed counted as 30 m of flat.
+- The route notes warn when a trip uses over half the range ("you may need to charge before the way back") or more than all of it. Warning only: routes don't change.
+- The demo Cherry (`?demo=devices`) has 12 km. Abbeyhill to the Grassmarket: about 6.6 km of battery, so she gets the "over half" note.
+
+**Unmapped stretches, diagnosed** ([DEVICES.md](plans/DEVICES.md#follow-ups-from-the-same-feedback))
+- The tester's two long unmapped stretches are York Place and the way into the Grassmarket from the west (West Port, Grindlay, Lady Lawson and Spittal Streets).
+- The detour is hills and setts, not missing data: mapping those pavements would make the route more certain, not shorter.
+
+**Search results no longer blink while typing**
+- Live Photon and postcode results stay up until new ones arrive. "grass market" now finds "Grassmarket".
+
 ## 2026-10-04 (after midnight)
 
 **Leaving later** (D-040)
