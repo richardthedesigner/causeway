@@ -36,3 +36,9 @@ jobs:
           for f in db/migrations/*.sql; do
             PGPASSWORD=postgres psql -h localhost -U postgres -v ON_ERROR_STOP=1 -q -f "$f"
           done
+      - name: Sharing rules (row-level security)
+        run: scripts/test-db.sh
+        env:
+          PGHOST: localhost
+          PGUSER: postgres
+          PGPASSWORD: postgres

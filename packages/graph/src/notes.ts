@@ -92,17 +92,38 @@ export interface UserNote {
   at: string;
   /** Opt-in per note. A label only, never thresholds. */
   mobility: MobilityLabel | null;
+  /**
+   * Was the ground wet? Optional ("Not sure" is null). Setts that are fine
+   * in the dry can be lethal in the wet, so a note counts most in the
+   * weather it describes. Absent on notes written before the field existed.
+   */
+  ground?: NoteGround | null;
+}
+
+export type NoteGround = "dry" | "wet";
+
+export const NOTE_GROUNDS: { ground: NoteGround | null; label: string }[] = [
+  { ground: "dry", label: "Dry" },
+  { ground: "wet", label: "Wet" },
+  { ground: null, label: "Not sure" },
+];
+
+/** A note about the other weather still says something, just less. */
+export function groundWeight(note: NoteGround | null | undefined, wetNow: boolean): number {
+  if (!note) return 1;
+  return (note === "wet") === wetNow ? 1 : 0.3;
 }
 
 export const NOTE_MAX_CHARS = 280;
 
 /** Why a note can't be saved, or null if it can. */
-export function noteProblem(n: Pick<UserNote, "text" | "sentiment" | "mobility">): string | null {
+export function noteProblem(n: Pick<UserNote, "text" | "sentiment" | "mobility" | "ground">): string | null {
   const t = n.text.trim();
   if (!t) return "Write a few words about it.";
   if (t.length > NOTE_MAX_CHARS) return `Keep it under ${NOTE_MAX_CHARS} characters.`;
   if (!NOTE_SENTIMENTS.some((s) => s.sentiment === n.sentiment)) return "Choose good, mixed or bad.";
   if (n.mobility !== null && !MOBILITY_LABELS.includes(n.mobility)) return "Unknown mobility label.";
+  if (n.ground != null && n.ground !== "dry" && n.ground !== "wet") return "Unknown ground condition.";
   return null;
 }
 
@@ -128,6 +149,8 @@ export function corroborations(n: UserNote, all: readonly UserNote[]): number {
   const authors = new Set<string>();
   for (const o of all) {
     if (o.id === n.id || o.author === n.author || o.sentiment !== n.sentiment) continue;
+    // "Lethal when wet" and "fine in the dry" aren't agreement or disagreement: different ground, no corroboration.
+    if (n.ground && o.ground && n.ground !== o.ground) continue;
     if (sameTarget(n, o)) authors.add(o.author);
   }
   return authors.size;
@@ -152,8 +175,20 @@ export function noteConfidence(n: UserNote, all: readonly UserNote[], now: Date 
 /** Notes about a place: matched by ref, or by being within `radiusM` of it (dropped pins move). */
 export function notesForPlace(notes: readonly UserNote[], place: { id: string; lon: number; lat: number }, radiusM = 40): UserNote[] {
   return notes.filter(
-    (n) => n.target.kind === "place" && (n.target.ref === place.id || haversine([n.lon, n.lat], [place.lon, place.lat]) <= radiusM),
+    (n) =>
+      n.target.kind === "place" &&
+      (n.target.ref === place.id || (!isEntranceRef(n.target.ref) && haversine([n.lon, n.lat], [place.lon, place.lat]) <= radiusM)),
   );
+}
+
+/** Reference for a mapped entrance. OSM node ids are stable across graph builds. */
+export const entranceRef = (osmId: number) => `entrance:${osmId}`;
+const isEntranceRef = (ref: string) => ref.startsWith("entrance:");
+
+/** Notes about one entrance: by its ref only, so a note about the side door never lands on the front door. */
+export function notesForEntrance(notes: readonly UserNote[], osmId: number): UserNote[] {
+  const ref = entranceRef(osmId);
+  return notes.filter((n) => n.target.kind === "place" && n.target.ref === ref);
 }
 
 /** A named stretch of a route, as the app sees it. */
@@ -225,12 +260,13 @@ export function noteSignals(
   graph: { meta: { builtAt: string }; edges: readonly GraphEdge[] },
   now: Date,
   user: MobilityLabel | null,
+  wetNow = false,
 ): Map<number, NoteSignal> {
   const out = new Map<number, NoteSignal>();
   const ways = notes.some((n) => n.target.kind === "way" && n.target.graphBuiltAt !== graph.meta.builtAt) ? wayIndex(graph.edges) : undefined;
   for (const n of notes) {
     if (n.target.kind !== "way") continue;
-    const w = SENTIMENT_WEIGHT[n.sentiment] * noteConfidence(n, notes, now) * relevance(n.mobility, user);
+    const w = SENTIMENT_WEIGHT[n.sentiment] * noteConfidence(n, notes, now) * relevance(n.mobility, user) * groundWeight(n.ground, wetNow);
     for (const id of new Set(resolveNoteEdges(n, graph, ways))) {
       const cur = out.get(id) ?? { score: 0, count: 0 };
       out.set(id, { score: Math.max(-2, Math.min(2, cur.score + w)), count: cur.count + 1 });

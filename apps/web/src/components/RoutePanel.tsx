@@ -1,6 +1,6 @@
 "use client";
-import { ArrowUpDown, CircleAlert, CircleCheck, CircleHelp, CircleX, DoorOpen, MessageSquarePlus, SlidersHorizontal } from "lucide-react";
-import { notesForPlace, notesForStretch, type UserNote } from "@causeway/graph";
+import { ArrowUpDown, ChevronDown, CircleAlert, CircleCheck, CircleHelp, CircleX, DoorOpen, MessageSquarePlus, Share2, SlidersHorizontal } from "lucide-react";
+import { entranceRef, notesForEntrance, notesForPlace, notesForStretch, type UserNote } from "@causeway/graph";
 import type { Profile } from "@causeway/profile";
 import { useState } from "react";
 import { ElevationChart } from "@/components/ElevationChart";
@@ -9,6 +9,7 @@ import type { NoteAbout } from "@/components/NoteSheet";
 import { Button } from "@/components/ui/button";
 import type { Place, PlannedRoute, PlanResult, WorksSummary } from "@/lib/plan-types";
 import type { Conditions, LiveLifts } from "@/lib/use-planner";
+import type { FlagReason } from "@/lib/sync";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -35,17 +36,21 @@ interface Props {
   notes: UserNote[];
   author: string;
   builtAt: string;
-  onAddNote: (about: NoteAbout) => void;
+  /** Open the note sheet with these subjects to choose from, most likely first. */
+  onAddNote: (choices: NoteAbout[]) => void;
   onDeleteNote: (id: string) => void;
+  /** Present when notes are shared: flag someone else's note. */
+  onFlagNote?: (id: string, reason: FlagReason) => Promise<boolean>;
 }
+
+const dist = (m: number) => (m >= 1000 ? `${(m / 1000).toFixed(1)} km` : `${m} m`);
 
 export const meta = (r: PlannedRoute) => {
   const s = r.summary;
   // With a train in the middle, the distance that matters is the bit you push, wheel or walk.
   const d = s.rides.length ? s.walkM : s.distanceM;
-  const dist = d >= 1000 ? `${(d / 1000).toFixed(1)} km` : `${d} m`;
   const steep = s.worstInclinePct === null ? "slope unknown" : `max ${Math.abs(s.worstInclinePct)}%`;
-  return `${Math.round(s.minutes)} min / ${dist} / ${steep}`;
+  return `${Math.round(s.minutes)} min / ${dist(d)} / ${steep}`;
 };
 
 /** Plain-language verdict. Never "step-free" while anything is unknown (the trust contract). */
@@ -59,7 +64,7 @@ function Verdict({ r }: { r: PlannedRoute }) {
     );
   return (
     <span className="inline-flex items-center gap-1.5 text-caution">
-      <CircleHelp aria-hidden className="size-5" /> Missing data for {s.unknownM} m
+      <CircleHelp aria-hidden className="size-5" /> Missing data for {dist(s.unknownM)}
     </span>
   );
 }
@@ -78,32 +83,60 @@ export function RoutePanel(props: Props) {
   };
   // Notes on stretches we lack data for show under "What we don't know"; the rest under "Why this way?".
   const routeNotes = stretches.filter((st) => !unknownNames.has(st.name)).flatMap((st) => notesForStretch(notes, st, builtAt));
-  const notedUnknowns = stretches.filter((st) => unknownNames.has(st.name) && notesForStretch(notes, st, builtAt).length).length;
-  const noteable = stretches.filter((st) => st.m >= 20 && !st.name.startsWith("a path") && !st.name.startsWith("unnamed")).slice(0, 8);
+  const others =
+    result?.status === "ok"
+      ? [...result.routes.map((r) => ({ r, title: r.label })), ...result.tradeoffs.flatMap((t) => (t.route ? [{ r: t.route, title: t.label }] : []))].filter((o) => o.r.id !== sel?.id)
+      : [];
+  const tradeoffMessages = result?.status === "ok" ? result.tradeoffs.filter((t) => !t.route) : [];
+  const isVenue = !!to.venue || to.id.startsWith("pin:");
   const placeNotes = notesForPlace(notes, to);
-  const aboutStretch = (st: (typeof stretches)[number]): NoteAbout => {
-    const [lon, lat] = st.points[Math.floor(st.points.length / 2)]!;
-    return { target: { kind: "way", name: st.name, osmWayIds: st.osmWayIds, edgeIds: st.edgeIds, graphBuiltAt: builtAt }, lon, lat };
-  };
+  const entrances = result?.status === "ok" ? result.entrances : [];
+  const entranceNotes = entrances.flatMap((e) => notesForEntrance(notes, e.osmId));
+  const peopleCount = routeNotes.length + placeNotes.length + entranceNotes.length + [...unknownNames].reduce((t, n) => t + stretchNotes(n).length, 0);
+
+  // What a new note can be about, most likely first: the place you're going, its doors, then the streets on the way.
+  const choices: NoteAbout[] = [
+    ...(isVenue ? [{ target: { kind: "place" as const, ref: to.id, name: to.name }, lon: to.lon, lat: to.lat }] : []),
+    ...entrances.map((e) => ({ target: { kind: "place" as const, ref: entranceRef(e.osmId), name: entranceName(e) }, lon: e.lon, lat: e.lat })),
+    ...[...stretches]
+      .filter((st) => st.m >= 20 && !st.name.startsWith("a path") && !st.name.startsWith("unnamed"))
+      .sort((a, b) => Number(b.name === to.name) - Number(a.name === to.name) || b.m - a.m)
+      .slice(0, 10)
+      .map((st): NoteAbout => {
+        const [lon, lat] = st.points[Math.floor(st.points.length / 2)]!;
+        return { target: { kind: "way", name: st.name, osmWayIds: st.osmWayIds, edgeIds: st.edgeIds, graphBuiltAt: builtAt }, lon, lat };
+      }),
+  ];
+
+  const worksClosed = props.works && props.works.closedNow > 0;
+  const liveLine =
+    props.lifts.state === "failed"
+      ? "Couldn't get live lift status from TfL. Check before you travel."
+      : props.lifts.state === "ok" && props.lifts.closed > 0
+        ? `${props.lifts.closed} lift${props.lifts.closed === 1 ? "" : "s"} out of service, routed around (TfL, ${props.lifts.at.slice(11, 16)} UTC).`
+        : worksClosed
+          ? `${props.works!.closedNow} pavement closure${props.works!.closedNow === 1 ? "" : "s"} nearby, avoided.`
+          : null;
 
   return (
-    <div className="grid grid-cols-1 gap-5">
-      {/* Journey: from / to, each changeable; swap. */}
-      <section aria-label="Journey" className="flex flex-wrap items-stretch gap-2">
-        <div className="grid min-w-0 flex-[1_1_12rem] gap-1.5">
-          <button type="button" onClick={props.onChangeFrom} className="min-h-12 w-full min-w-0 rounded-2xl bg-surface-2 px-4 py-1.5 text-left">
+    <div className="grid grid-cols-1 gap-4">
+      {/* Journey: one card, two rows, swap on the side. */}
+      <section aria-label="Journey" className="flex items-stretch gap-1 rounded-2xl bg-surface-2">
+        <div className="grid min-w-0 flex-1">
+          <button type="button" onClick={props.onChangeFrom} className="flex min-h-12 min-w-0 items-center gap-2 px-4 text-left">
             <span className="sr-only">Change start: </span>
-            <span className="block text-sm text-muted" aria-hidden>
+            <span aria-hidden className="w-10 shrink-0 text-sm text-muted">
               From
             </span>
-            <span className="block truncate">{from.name}</span>
+            <span className="truncate">{from.name}</span>
           </button>
-          <button type="button" onClick={props.onChangeTo} className="min-h-12 w-full min-w-0 rounded-2xl bg-surface-2 px-4 py-1.5 text-left">
+          <span aria-hidden className="mx-4 border-t border-line" />
+          <button type="button" onClick={props.onChangeTo} className="flex min-h-12 min-w-0 items-center gap-2 px-4 text-left">
             <span className="sr-only">Change destination: </span>
-            <span className="block text-sm text-muted" aria-hidden>
+            <span aria-hidden className="w-10 shrink-0 text-sm text-muted">
               To
             </span>
-            <span className="block truncate font-bold">{to.name}</span>
+            <span className="truncate font-bold">{to.name}</span>
           </button>
         </div>
         <Button variant="ghost" size="icon" onClick={props.onSwap} aria-label="Swap start and destination" className="self-center">
@@ -111,14 +144,9 @@ export function RoutePanel(props: Props) {
         </Button>
       </section>
 
-      <div className="flex flex-wrap items-center gap-2">
-        <Button onClick={props.onOpenMode} aria-label={`Routes are for ${profile.label}. Change`} className="h-auto max-w-full py-2 text-left">
-          <SlidersHorizontal aria-hidden className="size-5" /> {profile.label}
-        </Button>
-        <span className="text-sm text-muted">{weather === "dry" ? "Dry ground" : weather === "wet" ? "Wet ground" : "Icy ground"}</span>
-      </div>
-
       {planning && !result ? <p className="m-0 text-muted" aria-live="polite">Working out routes for your limits…</p> : null}
+
+      {result?.status !== "ok" ? <Settings {...props} weather={weather} /> : null}
 
       {result?.status === "none" ? (
         <section aria-live="polite" className="grid gap-2 rounded-2xl border border-stop/40 p-4">
@@ -136,247 +164,282 @@ export function RoutePanel(props: Props) {
             <h2 id="routes-h" className="sr-only">
               Routes
             </h2>
-            <div role="radiogroup" aria-label="Routes" className="grid gap-2">
-              {result.routes.map((r) => (
-                <RouteCard key={r.id} r={r} on={r.id === sel.id} onSelect={() => onSelect(r.id)} />
-              ))}
-            </div>
+            <RouteSummary r={sel} title={result.tradeoffs.find((t) => t.route?.id === sel.id)?.label} />
             {planning ? <p className="m-0 text-sm text-muted" aria-live="polite">Updating…</p> : null}
-            {props.lifts.state === "ok" ? (
-              <p className="m-0 text-sm text-muted">
-                Lift status from TfL at {props.lifts.at.slice(11, 16)} UTC: {props.lifts.closed === 0 ? "no outages on this network" : `${props.lifts.closed} platform${props.lifts.closed === 1 ? "" : "s"} closed to step-free travel, routed around`}.
-              </p>
-            ) : props.lifts.state === "failed" ? (
-              <p className="m-0 text-sm text-caution">Couldn&apos;t get live lift status from TfL. Check before you travel.</p>
-            ) : props.lifts.state === "loading" ? (
-              <p className="m-0 text-sm text-muted">Checking lifts with TfL…</p>
-            ) : null}
-            {props.works ? (
-              <p className="m-0 text-sm text-muted">
-                Pavement works: {props.works.closedNow + props.works.affectedNow === 0 ? "none known in this area today" : `${props.works.closedNow} closing a pavement (avoided) and ${props.works.affectedNow} on one (counted as unknown)`}. From {props.works.sources.join(" and ")}.
-              </p>
-            ) : !props.worksCovered ? (
-              <p className="m-0 text-sm text-muted">No open roadworks feed here yet, so pavement closures aren&apos;t shown.</p>
-            ) : null}
           </section>
 
-          <div className="flex flex-wrap gap-2">
-            <Button variant="primary" size="lg" onClick={props.onStart} className="flex-1">
+          <div className="grid gap-2">
+            <Button variant="primary" size="lg" onClick={props.onStart}>
               Start
             </Button>
-            <ShareButton to={to.name} minutes={sel.summary.minutes} />
+            <div className="grid grid-cols-2 gap-2">
+              <Button onClick={() => props.onAddNote(choices)} disabled={!choices.length}>
+                <MessageSquarePlus aria-hidden className="size-5 shrink-0" /> Add a note
+              </Button>
+              <ShareButton to={to.name} minutes={sel.summary.minutes} />
+            </div>
           </div>
 
-          <section aria-labelledby="why-h" className="grid gap-2">
-            <h2 id="why-h" className="m-0 text-lg font-bold">
-              Why this way?
-            </h2>
+          <div className="grid gap-1">
             <p className="m-0">{result.headline}</p>
-            {result.notes.length ? (
-              <ul className="m-0 grid list-none gap-1 p-0 text-muted">
-                {result.notes.map((n) => (
-                  <li key={n}>{n}</li>
-                ))}
-              </ul>
-            ) : null}
-            {routeNotes.length || notedUnknowns ? (
-              <div className="grid gap-2 pt-2">
-                <h3 className="m-0 text-base font-bold">Notes from people on this route</h3>
-                <p className="m-0 text-sm text-muted">Their own experience, not checked by us. Notes nudge your routes but never rule a street in or out.</p>
-                <NoteList notes={routeNotes} all={notes} author={author} onDelete={props.onDeleteNote} />
-                {notedUnknowns ? (
-                  <p className="m-0 text-sm text-muted">
-                    Notes on {notedUnknowns} {notedUnknowns === 1 ? "street" : "streets"} we&apos;re missing data for are under &ldquo;What we don&apos;t know&rdquo;.
-                  </p>
+            {liveLine ? <p className={cn("m-0 text-sm", props.lifts.state === "failed" ? "text-caution" : "text-muted")}>{liveLine}</p> : null}
+          </div>
+
+          <Settings {...props} weather={weather} />
+
+          <div className="grid gap-2">
+            {isVenue ? (
+              <More
+                title="Getting in"
+                icon={<DoorOpen aria-hidden className="size-5" />}
+                aside={entrances.length ? `${entrances.filter((e) => e.verdict.passable === "yes").length} of ${entrances.length} fit` : "Not mapped"}
+              >
+                {to.facts ? (
+                  <div className="grid gap-0.5">
+                    <ul className="m-0 grid list-none gap-0.5 p-0">
+                      {to.facts.map((f) => (
+                        <li key={f}>{f}</li>
+                      ))}
+                    </ul>
+                    <span className="text-sm text-muted">{to.factsSource}. Mapped by volunteers; check with the venue if it matters.</span>
+                  </div>
                 ) : null}
-              </div>
+                {entrances.length ? (
+                  <ul className="m-0 grid list-none gap-3 p-0">
+                    {entrances.map((e) => (
+                      <li key={e.osmId} className="grid gap-0.5">
+                        <span className="flex items-center gap-2">
+                          {e.verdict.passable === "yes" ? (
+                            <CircleCheck aria-hidden className="size-5 shrink-0 text-ok" />
+                          ) : e.verdict.passable === "no" ? (
+                            <CircleX aria-hidden className="size-5 shrink-0 text-stop" />
+                          ) : (
+                            <CircleHelp aria-hidden className="size-5 shrink-0 text-unknown" />
+                          )}
+                          <span>
+                            {e.name ? `${e.name}: ` : "Entrance: "}
+                            {e.verdict.detail}
+                            <span className="sr-only">. {e.verdict.passable === "yes" ? "Usable with your settings" : e.verdict.passable === "no" ? "Not usable with your settings" : "Not known"}</span>
+                          </span>
+                        </span>
+                        <span className="pl-7 text-sm text-muted">
+                          {e.distanceM} m from the pin / {e.source}
+                        </span>
+                        <PeopleSay notes={notesForEntrance(notes, e.osmId)} all={notes} author={author} onDelete={props.onDeleteNote} onFlag={props.onFlagNote} className="pl-7" />
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="m-0 text-muted">No entrances mapped near this point. Check with the venue before you go.</p>
+                )}
+                <PeopleSay notes={placeNotes} all={notes} author={author} onDelete={props.onDeleteNote} onFlag={props.onFlagNote} title="What people say about the place" />
+              </More>
             ) : null}
-            {noteable.length ? (
-              <div className="grid gap-2 pt-2">
-                <h3 id="add-note-h" className="m-0 text-base font-bold">
-                  Add a note about a street on this route
-                </h3>
-                <ul aria-labelledby="add-note-h" className="m-0 flex list-none flex-wrap gap-2 p-0">
-                  {noteable.map((st) => (
-                    <li key={st.name}>
-                      <button type="button" onClick={() => props.onAddNote(aboutStretch(st))} className="inline-flex min-h-12 items-center gap-2 rounded-full border border-line px-4 text-left">
-                        <MessageSquarePlus aria-hidden className="size-5 shrink-0" />
-                        <span className="sr-only">Add a note about </span>
-                        {st.name}
-                      </button>
-                    </li>
+
+            <More title="Why this way?" aside={peopleCount ? `${peopleCount} note${peopleCount === 1 ? "" : "s"} from people` : undefined}>
+              {result.notes.length ? (
+                <ul className="m-0 grid list-none gap-1 p-0">
+                  {result.notes.map((n) => (
+                    <li key={n}>{n}</li>
                   ))}
                 </ul>
-              </div>
-            ) : null}
-          </section>
+              ) : (
+                <p className="m-0 text-muted">Nothing else to flag on this route.</p>
+              )}
+              <PeopleSay notes={routeNotes} all={notes} author={author} onDelete={props.onDeleteNote} onFlag={props.onFlagNote} title="Notes from people on this route" hint="Their own experience, not checked by us. Notes nudge your routes but never rule a street in or out." />
+            </More>
 
-          {result.tradeoffs.length ? (
-            <section aria-labelledby="trade-h" className="grid gap-2">
-              <h2 id="trade-h" className="m-0 text-lg font-bold">
-                Other options
-              </h2>
-              {result.tradeoffs.map((t) =>
-                t.route ? (
-                  <RouteCard key={t.id} r={t.route} title={t.label} on={t.route.id === sel.id} onSelect={() => onSelect(t.route!.id)} />
-                ) : (
+            {others.length || tradeoffMessages.length ? (
+              <More title="Other ways" aside={others.length ? `${others.length}` : undefined}>
+                {others.length ? (
+                  <ul className="m-0 grid list-none gap-2 p-0">
+                    {others.map((o) => (
+                      <li key={o.r.id}>
+                        <RouteCard r={o.r} title={o.title} onSelect={() => onSelect(o.r.id)} />
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+                {tradeoffMessages.map((t) => (
                   <p key={t.id} className="m-0 flex items-start gap-2 text-muted">
                     <CircleAlert aria-hidden className="mt-0.5 size-5 shrink-0" />
                     {t.message}
                   </p>
-                ),
-              )}
-            </section>
-          ) : null}
-
-          {sel.unknowns.length ? (
-            <details className="rounded-2xl border border-line">
-              <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 font-bold">
-                What we don&apos;t know
-                <span className="text-sm font-normal text-muted">{sel.unknowns.length} places</span>
-              </summary>
-              <ul className="m-0 grid list-none gap-2 px-4 pb-4">
-                {sel.unknowns.slice(0, 12).map((u) => (
-                  <li key={u.name} className="grid">
-                    <span>
-                      {u.name} <span className="tabular text-muted">/ {u.m} m</span>
-                    </span>
-                    <span className="text-sm text-muted">{u.what}</span>
-                    {stretchNotes(u.name).length ? (
-                      <div className="mt-2 grid gap-1">
-                        <span className="text-sm font-bold">What people say (not checked by us)</span>
-                        <NoteList notes={stretchNotes(u.name)} all={notes} author={author} onDelete={props.onDeleteNote} />
-                      </div>
-                    ) : null}
-                  </li>
                 ))}
-              </ul>
-            </details>
-          ) : null}
+              </More>
+            ) : null}
 
-          <ElevationChart data={sel.elevation} worstPct={sel.summary.worstInclinePct} />
-
-          {to.venue || to.id.startsWith("pin:") ? (
-          <section aria-labelledby="in-h" className="grid gap-2">
-            <h2 id="in-h" className="m-0 flex items-center gap-2 text-lg font-bold">
-              <DoorOpen aria-hidden className="size-5" /> Getting in
-            </h2>
-            {to.facts ? (
-              <div className="grid gap-0.5">
-                <ul className="m-0 grid list-none gap-0.5 p-0">
-                  {to.facts.map((f) => (
-                    <li key={f}>{f}</li>
+            {sel.unknowns.length ? (
+              <More title="What we don't know" aside={`${sel.unknowns.length} place${sel.unknowns.length === 1 ? "" : "s"}`}>
+                <ul className="m-0 grid list-none gap-3 p-0">
+                  {sel.unknowns.slice(0, 12).map((u) => (
+                    <li key={u.name} className="grid">
+                      <span>
+                        {u.name} <span className="tabular text-muted">/ {u.m} m</span>
+                      </span>
+                      <span className="text-sm text-muted">{u.what}</span>
+                      <PeopleSay notes={stretchNotes(u.name)} all={notes} author={author} onDelete={props.onDeleteNote} onFlag={props.onFlagNote} title="What people say (not checked by us)" className="mt-2" />
+                    </li>
                   ))}
                 </ul>
-                <span className="text-sm text-muted">{to.factsSource}. Mapped by volunteers; check with the venue if it matters.</span>
-              </div>
+              </More>
             ) : null}
-            {result.entrances.length ? (
-              <ul className="m-0 grid list-none gap-2 p-0">
-                {result.entrances.map((e, i) => (
-                  <li key={i} className="grid gap-0.5">
-                    <span className="flex items-center gap-2">
-                      {e.verdict.passable === "yes" ? (
-                        <CircleCheck aria-hidden className="size-5 text-ok" />
-                      ) : e.verdict.passable === "no" ? (
-                        <CircleX aria-hidden className="size-5 text-stop" />
-                      ) : (
-                        <CircleHelp aria-hidden className="size-5 text-unknown" />
-                      )}
-                      <span>
-                        {e.name ? `${e.name}: ` : "Entrance: "}
-                        {e.verdict.detail}
-                        <span className="sr-only">. {e.verdict.passable === "yes" ? "Usable with your settings" : e.verdict.passable === "no" ? "Not usable with your settings" : "Not known"}</span>
-                      </span>
-                    </span>
-                    <span className="pl-7 text-sm text-muted">
-                      {e.distanceM} m from the pin / {e.source}
-                    </span>
-                  </li>
+
+            <More title="Hills" aside={sel.summary.worstInclinePct === null ? "Not known" : `Steepest ${Math.abs(sel.summary.worstInclinePct)}%`}>
+              <ElevationChart data={sel.elevation} worstPct={sel.summary.worstInclinePct} />
+            </More>
+
+            <More title="Route in words" aside={`${sel.segments.length} parts`}>
+              <ol className="m-0 grid gap-2 pl-5 [overflow-wrap:anywhere]">
+                {sel.segments.map((s, i) => (
+                  <li key={i}>{s}</li>
                 ))}
+              </ol>
+            </More>
+
+            <More title="Where this comes from">
+              <ul className="m-0 grid list-none gap-1 p-0 text-sm text-muted">
+                <li>
+                  Ground: {conditions.summary}. {conditions.source}.
+                </li>
+                {props.lifts.state === "ok" ? (
+                  <li>
+                    Lift status from TfL at {props.lifts.at.slice(11, 16)} UTC: {props.lifts.closed === 0 ? "no outages on this network" : `${props.lifts.closed} platform${props.lifts.closed === 1 ? "" : "s"} closed to step-free travel, routed around`}.
+                  </li>
+                ) : props.lifts.state === "loading" ? (
+                  <li>Checking lifts with TfL…</li>
+                ) : null}
+                {props.works ? (
+                  <li>
+                    Pavement works: {props.works.closedNow + props.works.affectedNow === 0 ? "none known in this area today" : `${props.works.closedNow} closing a pavement (avoided) and ${props.works.affectedNow} on one (counted as unknown)`}. From {props.works.sources.join(" and ")}.
+                  </li>
+                ) : !props.worksCovered ? (
+                  <li>No open roadworks feed here yet, so pavement closures aren&apos;t shown.</li>
+                ) : null}
               </ul>
-            ) : (
-              <p className="m-0 text-muted">No entrances mapped near this point. Check with the venue before you go.</p>
-            )}
-            {placeNotes.length ? (
-              <div className="grid gap-2 pt-2">
-                <h3 className="m-0 text-base font-bold">What people say</h3>
-                <p className="m-0 text-sm text-muted">Their own experience, not checked by us.</p>
-                <NoteList notes={placeNotes} all={notes} author={author} onDelete={props.onDeleteNote} />
-              </div>
-            ) : null}
-            <Button
-              className="justify-self-start"
-              onClick={() => props.onAddNote({ target: { kind: "place", ref: to.id, name: to.name }, lon: to.lon, lat: to.lat })}
-            >
-              <MessageSquarePlus aria-hidden className="size-5" /> Add a note about getting in
-            </Button>
-          </section>
-          ) : null}
-
-          <section aria-labelledby="ground-h" className="grid gap-2">
-            <h2 id="ground-h" className="m-0 text-lg font-bold">
-              Ground conditions
-            </h2>
-            <div role="radiogroup" aria-labelledby="ground-h" className="flex max-w-full flex-wrap gap-1 self-start rounded-[1.75rem] border border-line p-1">
-              {(["dry", "wet", "ice"] as const).map((k) => (
-                <button
-                  key={k}
-                  type="button"
-                  role="radio"
-                  aria-checked={weather === k}
-                  onClick={() => props.onConditions(k)}
-                  className={cn("min-h-12 min-w-16 rounded-full px-4 text-base", weather === k ? "bg-ink text-surface" : "text-ink")}
-                >
-                  {k === "dry" ? "Dry" : k === "wet" ? "Wet" : "Icy"}
-                </button>
-              ))}
-            </div>
-            <p className="m-0 text-sm text-muted">
-              {conditions.summary}. {conditions.source}.
-            </p>
-          </section>
-
-          <details className="group rounded-2xl border border-line">
-            <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between px-4 font-bold">
-              Route in words
-              <span className="text-sm font-normal text-muted">{sel.segments.length} parts</span>
-            </summary>
-            <ol className="m-0 grid gap-2 px-4 pb-4 pl-9 [overflow-wrap:anywhere]">
-              {sel.segments.map((s, i) => (
-                <li key={i}>{s}</li>
-              ))}
-            </ol>
-          </details>
+            </More>
+          </div>
         </>
       ) : null}
     </div>
   );
 }
 
-function RouteCard({ r, on, onSelect, title, subtitle }: { r: PlannedRoute; on: boolean; onSelect: () => void; title?: string; subtitle?: string }) {
+/** Who and what ground: the two things that change every route. */
+function Settings({ profile, onOpenMode, onConditions, weather }: Props & { weather: "dry" | "wet" | "ice" }) {
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <Button onClick={onOpenMode} aria-label={`Routes are for ${profile.label}. Change`} className="h-auto min-w-0 max-w-full px-4 py-2 text-left">
+        <SlidersHorizontal aria-hidden className="size-5 shrink-0" /> <span className="truncate">{profile.label}</span>
+      </Button>
+      <div role="radiogroup" aria-label="Ground" className="flex gap-0.5 rounded-full border border-line p-0.5">
+        {(["dry", "wet", "ice"] as const).map((k) => (
+          <button
+            key={k}
+            type="button"
+            role="radio"
+            aria-checked={weather === k}
+            onClick={() => onConditions(k)}
+            className={cn("min-h-12 min-w-12 rounded-full px-3 text-base", weather === k ? "bg-ink text-surface" : "text-ink")}
+          >
+            {k === "dry" ? "Dry" : k === "wet" ? "Wet" : "Icy"}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+const entranceName = (e: { name: string | null; verdict: { detail: string } }) => (e.name ? `${e.name} entrance` : `Entrance (${e.verdict.detail})`);
+
+/** A section you open when you want it. The summary row says what's inside, so a closed section still informs. */
+function More({ title, aside, icon, children }: { title: string; aside?: string; icon?: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <details className="group rounded-2xl border border-line">
+      <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4">
+        <span className="flex items-center gap-2 font-bold">
+          {icon}
+          {title}
+        </span>
+        <span className="flex items-center gap-2 text-sm text-muted">
+          {aside}
+          <ChevronDown aria-hidden className="size-5 shrink-0 transition-transform group-open:rotate-180" />
+        </span>
+      </summary>
+      <div className="grid gap-3 px-4 pb-4">{children}</div>
+    </details>
+  );
+}
+
+function PeopleSay({
+  notes,
+  all,
+  author,
+  onDelete,
+  onFlag,
+  title,
+  hint,
+  className,
+}: {
+  notes: UserNote[];
+  all: UserNote[];
+  author: string;
+  onDelete: (id: string) => void;
+  onFlag?: (id: string, reason: FlagReason) => Promise<boolean>;
+  title?: string;
+  hint?: string;
+  className?: string;
+}) {
+  if (!notes.length) return null;
+  return (
+    <div className={cn("grid gap-2", className)}>
+      {title ? <h3 className="m-0 text-base font-bold">{title}</h3> : null}
+      <p className="m-0 text-sm text-muted">{hint ?? "Their own experience, not checked by us."}</p>
+      <NoteList notes={notes} all={all} author={author} onDelete={onDelete} onFlag={onFlag} />
+    </div>
+  );
+}
+
+/** The chosen route, as a plain summary (not a control: other ways are under "Other ways"). */
+function RouteSummary({ r, title }: { r: PlannedRoute; title?: string }) {
   const s = r.summary;
   const extras = [
     s.rides.length ? s.rides.map((x) => `${x.line.replace(/ towards .*/, "")} to ${x.to}`).join(", then ") : null,
     s.movableBridges.length ? `${s.movableBridges.map((b) => b.name).join(", ")} (moving bridge)` : null,
-    s.lifts ? `${s.lifts} lift${s.lifts > 1 ? "s" : ""}` : null, s.steps ? `${s.steps} flight${s.steps > 1 ? "s" : ""} of steps` : null, (s.surfaceMix["setts"] ?? 0) > 20 ? `${s.surfaceMix["setts"]} m of setts` : null].filter(Boolean);
+    s.lifts ? `${s.lifts} lift${s.lifts > 1 ? "s" : ""}` : null,
+    s.steps ? `${s.steps} flight${s.steps > 1 ? "s" : ""} of steps` : null,
+    (s.surfaceMix["setts"] ?? 0) > 20 ? `${s.surfaceMix["setts"]} m of setts` : null,
+  ].filter(Boolean);
   return (
-    <button
-      type="button"
-      role="radio"
-      aria-checked={on}
-      onClick={onSelect}
-      className={cn("grid w-full gap-1 rounded-2xl border-2 p-4 text-left", on ? "border-accent bg-surface-2" : "border-line bg-surface hover:border-ink")}
-    >
-      <span className="flex items-baseline justify-between gap-3">
-        <span className="font-bold">{title ?? r.label}</span>
-        {r.minutesExtra > 0 ? <span className="tabular text-sm text-muted">+{r.minutesExtra} min</span> : null}
-      </span>
+    <div className="grid gap-0.5 rounded-2xl border-2 border-accent bg-surface-2 px-4 py-3">
+      <h3 className="m-0 flex flex-wrap items-baseline justify-between gap-x-3 text-base">
+        <span className="font-bold">{title ?? (r.label || "This way")}</span>
+        {r.minutesExtra > 0 ? <span className="tabular text-sm font-normal text-muted">+{r.minutesExtra} min</span> : null}
+      </h3>
       <span className="tabular font-mono text-[15px]">{meta(r)}</span>
-      {subtitle ? <span className="text-sm text-muted">{subtitle}</span> : null}
       {extras.length ? <span className="text-sm text-muted">{extras.join(" / ")}</span> : null}
       <span className="text-sm">
         <Verdict r={r} />
+      </span>
+    </div>
+  );
+}
+
+/** Another way there, one row: tap to make it the chosen route. */
+function RouteCard({ r, onSelect, title }: { r: PlannedRoute; onSelect: () => void; title?: string }) {
+  const s = r.summary;
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      className="flex min-h-12 w-full flex-wrap items-center justify-between gap-x-3 rounded-2xl border border-line bg-surface px-4 py-2 text-left hover:border-ink"
+    >
+      <span className="font-bold whitespace-nowrap">
+        <span className="sr-only">Switch to </span>
+        {title ?? r.label}
+      </span>
+      <span className="tabular text-sm text-muted">
+        {Math.round(s.minutes)} min{r.minutesExtra > 0 ? ` (+${r.minutesExtra})` : ""} / {s.verdict === "passable" ? "fits your limits" : `missing data for ${dist(s.unknownM)}`}
       </span>
     </button>
   );
@@ -408,8 +471,8 @@ function ShareButton({ to, minutes }: { to: string; minutes: number }) {
     }
   };
   return (
-    <Button size="lg" onClick={share} aria-live="polite">
-      {copied ? "Copied" : "Share arrival time"}
+    <Button onClick={share} aria-label={copied ? "Copied" : "Share your arrival time"}>
+      <Share2 aria-hidden className="size-5 shrink-0" /> <span aria-live="polite">{copied ? "Copied" : "Share"}</span>
     </Button>
   );
 }

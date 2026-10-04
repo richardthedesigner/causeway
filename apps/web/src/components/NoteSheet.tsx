@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Camera, Check, Frown, Meh, Smile } from "lucide-react";
-import { mobilityLabelFor, noteAttribution, NOTE_MAX_CHARS, NOTE_SENTIMENTS, noteProblem, type NoteSentiment, type NoteTarget, type UserNote } from "@causeway/graph";
+import { mobilityLabelFor, noteAttribution, NOTE_GROUNDS, NOTE_MAX_CHARS, NOTE_SENTIMENTS, noteProblem, type NoteGround, type NoteSentiment, type NoteTarget, type UserNote } from "@causeway/graph";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -15,21 +15,28 @@ export interface NoteAbout {
 }
 
 interface Props {
-  about: NoteAbout | null;
+  /** What the note can be about, most likely first. The first is chosen; "Change" offers the rest. Null when closed. */
+  choices: NoteAbout[] | null;
   onOpenChange: (v: boolean) => void;
   city: string;
   /** The profile preset id. Only its coarse label is ever offered, and only if the person switches it on. */
   preset: string;
   onSaved: (n: UserNote) => void;
+  /** Notes are shared with other people when sharing is on (D-030). */
+  sharing?: boolean;
 }
 
 const ICON = { good: Smile, mixed: Meh, bad: Frown } as const;
 
 /** Three taps plus typing: open, how was it, Save. A photo and how you get around are optional. */
-export function NoteSheet({ about, onOpenChange, city, preset, onSaved }: Props) {
+export function NoteSheet({ choices, onOpenChange, city, preset, onSaved, sharing }: Props) {
+  const [pick, setPick] = useState(0);
+  const [picking, setPicking] = useState(false);
+  const about = choices ? (choices[pick] ?? choices[0] ?? null) : null;
   const [sentiment, setSentiment] = useState<NoteSentiment | null>(null);
   const [text, setText] = useState("");
   const [shareMobility, setShareMobility] = useState(false);
+  const [ground, setGround] = useState<NoteGround | null>(null);
   const [photo, setPhoto] = useState<string | null>(null);
   const [done, setDone] = useState<"saved" | "failed" | null>(null);
   const label = mobilityLabelFor(preset);
@@ -39,6 +46,9 @@ export function NoteSheet({ about, onOpenChange, city, preset, onSaved }: Props)
       setSentiment(null);
       setText("");
       setShareMobility(false);
+      setGround(null);
+      setPick(0);
+      setPicking(false);
       setPhoto(null);
       setDone(null);
     }
@@ -61,6 +71,7 @@ export function NoteSheet({ about, onOpenChange, city, preset, onSaved }: Props)
       photo,
       at: new Date().toISOString(),
       mobility: shareMobility ? label : null,
+      ground,
     };
     const ok = saveNote(n);
     setDone(ok ? "saved" : "failed");
@@ -69,15 +80,17 @@ export function NoteSheet({ about, onOpenChange, city, preset, onSaved }: Props)
 
   const where = about?.target.name ?? "";
   return (
-    <Sheet open={about !== null} onOpenChange={reset}>
-      <SheetContent title="Add a note" description={about ? `About ${where}. Saved on this phone for now.` : undefined}>
+    <Sheet open={choices !== null} onOpenChange={reset}>
+      <SheetContent title="Add a note" description={sharing ? "Shared with other Causewayside users, with the date. You can delete it any time." : "Saved on this phone for now."}>
         {done === "saved" ? (
           <div className="grid gap-4" role="status">
             <p className="m-0 flex items-center gap-2 text-lg font-bold">
               <Check aria-hidden className="size-6 text-ok" /> Saved. Thank you.
             </p>
             <p className="m-0 text-muted">
-              It&apos;s kept on this phone and already shapes your own routes. When notes can be shared, others will see it from &ldquo;a Causewayside user&rdquo;, with the date.
+              {sharing
+                ? "It's shared now. Others see it from \u201ca Causewayside user\u201d, with the date. Photos are checked by a person before anyone else sees them."
+                : "It's kept on this phone and already shapes your own routes. When notes can be shared, others will see it from \u201ca Causewayside user\u201d, with the date."}
             </p>
             <Button variant="primary" size="lg" onClick={() => reset(false)}>
               Done
@@ -85,6 +98,40 @@ export function NoteSheet({ about, onOpenChange, city, preset, onSaved }: Props)
           </div>
         ) : (
           <div className="grid gap-5">
+            {picking && choices ? (
+              <fieldset className="m-0 border-0 p-0">
+                <legend className="mb-2 text-base font-bold">What&apos;s it about?</legend>
+                <div role="radiogroup" aria-label="What's it about?" className="grid gap-2">
+                  {choices.map((c, i) => (
+                    <button
+                      key={`${c.target.name}-${i}`}
+                      type="button"
+                      role="radio"
+                      aria-checked={i === pick}
+                      onClick={() => {
+                        setPick(i);
+                        setPicking(false);
+                      }}
+                      className={i === pick ? "min-h-12 rounded-2xl border border-ink bg-ink px-4 text-left text-surface" : "min-h-12 rounded-2xl border border-line px-4 text-left"}
+                    >
+                      {c.target.name}
+                      <span className="sr-only">{c.target.kind === "way" ? ", street" : ""}</span>
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
+            ) : (
+              <p className="m-0 flex flex-wrap items-center justify-between gap-2">
+                <span>
+                  About <span className="font-bold">{where}</span>
+                </span>
+                {choices && choices.length > 1 ? (
+                  <Button variant="ghost" onClick={() => setPicking(true)} aria-label={`Change what the note is about. Now: ${where}`}>
+                    Change
+                  </Button>
+                ) : null}
+              </p>
+            )}
             <fieldset className="m-0 border-0 p-0">
               <legend className="mb-2 text-base font-bold">How was it?</legend>
               <div role="radiogroup" aria-label="How was it?" className="grid grid-cols-3 gap-2">
@@ -129,6 +176,23 @@ export function NoteSheet({ about, onOpenChange, city, preset, onSaved }: Props)
                 {text.length} of {NOTE_MAX_CHARS}
               </span>
             </label>
+            <fieldset className="m-0 border-0 p-0">
+              <legend className="mb-2 text-base font-bold">Was the ground wet?</legend>
+              <div role="radiogroup" aria-label="Was the ground wet?" className="flex max-w-full flex-wrap gap-1 self-start rounded-[1.75rem] border border-line p-1">
+                {NOTE_GROUNDS.map((g) => (
+                  <button
+                    key={g.label}
+                    type="button"
+                    role="radio"
+                    aria-checked={ground === g.ground}
+                    onClick={() => setGround(g.ground)}
+                    className={ground === g.ground ? "min-h-12 rounded-full bg-ink px-4 text-surface" : "min-h-12 rounded-full px-4"}
+                  >
+                    {g.label}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
             <div className="grid gap-1">
               <label htmlFor="note-mobility" className="flex min-h-12 cursor-pointer items-center justify-between gap-4">
                 <span>Show how I get around</span>
@@ -140,7 +204,7 @@ export function NoteSheet({ about, onOpenChange, city, preset, onSaved }: Props)
             </div>
             <label className="flex min-h-12 cursor-pointer items-center gap-3">
               <Camera aria-hidden className="size-6" />
-              <span>{photo ? "Photo added" : "Add a photo (optional)"}</span>
+              <span>{photo ? "Photo added" : "Add a photo (optional)"}{sharing && !photo ? <span className="block text-sm text-muted">Checked by a person before anyone else sees it.</span> : null}</span>
               <input
                 id="note-photo"
                 type="file"

@@ -10,10 +10,13 @@ interface Props {
   onOpenChange: (v: boolean) => void;
   where: { lon: number; lat: number; accuracyM: number | null; label: string } | null;
   city: string;
+  /** Reports are sent for triage when sharing is on (D-030). */
+  sharing?: boolean;
+  onSaved?: () => void;
 }
 
 /** Two taps: what's wrong, then Save. A photo and a note are optional. */
-export function ReportSheet({ open, onOpenChange, where, city }: Props) {
+export function ReportSheet({ open, onOpenChange, where, city, sharing, onSaved }: Props) {
   const [kind, setKind] = useState<ReportKind | null>(null);
   const [note, setNote] = useState("");
   const [photo, setPhoto] = useState<string | null>(null);
@@ -33,17 +36,20 @@ export function ReportSheet({ open, onOpenChange, where, city }: Props) {
     if (!kind || !where) return;
     const ok = saveReport({ id: crypto.randomUUID(), kind, lon: where.lon, lat: where.lat, accuracyM: where.accuracyM, at: new Date().toISOString(), city, note: note.trim(), photo });
     setDone(ok ? "saved" : "failed");
+    if (ok) onSaved?.();
   };
 
   return (
     <Sheet open={open} onOpenChange={reset}>
-      <SheetContent title="Report a problem" description={where ? `At ${where.label}. Saved on this phone for now.` : "We need a location to save a report."}>
+      <SheetContent title="Report a problem" description={where ? `At ${where.label}. ${sharing ? "Sent to us to look into, never shown publicly." : "Saved on this phone for now."}` : "We need a location to save a report."}>
         {done === "saved" ? (
           <div className="grid gap-4" role="status">
             <p className="m-0 flex items-center gap-2 text-lg font-bold">
               <Check aria-hidden className="size-6 text-ok" /> Saved. Thank you.
             </p>
-            <p className="m-0 text-muted">It&apos;s kept on this phone. When reports can be shared, yours will help the next person on this street.</p>
+            <p className="m-0 text-muted">
+              {sharing ? "We'll look into it. It goes to us, not on the map, and never includes your settings." : "It's kept on this phone. When reports can be shared, yours will help the next person on this street."}
+            </p>
             <Button variant="primary" size="lg" onClick={() => reset(false)}>
               Done
             </Button>
