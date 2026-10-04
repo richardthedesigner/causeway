@@ -1,5 +1,5 @@
 "use client";
-import { ArrowUpDown, ChevronDown, CircleAlert, CircleCheck, CircleHelp, CircleX, DoorOpen, MapPin, MessageSquarePlus, Share2, Undo2 } from "lucide-react";
+import { ArrowUpDown, ChevronDown, CircleAlert, CircleCheck, CircleHelp, CircleX, DoorOpen, MapPin, MessageSquarePlus, Share2, Trees, Undo2 } from "lucide-react";
 import { entranceRef, notesForEntrance, notesForPlace, notesForStretch, type UserNote } from "@causeway/graph";
 import type { Profile } from "@causeway/profile";
 import { useState } from "react";
@@ -237,6 +237,12 @@ export function RoutePanel(props: Props) {
               <p className="m-0 flex items-start gap-1.5 text-sm">
                 <DoorOpen aria-hidden className="mt-0.5 size-4 shrink-0" />
                 Ends at {result.door.name ? `the ${result.door.name} entrance` : "an entrance"} that fits you ({result.door.detail}).
+              </p>
+            ) : null}
+            {result.gate ? (
+              <p className="m-0 flex items-start gap-1.5 text-sm">
+                <Trees aria-hidden className="mt-0.5 size-4 shrink-0" />
+                Ends at a gate into {result.gate.park}, the nearest on your way (OS Open Greenspace).
               </p>
             ) : null}
             {liveLine ? <p className={cn("m-0 text-sm", props.lifts.state === "failed" ? "text-caution" : "text-muted")}>{liveLine}</p> : null}

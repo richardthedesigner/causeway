@@ -21,6 +21,8 @@
     "build:bus": "tsx scripts/build-bus.ts",
     "build:footways": "tsx scripts/build-council-footways.ts",
     "build:floods": "tsx scripts/build-flood-areas.ts",
+    "build:greenspace": "tsx scripts/build-greenspace.ts",
+    "build:osm-notes": "tsx scripts/build-osm-notes.ts",
     "a11y": "node scripts/a11y-check.mjs",
     "e2e": "node scripts/e2e.mjs"
   },

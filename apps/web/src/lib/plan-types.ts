@@ -78,6 +78,8 @@ export type PlanResult =
       entrances: EntranceOption[];
       /** The entrance the route ends at, when one near a building fits this person; null means the building's centre. */
       door: { name: string | null; osmId: number; detail: string } | null;
+      /** A park: the route ends at one of its gates (DATA-08). */
+      gate?: { park: string } | null;
     }
   | {
       status: "none";
@@ -123,7 +125,7 @@ export interface FloodHere {
 }
 
 export type WorkerRequest =
-  | { type: "init"; graphUrl: string; networkUrl?: string; worksUrl?: string; busUrl?: string; footwaysUrl?: string; floodsUrl?: string; places: Place[] }
+  | { type: "init"; graphUrl: string; networkUrl?: string; worksUrl?: string; busUrl?: string; footwaysUrl?: string; floodsUrl?: string; greenspaceUrl?: string; osmNotesUrl?: string; places: Place[] }
   /** Environment Agency warnings in force (DATA-07). */
   | { type: "floods"; warnings: FloodWarning[]; fetchedAt: string }
   | { type: "works-live"; works: WorksObservation[]; fetchedAt: string }

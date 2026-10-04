@@ -14,3 +14,7 @@ for (const n of ["newcastle-gateshead", "london-jubilee"]) copyFileSync(`../../d
 for (const n of ["edinburgh-central", "newcastle-gateshead", "london-jubilee"]) copyFileSync(`../../data/transit/${n}/bus.json`, `public/graph/${n}-bus.json`);
 copyFileSync("../../data/council/edinburgh-central.footways.json", "public/graph/edinburgh-central-footways.json");
 for (const n of ["newcastle-gateshead", "london-jubilee"]) copyFileSync(`../../data/live/${n}.flood-areas.json`, `public/live/${n}.flood-areas.json`);
+for (const n of ["edinburgh-central", "newcastle-gateshead", "london-jubilee"]) {
+  copyFileSync(`../../data/places/${n}.greenspace.json`, `public/places/${n}.greenspace.json`);
+  copyFileSync(`../../data/places/${n}.osm-notes.json`, `public/places/${n}.osm-notes.json`);
+}

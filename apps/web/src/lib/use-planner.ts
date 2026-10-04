@@ -109,7 +109,7 @@ export function usePlanner(city: City) {
       }
     };
     const url = (f: string) => new URL(process.env.NEXT_PUBLIC_GRAPH_B64 && f.endsWith(".gz") ? f.replace(".json.gz", ".b64.txt") : f, document.baseURI).toString();
-    w.postMessage({ type: "init", graphUrl: url(city.graph), networkUrl: city.network ? url(city.network) : undefined, worksUrl: city.works ? url(city.works) : undefined, busUrl: city.bus ? url(city.bus) : undefined, footwaysUrl: city.footways ? url(city.footways) : undefined, floodsUrl: city.floods ? url(city.floods) : undefined, places: city.places } satisfies WorkerRequest);
+    w.postMessage({ type: "init", graphUrl: url(city.graph), networkUrl: city.network ? url(city.network) : undefined, worksUrl: city.works ? url(city.works) : undefined, busUrl: city.bus ? url(city.bus) : undefined, footwaysUrl: city.footways ? url(city.footways) : undefined, floodsUrl: city.floods ? url(city.floods) : undefined, greenspaceUrl: city.greenspace ? url(city.greenspace) : undefined, osmNotesUrl: city.osmNotes ? url(city.osmNotes) : undefined, places: city.places } satisfies WorkerRequest);
     return () => {
       clearInterval(timer);
       clearInterval(floodTimer);

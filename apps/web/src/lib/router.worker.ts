@@ -26,6 +26,8 @@ import {
   type Route,
 } from "@causeway/router";
 import type { Check, Place, PlannedRoute, PlanResult, RouteStrip, WorkerRequest, WorkerResponse } from "./plan-types";
+import { parkGates, type GreenspaceFile } from "./greenspace";
+import { osmNotesNear, type OsmNotesFile } from "./osm-notes";
 
 declare const self: DedicatedWorkerGlobalScope;
 let router: Router | null = null;
@@ -33,6 +35,10 @@ let graph: Graph | null = null;
 let network: TransitNetwork | null = null;
 /** Environment Agency flood areas over this city's paths (DATA-07). */
 let floodAreas: FloodAreas | null = null;
+/** Park gates from OS Open Greenspace (DATA-08). */
+let greenspace: GreenspaceFile | null = null;
+/** Open OpenStreetMap notes about the ground (DATA-08). */
+let osmNotes: OsmNotesFile | null = null;
 /** Works from the area's built file and from live feeds, kept apart so a refresh replaces only its own. */
 let fileWorks: { works: WorksObservation[]; source: string; builtAt: string } | null = null;
 let liveWorks: { works: WorksObservation[]; fetchedAt: string } | null = null;
@@ -60,7 +66,7 @@ function applyWorks() {
 
 const post = (m: WorkerResponse) => self.postMessage(m);
 
-async function load(url: string, networkUrl: string | undefined, worksUrl: string | undefined, busUrl: string | undefined, footwaysUrl: string | undefined, floodsUrl: string | undefined, demo: Place[]) {
+async function load(url: string, networkUrl: string | undefined, worksUrl: string | undefined, busUrl: string | undefined, footwaysUrl: string | undefined, floodsUrl: string | undefined, greenspaceUrl: string | undefined, osmNotesUrl: string | undefined, demo: Place[]) {
   const res = await fetch(url);
   if (!res.ok || !res.body) throw new Error(`graph: HTTP ${res.status}`);
   // Hosts that won't serve .gz get the same bytes as base64 text (the private preview build).
@@ -83,6 +89,22 @@ async function load(url: string, networkUrl: string | undefined, worksUrl: strin
       applyCouncilFootways(graph, (await (await fetch(footwaysUrl)).json()) as CouncilFootways);
     } catch {
       /* the layer is a bonus */
+    }
+  }
+  osmNotes = null;
+  if (osmNotesUrl) {
+    try {
+      osmNotes = (await (await fetch(osmNotesUrl)).json()) as OsmNotesFile;
+    } catch {
+      /* no notes: nothing extra to say */
+    }
+  }
+  greenspace = null;
+  if (greenspaceUrl) {
+    try {
+      greenspace = (await (await fetch(greenspaceUrl)).json()) as GreenspaceFile;
+    } catch {
+      /* no gates: parks end at their middle, as before */
     }
   }
   floodAreas = null;
@@ -310,6 +332,19 @@ function plan(req: Extract<WorkerRequest, { type: "plan" }>): PlanResult {
       door = { name: fits.name, osmId: fits.osmId, detail: fits.verdict.detail };
     }
   }
+  // A park: end at the gate nearest the way you're coming (DATA-08), if one can be reached.
+  let gate: { park: string } | null = null;
+  if (!alts.length) {
+    for (const g of parkGates(greenspace, req.to, req.from)) {
+      const bg = router.snap(g.lon, g.lat, p, c);
+      alts = router.alternatives(a, bg, p, c, 3);
+      if (alts.length) {
+        b = bg;
+        gate = { park: g.park };
+        break;
+      }
+    }
+  }
   if (!alts.length) alts = router.alternatives(a, b, p, c, 3);
   if (!alts.length) {
     const bw = router.snap(req.to.lon, req.to.lat, PRESETS.walking, c);
@@ -364,11 +399,13 @@ function plan(req: Extract<WorkerRequest, { type: "plan" }>): PlanResult {
     status: "ok",
     routes,
     headline: ex.headline,
-    notes: ex.notes,
+    // OpenStreetMap notes near the best route: shown, never used to route (DATA-08).
+    notes: [...ex.notes, ...osmNotesNear(osmNotes, routes[0]?.coords ?? [])],
     avoided: ex.avoided.slice(0, 4).map((x) => ({ name: x.name, detail: x.reason.detail })),
     tradeoffs: tos,
     entrances,
     door,
+    gate,
   };
 }
 
@@ -406,7 +443,7 @@ function fits(req: Extract<WorkerRequest, { type: "fits" }>): { key: string; min
 self.onmessage = async (ev: MessageEvent<WorkerRequest>) => {
   const m = ev.data;
   try {
-    if (m.type === "init") await load(m.graphUrl, m.networkUrl, m.worksUrl, m.busUrl, m.footwaysUrl, m.floodsUrl, m.places);
+    if (m.type === "init") await load(m.graphUrl, m.networkUrl, m.worksUrl, m.busUrl, m.footwaysUrl, m.floodsUrl, m.greenspaceUrl, m.osmNotesUrl, m.places);
     else if (m.type === "floods") {
       if (!graph || !floodAreas) return;
       // Each refresh replaces the last: a lifted warning lifts here too.
