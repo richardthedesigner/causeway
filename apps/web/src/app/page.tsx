@@ -1,6 +1,6 @@
 "use client";
 import { learnPace, type Profile } from "@causeway/profile";
-import { conditionsFromOpenMeteo, openMeteoUrl } from "@causeway/live";
+import { conditionsFromOpenMeteo, forecastConditions, openMeteoUrl } from "@causeway/live";
 import { haversine } from "@causeway/graph";
 import { ChevronLeft } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -27,11 +27,11 @@ import { useNotes } from "@/lib/use-notes";
 import { hoursText } from "@/lib/opening-hours";
 import { toiletsAlong } from "@/lib/toilets";
 import { usePlaces } from "@/lib/use-places";
-import { usePlanner, type Conditions } from "@/lib/use-planner";
+import { departure, usePlanner, type Conditions } from "@/lib/use-planner";
 
-/** When you'd reach a point this far along the route, leaving now at the route's average pace. */
-const passingAt = (r: PlannedRoute) => {
-  const t0 = Date.now(),
+/** When you'd reach a point this far along the route, at the route's average pace. */
+const passingAt = (r: PlannedRoute, leave: Date) => {
+  const t0 = leave.getTime(),
     mps = r.summary.distanceM / Math.max(60, r.summary.minutes * 60);
   return (m: number) => new Date(t0 + (m / mps) * 1000);
 };
@@ -81,7 +81,10 @@ export default function Home() {
   const [to, setTo] = useState<Place | null>(null);
   const [view, setView] = useState<View>("home");
   const [selected, setSelected] = useState<string | null>(null);
-  const [conditions, setConditions] = useState<Conditions>({ ...PRESET_CONDITIONS.dry, summary: "Checking the weather", source: "Open-Meteo" });
+  const [ground0, setConditions] = useState<Conditions>({ ...PRESET_CONDITIONS.dry, summary: "Checking the weather", source: "Open-Meteo" });
+  // Leaving later: everything time-dependent follows it (D-040).
+  const [leaveAt, setLeaveAt] = useState<Date | null>(null);
+  const conditions = useMemo(() => ({ ...ground0, leaveAt }), [ground0, leaveAt]);
   const [showSlopes, setShowSlopes] = useState(false);
   const [snap, setSnap] = useState<number | string | null>(SNAP.half);
   const [geoError, setGeoError] = useState<string | null>(null);
@@ -142,12 +145,13 @@ export default function Home() {
     fetch(openMeteoUrl(...city.weatherAt), { signal: ctl.signal })
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
       .then((j) => {
-        const c = conditionsFromOpenMeteo(j);
-        setConditions({ wet: c.wet, ice: c.ice, summary: c.summary, source: `From Open-Meteo at ${c.observedAt.slice(11, 16)} UTC` });
+        const later = leaveAt && leaveAt.getTime() > Date.now() + 45 * 60_000;
+        const c = later ? forecastConditions(j, leaveAt) : conditionsFromOpenMeteo(j);
+        setConditions({ wet: c.wet, ice: c.ice, summary: c.summary, source: later ? "From the Open-Meteo forecast" : `From Open-Meteo at ${c.observedAt.slice(11, 16)} UTC` });
       })
       .catch(() => setConditions({ ...PRESET_CONDITIONS.dry, summary: "Couldn't check the weather, so we're assuming dry", source: "Change it if the ground is wet or icy" }));
     return () => ctl.abort();
-  }, [city]);
+  }, [city, leaveAt]);
 
   const changeDevices = useCallback((f: (s: DeviceState) => DeviceState) => {
     setDevices((s) => {
@@ -251,7 +255,7 @@ export default function Home() {
     return typeof document === "undefined" ? null : { url: u(city.basemap), key: city.id, glyphs: u("fonts/glyphs.json"), center: [city.start.lon, city.start.lat] as [number, number] };
   }, [city]); // eslint-disable-line react-hooks/exhaustive-deps
   const selectedRoute = routes.find((r) => r.id === selected) ?? routes[0] ?? null;
-  const toilets = useMemo(() => (index && selectedRoute && view === "route" ? toiletsAlong(index, selectedRoute.coords, 80, passingAt(selectedRoute)) : null), [index, selectedRoute, view]);
+  const toilets = useMemo(() => (index && selectedRoute && view === "route" ? toiletsAlong(index, selectedRoute.coords, 80, passingAt(selectedRoute, departure(conditions))) : null), [index, selectedRoute, view, conditions]);
   const entrances = useMemo(() => (result?.status === "ok" ? result.entrances.map((e) => ({ lon: e.lon, lat: e.lat, ok: e.verdict.passable })) : []), [result]);
 
   const profileChip = (
@@ -394,6 +398,8 @@ export default function Home() {
             onBuses={(v) => updateProfile({ ...profile, buses: v })}
             toiletEvery={profile.maxToiletIntervalM}
             onToilets={() => setModeOpen(true)}
+            leaveAt={leaveAt}
+            onLeave={setLeaveAt}
           />
         </div>
       ) : view === "from" ? (

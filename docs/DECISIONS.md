@@ -361,3 +361,15 @@ The visual-impairment preset sets 60 s per 100 m; anyone can turn it on with "Af
 **Honesty.** Anything we can't read fully (months, sunrise, comments, "open end") shows the hours as mapped, never a guess. We don't know bank holidays, so a rule for them adds "(may differ on bank holidays)". Hours are volunteer-mapped and can be stale; the line says they're from OpenStreetMap.
 
 **Later.** With a departure time (not built yet), "when you arrive" should use it.
+
+## D-040 Leaving later
+
+**Decided.** 2026-10-04. Routes assumed you leave now. Bus waits, the after-dark check (D-038), opening hours (D-039), works and lift closures all depend on the time, so planning tonight's trip in the afternoon gave the afternoon's answer.
+
+**What we do.** A "Leaving" row in This trip: Now, In 30 min, In 1 hour, or At a time (the next time the clock reads it, so 08:30 in the evening means tomorrow). The chosen time becomes the router's clock (`Conditions.now`), so everything time-dependent follows it.
+- **Weather:** more than 45 minutes ahead, the ground comes from Open-Meteo's hourly forecast (same request, now asking 48 hours ahead), using the same rules as now over the hours before you leave. It says "Forecast wet at 19:30". Beyond the forecast, it falls back to now. Setting the ground by hand still wins until the time changes.
+- **Route panel:** "Leaving 18:30, arriving about 18:52", and opening hours for that arrival.
+- **Toilets:** open or shut when you'd pass, from the leaving time.
+- **Live bus times** are hidden when leaving later: they're for now. The timetable frequency is for the leaving time.
+
+**Not stored.** The leaving time lasts for the visit; it isn't saved, so a stale "tomorrow 08:30" can't surprise anyone next week. A time that has passed counts as now.
