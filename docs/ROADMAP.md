@@ -31,11 +31,11 @@ Keep rows to one line. Detail goes in an issue, a plan or the Notes column.
 
 The next five things to pick up, in order. Each points to its row below.
 
-1. **FEAT-01**: battery range per device. Finish PR #26, then the range field in the device editor.
-2. **SEC-05**: pin GitHub Actions to commit SHAs, least permissions per workflow. Dependabot (UPD-01) now keeps pins current.
-3. **SEC-04**: `SECURITY.md`, how to report a vulnerability.
-4. **STAB-03**: version the on-device stores and migrate old data.
-5. **DEP-05**: service worker update prompt.
+1. **SEC-12**: check the security headers are live on production.
+2. **SEC-06**: `pnpm audit` in CI, failing on high severity.
+3. **STAB-05**: timeouts and fallbacks for every live adapter.
+4. **SEC-09**: check nothing on the device leaks the profile.
+5. **STAB-10**: end-to-end journeys for the device switcher, notes and Leaving later.
 
 ## Big features
 
@@ -56,7 +56,7 @@ The next five things to pick up, in order. Each points to its row below.
 
 | ID | Task | Size | Priority | Status | Who | Notes |
 |---|---|---|---|---|---|---|
-| FEAT-01 | Battery range per device (`maxRangeKm`), with a warning on long routes | M | now | doing | Claude | Routing and warning text in PR #26 (draft, its D-039 needs renumbering after D-039 and D-040 landed). The range field in the device editor is still to do |
+| FEAT-01 | Battery range per device (`maxRangeKm`), with a warning on long routes | M | now | done (2026-10-04) | Claude | D-043. PR #26 merged into this branch, then "Warn me about battery range" in the device editor for powered chairs and scooters. PR #26 can be closed |
 | FEAT-02 | Separate road and pavement speeds for road scooters | M | next | todo | Claude | DEVICES.md follow-ups. Only if pace learning shows it matters |
 | FEAT-03 | Live bus and tram departures in Edinburgh and Newcastle | M | next | blocked | Richard, Claude | #8. Waits on API keys (HUM-01) |
 | FEAT-04 | "Report what's there" from "What we don't know" on a route | M | next | todo | Claude | UX_ASSESSMENT open finding |
@@ -117,7 +117,7 @@ Today there are no accounts: profiles and devices stay on the phone (D-009), and
 | DEP-02 | Preview deploy for every pull request, linked on the PR | S | next | todo | Richard, Claude | Vercel's Git integration may already do this. Confirm |
 | DEP-03 | A custom domain | S | later | blocked | Richard | Needs a name and payment |
 | DEP-04 | Release notes and version numbers users can see | S | later | todo | Claude | Build log is internal |
-| DEP-05 | Service worker update prompt, so people aren't stuck on an old build | S | now | todo | Claude | D-023 offline cache |
+| DEP-05 | Service worker update prompt, so people aren't stuck on an old build | S | now | done (2026-10-04) | Claude | D-045. `UpdatePrompt`: Reload or Later, never during navigation |
 | DEP-06 | Graph builds on a worker (Fly.io or Cloud Run), not a laptop | M | later | todo | Richard, Claude | D-010, "reconsider at Phase 3" |
 | DEP-07 | Privacy-safe error reporting (no locations, no profile) | M | next | todo | Richard, Claude | Choose a tool, decide what's sent, write it in DECISIONS |
 | DEP-08 | Production Supabase set up and checked against BACKEND.md | S | next | todo | Richard | Confirm it's live, migrations 0001 to 0005 applied |
@@ -130,14 +130,14 @@ Today there are no accounts: profiles and devices stay on the phone (D-009), and
 | SEC-01 | Security headers and a Content Security Policy (`vercel.json`, since a static export can't set them) | S | now | done (2026-10-04) | Claude | D-041. `apps/web/vercel.json`. The a11y and e2e checks serve the build with the same headers, so a CSP that breaks the app fails CI |
 | SEC-02 | Cloudflare Turnstile on anonymous sign-up | S | next | blocked | Richard | D-030. Before any publicity |
 | SEC-03 | Data protection impact assessment (DPIA) | M | next | blocked | Richard | D-030. Before wider launch |
-| SEC-04 | `SECURITY.md`: how to report a vulnerability | S | now | todo | Claude | |
-| SEC-05 | Pin GitHub Actions to commit SHAs and give each workflow the least permissions it needs | S | now | todo | Claude | |
-| SEC-06 | `pnpm audit` in CI, failing on high severity | S | next | todo | Claude | |
+| SEC-04 | `SECURITY.md`: how to report a vulnerability | S | now | done (2026-10-04) | Claude | `SECURITY.md`. GitHub private reporting has to be turned on (HUM-06) |
+| SEC-05 | Pin GitHub Actions to commit SHAs and give each workflow the least permissions it needs | S | now | done (2026-10-04) | Claude | Pinned to the latest release in each major, version in a comment. CI has `contents: read` and drops the checkout token |
+| SEC-06 | `pnpm audit` in CI, failing on high severity | S | now | todo | Claude | |
 | SEC-07 | Review row-level security and storage bucket rules against the threat model | M | next | todo | Claude | `db/migrations`, `scripts/test-db.sh` |
 | SEC-08 | Harden `/review`: sign-in rate limits, session length, audit of who can see what | S | later | todo | Claude | |
-| SEC-09 | Check nothing on the device leaks the profile (logs, URLs, error messages, analytics) | S | next | todo | Claude | D-009 |
+| SEC-09 | Check nothing on the device leaks the profile (logs, URLs, error messages, analytics) | S | now | todo | Claude | D-009 |
 | SEC-11 | Drop `'unsafe-inline'` from the CSP's `script-src`: hashes for Next's inline scripts at build time | S | later | todo | Claude | D-041. A static export's inline scripts change every build, so `vercel.json` can't list them by hand |
-| SEC-12 | Check the headers are live on production (`curl -I`) and score them on securityheaders.com | S | next | todo | Claude | D-041. Assumes the Vercel project's root directory is `apps/web` (it detects Next.js, so it must be) |
+| SEC-12 | Check the headers are live on production (`curl -I`) and score them on securityheaders.com | S | now | todo | Claude | D-041. Assumes the Vercel project's root directory is `apps/web` (it detects Next.js, so it must be) |
 | SEC-10 | Name the weekly reviewer for flags, photos and reports | S | next | blocked | Richard | BACKEND.md |
 
 ## Stability and testing
@@ -146,13 +146,14 @@ Today there are no accounts: profiles and devices stay on the phone (D-009), and
 |---|---|---|---|---|---|---|
 | STAB-01 | End-to-end test in the built app: search, route, start, end | M | now | done (2026-10-04) | Claude | `pnpm e2e` (`scripts/e2e.mjs`), in CI. One journey per city. Found and fixed STAB-09 on its first run |
 | STAB-02 | Screenshot tests for the main screens, light and dark, 320 px and 200% text | M | next | todo | Claude | Replaces hand-checked screenshots |
-| STAB-03 | Version the on-device stores (devices, notes, recents) and migrate old data | S | now | todo | Claude | A bad migration loses someone's devices |
+| STAB-03 | Version the on-device stores (devices, notes, recents) and migrate old data | S | now | done (2026-10-04) | Claude | D-044. `lib/stored.ts` for devices, notes and reports: version in the key, old keys never rewritten, anything unreadable backed up |
 | STAB-04 | Router fuzz test: many random start and end points per city, no crashes, no impossible routes | M | next | todo | Claude | |
-| STAB-05 | Timeouts and fallbacks for every live adapter | S | next | todo | Claude | `packages/live` |
+| STAB-05 | Timeouts and fallbacks for every live adapter | S | now | todo | Claude | `packages/live` |
 | STAB-06 | Data refresh guard: fail the weekly PR if counts drop by more than a set amount | S | next | todo | Claude | D-033 |
 | STAB-07 | Routing worker recovers if it crashes, and says so | S | later | todo | Claude | `router.worker.ts` |
 | STAB-09 | A city opened from last time started from Edinburgh's Causewayside, 537 km away | S | now | done (2026-10-04) | Claude | Found by STAB-01. `page.tsx` now sets the saved city's start too |
-| STAB-10 | End-to-end journeys for the device switcher, notes and Leaving later | S | next | todo | Claude | Extend `scripts/e2e.mjs` |
+| STAB-10 | End-to-end journeys for the device switcher, notes and Leaving later | S | now | todo | Claude | Extend `scripts/e2e.mjs` |
+| STAB-11 | The device editor's header fills a 320 by 640 screen at 200% text, so the settings are below the fold | S | next | todo | Claude | Found checking FEAT-01. Shrink or scroll the header with the content |
 | STAB-08 | Offline test: load a city, cut the network, route | S | later | todo | Claude | D-023 |
 
 ## Speed
@@ -173,6 +174,7 @@ Today there are no accounts: profiles and devices stay on the phone (D-009), and
 | BLOAT-01 | Move the four `step2-*.png` screenshots out of the repo root | S | now | done (2026-10-04) | Claude | Now in `docs/ux/devices/`, linked from DEVICES.md. Moving doesn't shrink `.git` (BLOAT-05) |
 | BLOAT-02 | Unused files, exports and dependencies (run `knip`) | S | next | todo | Claude | |
 | BLOAT-03 | Split `page.tsx` (608 lines) and `RoutePanel.tsx` (592 lines) | M | next | todo | Claude | |
+| BLOAT-07 | Fold `docs/OPEN_ITEMS.md` into this roadmap, or make one link to the other | S | next | todo | Claude | Both list what's waiting on Richard. Two lists drift |
 | BLOAT-04 | Retire superseded scripts (Phase 0 `build-snapshot`, `build-edinburgh`, `spike-edinburgh`) if `build-area` covers them | S | later | todo | Claude | Keep the acceptance snapshot working |
 | BLOAT-05 | Keep the 18 MB base map out of git history (release assets or LFS) | M | later | todo | Richard, Claude | `.git` is 52 MB and grows with every refresh |
 | BLOAT-06 | Archive old UX screenshots in `docs/ux` that no doc links to | S | later | todo | Claude | |
@@ -218,12 +220,14 @@ Decisions and accounts only Richard can give. Each one unblocks rows above.
 | HUM-02 | Venue access tags at public launch | S | next | todo | Richard | #11 |
 | HUM-03 | Scotland's roadworks register (SRWR) request | S | later | todo | Richard | #10. Unblocks DATA-07 |
 | HUM-04 | Nexus lift status | S | later | todo | Richard | #13. Unblocks DATA-06 |
+| HUM-06 | Turn on private vulnerability reporting (Settings, then Code security) | S | next | todo | Richard | `SECURITY.md` points people to it |
 | HUM-05 | Apple and Google developer accounts | S | next | todo | Richard | Unblocks BIG-01 |
 
 ## Log
 
 Newest first. One line per change: date, ID, what happened, link.
 
+- 2026-10-04: FEAT-01, SEC-05, SEC-04, STAB-03 and DEP-05 done (branch `claude/clever-fermat-ij543q`, PR #33). PR #26 merged into the branch; battery range is now D-043. Added STAB-11, BLOAT-07, HUM-06. Now promoted SEC-12, SEC-06, STAB-05, SEC-09, STAB-10.
 - 2026-10-04: BLOAT-01, SEC-01, UPD-01, STAB-01 and DEP-09 done (branch `claude/clever-fermat-ij543q`). STAB-01's first run found STAB-09, fixed. FEAT-01 is in PR #26. Added SEC-11, SEC-12, STAB-10. Now promoted SEC-05, SEC-04, STAB-03, DEP-05.
 - 2026-10-04: DEP-09 added after Vercel refused a preview for hitting the daily deployment limit.
 - 2026-10-04: Roadmap created from the build log, decisions, plans and open issues.

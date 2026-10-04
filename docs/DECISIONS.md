@@ -399,4 +399,19 @@ When there is nothing to compare with, it builds. Once DEP-01 makes `main` the p
 - Battery use is the route's distance on wheels plus each metre climbed counted as 30 m of flat (`CLIMB_FLAT_EQUIVALENT_M`, from a rolling resistance of about 0.03). Train and bus legs don't count. The figure is a starting point; user testing replaces it.
 - Warn only. Over half the range: "you may need to charge before the way back". Over the whole range: "it may not fit on one charge". Both say "about" and "counting the climbs". The router never changes or refuses a route because of range.
 - Rejected: range as a hard limit (a wrong figure would block routes the device can do), and favouring shorter routes near the limit (hard to explain why a route was picked).
-- Still to build: a range field in the device editor.
+- **In the editor** (FEAT-01): powered chairs and scooters get "Warn me about battery range" in Your limits. It is off by default, 15 km when first turned on, and 3 to 60 km. The range is the person's own figure, not a limit the type sets, so it carries over to another powered type and on "Reset", and goes for a type with no battery.
+
+## D-044 What's on the phone can't be lost to a change of shape
+
+**Decided.** 2026-10-04 (STAB-03). Devices, notes and reports live only in the browser's storage (D-009). A bad migration, or an older build still cached by the service worker, could wipe someone's devices with one save.
+
+**What we do** (`apps/web/src/lib/stored.ts`):
+- **The version is in the key** (`causewayside.devices.v1`). A new shape gets a new key and reads the old one once. Old keys are read, never rewritten or deleted, so an older build keeps working and going back a version loses nothing. The single profile from before devices is read this way.
+- **Nothing unreadable is overwritten.** Bad JSON, a reader that throws, or items a reader has to drop (such as a device type from a newer build) are copied to `<key>.backup` before the next save. It can be recovered by hand.
+- Rejected: a version number inside the stored value, because older builds would read the new shape as empty and save over it.
+
+## D-045 Saying when a new version is ready
+
+**Decided.** 2026-10-04 (DEP-05). The service worker (D-023) takes over as soon as a new build is installed, but a page that's already open keeps running the old code until it's reloaded. People keep a map open for days.
+
+**What we do.** The app looks for a new version when it comes back to the front and every hour. When one takes over, a card says "A new version of Causewayside is ready" with **Reload** and **Later**. It never reloads by itself, and waits while navigating, since a reload mid-journey would drop the route. It is rendered outside `<main>`, which the bottom sheet hides from screen readers.

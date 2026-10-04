@@ -13,7 +13,7 @@ Last updated: 2026-10-04.
 | Decide whether to show OpenStreetMap access tags for named venues at public launch | Saying a named business is or isn't accessible carries reputational and legal risk | A decision | [#11](https://github.com/richardthedesigner/causeway/issues/11) |
 | Apply for the live Street Manager feed, and access to Scotland's roadworks register | Edinburgh has no roadworks data at all; England's is a month old | An application each | [#10](https://github.com/richardthedesigner/causeway/issues/10) |
 | Ask Nexus for Tyne and Wear Metro lift status | Without it, Metro stations reached by lift are always "unknown" for step-free users | An email | [#13](https://github.com/richardthedesigner/causeway/issues/13) |
-| Say what to do with the stray screenshots at the repo root (`step2-*.png`, from another session) | Clutter; move to `docs/ux/` or delete | A word | |
+| Turn on private vulnerability reporting: Settings, then Code security | `SECURITY.md` sends people there; until it's on they have nowhere private to report | 1 minute | [ROADMAP](ROADMAP.md) HUM-06 |
 
 ## Blocked outside the project
 
@@ -44,4 +44,4 @@ Not now, on purpose: a phone app, whole cities, a reports backend, app accounts.
 
 ## Done
 
-Nothing settled yet. Move items here with the date.
+- 2026-10-04: the stray `step2-*.png` screenshots moved to `docs/ux/devices/` (ROADMAP BLOAT-01).

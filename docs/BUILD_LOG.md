@@ -2,6 +2,23 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
+## 2026-10-04 (night)
+
+The roadmap's next five.
+
+**Battery range in the device editor** (D-043, FEAT-01)
+- Powered chairs and scooters: "Warn me about battery range", 3 to 60 km. The route warns when a trip uses over half of it.
+
+**Nothing on the phone lost to a change of shape** (D-044, STAB-03)
+- Devices, notes and reports read through `lib/stored.ts`. Old keys are never rewritten; anything unreadable is backed up first.
+
+**A new version is ready** (D-045, DEP-05)
+- A card with Reload and Later when a new build takes over an open page. Never mid-journey.
+
+**Security housekeeping** (SEC-04, SEC-05)
+- `SECURITY.md`: report vulnerabilities privately.
+- GitHub Actions pinned to commit SHAs; CI can only read the code.
+
 ## 2026-10-04 (late evening)
 
 From the roadmap's Now list.
