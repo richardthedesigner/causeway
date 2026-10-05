@@ -140,7 +140,7 @@ const ANY: SurfaceTolerance = {
  * 0 to 6 mm; distance without a rest 50 m for walking stick and cane users,
  * 100 m for people with a mobility impairment and no stick). Gradients stay
  * more permissive than guidance where real users routinely exceed it. The
- * manual wheelchair's kerb and the rest distances follow it (D-013, D-052);
+ * manual wheelchair's kerb and the rest distances follow it (D-013, D-053);
  * the rollator keeps 300 m, as it has a seat. Phase 2 user testing replaces
  * these with research.
  */
@@ -172,7 +172,7 @@ export const PRESETS: Record<MobilityPreset, Profile> = {
     maxInclineDownPct: 8,
     comfortInclinePct: 4,
     maxCrossSlopePct: 4,
-    // Inclusive Mobility 2021 (DfT, OGL): dropped kerbs flush with the road, 6 mm at most (D-052).
+    // Inclusive Mobility 2021 (DfT, OGL): dropped kerbs flush with the road, 6 mm at most (D-053).
     maxKerbCm: 0.6,
     minWidthM: 0.9,
     maxSteps: 0,

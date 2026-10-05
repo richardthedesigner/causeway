@@ -1,5 +1,5 @@
 /**
- * The speed budget (docs/plans/PERF_BASELINE.md, D-054). Fails when:
+ * The speed budget (docs/plans/PERF_BASELINE.md, D-055). Fails when:
  * - the data a city downloads beside its graph, search index, buses and base
  *   map (council layer, park gates, notes, toilets, floods, works) comes to
  *   more than 400 KB compressed;
@@ -12,7 +12,7 @@
  *   and otherwise prints the figure;
  * - route plus trade-offs for the presets with a rest interval (REST_PRESETS),
  *   which plan with "More benches" searches that `alternatives` never makes,
- *   is more than 10% above its own stored baseline, on the same terms (D-053).
+ *   is more than 10% above its own stored baseline, on the same terms (D-054).
  */
 import { beforeAll, describe, expect, it } from "vitest";
 import { AREAS, EXTRA_BUDGET_BYTES, ROUTE_BUDGET, calibrate, extraBytes, loadAll, measureAll, measurePlans, readBaseline, type LoadedCity, type Measurement } from "./perf.js";

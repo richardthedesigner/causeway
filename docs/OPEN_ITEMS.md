@@ -38,14 +38,14 @@ These numbers shape routes but are our estimates, not evidence.
 | Battery use: each metre climbed counted as 30 m of flat, and the demo Cherry's 12 km range | [D-043](DECISIONS.md#d-043-battery-range-is-a-warning-set-by-the-user) |
 | In ice, how much an ungritted pavement costs: 100% more time on wheels, 50% on foot | [D-047](DECISIONS.md#d-047-ice-gritting-and-floods) |
 | Rest distances from Inclusive Mobility (50 m with a stick or crutches, 100 m with fatigue): right for real people, given how few benches are mapped? | [D-013](DECISIONS.md#d-013-unknown-risk-weights-and-preset-thresholds-are-placeholders) |
-| A manual wheelchair held to 6 mm kerbs, with every unmeasured dropped kerb taken as 6 mm: right for real chairs and real kerbs? | [D-052](DECISIONS.md#d-052-presets-on-inclusive-mobility-values-kerbs-credit-and-more-benches) |
+| A manual wheelchair held to 6 mm kerbs, with every unmeasured dropped kerb taken as 6 mm: right for real chairs and real kerbs? | [D-053](DECISIONS.md#d-053-presets-on-inclusive-mobility-values-kerbs-credit-and-more-benches) |
 | Screen reader and switch-access testing: axe only catches about a third of WCAG issues | [BUILD_LOG](BUILD_LOG.md) |
 
 ## Known gaps
 
 - Opening hours don't know bank holidays; the app says "may differ on bank holidays" ([D-039](DECISIONS.md#d-039-open-when-you-get-there)).
 - Weather beyond 48 hours ahead falls back to today's ([D-040](DECISIONS.md#d-040-leaving-later)).
-- The speed budget's timing checks hold 10% off CI. On a busy machine they can fail when nothing changed; run the test again before looking for a cause. A data refresh that rebuilds a graph can trip the settled-node check: re-baseline on purpose ([D-054](DECISIONS.md#d-054-a-speed-budget-the-tests-enforce), ROADMAP SPEED-07).
+- The speed budget's timing checks hold 10% off CI. On a busy machine they can fail when nothing changed; run the test again before looking for a cause. A data refresh that rebuilds a graph can trip the settled-node check: re-baseline on purpose ([D-055](DECISIONS.md#d-055-a-speed-budget-the-tests-enforce), ROADMAP SPEED-07).
 - A guess to check on the next production deploy: Vercel serves MapLibre's worker (`/maplibre/6.12.0/maplibre-gl-worker.mjs`) as JavaScript, so the map draws. The local checks confirm it with our own server ([D-050](DECISIONS.md#d-050-dependency-audit-in-ci-and-maplibre-6)).
 
 ## Deferred by Richard
@@ -54,7 +54,7 @@ Not now, on purpose: a phone app, whole cities, a reports backend, app accounts.
 
 ## Done
 
-- 2026-10-05: the rollator keeps 300 m between rests, not Inclusive Mobility's 50 m for stick users: it has a seat. Richard's call ([D-052](DECISIONS.md#d-052-presets-on-inclusive-mobility-values-kerbs-credit-and-more-benches), ROADMAP DATA-28).
-- 2026-10-05: presets follow Inclusive Mobility's kerbs, as Richard decided: manual wheelchair 6 mm ([D-052](DECISIONS.md#d-052-presets-on-inclusive-mobility-values-kerbs-credit-and-more-benches)).
+- 2026-10-05: the rollator keeps 300 m between rests, not Inclusive Mobility's 50 m for stick users: it has a seat. Richard's call ([D-053](DECISIONS.md#d-053-presets-on-inclusive-mobility-values-kerbs-credit-and-more-benches), ROADMAP DATA-28).
+- 2026-10-05: presets follow Inclusive Mobility's kerbs, as Richard decided: manual wheelchair 6 mm ([D-053](DECISIONS.md#d-053-presets-on-inclusive-mobility-values-kerbs-credit-and-more-benches)).
 - 2026-10-04: the scraped Changing Places toilets and NHS records are out of the search indexes and filtered from future builds (ROADMAP DATA-01, PR #33).
 - 2026-10-04: the stray `step2-*.png` screenshots moved to `docs/ux/devices/` (ROADMAP BLOAT-01).

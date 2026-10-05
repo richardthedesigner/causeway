@@ -108,7 +108,7 @@ describe("Street Manager activities (DATA-05)", async () => {
     expect(o).toMatchObject({ id: "sma:ARN-1", footway: "affected", description: "A skip on the pavement", street: "Storey's Gate", start: "2026-10-01T00:00:00.000Z", end: "2026-10-05T23:59:59.000Z" });
   });
 
-  it("uses the end time when given, and never shows the record's free text (D-051)", () => {
+  it("uses the end time when given, and never shows the record's free text (D-052)", () => {
     const [o] = streetManagerActivityObservations([act({ activity: "other", details: "Bridge maintenance works", end_time: "2026-10-05T18:00:00.000Z" })], osgb, now);
     expect(o!.end).toBe("2026-10-05T18:00:00.000Z");
     expect(o!.description).toBe("An obstruction on the pavement");

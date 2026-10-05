@@ -25,7 +25,7 @@ for (let i = 0; i < ROUNDS; i++) {
 const sorted = [...rounds].sort((a, b) => a.normalised - b.normalised);
 const m = sorted[Math.floor(ROUNDS / 2)]!;
 
-// Route plus trade-offs for the rest presets (D-053), measured the same way.
+// Route plus trade-offs for the rest presets (D-054), measured the same way.
 measurePlans(cities, 1);
 const planRounds: PlanMeasurement[] = [];
 for (let i = 0; i < ROUNDS; i++) {

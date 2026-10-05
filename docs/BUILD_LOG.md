@@ -6,19 +6,19 @@ A running record of what was built, newest first. Each entry links the decision 
 
 Richard chose main as the base; the overnight build's extras (PR #36) are ported by hand, smallest and safest first.
 
-**Honesty fixes** (D-051)
+**Honesty fixes** (D-052)
 - Edinburgh council widths and surfaces are inferred: a narrow council width costs time and no longer closes a pavement.
 - TfL street comments that deny a closure ("no footway closed") no longer close the pavement.
 - Street Manager activities show our own words and the street, never the record's free text. Three London entries lost their "(Impact Area)"-style endings.
 - Lift outages at one station count together: Canning Town lifts 1 and 3 out now cut off the Jubilee line.
 - A search result's first fact may take two lines before it is cut off.
 
-**Presets on Inclusive Mobility values** (D-052, D-053, DATA-28)
+**Presets on Inclusive Mobility values** (D-053, D-054, DATA-28)
 - Manual wheelchair kerb limit 2 cm to 6 mm; a dropped kerb with no measured height counts as 6 mm. Kerb limits under 1 cm read in millimetres. The rollator keeps 300 m between rests (Richard).
 - "More benches" starts loosest and makes at most two searches, each with a cost limit; its search is quicker. Waverley to the Grassmarket with a walking stick now gets an offer (470 m instead of 890 m).
 - `scripts/preset-outcomes.ts` records verdict, time, route and "More benches" for every journey and preset. No verdict, time or route changed.
 
-**A speed budget** (D-054, SPEED-02)
+**A speed budget** (D-055, SPEED-02)
 - `pnpm test` fails if routing the acceptance journeys settles 10% more nodes, or gets 10% slower over a fixed yardstick (on CI, printed and failing only past 50%). Rest presets' "More benches" searches are timed too.
 - Each city's data beside the graph stays under 400 KB compressed. Baseline and sizes: [PERF_BASELINE](plans/PERF_BASELINE.md). Re-measure with `pnpm perf:baseline`.
 

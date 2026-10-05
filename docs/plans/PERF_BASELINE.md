@@ -1,6 +1,6 @@
 # Performance baseline
 
-Measured 2026-10-05 on main with the overnight build's honesty fixes and presets ported (D-051 to D-053), so later ports can be checked against it. The rules are in [D-054](../DECISIONS.md#d-054-a-speed-budget-the-tests-enforce).
+Measured 2026-10-05 on main with the overnight build's honesty fixes and presets ported (D-052 to D-054), so later ports can be checked against it. The rules are in [D-055](../DECISIONS.md#d-055-a-speed-budget-the-tests-enforce).
 
 - **Download:** the data a city downloads beside its street graph, search index, buses and base map (the council layer, park gates, OpenStreetMap notes, the Toilet Map, flood areas, pavement works) comes to at most 400 KB compressed.
 - **Routing work:** routing the acceptance journeys settles at most 10% more nodes than the baseline.
@@ -99,7 +99,7 @@ After a warm-up pass, the median of 5 rounds; each timing is the fastest of 3 ru
 | parliament-square-canada-square | manual-wheelchair | 1 | 67.9 ms | 9,728 |
 | parliament-square-canada-square | visual-impairment | 1 | 66.6 ms | 11,423 |
 
-### Rest presets: route plus trade-offs (D-053)
+### Rest presets: route plus trade-offs (D-054)
 
 Median of 5 rounds. Calibration workload: 96.7 ms. All cities: 6357 ms, normalised 65.75.
 

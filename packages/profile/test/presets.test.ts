@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { PRESETS, kerbLimitText, stepKerbCm } from "@causeway/profile";
 
-describe("presets on Inclusive Mobility values (D-013, D-052)", () => {
+describe("presets on Inclusive Mobility values (D-013, D-053)", () => {
   it("rest distances: 50 m with a stick or crutches, 100 m with fatigue, 300 m with a rollator's seat", () => {
     expect(PRESETS["walking-stick"].maxRestIntervalM).toBe(50);
     expect(PRESETS.crutches.maxRestIntervalM).toBe(50);

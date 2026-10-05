@@ -1,5 +1,5 @@
 /**
- * The speed budget (docs/plans/PERF_BASELINE.md, D-054): what each city costs
+ * The speed budget (docs/plans/PERF_BASELINE.md, D-055): what each city costs
  * to download, and how long routing the acceptance journeys takes. Shared by
  * `pnpm perf:baseline` (writes the baseline), scripts/perf-budget.test.ts
  * (fails when a change goes over it) and scripts/preset-outcomes.ts.
@@ -45,7 +45,7 @@ export const PERF_PRESETS = ["walking", "manual-wheelchair", "visual-impairment"
 /**
  * Presets with a rest interval. Their plans also search for "More benches" (and, for fatigue, "Past more toilets"),
  * which `alternatives` never does, so they get their own measure: route plus trade-offs, as the worker runs
- * before it answers (D-053). Walking stick and crutches use the same search with a shorter interval.
+ * before it answers (D-054). Walking stick and crutches use the same search with a shorter interval.
  */
 export const REST_PRESETS = ["rollator", "fatigue"] as const;
 
