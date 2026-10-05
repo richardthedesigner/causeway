@@ -17,6 +17,8 @@ Last updated: 2026-10-05.
 | Ask Nexus for Tyne and Wear Metro lift status | Without it, Metro stations reached by lift are always "unknown" for step-free users | An email | [#13](https://github.com/richardthedesigner/causeway/issues/13) |
 | Decide whether chain-store websites scraped by AllThePlaces count as scraping under our rule | 348 places in search come only from AllThePlaces: mostly chain stores, parcel lockers and scout halls. Its Changing Places and NHS records are already out | A decision | ROADMAP DATA-27, [D-028](DECISIONS.md#d-028-overture-fills-search-gaps-osm-stays-the-source-of-access-facts) |
 | Turn on private vulnerability reporting: Settings, then Code security | `SECURITY.md` sends people there; until it's on they have nowhere private to report | 1 minute | [ROADMAP](ROADMAP.md) SEC-14 |
+| Check branch protection on `main` and `claude/sleepy-johnson-mavbrs`: Settings, then Branches. Direct pushes from Actions should be blocked, except the mirror | A compromised package in the data refresh could otherwise push straight to production | 5 minutes | [ROADMAP](ROADMAP.md) SEC-23, [security review](reviews/security-2026-10.md) M3 |
+| Don't run the migrations on Supabase (BACKEND.md step 3) until SEC-16 is done | With Supabase's default grants, anyone could delete every shared note and write the graph tables | None: just wait | [ROADMAP](ROADMAP.md) SEC-16, [security review](reviews/security-2026-10.md) C1 |
 
 ## Blocked outside the project
 
