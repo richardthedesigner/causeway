@@ -154,7 +154,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | SMALL-09 | "Why this way?" one tap from the navigation screen | S | later | todo | Claude | |
 | SMALL-10 | Recent journeys, not just recent places | S | later | todo | Claude | `recents.ts` |
 | SMALL-11 | Weather for trips more than 48 hours ahead | S | later | todo | Claude | D-040 falls back to today's |
-| SMALL-12 | A favicon and app icons (every page load asks for `/favicon.ico` and gets a 404) | S | now | todo | Claude | Found doing SEC-04 |
+| SMALL-12 | A favicon and app icons (every page load asks for `/favicon.ico` and gets a 404) | S | now | todo | Claude | Found doing SEC-04. Seen on production 2026-10-05. |
 | SMALL-13 | Saved places on the map, and as a start as well as a destination from the route screen | S | later | todo | Claude | Found doing FEAT-04. Today they show in search, and as starts in "Starting from?" |
 | SMALL-14 | Toilet Map: say when OSM and the Toilet Map disagree, keep disputed toilets off routes, and say when a record is over 2 years old | S | now | done (2026-10-05) | Claude | D-065. Ported from PR #36. 5 disputes in Edinburgh, 1 in Newcastle |
 | SMALL-15 | Parks and OpenStreetMap notes: a park found by name ends at its gate, not a nearby building's door; old notes and business questions left out; "N more places a mapper flagged" | S | now | done (2026-10-05) | Claude | D-048 update. Ported from PR #36. 26 of 119 named Edinburgh parks with gates had a fitting door within 50 m |
@@ -173,7 +173,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | SEC-08 | Harden `/review`: sign-in rate limits, session length | S | later | todo | Claude | |
 | SEC-09 | Cloudflare Turnstile on anonymous sign-up, before any publicity | S | later | blocked | Richard, Claude | D-030 |
 | SEC-10 | Data protection impact assessment (DPIA), before wider launch | M | later | blocked | Richard | D-030 |
-| SEC-12 | Check the headers are live on production (`curl -I`), and score them on securityheaders.com | S | next | todo | Claude | D-041. Production has Vercel login protection on its `vercel.app` URLs, which may need Richard |
+| SEC-12 | Check the headers are live on production (`curl -I`), and score them on securityheaders.com | S | next | done (2026-10-05) | Claude | D-041. Headers confirmed live on production. securityheaders.com score still blocked by Vercel login protection; needs custom domain or relaxed login protection for Richard to check. |
 | SEC-13 | Drop `'unsafe-inline'` from the CSP's `script-src`: hashes for Next's inline scripts at build time | S | later | todo | Claude | D-041. They change every build |
 | SEC-14 | Turn on private vulnerability reporting (Settings, then Code security) | S | next | blocked | Richard | `SECURITY.md` points people to it |
 | SEC-15 | Remove a deleted note's approved photo from the public bucket | S | later | todo | Claude | D-059. Hidden once the note's gone, but the copy stays. A reviewer step or a server job, once sharing is on |
@@ -244,6 +244,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | DEP-06 | Release notes and version numbers users can see | S | later | todo | Claude | The build log is internal |
 | DEP-07 | A custom domain | S | later | blocked | Richard | Needs a name and payment |
 | DEP-08 | Merge PR #44 on top of PR #42: conflicts, D-numbers and task IDs (PORT-44) | S | now | done (2026-10-05) | Claude | Merge commits only. No numbers collided. CSP checked for #44's new feeds |
+| REL-01 | Release check and runbook for 2026-10-05 deployment | S | next | done (2026-10-05) | Claude | PR #48. The release (PRs #38, #42, #44) is on production (deployment `dpl_7wg8rrU5ZACcB7DYG7BuwDH8Aopp`, commit `023b781`, READY at about 19:03 UTC). Post-deploy checks pass. |
 
 ## Reviews
 
@@ -251,7 +252,7 @@ Repeat on the cadence shown. When one is done, set it back to `todo` with the ne
 
 | ID | Task | Size | Priority | Status | Who | Notes |
 |---|---|---|---|---|---|---|
-| REV-01 | Docs freshness: README status line, UX_ASSESSMENT, OPEN_ITEMS, this file | S | next | todo | Claude | Monthly |
+| REV-01 | Docs freshness: README status line, UX_ASSESSMENT, OPEN_ITEMS, this file | S | next | todo | Claude | Monthly. Next: 2026-11-05 |
 | REV-02 | Security review of the whole repo | M | next | todo | Claude | Quarterly |
 | REV-03 | Code review of the largest and most-changed files | S | next | todo | Claude | Monthly |
 | REV-04 | Decisions review: anything marked as a guess or "reconsider" (D-010, D-013, D-037, D-038) | S | later | todo | Richard, Claude | Quarterly |
@@ -278,6 +279,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 
 Newest first. One line per change: date, ID, what happened, link.
 
+- 2026-10-05: REL-01 done: Release check and runbook. PRs #38, #42, #44 are on production (commit `023b781`, deployment `dpl_7wg8rrU5ZACcB7DYG7BuwDH8Aopp`, READY). Post-deploy checks pass; maplibre-gl-worker.mjs serves as JavaScript. MapLibre worker guess confirmed on production (move to OPEN_ITEMS Done). SEC-12 headers confirmed live; score blocked by login protection.
 - 2026-10-05: DEP-08 (PORT-44) done: PR #44 merged with PR #42. No D-number or task ID collided: #42 holds D-059 and D-060, #44 D-053 to D-058 and D-061 to D-068. SPEED-02 was done in #44, so SPEED-01 joins Now in its place.
 - 2026-10-05: FEAT-19 done: "On this route" under the route card, grouped Blocked, Slower and Worth knowing, each fact labelled live, static data or reported by people with its source and date; the route card keeps only failed feeds, a count of closures gone round and a flood area on the route (D-067, ported from PR #36).
 - 2026-10-05: DATA-32 done: UKHSA heat and cold alerts (only in season and before their end), gusts on exposed bridges, and air quality, pollen and UV when high; Open-Meteo times read as UTC (D-066). DATA-25 in part: SEPA's Water of Leith level on routes using the walkway.

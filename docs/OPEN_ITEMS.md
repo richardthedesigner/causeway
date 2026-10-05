@@ -2,12 +2,14 @@
 
 What's outstanding on Causewayside: things waiting on Richard, things blocked outside the project, and guesses to check with users. Keep this up to date: add an item when it comes up, and move it to "Done" with the date when it's settled. Details live in the linked issue or decision. The order of work is in [ROADMAP.md](ROADMAP.md).
 
-Last updated: 2026-10-05.
+Last updated: 2026-10-05 (after release check).
 
 ## Waiting on Richard
 
 | What | Why it matters | Effort | Link |
 |---|---|---|---|
+| Apply db/migrations/0006_my_data.sql before sharing is switched on | Sharing requires the database schema. The migration is ready; it needs to be applied to production before features that depend on it are enabled | 1 minute (with admin access) | docs/releases/2026-10-05.md, [ROADMAP](ROADMAP.md) SEC-06 |
+| SEC-12's securityheaders.com score: needs custom domain or relaxed login protection | Production is behind Vercel login protection on vercel.app, so the security scoring tool can't reach it. Score can be checked once there's a custom domain or protection is relaxed | A decision or a purchase | [ROADMAP](ROADMAP.md) SEC-12 |
 | Run the data refresh once by hand: Actions, then data-refresh, then Run workflow on `main` | Proves the weekly refresh works. It has never run, and this project's sessions can't start workflows | 1 minute | [#14](https://github.com/richardthedesigner/causeway/issues/14) |
 | Sign up for free API keys: National Rail, Met Office, Mapillary, BODS, Nexus | Each unlocks a data adapter (live trains, better weather, street photos, live buses) | About 30 minutes | [#9](https://github.com/richardthedesigner/causeway/issues/9) |
 | Decide whether to show OpenStreetMap access tags for named venues at public launch | Saying a named business is or isn't accessible carries reputational and legal risk | A decision | [#11](https://github.com/richardthedesigner/causeway/issues/11) |
@@ -50,7 +52,6 @@ These numbers shape routes but are our estimates, not evidence.
 - When someone deletes everything, a photo a reviewer had approved stays in the public bucket (hidden, as its note is gone) until a reviewer removes it. Worth a weekly clean-up step for the reviewer, or a server job, once sharing is on ([D-059](DECISIONS.md#d-059-your-data-a-copy-and-delete-everything)).
 - Weather beyond 48 hours ahead falls back to today's ([D-040](DECISIONS.md#d-040-leaving-later)).
 - The speed budget's timing checks hold 10% off CI. On a busy machine they can fail when nothing changed; run the test again before looking for a cause. A data refresh that rebuilds a graph can trip the settled-node check: re-baseline on purpose ([D-056](DECISIONS.md#d-056-a-speed-budget-the-tests-enforce), ROADMAP SPEED-07).
-- A guess to check on the next production deploy: Vercel serves MapLibre's worker (`/maplibre/6.12.0/maplibre-gl-worker.mjs`) as JavaScript, so the map draws. The local checks confirm it with our own server ([D-050](DECISIONS.md#d-050-dependency-audit-in-ci-and-maplibre-6)).
 - The Scottish Road Works Register is daily, but the data refresh is weekly, so new Edinburgh works can be up to a week late ([D-057](DECISIONS.md#d-057-edinburghs-works-from-the-scottish-road-works-register)).
 - Street Manager's June 2026 activity archive is published truncated, so the build skips it; activities created or last changed only in June are missing until a later event brings them back ([D-027](DECISIONS.md#d-027-live-and-third-party-data-come-in-through-adapters)).
 - Whether a register entry closes the pavement is read from its free text. Check a sample of Edinburgh road closures on the ground or with testers (D-057).
@@ -64,6 +65,7 @@ Not now, on purpose: a phone app, whole cities, a reports backend, app accounts.
 
 ## Done
 
+- 2026-10-05: MapLibre worker confirmed on production: Vercel serves `maplibre-gl-worker.mjs` as JavaScript (content-type: application/javascript), so the map draws ([D-050](DECISIONS.md#d-050-dependency-audit-in-ci-and-maplibre-6), [REL-01](ROADMAP.md)).
 - 2026-10-05: TfL's informational station messages (a reduced escalator service) are shown, under Worth knowing in "On this route" on routes through the station ([D-067](DECISIONS.md#d-067-more-data-same-calm)).
 - 2026-10-05: the weather and health lines (alerts, gusts, air, the Water of Leith) moved from "Why this way?" into "On this route", with their source and time ([D-067](DECISIONS.md#d-067-more-data-same-calm)).
 - 2026-10-05: Open-Meteo's times were read as the phone's local time, an hour out in British Summer Time. Now read as UTC everywhere, with a test ([D-066](DECISIONS.md#d-066-heat-and-cold-alerts-gusts-air-quality-and-the-water-of-leith)).
