@@ -1,5 +1,6 @@
 /**
- * Build each English area's works file from the latest Street Manager monthly archive:
+ * Build each English area's works file from the latest Street Manager monthly archives,
+ * permits (works) and activities (skips, scaffolding, hoardings: DATA-05):
  *   pnpm build:works [YYYY/MM]   (default: last month)
  * Writes data/live/<area>.works.json (WorksObservations still open at build time).
  * Scotland's register (SRWR) has no open feed yet, so Edinburgh gets none (DATA_SOURCES.md).
@@ -11,7 +12,7 @@ import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fromOsgb, registerOsgb, toOsgb } from "@causeway/graph/node";
-import { streetManagerObservations, type StreetManagerPermit } from "@causeway/live";
+import { streetManagerActivityObservations, streetManagerObservations, type StreetManagerActivity, type StreetManagerPermit } from "@causeway/live";
 import { AREAS } from "./areas.js";
 import { cached, CACHE, EDINBURGH_OLD_TOWN, toArrayBuffer } from "./sources.js";
 
@@ -40,17 +41,31 @@ const extract = join(CACHE, `sm-permit-${month.replace("/", "-")}.json`);
 if (!existsSync(extract)) execFileSync("python3", [join(ROOT, "scripts/streetmanager-extract.py"), JSON.stringify({ zip: zipFile, boxes, out: extract })], { stdio: "inherit" });
 const permits = JSON.parse(readFileSync(extract, "utf8")) as (StreetManagerPermit & { area: string })[];
 
+// Activities: skips, scaffolding, hoardings and other non-works licences, from the same bucket.
+const actZip = join(CACHE, `sm-activity-${month.replace("/", "-")}.zip`);
+if (!existsSync(actZip)) execFileSync("curl", ["-sS", "-o", actZip, `https://opendata.manage-roadworks.service.gov.uk/activity/${month}.zip`], { stdio: "inherit" });
+const actExtract = join(CACHE, `sm-activity-${month.replace("/", "-")}.json`);
+if (!existsSync(actExtract)) execFileSync("python3", [join(ROOT, "scripts/streetmanager-extract.py"), JSON.stringify({ kind: "activity", zip: actZip, boxes, out: actExtract })], { stdio: "inherit" });
+const activities = JSON.parse(readFileSync(actExtract, "utf8")) as (StreetManagerActivity & { area: string })[];
+
 mkdirSync(join(ROOT, "data/live"), { recursive: true });
 const now = new Date();
 for (const a of english) {
-  const obs = streetManagerObservations(
-    permits.filter((p) => p.area === a.name),
-    fromOsgb,
-    now,
-  ).filter((o) => o.geometry.some(([x, y]) => a.osm.apiTiles.some((t) => t[0] <= x && x <= t[2] && t[1] <= y && y <= t[3])));
+  const obs = [
+    ...streetManagerObservations(
+      permits.filter((p) => p.area === a.name),
+      fromOsgb,
+      now,
+    ),
+    ...streetManagerActivityObservations(
+      activities.filter((p) => p.area === a.name),
+      fromOsgb,
+      now,
+    ),
+  ].filter((o) => o.geometry.some(([x, y]) => a.osm.apiTiles.some((t) => t[0] <= x && x <= t[2] && t[1] <= y && y <= t[3])));
   writeFileSync(
     join(ROOT, "data/live", `${a.name}.works.json`),
-    JSON.stringify({ area: a.name, source: `Street Manager open data, permit archive ${month}`, licence: "Open Government Licence v3.0", builtAt: now.toISOString(), works: obs }, null, 0),
+    JSON.stringify({ area: a.name, source: `Street Manager open data, permit and activity archives ${month}`, licence: "Open Government Licence v3.0", builtAt: now.toISOString(), works: obs }, null, 0),
   );
-  console.log(`${a.name}: ${obs.length} works on pavements (${obs.filter((o) => o.footway === "closed").length} closing them)`);
+  console.log(`${a.name}: ${obs.length} works and activities on pavements (${obs.filter((o) => o.footway === "closed").length} closing them, ${obs.filter((o) => o.id.startsWith("sma:")).length} skips, scaffolding and the like)`);
 }

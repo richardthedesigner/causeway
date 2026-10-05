@@ -44,6 +44,9 @@ export interface Evaluation {
 }
 
 const WHEELED = (p: Profile) => p.maxSteps === 0;
+/** In ice, extra time on a pavement that isn't gritted, as a share of its time: wheels and everyone else. A guess (D-047). */
+const ICE_UNGRITTED_WHEELED = 1;
+const ICE_UNGRITTED = 0.5;
 
 /** Getting off a bus: the ramp, and a moment to get clear of the stop. */
 const BUS_ALIGHT_S = 30;
@@ -261,6 +264,9 @@ function evaluateEdgeBase(e: GraphEdge, forward: boolean, p: Profile, c: Conditi
   }
   if (e.kind === "board" || e.kind === "interchange") {
     const seconds = e.kind === "board" ? (forward ? BOARD_WAIT_S : ALIGHT_S) : e.lengthM / Math.min(p.speedMps, 1.2) + 60;
+    if (needsStepFree(p) && isKnown(a.stepCount) && a.stepCount.value > 0) {
+      return exclude("steps", a.stepCount.method?.split(": ").slice(1).join(": ") || "no step-free route to the platform");
+    }
     if (needsStepFree(p) && !isKnown(a.stepCount)) {
       const s = UNKNOWN_STATION_S * (1 - p.uncertaintyTolerance);
       return { passable: "unknown", seconds, cost: seconds + s, reasons: [...reasons, { kind: "unknown", attr: "station", detail: "step-free access not confirmed", seconds: s }] };
@@ -321,6 +327,16 @@ function evaluateEdgeBase(e: GraphEdge, forward: boolean, p: Profile, c: Conditi
     const s = seconds * Math.min(2, over / 4) * confidence(a.crossSlope, c.now);
     penalty += s;
     reasons.push({ kind: "penalty", attr: "crossSlope", detail: `${a.crossSlope.value.toFixed(1)}% camber`, seconds: s });
+  }
+
+  // Ice and gritting (DATA-07): where the council's routes are known, pavements off them cost more in ice.
+  if (c.ice && a.gritted && isKnown(a.gritted) && e.kind !== "steps") {
+    if (a.gritted.value) reasons.push({ kind: "penalty", attr: "gritted", detail: "on a gritting route", seconds: 0 });
+    else {
+      const s = seconds * (WHEELED(p) ? ICE_UNGRITTED_WHEELED : ICE_UNGRITTED);
+      penalty += s;
+      reasons.push({ kind: "penalty", attr: "gritted", detail: "not on a gritting route, so it may be icy", seconds: s });
+    }
   }
 
   // Surface.

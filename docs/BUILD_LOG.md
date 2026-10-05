@@ -2,11 +2,106 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
-## 2026-10-05
+## 2026-10-05 (later)
 
 **Road speed for road scooters** (D-051, FEAT-02)
 - A road scooter goes at 8 mph on roads without mapped pavements, and at its own pavement pace elsewhere. Pace learning learns only the pavement pace.
 - Central Edinburgh journeys get 20 to 45% quicker, and routes move onto roads (Marchmont to Leith Walk: 48% to 91% on roads).
+
+## 2026-10-05 (morning)
+
+Security and stability, from the roadmap's Now list.
+
+**TfL station toilets** (DATA-23)
+- London's search and toilet layer gain the toilets TfL lists at 24 of our stations, from the station data we already load. Those past the ticket gates are marked for customers and aren't offered as stops on the way.
+
+**Dependency audit** (D-050, SEC-04, UPD-02)
+- CI fails on any high or critical advisory. The first run found a critical MapLibre hole and two high PostCSS ones.
+- MapLibre 4.7.1 to 6.12.0, with its worker served from `public/maplibre/`. PostCSS lifted by an override.
+
+**The profile never leaves the phone** (D-009, SEC-05)
+- Reviewed logs, URLs, errors, sharing, notes and reports: no leak. `pnpm e2e` now fails if any request carries the device's name, type or limits.
+
+**More end-to-end journeys** (STAB-10)
+- Two devices and a switch, leaving in an hour, a route, and a note kept on the phone.
+- It found a real bug: fully open, the drawer sits 6% of the screen below the bottom edge, so the last things in it (the trip settings, on a phone this size) could never scroll into view. The drawer's list now has that much padding, and scroll padding for keyboard focus.
+
+**Large text on a small phone** (STAB-11)
+- Sheets keep only the title and Close at the top; the description scrolls. Bars, icon buttons and switches are sized in pixels. The device type chips drop to one column when the text is large.
+- `pnpm a11y` checks setup and the device settings at 320 by 640 with 200% text.
+
+## 2026-10-05 (small hours)
+
+More pilot-city data, from the roadmap's Now list.
+
+**Ice and floods** (D-047, DATA-07)
+- In ice, Edinburgh routes prefer the council's priority gritting routes and say so.
+- Environment Agency flood warnings, live: a severe warning closes the paths in its area, a warning flags them, an alert is named.
+
+**Park gates and OSM notes** (D-048, DATA-08)
+- A route to a park ends at the gate nearest your way in (OS Open Greenspace), not the middle of the grass.
+- Open OpenStreetMap notes about the ground near a route are shown, dated and unchecked.
+
+**The Toilet Map** (D-049, DATA-09)
+- Accessible, RADAR and opening-hours facts OSM lacks, and toilets it hasn't mapped, with when each was last checked.
+
+**Inclusive Mobility rest distances** (D-013, DATA-10)
+- Walking stick and crutches 50 m, fatigue 100 m. "More benches" still finds something useful.
+
+**Weekly graphs** (D-033, DATA-11)
+- The data refresh now rebuilds the street graphs and every layer keyed to them, and counts them in its summary.
+
+## 2026-10-04 (late night)
+
+Data for the pilot cities, from the roadmap's Now list.
+
+**No scraped records** (D-028, DATA-01)
+- AllThePlaces-only toilets and health services left out of the Overture merge; 29 "Changing Places" and 24 GP, dentist, hospital and pharmacy records removed from the search indexes.
+
+**London stations, line by line** (D-020, DATA-03, DATA-04)
+- TfL's station data says which lines are step-free from the street, the platform-to-train step and gap, and which lift serves what. A lift outage now closes only the lines it really cuts off.
+- Line closures (by station, with TfL's dates) and plain station messages (closed, not calling, no step-free access) act on the rail graph. The route panel names a closure in force.
+
+**Skips, scaffolding and hoardings** (D-027, DATA-05)
+- Street Manager's activity archive adds obstructions on English pavements, counted as unknown.
+
+**Edinburgh pavement widths and surfaces** (D-046, DATA-06)
+- The council's Adopted Roads footways, as a separate layer joined at load. Widths known on 8,707 pavement edges, up from 1,731.
+
+## 2026-10-04 (night)
+
+The roadmap's next five.
+
+**Battery range in the device editor** (D-043, FEAT-01)
+- Powered chairs and scooters: "Warn me about battery range", 3 to 60 km. The route warns when a trip uses over half of it.
+
+**Nothing on the phone lost to a change of shape** (D-044, STAB-03)
+- Devices, notes and reports read through `lib/stored.ts`. Old keys are never rewritten; anything unreadable is backed up first.
+
+**A new version is ready** (D-045, DEP-04)
+- A card with Reload and Later when a new build takes over an open page. Never mid-journey.
+
+**Security housekeeping** (SEC-02, SEC-03)
+- `SECURITY.md`: report vulnerabilities privately.
+- GitHub Actions pinned to commit SHAs; CI can only read the code.
+
+## 2026-10-04 (late evening)
+
+From the roadmap's Now list.
+
+**Security headers** (D-041, SEC-01)
+- A Content Security Policy, HSTS, no framing, a strict referrer policy and a permissions policy, from `apps/web/vercel.json`.
+- The accessibility check and the new end-to-end test serve the build with the same headers and fail on anything the policy blocks.
+
+**End-to-end journeys** (STAB-01)
+- `pnpm e2e`, in CI: in each city, search, route, start, arrive and end in the built app.
+- Its first run found that a city opened from last time started from Causewayside in Edinburgh. Fixed (STAB-09).
+
+**Dependabot** (UPD-01): npm and GitHub Actions, weekly, minor and patch updates grouped.
+
+**Fewer Vercel builds** (D-042, DEP-03): `main` and docs-only changes no longer build.
+
+**Tidy** (BLOAT-01): the step 2 review screenshots moved from the repo root to `docs/ux/devices/`.
 
 ## 2026-10-04 (evening)
 

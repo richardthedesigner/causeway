@@ -10,6 +10,7 @@ import { DeviceMenu } from "@/components/DeviceMenu";
 import { DeviceEditor } from "@/components/DeviceEditor";
 import { DeviceSetup } from "@/components/DeviceSetup";
 import { NavView, type Me } from "@/components/NavView";
+import { UpdatePrompt } from "@/components/UpdatePrompt";
 import { NoteSheet, type NoteAbout } from "@/components/NoteSheet";
 import { PlaceIcon, PlaceSearch } from "@/components/PlaceSearch";
 import { ReportSheet } from "@/components/ReportSheet";
@@ -45,6 +46,7 @@ const PRESET_CONDITIONS: Record<Ground, Conditions> = {
 type View = "home" | "from" | "route";
 
 const CITY_KEY = "causewayside.city.v1";
+// full: change the 6dvh padding on the drawer body with it.
 const SNAP = { peek: 0.24, half: 0.52, full: 0.94 };
 
 
@@ -58,7 +60,12 @@ export default function Home() {
   useEffect(() => {
     try {
       const saved = localStorage.getItem(CITY_KEY);
-      if (saved) setCity(cityById(saved));
+      if (saved) {
+        const c = cityById(saved);
+        setCity(c);
+        // Start in the saved city too, not at the first city's default start.
+        setFrom(c.start);
+      }
     } catch {
       /* no storage: default city */
     }
@@ -68,7 +75,9 @@ export default function Home() {
   // Venues with an accessible toilet go to the router, so "Past more toilets" can use them (public ones are in the graph).
   useEffect(() => {
     if (!index) return;
-    planner.sendToilets(index.entries.filter((e) => e.cat !== "amenity=toilets" && e.access?.["toilets:wheelchair"] === "yes" && hoursText(e.access.opening_hours, new Date())?.open !== false).map((e) => ({ lon: e.place.lon, lat: e.place.lat, name: e.place.name })));
+    // Venues with an accessible toilet, and Toilet Map and TfL station toilets OSM hasn't mapped (OSM's public toilets are in the graph already). Toilets inside the ticket gates need a ticket, so they stay out.
+    const extra = (e: (typeof index.entries)[number]) => (e.cat !== "amenity=toilets" ? e.access?.["toilets:wheelchair"] === "yes" : /^(toiletmap|tfl-toilet):/.test(e.place.id) && e.access?.wheelchair === "yes" && e.access.access !== "customers");
+    planner.sendToilets(index.entries.filter((e) => extra(e) && hoursText(e.access?.opening_hours, new Date())?.open !== false).map((e) => ({ lon: e.place.lon, lat: e.place.lat, name: e.place.name })));
   }, [index]); // eslint-disable-line react-hooks/exhaustive-deps
   // Server render and first paint use the first-visit default; the saved devices load on mount.
   const [devices, setDevices] = useState<DeviceState>(FIRST_VISIT);
@@ -329,8 +338,11 @@ export default function Home() {
     </>
   );
 
+  // Fully open, the drawer still sits (1 - SNAP.full) of the screen below the bottom edge. Pad by that much, or the last
+  // things in the list (the trip settings, the end of a route) can never scroll into view (STAB-10). Scroll padding does the
+  // same for anything scrolled to by keyboard focus.
   const body = (
-    <div className="min-h-0 flex-1 overflow-y-auto px-4 pt-1 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]">
+    <div className="min-h-0 flex-1 overflow-y-auto px-4 pt-1 pb-[calc(1.5rem+6dvh+env(safe-area-inset-bottom,0px))] [scroll-padding-bottom:calc(1rem+6dvh)] md:pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] md:[scroll-padding-bottom:1rem]">
       {pin ? (
         <section aria-live="polite" aria-label="Dropped pin" className="mb-3 flex flex-wrap items-center gap-3 rounded-2xl border-2 border-accent p-3">
           <p className="m-0 min-w-0 flex-1">
@@ -456,6 +468,7 @@ export default function Home() {
           }}
           lifts={planner.lifts}
           works={planner.works}
+          floods={planner.floods}
           worksCovered={!!city.works}
           liveBuses={city.liveLifts}
           onStart={() => setNavigating(true)}
@@ -509,6 +522,7 @@ export default function Home() {
         credit={`${city.credit} Pavement data built ${planner.ready?.builtAt.slice(0, 10) ?? ""}.`}
         minimal={navigating}
       />
+      <UpdatePrompt navigating={navigating} />
       {navigating && selectedRoute ? (
         <NavView
           route={selectedRoute}

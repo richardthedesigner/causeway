@@ -7,15 +7,21 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { loadSnapshot, type Graph, type TransitNetwork } from "@causeway/graph/node";
-import { applyLiveStates, fetchLiftOutages, liftOutageStates, parseLiftDisruptions } from "@causeway/live";
+import { applyStationAccess, loadSnapshot, refRides, type Graph, type TransitNetwork } from "@causeway/graph/node";
+import { applyLiveStates, fetchLiftOutages, liftOutageStates, parseLiftDisruptions, parseLineStatus, railDisruptionStates } from "@causeway/live";
 import { PRESETS } from "@causeway/profile";
 import { describeSegments, explain, Router, summarise } from "@causeway/router";
 import { LONDON_JOURNEYS } from "../../../scripts/journeys.js";
 
 const ROOT = join(import.meta.dirname, "../../..");
 const net = JSON.parse(readFileSync(join(ROOT, "data/transit/london/network.json"), "utf8")) as TransitNetwork;
-const fresh = () => loadSnapshot(join(ROOT, "data/snapshots/london-jubilee.graph.json.gz"));
+// As the app does: TfL's per-line step-free facts on the board edges when the city loads (DATA-03).
+const fresh = () => {
+  const g = loadSnapshot(join(ROOT, "data/snapshots/london-jubilee.graph.json.gz"));
+  applyStationAccess(g, net);
+  refRides(g);
+  return g;
+};
 const recorded = parseLiftDisruptions(JSON.parse(readFileSync(join(ROOT, "packages/live/test/fixtures/tfl-lifts-2026-10-04.json"), "utf8")), "2026-10-04T12:00:00Z");
 const NOW = new Date("2026-10-04T12:05:00Z");
 const j = LONDON_JOURNEYS[0]!;
@@ -40,6 +46,21 @@ describe("Parliament Square to Canary Wharf", () => {
     expect(states.get("board:jubilee:940GZZLUCYF")!.affects).toBe("step-free");
   });
 
+  it("closes only the lines a lift outage cuts off, from TfL's station layout (DATA-03)", () => {
+    const at = (lifts: string[]) => liftOutageStates([{ stationId: "HUBWSM", stationName: "Westminster", liftIds: lifts, message: "", alternativeMentioned: false, fetchedAt: "2026-10-04T12:00:00Z" }], net, refs(fresh()));
+    // Lift 5 joins the District line level to the Jubilee platforms.
+    expect(at(["HUBWSM-Lift-5"]).has("board:jubilee:940GZZLUWSM")).toBe(true);
+    // Lift 3 serves the eastbound District platform only: the Jubilee line is still step-free by lifts 2, 4 and 5.
+    expect(at(["HUBWSM-Lift-3"]).size).toBe(0);
+  });
+
+  it("a Jubilee line station TfL maps with no step-free route is closed to wheelchair users, open to walkers", () => {
+    const g = fresh();
+    const e = g.edges.find((x) => x.ref === "board:jubilee:940GZZLUSWC")!;
+    expect(e.attrs.stepCount.value).toBe(1);
+    expect(e.attrs.stepCount.method).toMatch(/TfL station data .*no step-free route/);
+  });
+
   it("with no outages, a wheelchair user takes the Jubilee line straight to Canary Wharf", () => {
     const { route } = plan(fresh(), "manual-wheelchair");
     expect(summarise(route, NOW).rides).toEqual([{ line: "Jubilee line", from: "Westminster", to: "Canary Wharf", stops: expect.any(Number) }]);
@@ -56,6 +77,22 @@ describe("Parliament Square to Canary Wharf", () => {
     expect(ex.headline).toMatch(/Avoids Canary Wharf, Jubilee line \(lift out of service\)\. Adds \d+ minutes?\./);
     expect(ex.notes.some((n) => /faulty lift/.test(n) && /TfL/.test(n))).toBe(true);
     expect(describeSegments(route).some((s) => /^Take the /.test(s))).toBe(true);
+  });
+
+  it("with the recorded Jubilee line part closure (DATA-04), nobody is sent along the closed stretch", () => {
+    const g = fresh();
+    const closure = parseLineStatus(JSON.parse(readFileSync(join(ROOT, "packages/live/test/fixtures/tfl-line-status-2026-10-04.json"), "utf8")), "2026-10-04T12:00:00Z");
+    expect(applyLiveStates(g, railDisruptionStates(closure, net, refs(g), NOW))).toBeGreaterThan(0);
+    // Our two London zones are joined only by the Jubilee line, so with Green Park to Canary Wharf closed
+    // there is honestly no way through: no route, rather than one along a closed line.
+    const r = new Router(g);
+    for (const preset of ["walking", "manual-wheelchair"] as const) {
+      const p = PRESETS[preset];
+      const c = { now: NOW, wet: false, ice: false };
+      expect(r.route(r.snap(j.from.lon, j.from.lat, p, c), r.snap(j.to.lon, j.to.lat, p, c), p, c), preset).toBeNull();
+    }
+    // The day after, it runs again.
+    expect(plan(g, "walking", new Date("2026-10-05T09:00:00Z")).route).not.toBeNull();
   });
 
   it("someone walking is not rerouted by a lift outage", () => {

@@ -1,11 +1,13 @@
 /**
  * Normalise TfL Unified API responses (Line/{id}/Route/Sequence/all and
- * StopPoint details, fetched 2026-10-04) into data/transit/london/network.json.
+ * StopPoint details, fetched 2026-10-04) into data/transit/london/network.json,
+ * with each station's step-free layout from TfL's station data (DATA-03).
  *   tsx scripts/transit-london.ts
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import type { TransitNetwork, TransitStation } from "@causeway/graph";
+import { stepFreeLines, type TransitNetwork, type TransitStation } from "@causeway/graph";
+import { stationAccess } from "./tfl-station-access.js";
 
 const DIR = join(import.meta.dirname, "../data/transit/london");
 const LINES = [
@@ -54,8 +56,13 @@ for (const line of LINES) {
   }
   for (const r of seq.orderedLineRoutes) routes.push({ line: line.id, lineName: line.name, mode: line.mode, stops: r.naptanIds });
 }
+// TfL's station data: which areas join up without steps, per line (applied to board edges when the city loads).
+const access = await stationAccess(Object.keys(stations).map((id) => ({ id, lines: [...new Set(routes.filter((r) => r.stops.includes(id)).map((r) => r.line))] })));
+for (const [id, a] of Object.entries(access)) stations[id]!.access = a;
 const net: TransitNetwork = { source: "TfL Unified API (Line Route Sequence, StopPoint)", fetchedAt: "2026-10-04T15:10:00Z", stations, routes };
 writeFileSync(join(DIR, "network.json"), JSON.stringify(net, null, 1));
 const c = (m: string, v: string) => Object.values(stations).filter((s) => s.mode === m && s.stepFree === v).length;
 console.log(`${Object.keys(stations).length} stations, ${routes.length} routes; tube step-free yes/unknown ${c("tube", "yes")}/${c("tube", "unknown")}; dlr yes ${c("dlr", "yes")}`);
+const lineStates = Object.values(stations).flatMap((s) => (s.access ? Object.values(stepFreeLines(s.access)) : ["none"]));
+console.log(`station data: ${Object.keys(access).length} stations; board edges ${["yes", "part", "no", "unknown", "none"].map((k) => `${k} ${lineStates.filter((v) => v === k).length}`).join(", ")}`);
 for (const id of ["940GZZLUWSM", "940GZZLUCYF", "940GZZLUCGT", "940GZZDLCGT", "940GZZDLCAN", "940GZZDLHEQ", "940GZZLUNGW", "940GZZLUCWR"]) console.log(id, stations[id]?.name, stations[id]?.stepFree, stations[id]?.hub);

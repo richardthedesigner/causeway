@@ -40,6 +40,7 @@ pnpm build:snapshot          # rebuild data/snapshots/edinburgh-old-town.graph.j
 pnpm spike                   # regenerate docs/spikes/phase0-edinburgh.{md,geojson}
 pnpm web:dev                 # the app at http://localhost:3000 (central Edinburgh)
 pnpm web:build               # static export in apps/web/out
+pnpm e2e                     # after web:build: search, route and navigate in each city, in a real browser
 
 # Phase 1: central Edinburgh (needs pip install osmium)
 curl -o .data-cache/Edinburgh.osm.pbf https://download.bbbike.org/osm/bbbike/Edinburgh/Edinburgh.osm.pbf

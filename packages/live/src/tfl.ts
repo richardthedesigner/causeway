@@ -6,7 +6,7 @@
  * lift ID to a lift edge in our graph needs the London station graph (Phase 3);
  * `toLiveStates` takes that mapping as an index so the adapter stays pure.
  */
-import type { LiveState } from "@causeway/graph";
+import { stepFreeLines, type LiveState, type StationAccess } from "@causeway/graph";
 
 export interface TflLiftDisruption {
   stationUniqueId: string;
@@ -89,7 +89,7 @@ const titleCase = (s: string) =>
  */
 export function liftOutageStates(
   outages: LiftOutage[],
-  net: { stations: Record<string, { id: string; hub: string | null }>; routes: { line: string; lineName: string }[] },
+  net: { stations: Record<string, { id: string; hub: string | null; access?: StationAccess }>; routes: { line: string; lineName: string }[] },
   edgeRefs: Set<string>,
   ttlMinutes = 15,
 ): Map<string, LiveState> {
@@ -110,6 +110,15 @@ export function liftOutageStates(
       validUntil: new Date(Date.parse(o.fetchedAt) + ttlMinutes * 60_000).toISOString(),
     };
     for (const s of stations) {
+      // TfL's station layout says which lines this lift cuts off: close exactly those (DATA-03).
+      if (s.access && (o.stationId === s.access.tflId || o.stationId === s.id)) {
+        const before = stepFreeLines(s.access);
+        const after = stepFreeLines(s.access, new Set(o.liftIds));
+        for (const [line, v] of Object.entries(after)) {
+          if (before[line] === "yes" && v !== "yes" && edgeRefs.has(`board:${line}:${s.id}`)) out.set(`board:${line}:${s.id}`, state);
+        }
+        continue;
+      }
       if (streetLevel) {
         if (edgeRefs.has(`link:${s.id}`)) out.set(`link:${s.id}`, state);
         continue;

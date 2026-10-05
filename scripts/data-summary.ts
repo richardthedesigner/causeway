@@ -30,6 +30,13 @@ const ROWS: Row[] = [
   ["Bus, tram and Metro stops", (d) => Object.keys(d.stops).length, "data/transit/{a}/bus.json"],
   ["Route directions", (d) => d.lines.length, "data/transit/{a}/bus.json"],
   ["Pavement works", (d) => d.works.length, "data/live/{a}.works.json"],
+  ["Street graph edges", (d) => d.edges.length, "data/snapshots/{a}.graph.json.gz"],
+  ["Edges with a known gradient", (d) => d.edges.filter((e: any) => e.attrs?.incline?.state !== "unknown").length, "data/snapshots/{a}.graph.json.gz"],
+  ["Council footway matches", (d) => Object.keys(d.edges).length, "data/council/{a}.footways.json"],
+  ["Paths in flood areas", (d) => Object.values(d.areas).reduce((n: number, x: any) => n + x.keys.length, 0), "data/live/{a}.flood-areas.json"],
+  ["Park gates", (d) => d.sites.reduce((n: number, s: any) => n + s.gates.length, 0), "data/places/{a}.greenspace.json"],
+  ["OSM notes about the ground", (d) => d.notes.length, "data/places/{a}.osm-notes.json"],
+  ["Toilet Map toilets", (d) => d.toilets.length, "data/places/{a}.toiletmap.json"],
 ];
 
 const cell = (now: number | null, before: number | null) => {

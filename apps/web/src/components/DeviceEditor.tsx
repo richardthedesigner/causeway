@@ -1,5 +1,5 @@
 "use client";
-import { PRESETS, type MobilityPreset, type Profile, type SavedDevice } from "@causeway/profile";
+import { hasBattery, PRESETS, type MobilityPreset, type Profile, type SavedDevice } from "@causeway/profile";
 import { useState } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Slider } from "@/components/ui/slider";
@@ -7,6 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, Minus, Plus, Trash2 } from "lucide-react";
 
+import { presetProfile, RANGE_DEFAULT_KM, RANGE_MAX_KM, RANGE_MIN_KM } from "@/lib/devices";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -38,12 +39,12 @@ const PRESET_GROUPS: { id: string; label: string; presets: MobilityPreset[] }[] 
   { id: "other", label: "Other needs", presets: ["fatigue", "visual-impairment"] },
 ];
 
-/** The closed "Your limits" row still says what matters: "Uphill 6% / Kerb 2 cm / No steps". */
+/** The closed "Your limits" row still says what matters: "Uphill 6% / Kerb 2 cm / No steps / 12 km battery". */
 function limitsSummary(p: Profile, steps: number): string {
   const up = p.maxInclineUpPct >= 50 ? "Any slope" : `Uphill ${p.maxInclineUpPct}%`;
   const kerb = p.maxKerbCm === 0 ? "Flush kerbs" : `Kerb ${p.maxKerbCm} cm`;
   const st = steps === 0 ? "No steps" : steps >= STEP_LIMIT ? "Any steps" : `Up to ${steps} steps`;
-  return `${up} / ${kerb} / ${st}`;
+  return [up, kerb, st, p.maxRangeKm ? `${p.maxRangeKm} km battery` : null].filter(Boolean).join(" / ");
 }
 
 
@@ -57,8 +58,10 @@ export function DeviceEditor({ open, onOpenChange, device, onChange, onRename, o
   const profile = device.profile;
   const [confirming, setConfirming] = useState(false);
   const set = (patch: Partial<Profile>) => onChange({ ...profile, ...patch });
-  const pick = (preset: MobilityPreset) => onChange({ ...PRESETS[preset] });
-  const custom = JSON.stringify({ ...profile, label: "" }) !== JSON.stringify({ ...PRESETS[profile.preset], label: "" });
+  const pick = (preset: MobilityPreset) => onChange(presetProfile(profile, preset));
+  // The battery range is the person's own figure, not a change to the type's limits.
+  const custom = JSON.stringify({ ...profile, label: "", maxRangeKm: undefined }) !== JSON.stringify({ ...PRESETS[profile.preset], label: "", maxRangeKm: undefined });
+  const range = profile.maxRangeKm ?? null;
   const stepsAllowed = Number.isFinite(profile.maxSteps) ? Math.min(profile.maxSteps, STEP_LIMIT) : STEP_LIMIT;
 
   return (
@@ -78,7 +81,7 @@ export function DeviceEditor({ open, onOpenChange, device, onChange, onRename, o
               onChange={(e) => onRename(e.target.value.slice(0, 40))}
               placeholder={PRESETS[profile.preset].label}
               autoComplete="off"
-              className="min-h-12 rounded-xl border border-line bg-surface-2 px-3 text-base text-ink focus:border-accent focus:outline-none"
+              className="min-h-12 w-full min-w-0 rounded-xl border border-line bg-surface-2 px-3 text-base text-ink focus:border-accent focus:outline-none"
             />
             <span className="text-sm text-muted">Optional. For example: Cherry, Dad&apos;s chair, the red one.</span>
           </label>
@@ -93,7 +96,8 @@ export function DeviceEditor({ open, onOpenChange, device, onChange, onRename, o
                 <span id={`group-${g.id}`} className="text-sm text-muted">
                   {g.label}
                 </span>
-                <div className="grid grid-cols-2 gap-2">
+                {/* Two columns, or one when large text would clip the names (STAB-11). */}
+                <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,9rem),1fr))] gap-2">
                   {g.presets.map((k) => {
                     const on = profile.preset === k;
                     return (
@@ -242,6 +246,24 @@ export function DeviceEditor({ open, onOpenChange, device, onChange, onRename, o
             {profile.paceSamples ? `, learned from ${profile.paceSamples} journey${profile.paceSamples === 1 ? "" : "s"}` : ", a starting figure. It adjusts as you use navigation"}.
           </p>
 
+          {hasBattery(profile) ? (
+            <div className="grid gap-1">
+              <Toggle id="battery-range" label="Warn me about battery range" checked={range !== null} onChange={(v) => set({ maxRangeKm: v ? RANGE_DEFAULT_KM : null })} />
+              {range !== null ? (
+                <Limit
+                  label="Range on one charge"
+                  value={`${range} km`}
+                  help="On the flat, from your manual or your own trips. We count each climb as extra distance, and warn when a trip uses over half."
+                  onStep={(d) => set({ maxRangeKm: clamp(range + d, RANGE_MIN_KM, RANGE_MAX_KM) })}
+                >
+                  <Slider thumbLabel="Range on one charge" valueText={`${range} kilometres`} min={RANGE_MIN_KM} max={RANGE_MAX_KM} step={1} value={[range]} onValueChange={([v]) => set({ maxRangeKm: v! })} />
+                </Limit>
+              ) : (
+                <p className="m-0 text-sm text-muted">Off: we don&apos;t guess your battery.</p>
+              )}
+            </div>
+          ) : null}
+
           <Limit
             label="When we don't know"
             value={profile.uncertaintyTolerance < 0.25 ? "Avoid unknowns" : profile.uncertaintyTolerance > 0.75 ? "Happy to risk it" : "Some risk is fine"}
@@ -291,7 +313,7 @@ export function DeviceEditor({ open, onOpenChange, device, onChange, onRename, o
 function Limit({ label, value, help, onStep, children }: { label: string; value: string; help?: string; onStep?: (dir: -1 | 1) => void; children: React.ReactNode }) {
   return (
     <div>
-      <div className="flex items-baseline justify-between gap-3">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-3">
         <span className="text-base">{label}</span>
         <span className="tabular font-mono text-base font-semibold">{value}</span>
       </div>
@@ -316,7 +338,7 @@ function Limit({ label, value, help, onStep, children }: { label: string; value:
 function Toggle({ id, label, checked, onChange }: { id: string; label: string; checked: boolean; onChange: (v: boolean) => void }) {
   return (
     <label htmlFor={id} className="flex min-h-12 cursor-pointer items-center justify-between gap-4">
-      <span className="text-base">{label}</span>
+      <span className="min-w-0 text-base">{label}</span>
       <Switch id={id} checked={checked} onCheckedChange={onChange} />
     </label>
   );

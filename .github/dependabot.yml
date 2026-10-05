@@ -1,0 +1,35 @@
+# Weekly dependency updates (UPD-01). Minor and patch updates come as one grouped
+# pull request per ecosystem; majors come one at a time, since each needs a look.
+# CI runs on each pull request (typecheck, tests, build, accessibility, end to end).
+version: 2
+updates:
+  - package-ecosystem: npm # pnpm workspaces: root, apps/web and packages/*
+    directory: /
+    target-branch: main
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/London
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
+    ignore:
+      # Major upgrades with their own roadmap rows: MapLibre 5 (UPD-02), Next.js (UPD-03).
+      - dependency-name: maplibre-gl
+        update-types: [version-update:semver-major]
+      - dependency-name: next
+        update-types: [version-update:semver-major]
+
+  - package-ecosystem: github-actions
+    directory: /
+    target-branch: main
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/London
+    groups:
+      actions:
+        patterns: ["*"]

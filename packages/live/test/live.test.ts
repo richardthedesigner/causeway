@@ -81,3 +81,40 @@ describe("weather to conditions", () => {
     expect(forecastConditions(ahead(), new Date("2026-10-06T14:00:00Z"), now).summary).toBe("Dry");
   });
 });
+
+describe("Street Manager activities (DATA-05)", async () => {
+  const { streetManagerActivityObservations } = await import("../src/works.js");
+  const osgb = (e: number, n: number): [number, number] => [e / 1e5, n / 1e5];
+  const act = (over: Record<string, string | null> = {}) => ({
+    ref: "ARN-1",
+    event_time: "2026-09-15T10:00:00Z",
+    event_type: "ACTIVITY_CREATED",
+    geom: "POINT(425000 564000)",
+    street: "STOREY'S GATE",
+    activity: "skips",
+    details: null,
+    location_type: "Footway",
+    cancelled: "No",
+    start_date: "2026-10-01T00:00:00.000Z",
+    start_time: null,
+    end_date: "2026-10-05T00:00:00.000Z",
+    end_time: null,
+    ...over,
+  });
+  const now = new Date("2026-10-04T12:00:00Z");
+
+  it("keeps activities on the pavement, never as closed, until the end of the last day", () => {
+    const [o] = streetManagerActivityObservations([act()], osgb, now);
+    expect(o).toMatchObject({ id: "sma:ARN-1", footway: "affected", description: "A skip on the pavement", street: "Storey's Gate", start: "2026-10-01T00:00:00.000Z", end: "2026-10-05T23:59:59.000Z" });
+  });
+
+  it("uses the end time when given, and adds TfL-style detail for other activities", () => {
+    const [o] = streetManagerActivityObservations([act({ activity: "other", details: "Bridge maintenance works", end_time: "2026-10-05T18:00:00.000Z" })], osgb, now);
+    expect(o!.end).toBe("2026-10-05T18:00:00.000Z");
+    expect(o!.description).toBe("An obstruction on the pavement (Bridge maintenance works)");
+  });
+
+  it("leaves out road-only, cancelled and finished activities", () => {
+    expect(streetManagerActivityObservations([act({ location_type: "Carriageway" }), act({ cancelled: "Yes" }), act({ event_type: "ACTIVITY_CANCELLED" }), act({ end_date: "2026-10-01T00:00:00.000Z" })], osgb, now)).toEqual([]);
+  });
+});

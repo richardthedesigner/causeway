@@ -2,38 +2,26 @@
  * WCAG 2.2 AA check of the built app with axe-core, light and dark, on the
  * screens people use most: start, search results, a route with buses and
  * toilets (every section open), first-visit setup, the device list and the
- * device settings.
+ * device settings, with a battery range, and the update prompt. Then the
+ * setup and device settings sheets on a 320 by 640 phone at 200% text: the
+ * header takes at most a third of the screen, and nothing runs off the side (STAB-11).
  *   pnpm web:build && pnpm a11y
- * Exits 1 on any violation. Runs in CI (.github/workflows/ci.yml).
+ * Exits 1 on any violation, or anything the Content Security Policy blocks. Runs in CI (.github/workflows/ci.yml).
  */
-import { createReadStream, existsSync, readFileSync, statSync } from "node:fs";
-import { createServer } from "node:http";
+import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
-import { extname, join, normalize } from "node:path";
-import { chromium } from "playwright";
+import { launchBrowser, serveOut, watchCsp } from "./serve-out.mjs";
 
 const require = createRequire(import.meta.url);
 const AXE = readFileSync(require.resolve("axe-core/axe.min.js"), "utf8");
-const OUT = join(import.meta.dirname, "../apps/web/out");
-if (!existsSync(OUT)) throw new Error("apps/web/out missing: run pnpm web:build first");
-
-const TYPES = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".json": "application/json", ".gz": "application/gzip", ".pmtiles": "application/octet-stream", ".webmanifest": "application/manifest+json" };
-const server = createServer((req, res) => {
-  let path = normalize(decodeURIComponent((req.url ?? "/").split("?")[0]));
-  if (path.endsWith("/")) path += "index.html";
-  const file = join(OUT, path);
-  if (!file.startsWith(OUT) || !existsSync(file) || !statSync(file).isFile()) return res.writeHead(404).end();
-  res.writeHead(200, { "content-type": TYPES[extname(file)] ?? "application/octet-stream" });
-  createReadStream(file).pipe(res);
-});
-await new Promise((r) => server.listen(0, "127.0.0.1", r));
-const url = `http://127.0.0.1:${server.address().port}/`;
-
-// Locally the pre-installed Chromium may not match Playwright's expected build; CI installs the right one.
-const browser = await chromium.launch(existsSync("/opt/pw-browsers/chromium") && !process.env.CI ? { executablePath: "/opt/pw-browsers/chromium" } : {});
+const server = await serveOut();
+const url = server.url;
+const browser = await launchBrowser();
+const csp = [];
 const failures = [];
 for (const scheme of ["light", "dark"]) {
   const page = await (await browser.newContext({ viewport: { width: 390, height: 844 }, colorScheme: scheme })).newPage();
+  watchCsp(page, csp);
   const check = async (name) => {
     await page.addScriptTag({ content: AXE });
     const violations = await page.evaluate(async () => (await window.axe.run(document, { runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"] } })).violations.map((v) => ({ id: v.id, impact: v.impact, help: v.help, targets: v.nodes.slice(0, 3).map((n) => n.target.join(" ")) })));
@@ -78,11 +66,65 @@ for (const scheme of ["light", "dark"]) {
   await page.getByRole("menuitem", { name: /^Edit/ }).click();
   await page.getByRole("dialog").filter({ hasText: "Your limits" }).waitFor();
   await check("device settings");
+  // Cherry is a powerchair, so the limits offer a battery range (D-043).
+  await page.getByText("Your limits", { exact: true }).first().click();
+  await page.getByRole("switch", { name: "Warn me about battery range" }).click();
+  await page.getByRole("slider", { name: "Range on one charge" }).waitFor();
+  await check("device settings, battery range");
+
+  // A new build takes over an open page: the update prompt (DEP-04). The first takeover is a first visit.
+  await page.keyboard.press("Escape");
+  await page.evaluate(() => {
+    navigator.serviceWorker.dispatchEvent(new Event("controllerchange"));
+    navigator.serviceWorker.dispatchEvent(new Event("controllerchange"));
+  });
+  await page.getByRole("button", { name: "Reload" }).waitFor();
+  await check("update prompt");
+}
+// Reflow (WCAG 1.4.4, 1.4.10): the device sheets at 320 by 640 with text at 200% (STAB-11).
+{
+  const page = await (await browser.newContext({ viewport: { width: 320, height: 640 } })).newPage();
+  watchCsp(page, csp);
+  await page.goto(url);
+  await page.getByPlaceholder("Where to?").waitFor({ timeout: 60_000 });
+  await page.addStyleTag({ content: "html { font-size: 200% !important }" });
+  const reflow = async (name) => {
+    const r = await page.evaluate(() => {
+      const d = [...document.querySelectorAll("[role=dialog]")].pop();
+      const box = d.getBoundingClientRect();
+      const off = [...d.querySelectorAll("*")].filter((e) => {
+        const b = e.getBoundingClientRect();
+        return b.width > 0 && (b.right > box.right + 1 || b.left < box.left - 1);
+      });
+      return { off: off.slice(0, 3).map((e) => `${e.tagName.toLowerCase()} "${(e.textContent ?? "").trim().slice(0, 30)}"`), header: d.querySelector("header")?.getBoundingClientRect().height ?? 0 };
+    });
+    const problems = [...r.off.map((o) => `${o} runs off the side`), ...(r.header > 640 / 3 ? [`the header takes ${Math.round(r.header)} of 640 px, over a third`] : [])];
+    console.log(`200% text / ${name}: ${problems.length ? problems.join("; ") : "fits"}`);
+    for (const p of problems) failures.push(`200% text / ${name} / ${p}`);
+  };
+  await page.getByRole("button", { name: "Set up how you get around" }).first().click();
+  await page.getByRole("dialog", { name: "What do you use?" }).waitFor();
+  await reflow("setup: what do you use?");
+  await page.getByRole("radio", { name: /Powerchair, lightweight/ }).click();
+  await page.getByRole("button", { name: "Next" }).click();
+  await reflow("setup: name");
+  await page.getByLabel("Name").fill("Cherry");
+  await page.getByRole("button", { name: "Next" }).click();
+  await reflow("setup: limits");
+  await page.getByRole("button", { name: "Save Cherry" }).click();
+  await page.getByRole("button", { name: /Routes are for/ }).first().click();
+  await page.getByRole("menuitem", { name: /^Edit/ }).click();
+  await page.getByRole("dialog").filter({ hasText: "Your limits" }).waitFor();
+  for (const d of await page.locator("[role=dialog] details").all()) await d.evaluate((el) => (el.open = true));
+  await page.getByRole("switch", { name: "Warn me about battery range" }).click();
+  await reflow("device settings, every section open");
 }
 await browser.close();
 server.close();
+// axe fetches the page's stylesheets itself to check them; the app never fetches the font CSS, it links it.
+for (const c of csp.filter((c) => !(/'https:\/\/fonts\.googleapis\.com\//.test(c) && /connect-src/.test(c)))) failures.push(`Content Security Policy: ${c}`), console.log(`  [csp] ${c}`);
 if (failures.length) {
-  console.error(`\n${failures.length} accessibility violation(s).`);
+  console.error(`\n${failures.length} accessibility or Content Security Policy problem(s).`);
   process.exit(1);
 }
-console.log("\nNo WCAG 2.2 AA violations found by axe.");
+console.log("\nNo WCAG 2.2 AA violations found by axe, and the device sheets reflow at 200% text.");

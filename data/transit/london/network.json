@@ -11,7 +11,331 @@
    "hub": "HUBSRA",
    "stepFree": "unknown",
    "stepFreeSource": "TfL StopPoint: no step-free information",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "HUBSRA",
+    "outside": "HUBSRA-Outside",
+    "paths": [
+     [
+      "HUBSRA-1000226-BRIDG-91",
+      "HUBSRA-1000226-MEZ-4",
+      null
+     ],
+     [
+      "HUBSRA-1000226-BUS S-90",
+      "HUBSRA-1000226-TH-E-70",
+      null
+     ],
+     [
+      "HUBSRA-1000226-Cen3A-16",
+      "HUBSRA-1000226-CenWB-3",
+      null
+     ],
+     [
+      "HUBSRA-1000226-Cen3A-16",
+      "HUBSRA-1000226-MEZ-4",
+      null
+     ],
+     [
+      "HUBSRA-1000226-CenEB-2",
+      "HUBSRA-1000226-RPL-E-15",
+      null
+     ],
+     [
+      "HUBSRA-1000226-CenWB-3",
+      "HUBSRA-1000226-RPL-W-14",
+      null
+     ],
+     [
+      "HUBSRA-1000226-DLR-17",
+      "HUBSRA-1000226-MEZ-4",
+      null
+     ],
+     [
+      "HUBSRA-1000226-DLR-N-6",
+      "HUBSRA-1000226-TH-W-5",
+      null
+     ],
+     [
+      "HUBSRA-1000226-DLR-S-7",
+      "HUBSRA-1000226-TH-E-70",
+      null
+     ],
+     [
+      "HUBSRA-1000226-GIBBI-93",
+      "HUBSRA-1000226-TH-W-5",
+      null
+     ],
+     [
+      "HUBSRA-1000226-Jubil-8",
+      "HUBSRA-1000226-TH-W-5",
+      null
+     ],
+     [
+      "HUBSRA-1000226-RPL-N-12",
+      "HUBSRA-1000226-RPL-O-9",
+      null
+     ],
+     [
+      "HUBSRA-1000226-CenEB-2",
+      "HUBSRA-Plat06-EB-central",
+      null
+     ],
+     [
+      "HUBSRA-1000226-RPL-E-15",
+      "HUBSRA-Plat08-EB-elizabeth|national-rail",
+      null
+     ],
+     [
+      "HUBSRA-1000226-CenWB-3",
+      "HUBSRA-Plat03-WB-central",
+      null
+     ],
+     [
+      "HUBSRA-1000226-CenWB-3",
+      "HUBSRA-Plat05-WB-elizabeth|national-rail",
+      null
+     ],
+     [
+      "HUBSRA-1000226-DLR-17",
+      "HUBSRA-Plat4A-WB-dlr",
+      null
+     ],
+     [
+      "HUBSRA-1000226-DLR-17",
+      "HUBSRA-Plat4B-WB-dlr",
+      null
+     ],
+     [
+      "HUBSRA-1000226-Jubil-8",
+      "HUBSRA-Plat13-WB-jubilee",
+      null
+     ],
+     [
+      "HUBSRA-1000226-Jubil-8",
+      "HUBSRA-Plat14-WB-jubilee",
+      null
+     ],
+     [
+      "HUBSRA-1000226-Jubil-8",
+      "HUBSRA-Plat15-WB-jubilee",
+      null
+     ],
+     [
+      "HUBSRA-1000226-DLR-S-7",
+      "HUBSRA-Plat17-SB-dlr",
+      null
+     ],
+     [
+      "HUBSRA-1000226-RPL-N-12",
+      "HUBSRA-Plat01-WB-london-overground",
+      null
+     ],
+     [
+      "HUBSRA-1000226-RPL-N-12",
+      "HUBSRA-Plat02-WB-london-overground",
+      null
+     ],
+     [
+      "HUBSRA-1000226-RPL-O-9",
+      "HUBSRA-Plat01-WB-london-overground",
+      null
+     ],
+     [
+      "HUBSRA-1000226-RPL-O-9",
+      "HUBSRA-Plat02-WB-london-overground",
+      null
+     ],
+     [
+      "HUBSRA-1000226-DLR-N-6",
+      "HUBSRA-Plat16-NB-dlr",
+      null
+     ],
+     [
+      "HUBSRA-1000226-WESTF-92",
+      "HUBSRA-Outside",
+      null
+     ],
+     [
+      "HUBSRA-1000226-Cen3A-16",
+      "HUBSRA-Plat3A-WB-central",
+      null
+     ],
+     [
+      "HUBSRA-Outside",
+      "HUBSRA-1000226-GIBBI-93",
+      null
+     ],
+     [
+      "HUBSRA-1000226-Cen3A-16",
+      "HUBSRA-1000226-D-Bri-76",
+      null
+     ],
+     [
+      "HUBSRA-1000226-CenWB-3",
+      "HUBSRA-1000226-D-Bri-76",
+      null
+     ],
+     [
+      "HUBSRA-1000226-D-Bri-76",
+      "HUBSRA-1000226-DLR-17",
+      null
+     ],
+     [
+      "HUBSRA-1000226-D-Bri-76",
+      "HUBSRA-1000226-RPL-W-14",
+      null
+     ],
+     [
+      "HUBSRA-1000226-Sub-W-10",
+      "HUBSRA-1000226-CenEB-2",
+      "HUBSRA-Lift-10"
+     ],
+     [
+      "HUBSRA-1000226-Sub-W-10",
+      "HUBSRA-1000226-RPL-O-9",
+      "HUBSRA-Lift-12"
+     ],
+     [
+      "HUBSRA-1000226-RPL-O-9",
+      "HUBSRA-1000226-RPL-N-12",
+      "HUBSRA-Lift-12"
+     ],
+     [
+      "HUBSRA-1000226-WESTF-92",
+      "HUBSRA-1000226-Sub-W-10",
+      "HUBSRA-Lift-16"
+     ],
+     [
+      "HUBSRA-1000226-WESTF-92",
+      "HUBSRA-1000226-Sub-M-1",
+      "HUBSRA-Lift-17"
+     ],
+     [
+      "HUBSRA-1000226-Sub-W-10",
+      "HUBSRA-1000226-CenWB-3",
+      "HUBSRA-Lift-3"
+     ],
+     [
+      "HUBSRA-1000226-Sub-M-1",
+      "HUBSRA-1000226-CenEB-2",
+      "HUBSRA-Lift-2"
+     ],
+     [
+      "HUBSRA-1000226-Sub-M-1",
+      "HUBSRA-1000226-CenWB-3",
+      "HUBSRA-Lift-18"
+     ],
+     [
+      "HUBSRA-1000226-MEZ-4",
+      "HUBSRA-1000226-TH-E-70",
+      "HUBSRA-Lift-4"
+     ],
+     [
+      "HUBSRA-1000226-MEZ-4",
+      "HUBSRA-1000226-TH-W-5",
+      "HUBSRA-Lift-5"
+     ],
+     [
+      "HUBSRA-1000226-TH-W-5",
+      "HUBSRA-1000226-Jubil-8",
+      "HUBSRA-Lift-5"
+     ],
+     [
+      "HUBSRA-1000226-MEZ-4",
+      "HUBSRA-1000226-TH-E-70",
+      "HUBSRA-Lift-6"
+     ],
+     [
+      "HUBSRA-1000226-MEZ-4",
+      "HUBSRA-1000226-TH-W-5",
+      "HUBSRA-Lift-7"
+     ],
+     [
+      "HUBSRA-1000226-TH-W-5",
+      "HUBSRA-1000226-Jubil-8",
+      "HUBSRA-Lift-7"
+     ],
+     [
+      "HUBSRA-1000226-Sub-W-10",
+      "HUBSRA-1000226-TH-W-5",
+      "HUBSRA-Lift-8"
+     ],
+     [
+      "HUBSRA-1000226-TH-W-5",
+      "HUBSRA-1000226-Jubil-8",
+      "HUBSRA-Lift-8"
+     ],
+     [
+      "HUBSRA-1000226-Sub-M-1",
+      "HUBSRA-1000226-RPL-O-9",
+      "HUBSRA-Lift-9"
+     ],
+     [
+      "HUBSRA-1000226-RPL-O-9",
+      "HUBSRA-1000226-RPL-N-12",
+      "HUBSRA-Lift-9"
+     ],
+     [
+      "HUBSRA-1000226-Sub-M-1",
+      "HUBSRA-1000226-RPL-X-11",
+      "HUBSRA-Lift-1"
+     ],
+     [
+      "HUBSRA-1000226-Sub-W-10",
+      "HUBSRA-1000226-RPL-X-11",
+      "HUBSRA-Lift-11"
+     ],
+     [
+      "HUBSRA-1000226-Sub-E-75",
+      "HUBSRA-1000226-RPL-S-13",
+      "HUBSRA-Lift-13"
+     ],
+     [
+      "HUBSRA-1000226-Sub-E-75",
+      "HUBSRA-1000226-RPL-S-13",
+      "HUBSRA-Lift-14"
+     ]
+    ],
+    "lines": {
+     "jubilee": {
+      "platforms": [
+       "HUBSRA-Plat13-WB-jubilee",
+       "HUBSRA-Plat14-WB-jubilee",
+       "HUBSRA-Plat15-WB-jubilee"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [
+     {
+      "accessible": false,
+      "radar": false,
+      "insideGate": true,
+      "location": "Located in Southern ticket hall, paid side"
+     },
+     {
+      "accessible": false,
+      "radar": false,
+      "insideGate": true,
+      "location": "Located in Southern ticket hall, paid side"
+     },
+     {
+      "accessible": true,
+      "radar": false,
+      "insideGate": true,
+      "location": "Located in Southern ticket hall, paid side. Baby changing standalone area"
+     },
+     {
+      "accessible": true,
+      "radar": false,
+      "insideGate": true,
+      "location": "Adjacent to DLR platform 16."
+     }
+    ],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZLUWHM": {
    "id": "940GZZLUWHM",
@@ -22,7 +346,155 @@
    "hub": "HUBWEH",
    "stepFree": "unknown",
    "stepFreeSource": "TfL StopPoint: no step-free information",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "HUBWEH",
+    "outside": "HUBWEH-Outside",
+    "paths": [
+     [
+      "HUBWEH-1000262-A-MAN-7",
+      "HUBWEH-1000262-BookH-6",
+      null
+     ],
+     [
+      "HUBWEH-1000262-A-MAN-7",
+      "HUBWEH-1000262-Bus-8",
+      null
+     ],
+     [
+      "HUBWEH-1000262-DisEB-4",
+      "HUBWEH-1000262-DisWB-9",
+      null
+     ],
+     [
+      "HUBWEH-1000262-DLRNB-5",
+      "HUBWEH-1000262-DLRSB-11",
+      null
+     ],
+     [
+      "HUBWEH-1000262-JubEB-2",
+      "HUBWEH-1000262-JubWB-10",
+      null
+     ],
+     [
+      "HUBWEH-1000262-BookH-6",
+      "HUBWEH-Outside",
+      null
+     ],
+     [
+      "HUBWEH-1000262-DisWB-9",
+      "HUBWEH-Plat01-WB-district|hammersmith-city",
+      null
+     ],
+     [
+      "HUBWEH-1000262-DisEB-4",
+      "HUBWEH-Plat02-EB-district|hammersmith-city",
+      null
+     ],
+     [
+      "HUBWEH-1000262-DLRSB-11",
+      "HUBWEH-Plat03-SB-dlr",
+      null
+     ],
+     [
+      "HUBWEH-1000262-DLRNB-5",
+      "HUBWEH-Plat04-NB-dlr",
+      null
+     ],
+     [
+      "HUBWEH-1000262-JubWB-10",
+      "HUBWEH-Plat05-WB-jubilee",
+      null
+     ],
+     [
+      "HUBWEH-1000262-JubEB-2",
+      "HUBWEH-Plat06-EB-jubilee",
+      null
+     ],
+     [
+      "HUBWEH-1000262-RPL-3",
+      "HUBWEH-Plat07-WB-national-rail",
+      null
+     ],
+     [
+      "HUBWEH-1000262-RPL-3",
+      "HUBWEH-Plat08-EB-national-rail",
+      null
+     ],
+     [
+      "HUBWEH-Plat01-WB-district|hammersmith-city",
+      "HUBWEH-Plat02-EB-district|hammersmith-city",
+      null
+     ],
+     [
+      "HUBWEH-Plat03-SB-dlr",
+      "HUBWEH-Plat04-NB-dlr",
+      null
+     ],
+     [
+      "HUBWEH-Plat05-WB-jubilee",
+      "HUBWEH-Plat06-EB-jubilee",
+      null
+     ],
+     [
+      "HUBWEH-Plat07-WB-national-rail",
+      "HUBWEH-Plat08-EB-national-rail",
+      null
+     ],
+     [
+      "HUBWEH-1000262-BookH-6",
+      "HUBWEH-1000262-Footb-1",
+      "HUBWEH-Lift-1"
+     ],
+     [
+      "HUBWEH-1000262-Footb-1",
+      "HUBWEH-1000262-JubEB-2",
+      "HUBWEH-Lift-2"
+     ],
+     [
+      "HUBWEH-1000262-JubEB-2",
+      "HUBWEH-1000262-JubWB-10",
+      "HUBWEH-Lift-2"
+     ],
+     [
+      "HUBWEH-1000262-BookH-6",
+      "HUBWEH-1000262-DisEB-4",
+      "HUBWEH-Lift-4"
+     ],
+     [
+      "HUBWEH-1000262-DisEB-4",
+      "HUBWEH-1000262-DisWB-9",
+      "HUBWEH-Lift-4"
+     ],
+     [
+      "HUBWEH-1000262-Footb-1",
+      "HUBWEH-1000262-DLRNB-5",
+      "HUBWEH-Lift-5"
+     ],
+     [
+      "HUBWEH-1000262-DLRNB-5",
+      "HUBWEH-1000262-DLRSB-11",
+      "HUBWEH-Lift-5"
+     ],
+     [
+      "HUBWEH-1000262-BookH-6",
+      "HUBWEH-1000262-RPL-3",
+      "HUBWEH-Lift-6"
+     ]
+    ],
+    "lines": {
+     "jubilee": {
+      "platforms": [
+       "HUBWEH-Plat05-WB-jubilee",
+       "HUBWEH-Plat06-EB-jubilee"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZLUCGT": {
    "id": "940GZZLUCGT",
@@ -33,7 +505,150 @@
    "hub": "HUBCAN",
    "stepFree": "unknown",
    "stepFreeSource": "TfL StopPoint: no step-free information",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "HUBCAN",
+    "outside": "HUBCAN-Outside",
+    "paths": [
+     [
+      "HUBCAN-1000039-Bus 2-7",
+      "HUBCAN-1000039-ENTRA-3",
+      null
+     ],
+     [
+      "HUBCAN-1000039-DLR1-2",
+      "HUBCAN-1000039-DLR2-16",
+      null
+     ],
+     [
+      "HUBCAN-1000039-DLR3-4",
+      "HUBCAN-1000039-DLR4-6",
+      null
+     ],
+     [
+      "HUBCAN-1000039-JubEB-15",
+      "HUBCAN-1000039-Jubil-1",
+      null
+     ],
+     [
+      "HUBCAN-1000039-BOW-9",
+      "HUBCAN-Outside",
+      null
+     ],
+     [
+      "HUBCAN-1000039-DLR3-4",
+      "HUBCAN-Plat03-EB-dlr",
+      null
+     ],
+     [
+      "HUBCAN-1000039-DLR4-6",
+      "HUBCAN-Plat04-WB-dlr",
+      null
+     ],
+     [
+      "HUBCAN-1000039-DLR1-2",
+      "HUBCAN-Plat01-SB-dlr",
+      null
+     ],
+     [
+      "HUBCAN-1000039-DLR2-16",
+      "HUBCAN-Plat02-NB-dlr",
+      null
+     ],
+     [
+      "HUBCAN-1000039-ENTRA-3",
+      "HUBCAN-Outside",
+      null
+     ],
+     [
+      "HUBCAN-1000039-JubEB-15",
+      "HUBCAN-Plat05-WB-jubilee",
+      null
+     ],
+     [
+      "HUBCAN-1000039-JubEB-15",
+      "HUBCAN-Plat06-EB-jubilee",
+      null
+     ],
+     [
+      "HUBCAN-1000039-Jubil-1",
+      "HUBCAN-Plat05-WB-jubilee",
+      null
+     ],
+     [
+      "HUBCAN-1000039-Jubil-1",
+      "HUBCAN-Plat06-EB-jubilee",
+      null
+     ],
+     [
+      "HUBCAN-Plat01-SB-dlr",
+      "HUBCAN-Plat02-NB-dlr",
+      null
+     ],
+     [
+      "HUBCAN-Plat03-EB-dlr",
+      "HUBCAN-Plat04-WB-dlr",
+      null
+     ],
+     [
+      "HUBCAN-Plat05-WB-jubilee",
+      "HUBCAN-Plat06-EB-jubilee",
+      null
+     ],
+     [
+      "HUBCAN-1000039-BOW-9",
+      "HUBCAN-1000039-BookH-5",
+      "HUBCAN-Lift-1"
+     ],
+     [
+      "HUBCAN-1000039-BookH-5",
+      "HUBCAN-1000039-DLR1-2",
+      "HUBCAN-Lift-2"
+     ],
+     [
+      "HUBCAN-1000039-DLR1-2",
+      "HUBCAN-1000039-DLR2-16",
+      "HUBCAN-Lift-2"
+     ],
+     [
+      "HUBCAN-1000039-ENTRA-3",
+      "HUBCAN-1000039-BookH-5",
+      "HUBCAN-Lift-3"
+     ],
+     [
+      "HUBCAN-1000039-BookH-5",
+      "HUBCAN-1000039-Jubil-1",
+      "HUBCAN-Lift-4"
+     ],
+     [
+      "HUBCAN-1000039-Jubil-1",
+      "HUBCAN-1000039-JubEB-15",
+      "HUBCAN-Lift-4"
+     ],
+     [
+      "HUBCAN-1000039-JubEB-15",
+      "HUBCAN-1000039-DLR3-4",
+      "HUBCAN-Lift-4"
+     ],
+     [
+      "HUBCAN-1000039-DLR3-4",
+      "HUBCAN-1000039-DLR4-6",
+      "HUBCAN-Lift-4"
+     ]
+    ],
+    "lines": {
+     "jubilee": {
+      "platforms": [
+       "HUBCAN-Plat05-WB-jubilee",
+       "HUBCAN-Plat06-EB-jubilee"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZLUNGW": {
    "id": "940GZZLUNGW",
@@ -44,7 +659,100 @@
    "hub": "HUBNGW",
    "stepFree": "yes",
    "stepFreeSource": "TfL StopPoint: AccessViaLift = Yes",
-   "note": "If you require level access to leave the train at Green Park, please make sure that you travel in the correct carriage"
+   "note": "If you require level access to leave the train at Green Park, please make sure that you travel in the correct carriage",
+   "access": {
+    "tflId": "940GZZLUNGW",
+    "outside": "940GZZLUNGW-Outside",
+    "paths": [
+     [
+      "940GZZLUNGW-1000160-BEntr-5",
+      "940GZZLUNGW-1000160-BusSt-3",
+      null
+     ],
+     [
+      "940GZZLUNGW-1000160-BEntr-5",
+      "940GZZLUNGW-Outside",
+      null
+     ],
+     [
+      "940GZZLUNGW-1000160-JubEB-1",
+      "940GZZLUNGW-Plat03-EB-jubilee",
+      null
+     ],
+     [
+      "940GZZLUNGW-1000160-JubWT-2",
+      "940GZZLUNGW-Plat01-WB-jubilee",
+      null
+     ],
+     [
+      "940GZZLUNGW-1000160-JubWT-2",
+      "940GZZLUNGW-Plat02-WB-jubilee",
+      null
+     ],
+     [
+      "940GZZLUNGW-1000160-OEntr-7",
+      "940GZZLUNGW-Outside",
+      null
+     ],
+     [
+      "940GZZLUNGW-Plat01-WB-jubilee",
+      "940GZZLUNGW-Plat02-WB-jubilee",
+      null
+     ],
+     [
+      "940GZZLUNGW-1000160-BookH-4",
+      "940GZZLUNGW-1000160-JubEB-1",
+      "940GZZLUNGW-Lift-1"
+     ],
+     [
+      "940GZZLUNGW-1000160-BookH-4",
+      "940GZZLUNGW-1000160-JubWT-2",
+      "940GZZLUNGW-Lift-2"
+     ],
+     [
+      "940GZZLUNGW-1000160-OEntr-7",
+      "940GZZLUNGW-1000160-BEntr-5",
+      "940GZZLUNGW-Lift-4"
+     ],
+     [
+      "940GZZLUNGW-1000160-BEntr-5",
+      "940GZZLUNGW-1000160-BookH-4",
+      "940GZZLUNGW-Lift-4"
+     ]
+    ],
+    "lines": {
+     "jubilee": {
+      "platforms": [
+       "940GZZLUNGW-Plat01-WB-jubilee",
+       "940GZZLUNGW-Plat02-WB-jubilee",
+       "940GZZLUNGW-Plat03-EB-jubilee"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [
+     {
+      "accessible": false,
+      "radar": false,
+      "insideGate": false,
+      "location": "Located by bus station entrance"
+     },
+     {
+      "accessible": false,
+      "radar": false,
+      "insideGate": false,
+      "location": "Located by bus station entrance"
+     },
+     {
+      "accessible": true,
+      "radar": false,
+      "insideGate": true,
+      "location": "Baby changing is located separately and only available when the information kiosk in the bus station is open"
+     }
+    ],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZLUCYF": {
    "id": "940GZZLUCYF",
@@ -55,7 +763,324 @@
    "hub": "HUBCAW",
    "stepFree": "yes",
    "stepFreeSource": "TfL StopPoint: AccessViaLift = Yes",
-   "note": "200m between Jubilee line and DLR station via the street. If you are boarding the Jubilee line at this station and require level access to leave the train at Green Park, please make sure that you travel in the correct carriage"
+   "note": "200m between Jubilee line and DLR station via the street. If you are boarding the Jubilee line at this station and require level access to leave the train at Green Park, please make sure that you travel in the correct carriage",
+   "access": {
+    "tflId": "HUBCAW",
+    "outside": "HUBCAW-Outside",
+    "paths": [
+     [
+      "HUBCAW-1000038-BUSF-7",
+      "HUBCAW-1000038-BUSG-6",
+      null
+     ],
+     [
+      "HUBCAW-1000038-BUSF-7",
+      "HUBCAW-1000038-PLA-1",
+      null
+     ],
+     [
+      "HUBCAW-1000038-BUSF-7",
+      "HUBCAW-1003008-NORTH-3",
+      null
+     ],
+     [
+      "HUBCAW-1000038-BUSG-6",
+      "HUBCAW-1000038-PLA-1",
+      null
+     ],
+     [
+      "HUBCAW-1000038-BUSG-6",
+      "HUBCAW-1003008-NORTH-3",
+      null
+     ],
+     [
+      "HUBCAW-1000038-BUSG-6",
+      "HUBCAW-1003008-SOUTH-5",
+      null
+     ],
+     [
+      "HUBCAW-1000038-J Mez-11",
+      "HUBCAW-1003008-NORTH-3",
+      null
+     ],
+     [
+      "HUBCAW-1000038-J Mez-11",
+      "HUBCAW-1003008-SOUTH-5",
+      null
+     ],
+     [
+      "HUBCAW-1000038-JubiE-5",
+      "HUBCAW-1000038-JubiW-8",
+      null
+     ],
+     [
+      "HUBCAW-1000038-PLA-1",
+      "HUBCAW-1003008-SOUTH-5",
+      null
+     ],
+     [
+      "HUBCAW-1000038-UBST-13",
+      "HUBCAW-1002163-HLE-3",
+      null
+     ],
+     [
+      "HUBCAW-1002163-HLE-3",
+      "HUBCAW-1003008-NORTH-3",
+      null
+     ],
+     [
+      "HUBCAW-1003008-NORTH-3",
+      "HUBCAW-1000038-Mt Sq-12",
+      null
+     ],
+     [
+      "HUBCAW-1003008-NORTH-3",
+      "HUBCAW-1000038-PLA-1",
+      null
+     ],
+     [
+      "HUBCAW-1003008-NORTH-3",
+      "HUBCAW-1000038-UBST-13",
+      null
+     ],
+     [
+      "HUBCAW-1000038-J Mez-11",
+      "HUBCAW-Outside",
+      null
+     ],
+     [
+      "HUBCAW-1000038-JubiW-8",
+      "HUBCAW-Plat01-WB-jubilee",
+      null
+     ],
+     [
+      "HUBCAW-1000038-JubiE-5",
+      "HUBCAW-Plat02-EB-jubilee",
+      null
+     ],
+     [
+      "HUBCAW-1000038-PLA-1",
+      "HUBCAW-Outside",
+      null
+     ],
+     [
+      "HUBCAW-1000038-UBST-13",
+      "HUBCAW-Outside",
+      null
+     ],
+     [
+      "HUBCAW-1003008-DLR-N-4",
+      "HUBCAW-Plat06-NB-dlr",
+      null
+     ],
+     [
+      "HUBCAW-1003008-DLR-N-4",
+      "HUBCAW-Plat05-NB-dlr",
+      null
+     ],
+     [
+      "HUBCAW-1003008-DLR-N-4",
+      "HUBCAW-Plat04-dlr",
+      null
+     ],
+     [
+      "HUBCAW-1003008-DLR-S-2",
+      "HUBCAW-Plat01-SB-dlr",
+      null
+     ],
+     [
+      "HUBCAW-1003008-DLR-S-2",
+      "HUBCAW-Plat03-dlr",
+      null
+     ],
+     [
+      "HUBCAW-1003008-DLR-S-2",
+      "HUBCAW-Plat02-SB-dlr",
+      null
+     ],
+     [
+      "HUBCAW-1003008-NORTH-3",
+      "HUBCAW-Outside",
+      null
+     ],
+     [
+      "HUBCAW-1003008-SHE-6",
+      "HUBCAW-Outside",
+      null
+     ],
+     [
+      "HUBCAW-1003008-SHW-7",
+      "HUBCAW-Outside",
+      null
+     ],
+     [
+      "HUBCAW-Plat01-WB-jubilee",
+      "HUBCAW-Plat02-EB-jubilee",
+      null
+     ],
+     [
+      "HUBCAW-Plat02-SB-dlr",
+      "HUBCAW-Plat03-dlr",
+      null
+     ],
+     [
+      "HUBCAW-Plat04-dlr",
+      "HUBCAW-Plat05-NB-dlr",
+      null
+     ],
+     [
+      "HUBCAW-Outside",
+      "HUBCAW-1002163-HLE-3",
+      null
+     ],
+     [
+      "HUBCAW-Outside",
+      "HUBCAW-1002163-QE-4",
+      null
+     ],
+     [
+      "HUBCAW-Outside",
+      "HUBCAW-1002163-CAP-7",
+      null
+     ],
+     [
+      "HUBCAW-1002163-EL EB-1",
+      "HUBCAW-PlatA-EB-elizabeth",
+      null
+     ],
+     [
+      "HUBCAW-1002163-EL WB-5",
+      "HUBCAW-PlatB-WB-elizabeth",
+      null
+     ],
+     [
+      "HUBCAW-1003008-DLR M-1",
+      "HUBCAW-1003008-SOUTH-5",
+      null
+     ],
+     [
+      "HUBCAW-1003008-NORTH-3",
+      "HUBCAW-1003008-DLR M-1",
+      "HUBCAW-Lift-DLR 1"
+     ],
+     [
+      "HUBCAW-1003008-NORTH-3",
+      "HUBCAW-1003008-DLR M-1",
+      "HUBCAW-Lift-DLR 2"
+     ],
+     [
+      "HUBCAW-1003008-SHW-7",
+      "HUBCAW-1003008-DLR M-1",
+      "HUBCAW-Lift-DLR S2"
+     ],
+     [
+      "HUBCAW-1003008-DLR M-1",
+      "HUBCAW-1003008-DLR-N-4",
+      "HUBCAW-Lift-DLR S2"
+     ],
+     [
+      "HUBCAW-1003008-SHE-6",
+      "HUBCAW-1003008-DLR M-1",
+      "HUBCAW-Lift-DLR S3"
+     ],
+     [
+      "HUBCAW-1003008-DLR M-1",
+      "HUBCAW-1003008-DLR-S-2",
+      "HUBCAW-Lift-DLR S3"
+     ],
+     [
+      "HUBCAW-1000038-PLA-1",
+      "HUBCAW-1000038-J Mez-11",
+      "HUBCAW-Lift-LU 1"
+     ],
+     [
+      "HUBCAW-1000038-J Mez-11",
+      "HUBCAW-1000038-UBST-13",
+      "HUBCAW-Lift-LU 1"
+     ],
+     [
+      "HUBCAW-1000038-UBST-13",
+      "HUBCAW-1000038-BookJ-2",
+      "HUBCAW-Lift-LU 1"
+     ],
+     [
+      "HUBCAW-1000038-BookJ-2",
+      "HUBCAW-1000038-JubiE-5",
+      "HUBCAW-Lift-LU 2"
+     ],
+     [
+      "HUBCAW-1000038-JubiE-5",
+      "HUBCAW-1000038-JubiW-8",
+      "HUBCAW-Lift-LU 2"
+     ],
+     [
+      "HUBCAW-1002163-HLE-3",
+      "HUBCAW-1002163-QE-4",
+      "HUBCAW-Lift-A"
+     ],
+     [
+      "HUBCAW-1002163-QE-4",
+      "HUBCAW-1002163-BH-2",
+      "HUBCAW-Lift-A"
+     ],
+     [
+      "HUBCAW-1002163-CAP-7",
+      "HUBCAW-1002163-BH-2",
+      "HUBCAW-Lift-B"
+     ],
+     [
+      "HUBCAW-1002163-BH-2",
+      "HUBCAW-1002163-EL EB-1",
+      "HUBCAW-Lift-C"
+     ],
+     [
+      "HUBCAW-1002163-EL EB-1",
+      "HUBCAW-1002163-EL WB-5",
+      "HUBCAW-Lift-C"
+     ],
+     [
+      "HUBCAW-1002163-BH-2",
+      "HUBCAW-1002163-EL EB-1",
+      "HUBCAW-Lift-D"
+     ],
+     [
+      "HUBCAW-1002163-EL EB-1",
+      "HUBCAW-1002163-EL WB-5",
+      "HUBCAW-Lift-D"
+     ]
+    ],
+    "lines": {
+     "jubilee": {
+      "platforms": [
+       "HUBCAW-Plat01-WB-jubilee",
+       "HUBCAW-Plat02-EB-jubilee"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [
+     {
+      "accessible": false,
+      "radar": false,
+      "insideGate": false,
+      "location": "Located in ticket hall"
+     },
+     {
+      "accessible": false,
+      "radar": false,
+      "insideGate": false,
+      "location": "Located in ticket hall"
+     },
+     {
+      "accessible": true,
+      "radar": false,
+      "insideGate": false,
+      "location": "Located in ticket hall"
+     }
+    ],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZLUCWR": {
    "id": "940GZZLUCWR",
@@ -66,7 +1091,100 @@
    "hub": "HUBZCW",
    "stepFree": "unknown",
    "stepFreeSource": "TfL StopPoint: no step-free information",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "HUBZCW",
+    "outside": "HUBZCW-Outside",
+    "paths": [
+     [
+      "HUBZCW-1000037-Bus-6",
+      "HUBZCW-1000037-SURRE-4",
+      null
+     ],
+     [
+      "HUBZCW-1000037-Jubil-1",
+      "HUBZCW-1000037-JubWB-10",
+      null
+     ],
+     [
+      "HUBZCW-1000037-Jubil-1",
+      "HUBZCW-Plat01-WB-jubilee",
+      null
+     ],
+     [
+      "HUBZCW-1000037-Jubil-1",
+      "HUBZCW-Plat02-EB-jubilee",
+      null
+     ],
+     [
+      "HUBZCW-1000037-JubWB-10",
+      "HUBZCW-Plat01-WB-jubilee",
+      null
+     ],
+     [
+      "HUBZCW-1000037-JubWB-10",
+      "HUBZCW-Plat02-EB-jubilee",
+      null
+     ],
+     [
+      "HUBZCW-1000037-RPL-N-2",
+      "HUBZCW-Plat04-NB-london-overground",
+      null
+     ],
+     [
+      "HUBZCW-1000037-RPL-S-3",
+      "HUBZCW-Plat03-SB-london-overground",
+      null
+     ],
+     [
+      "HUBZCW-1000037-SURRE-4",
+      "HUBZCW-Outside",
+      null
+     ],
+     [
+      "HUBZCW-Plat01-WB-jubilee",
+      "HUBZCW-Plat02-EB-jubilee",
+      null
+     ],
+     [
+      "HUBZCW-1000037-RLY-5",
+      "HUBZCW-1000037-RPL-S-3",
+      "HUBZCW-Lift-1"
+     ],
+     [
+      "HUBZCW-1000037-RPL-S-3",
+      "HUBZCW-1000037-JubWB-10",
+      "HUBZCW-Lift-1"
+     ],
+     [
+      "HUBZCW-1000037-JubWB-10",
+      "HUBZCW-1000037-Jubil-1",
+      "HUBZCW-Lift-1"
+     ],
+     [
+      "HUBZCW-1000037-RLY-5",
+      "HUBZCW-1000037-RPL-N-2",
+      "HUBZCW-Lift-2"
+     ],
+     [
+      "HUBZCW-1000037-SURRE-4",
+      "HUBZCW-1000037-RLY-5",
+      "HUBZCW-Lift-4"
+     ]
+    ],
+    "lines": {
+     "jubilee": {
+      "platforms": [
+       "HUBZCW-Plat01-WB-jubilee",
+       "HUBZCW-Plat02-EB-jubilee"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZLUBMY": {
    "id": "940GZZLUBMY",
@@ -77,7 +1195,65 @@
    "hub": null,
    "stepFree": "yes",
    "stepFreeSource": "TfL StopPoint: AccessViaLift = Yes",
-   "note": "If you require level access to leave the train at Green Park, please make sure that you travel in the correct carriage"
+   "note": "If you require level access to leave the train at Green Park, please make sure that you travel in the correct carriage",
+   "access": {
+    "tflId": "940GZZLUBMY",
+    "outside": "940GZZLUBMY-Outside",
+    "paths": [
+     [
+      "940GZZLUBMY-1000021-A-JAM-3",
+      "940GZZLUBMY-1000021-BookH-1",
+      null
+     ],
+     [
+      "940GZZLUBMY-1000021-A-JAM-3",
+      "940GZZLUBMY-1000021-Bus-4",
+      null
+     ],
+     [
+      "940GZZLUBMY-1000021-Jubil-2",
+      "940GZZLUBMY-1000021-JubWB-9",
+      null
+     ],
+     [
+      "940GZZLUBMY-1000021-BookH-1",
+      "940GZZLUBMY-Outside",
+      null
+     ],
+     [
+      "940GZZLUBMY-1000021-Jubil-2",
+      "940GZZLUBMY-Plat01-WB-jubilee",
+      null
+     ],
+     [
+      "940GZZLUBMY-1000021-Jubil-2",
+      "940GZZLUBMY-Plat02-EB-jubilee",
+      null
+     ],
+     [
+      "940GZZLUBMY-Plat01-WB-jubilee",
+      "940GZZLUBMY-Plat02-EB-jubilee",
+      null
+     ],
+     [
+      "940GZZLUBMY-1000021-BookH-1",
+      "940GZZLUBMY-1000021-Jubil-2",
+      "940GZZLUBMY-Lift-1"
+     ]
+    ],
+    "lines": {
+     "jubilee": {
+      "platforms": [
+       "940GZZLUBMY-Plat01-WB-jubilee",
+       "940GZZLUBMY-Plat02-EB-jubilee"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZLULNB": {
    "id": "940GZZLULNB",
@@ -88,7 +1264,269 @@
    "hub": "HUBLBG",
    "stepFree": "unknown",
    "stepFreeSource": "TfL StopPoint: no step-free information",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "HUBLBG",
+    "outside": "HUBLBG-Outside",
+    "paths": [
+     [
+      "HUBLBG-1000139-A-DUK-6",
+      "HUBLBG-1000139-BookJ-3",
+      null
+     ],
+     [
+      "HUBLBG-1000139-A-DUK-6",
+      "HUBLBG-1000139-BUS S-7",
+      null
+     ],
+     [
+      "HUBLBG-1000139-A-DUK-6",
+      "HUBLBG-1000139-Bus-1",
+      null
+     ],
+     [
+      "HUBLBG-1000139-A-DUK-6",
+      "HUBLBG-1000139-DSB-15",
+      null
+     ],
+     [
+      "HUBLBG-1000139-BookJ-3",
+      "HUBLBG-1000139-D-RAI-5",
+      null
+     ],
+     [
+      "HUBLBG-1000139-BookJ-3",
+      "HUBLBG-1000139-SStTo-19",
+      null
+     ],
+     [
+      "HUBLBG-1000139-BOROU-4",
+      "HUBLBG-1000139-BUS S-7",
+      null
+     ],
+     [
+      "HUBLBG-1000139-BOROU-4",
+      "HUBLBG-1000139-Bus-1",
+      null
+     ],
+     [
+      "HUBLBG-1000139-BOROU-4",
+      "HUBLBG-1000139-DSB-15",
+      null
+     ],
+     [
+      "HUBLBG-1000139-BUS S-7",
+      "HUBLBG-1000139-Bus-1",
+      null
+     ],
+     [
+      "HUBLBG-1000139-BUS S-7",
+      "HUBLBG-1000139-D-RAI-5",
+      null
+     ],
+     [
+      "HUBLBG-1000139-BUS S-7",
+      "HUBLBG-1000139-DSB-15",
+      null
+     ],
+     [
+      "HUBLBG-1000139-BUS S-7",
+      "HUBLBG-1000139-EntR-13",
+      null
+     ],
+     [
+      "HUBLBG-1000139-Bus-1",
+      "HUBLBG-1000139-D-RAI-5",
+      null
+     ],
+     [
+      "HUBLBG-1000139-Bus-1",
+      "HUBLBG-1000139-DSB-15",
+      null
+     ],
+     [
+      "HUBLBG-1000139-Bus-1",
+      "HUBLBG-1000139-EntR-13",
+      null
+     ],
+     [
+      "HUBLBG-1000139-D-RAI-5",
+      "HUBLBG-1000139-DSB-15",
+      null
+     ],
+     [
+      "HUBLBG-1000139-EntR-13",
+      "HUBLBG-1000139-SStTo-19",
+      null
+     ],
+     [
+      "HUBLBG-1000139-JubEB-2",
+      "HUBLBG-1000139-JubWB-27",
+      null
+     ],
+     [
+      "HUBLBG-1000139-NorNB-9",
+      "HUBLBG-1000139-NorSB-28",
+      null
+     ],
+     [
+      "HUBLBG-1000139-RLY-16",
+      "HUBLBG-1000139-SStTh-17",
+      null
+     ],
+     [
+      "HUBLBG-1000139-RLY-16",
+      "HUBLBG-1000139-SStTo-19",
+      null
+     ],
+     [
+      "HUBLBG-1000139-RPL-T-11",
+      "HUBLBG-1000139-UpFlr-18",
+      null
+     ],
+     [
+      "HUBLBG-1000139-RPL10-24",
+      "HUBLBG-1000139-UpFlr-18",
+      null
+     ],
+     [
+      "HUBLBG-1000139-RPL13-25",
+      "HUBLBG-1000139-UpFlr-18",
+      null
+     ],
+     [
+      "HUBLBG-1000139-RPL15-26",
+      "HUBLBG-1000139-UpFlr-18",
+      null
+     ],
+     [
+      "HUBLBG-1000139-A-DUK-6",
+      "HUBLBG-Outside",
+      null
+     ],
+     [
+      "HUBLBG-1000139-D-RAI-5",
+      "HUBLBG-Outside",
+      null
+     ],
+     [
+      "HUBLBG-1000139-EntR-13",
+      "HUBLBG-Outside",
+      null
+     ],
+     [
+      "HUBLBG-1000139-BOROU-4",
+      "HUBLBG-Outside",
+      null
+     ],
+     [
+      "HUBLBG-1000139-JubWB-27",
+      "HUBLBG-Plat03-WB-jubilee",
+      null
+     ],
+     [
+      "HUBLBG-1000139-JubEB-2",
+      "HUBLBG-Plat04-EB-jubilee",
+      null
+     ],
+     [
+      "HUBLBG-1000139-NorNB-9",
+      "HUBLBG-Plat01-NB-northern",
+      null
+     ],
+     [
+      "HUBLBG-1000139-NorSB-28",
+      "HUBLBG-Plat02-SB-northern",
+      null
+     ],
+     [
+      "HUBLBG-1000139-SStTh-17",
+      "HUBLBG-Outside",
+      null
+     ],
+     [
+      "HUBLBG-1000139-SStTo-19",
+      "HUBLBG-Outside",
+      null
+     ],
+     [
+      "HUBLBG-Plat04-SB-national-rail",
+      "HUBLBG-1000139-RPL45-22",
+      null
+     ],
+     [
+      "HUBLBG-Plat05-NB-national-rail",
+      "HUBLBG-1000139-RPL45-22",
+      null
+     ],
+     [
+      "HUBLBG-1000139-BookJ-3",
+      "HUBLBG-1000139-JubEB-2",
+      "HUBLBG-Lift-2"
+     ],
+     [
+      "HUBLBG-1000139-JubEB-2",
+      "HUBLBG-1000139-JubWB-27",
+      "HUBLBG-Lift-2"
+     ],
+     [
+      "HUBLBG-1000139-BOROU-4",
+      "HUBLBG-1000139-BookN-8",
+      "HUBLBG-Lift-3"
+     ],
+     [
+      "HUBLBG-1000139-BookN-8",
+      "HUBLBG-1000139-NorNB-9",
+      "HUBLBG-Lift-4"
+     ],
+     [
+      "HUBLBG-1000139-NorNB-9",
+      "HUBLBG-1000139-NorSB-28",
+      "HUBLBG-Lift-4"
+     ],
+     [
+      "HUBLBG-1000139-RLY-16",
+      "HUBLBG-1000139-RPL45-22",
+      "HUBLBG-Lift-5"
+     ],
+     [
+      "HUBLBG-1000139-RLY-16",
+      "HUBLBG-1000139-UpFlr-18",
+      "HUBLBG-Lift-6"
+     ]
+    ],
+    "lines": {
+     "jubilee": {
+      "platforms": [
+       "HUBLBG-Plat03-WB-jubilee",
+       "HUBLBG-Plat04-EB-jubilee"
+      ],
+      "mapped": true,
+      "train": "Level boarding at 2 centre doors on car 5; 2 centre doors on car 2. Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [
+     {
+      "accessible": false,
+      "radar": false,
+      "insideGate": false,
+      "location": "Located in National Rail station"
+     },
+     {
+      "accessible": false,
+      "radar": false,
+      "insideGate": false,
+      "location": "Located in National Rail station"
+     },
+     {
+      "accessible": true,
+      "radar": false,
+      "insideGate": false,
+      "location": "Located in National Rail station"
+     }
+    ],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZLUSWK": {
    "id": "940GZZLUSWK",
@@ -99,7 +1537,80 @@
    "hub": null,
    "stepFree": "yes",
    "stepFreeSource": "TfL StopPoint: AccessViaLift = Yes",
-   "note": "If you require level access to leave the train at Green Park, please make sure that you travel in the correct carriage"
+   "note": "If you require level access to leave the train at Green Park, please make sure that you travel in the correct carriage",
+   "access": {
+    "tflId": "940GZZLUSWK",
+    "outside": "940GZZLUSWK-Outside",
+    "paths": [
+     [
+      "940GZZLUSWK-1000215-A-CUT-2",
+      "940GZZLUSWK-1000215-Bus-7",
+      null
+     ],
+     [
+      "940GZZLUSWK-1000215-Jubil-3",
+      "940GZZLUSWK-1000215-JubWB-9",
+      null
+     ],
+     [
+      "940GZZLUSWK-1000215-A-CUT-2",
+      "940GZZLUSWK-Outside",
+      null
+     ],
+     [
+      "940GZZLUSWK-1000215-Jubil-3",
+      "940GZZLUSWK-Plat01-WB-jubilee",
+      null
+     ],
+     [
+      "940GZZLUSWK-1000215-Jubil-3",
+      "940GZZLUSWK-Plat02-EB-jubilee",
+      null
+     ],
+     [
+      "940GZZLUSWK-1000215-JubWB-9",
+      "940GZZLUSWK-Plat01-WB-jubilee",
+      null
+     ],
+     [
+      "940GZZLUSWK-1000215-JubWB-9",
+      "940GZZLUSWK-Plat02-EB-jubilee",
+      null
+     ],
+     [
+      "940GZZLUSWK-Plat01-WB-jubilee",
+      "940GZZLUSWK-Plat02-EB-jubilee",
+      null
+     ],
+     [
+      "940GZZLUSWK-1000215-BookH-1",
+      "940GZZLUSWK-1000215-JubWB-9",
+      "940GZZLUSWK-Lift-1"
+     ],
+     [
+      "940GZZLUSWK-1000215-JubWB-9",
+      "940GZZLUSWK-1000215-Jubil-3",
+      "940GZZLUSWK-Lift-1"
+     ],
+     [
+      "940GZZLUSWK-1000215-A-CUT-2",
+      "940GZZLUSWK-1000215-BookH-1",
+      "940GZZLUSWK-Lift-2"
+     ]
+    ],
+    "lines": {
+     "jubilee": {
+      "platforms": [
+       "940GZZLUSWK-Plat01-WB-jubilee",
+       "940GZZLUSWK-Plat02-EB-jubilee"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZLUWLO": {
    "id": "940GZZLUWLO",
@@ -110,7 +1621,224 @@
    "hub": "HUBWAT",
    "stepFree": "unknown",
    "stepFreeSource": "TfL StopPoint: no step-free information",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "HUBWAT",
+    "outside": "HUBWAT-Outside",
+    "paths": [
+     [
+      "HUBWAT-1000254-A-YOR-7",
+      "HUBWAT-1000254-BookB-10",
+      null
+     ],
+     [
+      "HUBWAT-1000254-A-YOR-7",
+      "HUBWAT-1000254-BusB-15",
+      null
+     ],
+     [
+      "HUBWAT-1000254-A-YOR-7",
+      "HUBWAT-1000254-BusD-16",
+      null
+     ],
+     [
+      "HUBWAT-1000254-A-YOR-7",
+      "HUBWAT-1000254-BusHT-17",
+      null
+     ],
+     [
+      "HUBWAT-1000254-B-WOR-13",
+      "HUBWAT-1000254-BookJ-1",
+      null
+     ],
+     [
+      "HUBWAT-1000254-B-WOR-13",
+      "HUBWAT-1000254-BusB-15",
+      null
+     ],
+     [
+      "HUBWAT-1000254-B-WOR-13",
+      "HUBWAT-1000254-BusD-16",
+      null
+     ],
+     [
+      "HUBWAT-1000254-B-WOR-13",
+      "HUBWAT-1000254-BusHT-17",
+      null
+     ],
+     [
+      "HUBWAT-1000254-BookM-18",
+      "HUBWAT-1000254-NRDP-22",
+      null
+     ],
+     [
+      "HUBWAT-1000254-Bus-11",
+      "HUBWAT-1000254-WATER-6",
+      null
+     ],
+     [
+      "HUBWAT-1000254-BusB-15",
+      "HUBWAT-1000254-BusHT-17",
+      null
+     ],
+     [
+      "HUBWAT-1000254-BusD-16",
+      "HUBWAT-1000254-BusHT-17",
+      null
+     ],
+     [
+      "HUBWAT-1000254-C-WBR-71",
+      "HUBWAT-1000254-RPL-14",
+      null
+     ],
+     [
+      "HUBWAT-1000254-E-TEN-73",
+      "HUBWAT-1000254-RPL-14",
+      null
+     ],
+     [
+      "HUBWAT-1000254-F-SAP-74",
+      "HUBWAT-1000254-RPL-14",
+      null
+     ],
+     [
+      "HUBWAT-1000254-G-CUR-26",
+      "HUBWAT-1000254-TSC-23",
+      null
+     ],
+     [
+      "HUBWAT-1000254-IntJu-19",
+      "HUBWAT-1000254-LoCon-12",
+      null
+     ],
+     [
+      "HUBWAT-1000254-JubEB-2",
+      "HUBWAT-1000254-JubWB-25",
+      null
+     ],
+     [
+      "HUBWAT-1000254-NorNB-5",
+      "HUBWAT-1000254-NorSB-24",
+      null
+     ],
+     [
+      "HUBWAT-1000254-RPL-14",
+      "HUBWAT-1000254-WATER-6",
+      null
+     ],
+     [
+      "HUBWAT-1000254-JubWB-25",
+      "HUBWAT-Plat05-WB-jubilee",
+      null
+     ],
+     [
+      "HUBWAT-1000254-JubEB-2",
+      "HUBWAT-Plat06-EB-jubilee",
+      null
+     ],
+     [
+      "HUBWAT-Plat05-WB-jubilee",
+      "HUBWAT-Plat06-EB-jubilee",
+      null
+     ],
+     [
+      "HUBWAT-1000254-B-WOR-13",
+      "HUBWAT-Outside",
+      null
+     ],
+     [
+      "HUBWAT-1000254-BookJ-1",
+      "HUBWAT-Outside",
+      null
+     ],
+     [
+      "HUBWAT-1000254-WCArr-20",
+      "HUBWAT-Plat26-WB-waterloo-city",
+      null
+     ],
+     [
+      "HUBWAT-1000254-BakSB-3",
+      "HUBWAT-1000254-LoCon-12",
+      null
+     ],
+     [
+      "HUBWAT-1000254-BookM-18",
+      "HUBWAT-1000254-WCDep-9",
+      null
+     ],
+     [
+      "HUBWAT-1000254-WCArr-20",
+      "HUBWAT-1000254-BookM-18",
+      "HUBWAT-Lift-1"
+     ],
+     [
+      "HUBWAT-1000254-BookJ-1",
+      "HUBWAT-1000254-IntJu-19",
+      "HUBWAT-Lift-2"
+     ],
+     [
+      "HUBWAT-1000254-IntJu-19",
+      "HUBWAT-1000254-JubEB-2",
+      "HUBWAT-Lift-2"
+     ],
+     [
+      "HUBWAT-1000254-JubEB-2",
+      "HUBWAT-1000254-JubWB-25",
+      "HUBWAT-Lift-2"
+     ],
+     [
+      "HUBWAT-1000254-BookM-18",
+      "HUBWAT-1000254-NRDP-22",
+      "HUBWAT-Lift-3"
+     ],
+     [
+      "HUBWAT-1000254-NRDP-22",
+      "HUBWAT-1000254-TSC-23",
+      "HUBWAT-Lift-3"
+     ],
+     [
+      "HUBWAT-1000254-TSC-23",
+      "HUBWAT-1000254-RPL-14",
+      "HUBWAT-Lift-3"
+     ],
+     [
+      "HUBWAT-1000254-B-WOR-13",
+      "HUBWAT-1000254-RPL-14",
+      "HUBWAT-Lift-4"
+     ]
+    ],
+    "lines": {
+     "jubilee": {
+      "platforms": [
+       "HUBWAT-Plat05-WB-jubilee",
+       "HUBWAT-Plat06-EB-jubilee"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [
+     {
+      "accessible": false,
+      "radar": false,
+      "insideGate": false,
+      "location": "Located in National Rail station"
+     },
+     {
+      "accessible": false,
+      "radar": false,
+      "insideGate": false,
+      "location": "Located in National Rail station"
+     },
+     {
+      "accessible": true,
+      "radar": false,
+      "insideGate": false,
+      "location": "Located in National Rail station"
+     }
+    ],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZLUWSM": {
    "id": "940GZZLUWSM",
@@ -121,7 +1849,113 @@
    "hub": "HUBWSM",
    "stepFree": "yes",
    "stepFreeSource": "TfL StopPoint: AccessViaLift = Yes",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "HUBWSM",
+    "outside": "HUBWSM-Outside",
+    "paths": [
+     [
+      "HUBWSM-1000266-A-BRI-2",
+      "HUBWSM-1000266-Bus-1",
+      null
+     ],
+     [
+      "HUBWSM-1000266-Bus-1",
+      "HUBWSM-1000266-E-WEP-10",
+      null
+     ],
+     [
+      "HUBWSM-1000266-Bus-1",
+      "HUBWSM-1000266-F-WES-7",
+      null
+     ],
+     [
+      "HUBWSM-1000266-Bus-1",
+      "HUBWSM-1000266-G1-PW-9",
+      null
+     ],
+     [
+      "HUBWSM-1000266-Bus-1",
+      "HUBWSM-1000266-G2-PE-8",
+      null
+     ],
+     [
+      "HUBWSM-1000266-A-BRI-2",
+      "HUBWSM-Outside",
+      null
+     ],
+     [
+      "HUBWSM-1000266-DisEB-3",
+      "HUBWSM-Plat02-EB-circle|district",
+      null
+     ],
+     [
+      "HUBWSM-1000266-DisWB-5",
+      "HUBWSM-Plat01-WB-circle|district",
+      null
+     ],
+     [
+      "HUBWSM-1000266-JubEB-6",
+      "HUBWSM-Plat03-EB-jubilee",
+      null
+     ],
+     [
+      "HUBWSM-1000266-JubWB-11",
+      "HUBWSM-Plat04-WB-jubilee",
+      null
+     ],
+     [
+      "HUBWSM-1000266-BookH-4",
+      "HUBWSM-1000266-A-BRI-2",
+      "HUBWSM-Lift-2"
+     ],
+     [
+      "HUBWSM-1000266-BookH-4",
+      "HUBWSM-1000266-DisEB-3",
+      "HUBWSM-Lift-3"
+     ],
+     [
+      "HUBWSM-1000266-BookH-4",
+      "HUBWSM-1000266-DisWB-5",
+      "HUBWSM-Lift-4"
+     ],
+     [
+      "HUBWSM-1000266-DisWB-5",
+      "HUBWSM-1000266-JubEB-6",
+      "HUBWSM-Lift-5"
+     ],
+     [
+      "HUBWSM-1000266-JubEB-6",
+      "HUBWSM-1000266-JubWB-11",
+      "HUBWSM-Lift-5"
+     ]
+    ],
+    "lines": {
+     "jubilee": {
+      "platforms": [
+       "HUBWSM-Plat03-EB-jubilee",
+       "HUBWSM-Plat04-WB-jubilee"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [
+     {
+      "accessible": false,
+      "radar": false,
+      "insideGate": false,
+      "location": "Located in public subway"
+     },
+     {
+      "accessible": false,
+      "radar": false,
+      "insideGate": false,
+      "location": "Located in public subway"
+     }
+    ],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZLUGPK": {
    "id": "940GZZLUGPK",
@@ -132,7 +1966,183 @@
    "hub": null,
    "stepFree": "yes",
    "stepFreeSource": "TfL StopPoint: AccessViaLift = Yes",
-   "note": "You need to make a 220m journey to change between the Jubilee and the Piccadilly line, a 160m journey to change between the Victoria and the Piccadilly line and a 380m journey to change between the Victoria and the Jubilee line"
+   "note": "You need to make a 220m journey to change between the Jubilee and the Piccadilly line, a 160m journey to change between the Victoria and the Piccadilly line and a 380m journey to change between the Victoria and the Jubilee line",
+   "access": {
+    "tflId": "940GZZLUGPK",
+    "outside": "940GZZLUGPK-Outside",
+    "paths": [
+     [
+      "940GZZLUGPK-1000093-A-P-N-10",
+      "940GZZLUGPK-1000093-Bus-14",
+      null
+     ],
+     [
+      "940GZZLUGPK-1000093-B-P-S-8",
+      "940GZZLUGPK-1000093-Bus-14",
+      null
+     ],
+     [
+      "940GZZLUGPK-1000093-Bus-14",
+      "940GZZLUGPK-1000093-C-GRE-12",
+      null
+     ],
+     [
+      "940GZZLUGPK-1000093-Bus-14",
+      "940GZZLUGPK-1000093-D-P-S-4",
+      null
+     ],
+     [
+      "940GZZLUGPK-1000093-Bus-14",
+      "940GZZLUGPK-1000093-E-STR-11",
+      null
+     ],
+     [
+      "940GZZLUGPK-1000093-JUB-19",
+      "940GZZLUGPK-1000093-JubEB-9",
+      null
+     ],
+     [
+      "940GZZLUGPK-1000093-JUB-19",
+      "940GZZLUGPK-1000093-JubWB-3",
+      null
+     ],
+     [
+      "940GZZLUGPK-1000093-PicEB-1",
+      "940GZZLUGPK-1000093-PicWB-15",
+      null
+     ],
+     [
+      "940GZZLUGPK-1000093-VIC-18",
+      "940GZZLUGPK-1000093-VicNB-13",
+      null
+     ],
+     [
+      "940GZZLUGPK-1000093-VIC-18",
+      "940GZZLUGPK-1000093-VicSB-7",
+      null
+     ],
+     [
+      "940GZZLUGPK-1000093-D-P-S-4",
+      "940GZZLUGPK-Outside",
+      null
+     ],
+     [
+      "940GZZLUGPK-1000093-JUB-19",
+      "940GZZLUGPK-Plat05-NB-jubilee",
+      null
+     ],
+     [
+      "940GZZLUGPK-1000093-JUB-19",
+      "940GZZLUGPK-Plat06-SB-jubilee",
+      null
+     ],
+     [
+      "940GZZLUGPK-1000093-PicWB-15",
+      "940GZZLUGPK-Plat01-WB-piccadilly",
+      null
+     ],
+     [
+      "940GZZLUGPK-1000093-PicEB-1",
+      "940GZZLUGPK-Plat02-EB-piccadilly",
+      null
+     ],
+     [
+      "940GZZLUGPK-1000093-VIC-18",
+      "940GZZLUGPK-Plat03-NB-victoria",
+      null
+     ],
+     [
+      "940GZZLUGPK-1000093-VIC-18",
+      "940GZZLUGPK-Plat04-SB-victoria",
+      null
+     ],
+     [
+      "940GZZLUGPK-Plat01-WB-piccadilly",
+      "940GZZLUGPK-Plat02-EB-piccadilly",
+      null
+     ],
+     [
+      "940GZZLUGPK-Plat03-NB-victoria",
+      "940GZZLUGPK-Plat04-SB-victoria",
+      null
+     ],
+     [
+      "940GZZLUGPK-Plat05-NB-jubilee",
+      "940GZZLUGPK-Plat06-SB-jubilee",
+      null
+     ],
+     [
+      "940GZZLUGPK-1000093-BookH-5",
+      "940GZZLUGPK-1000093-C-GRE-12",
+      null
+     ],
+     [
+      "940GZZLUGPK-1000093-LoCon-2",
+      "940GZZLUGPK-1000093-PicEB-1",
+      "940GZZLUGPK-Lift-1"
+     ],
+     [
+      "940GZZLUGPK-1000093-PicEB-1",
+      "940GZZLUGPK-1000093-PicWB-15",
+      "940GZZLUGPK-Lift-1"
+     ],
+     [
+      "940GZZLUGPK-1000093-LoCon-2",
+      "940GZZLUGPK-1000093-JUB-19",
+      "940GZZLUGPK-Lift-2"
+     ],
+     [
+      "940GZZLUGPK-1000093-D-P-S-4",
+      "940GZZLUGPK-1000093-BookH-5",
+      "940GZZLUGPK-Lift-4"
+     ],
+     [
+      "940GZZLUGPK-1000093-BookH-5",
+      "940GZZLUGPK-1000093-VIC-18",
+      "940GZZLUGPK-Lift-5"
+     ],
+     [
+      "940GZZLUGPK-1000093-VIC-18",
+      "940GZZLUGPK-1000093-LoCon-2",
+      "940GZZLUGPK-Lift-5"
+     ],
+     [
+      "940GZZLUGPK-1000093-BookH-5",
+      "940GZZLUGPK-1000093-VIC-18",
+      "940GZZLUGPK-Lift-6"
+     ],
+     [
+      "940GZZLUGPK-1000093-VIC-18",
+      "940GZZLUGPK-1000093-LoCon-2",
+      "940GZZLUGPK-Lift-6"
+     ]
+    ],
+    "lines": {
+     "jubilee": {
+      "platforms": [
+       "940GZZLUGPK-Plat05-NB-jubilee",
+       "940GZZLUGPK-Plat06-SB-jubilee"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [
+     {
+      "accessible": false,
+      "radar": false,
+      "insideGate": false,
+      "location": null
+     },
+     {
+      "accessible": false,
+      "radar": false,
+      "insideGate": false,
+      "location": null
+     }
+    ],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZLUBND": {
    "id": "940GZZLUBND",
@@ -143,7 +2153,290 @@
    "hub": "HUBBDS",
    "stepFree": "unknown",
    "stepFreeSource": "TfL StopPoint: no step-free information",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "HUBBDS",
+    "outside": "HUBBDS-Outside",
+    "paths": [
+     [
+      "HUBBDS-1000025-A-O-S-7",
+      "HUBBDS-1000025-BusN-14",
+      null
+     ],
+     [
+      "HUBBDS-1000025-A-O-S-7",
+      "HUBBDS-1000025-BusU-1",
+      null
+     ],
+     [
+      "HUBBDS-1000025-A-O-S-7",
+      "HUBBDS-1000025-BusV-13",
+      null
+     ],
+     [
+      "HUBBDS-1000025-B-DAV-10",
+      "HUBBDS-1000025-BusN-14",
+      null
+     ],
+     [
+      "HUBBDS-1000025-B-DAV-10",
+      "HUBBDS-1000025-BusU-1",
+      null
+     ],
+     [
+      "HUBBDS-1000025-B-DAV-10",
+      "HUBBDS-1000025-BusV-13",
+      null
+     ],
+     [
+      "HUBBDS-1000025-B-GIL-9",
+      "HUBBDS-1000025-BusN-14",
+      null
+     ],
+     [
+      "HUBBDS-1000025-B-GIL-9",
+      "HUBBDS-1000025-BusU-1",
+      null
+     ],
+     [
+      "HUBBDS-1000025-B-GIL-9",
+      "HUBBDS-1000025-BusV-13",
+      null
+     ],
+     [
+      "HUBBDS-1000025-B-OXF-11",
+      "HUBBDS-1000025-BusN-14",
+      null
+     ],
+     [
+      "HUBBDS-1000025-B-OXF-11",
+      "HUBBDS-1000025-BusU-1",
+      null
+     ],
+     [
+      "HUBBDS-1000025-B-OXF-11",
+      "HUBBDS-1000025-BusV-13",
+      null
+     ],
+     [
+      "HUBBDS-1000025-B-WES-8",
+      "HUBBDS-1000025-BusN-14",
+      null
+     ],
+     [
+      "HUBBDS-1000025-B-WES-8",
+      "HUBBDS-1000025-BusU-1",
+      null
+     ],
+     [
+      "HUBBDS-1000025-B-WES-8",
+      "HUBBDS-1000025-BusV-13",
+      null
+     ],
+     [
+      "HUBBDS-1000025-BusN-14",
+      "HUBBDS-1000025-BusU-1",
+      null
+     ],
+     [
+      "HUBBDS-1000025-BusN-14",
+      "HUBBDS-1000025-BusV-13",
+      null
+     ],
+     [
+      "HUBBDS-1000025-BusN-14",
+      "HUBBDS-1000025-C-STR-6",
+      null
+     ],
+     [
+      "HUBBDS-1000025-BusU-1",
+      "HUBBDS-1000025-BusV-13",
+      null
+     ],
+     [
+      "HUBBDS-1000025-BusU-1",
+      "HUBBDS-1000025-C-STR-6",
+      null
+     ],
+     [
+      "HUBBDS-1000025-BusV-13",
+      "HUBBDS-1000025-C-STR-6",
+      null
+     ],
+     [
+      "HUBBDS-1000025-CenEB-2",
+      "HUBBDS-1000025-CenWB-28",
+      null
+     ],
+     [
+      "HUBBDS-1000025-D-DSC-19",
+      "HUBBDS-1000025-DSBH-23",
+      null
+     ],
+     [
+      "HUBBDS-1000025-E-HSQ-20",
+      "HUBBDS-1000025-HSQBH-24",
+      null
+     ],
+     [
+      "HUBBDS-1000025-EL EB-18",
+      "HUBBDS-1000025-ELEL-22",
+      null
+     ],
+     [
+      "HUBBDS-1000025-EL EB-18",
+      "HUBBDS-1000025-ELWL-21",
+      null
+     ],
+     [
+      "HUBBDS-1000025-EL WB-25",
+      "HUBBDS-1000025-ELEL-22",
+      null
+     ],
+     [
+      "HUBBDS-1000025-EL WB-25",
+      "HUBBDS-1000025-ELWL-21",
+      null
+     ],
+     [
+      "HUBBDS-1000025-ELI-17",
+      "HUBBDS-1000025-ELIJ-27",
+      null
+     ],
+     [
+      "HUBBDS-1000025-JubNB-4",
+      "HUBBDS-1000025-JubSB-5",
+      null
+     ],
+     [
+      "HUBBDS-1000025-CenWB-28",
+      "HUBBDS-Plat01-WB-central",
+      null
+     ],
+     [
+      "HUBBDS-1000025-CenEB-2",
+      "HUBBDS-Plat02-EB-central",
+      null
+     ],
+     [
+      "HUBBDS-1000025-C-STR-6",
+      "HUBBDS-Outside",
+      null
+     ],
+     [
+      "HUBBDS-1000025-JubNB-4",
+      "HUBBDS-Plat03-NB-jubilee",
+      null
+     ],
+     [
+      "HUBBDS-1000025-JubNB-4",
+      "HUBBDS-Plat04-SB-jubilee",
+      null
+     ],
+     [
+      "HUBBDS-1000025-JubSB-5",
+      "HUBBDS-Plat03-NB-jubilee",
+      null
+     ],
+     [
+      "HUBBDS-1000025-JubSB-5",
+      "HUBBDS-Plat04-SB-jubilee",
+      null
+     ],
+     [
+      "HUBBDS-Plat01-WB-central",
+      "HUBBDS-Plat02-EB-central",
+      null
+     ],
+     [
+      "HUBBDS-Plat03-NB-jubilee",
+      "HUBBDS-Plat04-SB-jubilee",
+      null
+     ],
+     [
+      "HUBBDS-Outside",
+      "HUBBDS-1000025-E-HSQ-20",
+      null
+     ],
+     [
+      "HUBBDS-Outside",
+      "HUBBDS-1000025-D-DSC-19",
+      null
+     ],
+     [
+      "HUBBDS-PlatA-EB-elizabeth",
+      "HUBBDS-1000025-EL EB-18",
+      null
+     ],
+     [
+      "HUBBDS-PlatB-WB-elizabeth",
+      "HUBBDS-1000025-EL WB-25",
+      null
+     ],
+     [
+      "HUBBDS-1000025-BookH-12",
+      "HUBBDS-1000025-CJL-16",
+      "HUBBDS-Lift-1"
+     ],
+     [
+      "HUBBDS-1000025-CJL-16",
+      "HUBBDS-1000025-JubNB-4",
+      "HUBBDS-Lift-2"
+     ],
+     [
+      "HUBBDS-1000025-JubNB-4",
+      "HUBBDS-1000025-JubSB-5",
+      "HUBBDS-Lift-2"
+     ],
+     [
+      "HUBBDS-1000025-ELIJ-27",
+      "HUBBDS-1000025-CJL-16",
+      "HUBBDS-Lift-3"
+     ],
+     [
+      "HUBBDS-1000025-CJL-16",
+      "HUBBDS-1000025-CenEB-2",
+      "HUBBDS-Lift-3"
+     ],
+     [
+      "HUBBDS-1000025-CenEB-2",
+      "HUBBDS-1000025-CenWB-28",
+      "HUBBDS-Lift-3"
+     ],
+     [
+      "HUBBDS-1000025-C-STR-6",
+      "HUBBDS-1000025-BookH-12",
+      "HUBBDS-Lift-4"
+     ],
+     [
+      "HUBBDS-1000025-DSBH-23",
+      "HUBBDS-1000025-ELI-17",
+      "HUBBDS-Lift-5"
+     ],
+     [
+      "HUBBDS-1000025-ELI-17",
+      "HUBBDS-1000025-ELWL-21",
+      "HUBBDS-Lift-5"
+     ],
+     [
+      "HUBBDS-1000025-HSQBH-24",
+      "HUBBDS-1000025-ELEL-22",
+      "HUBBDS-Lift-6"
+     ]
+    ],
+    "lines": {
+     "jubilee": {
+      "platforms": [
+       "HUBBDS-Plat03-NB-jubilee",
+       "HUBBDS-Plat04-SB-jubilee"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train. Staff can put out a manual ramp."
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZLUBST": {
    "id": "940GZZLUBST",
@@ -154,7 +2447,148 @@
    "hub": null,
    "stepFree": "unknown",
    "stepFreeSource": "TfL StopPoint: no step-free information",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "940GZZLUBST",
+    "outside": "940GZZLUBST-Outside",
+    "paths": [
+     [
+      "940GZZLUBST-1000011-A-M-N-10",
+      "940GZZLUBST-1000011-BusAB-1",
+      null
+     ],
+     [
+      "940GZZLUBST-1000011-A-M-N-10",
+      "940GZZLUBST-1000011-BusDE-17",
+      null
+     ],
+     [
+      "940GZZLUBST-1000011-A-M-N-10",
+      "940GZZLUBST-1000011-BusW-20",
+      null
+     ],
+     [
+      "940GZZLUBST-1000011-B-M-S-11",
+      "940GZZLUBST-1000011-BusAB-1",
+      null
+     ],
+     [
+      "940GZZLUBST-1000011-B-M-S-11",
+      "940GZZLUBST-1000011-BusDE-17",
+      null
+     ],
+     [
+      "940GZZLUBST-1000011-B-M-S-11",
+      "940GZZLUBST-1000011-BusW-20",
+      null
+     ],
+     [
+      "940GZZLUBST-1000011-BakNB-3",
+      "940GZZLUBST-1000011-JubNB-7",
+      null
+     ],
+     [
+      "940GZZLUBST-1000011-BakSB-2",
+      "940GZZLUBST-1000011-JubSB-6",
+      null
+     ],
+     [
+      "940GZZLUBST-1000011-BookB-13",
+      "940GZZLUBST-1000011-C-BAK-12",
+      null
+     ],
+     [
+      "940GZZLUBST-1000011-BookB-13",
+      "940GZZLUBST-1000011-D-M-C-16",
+      null
+     ],
+     [
+      "940GZZLUBST-1000011-BusAB-1",
+      "940GZZLUBST-1000011-BusDE-17",
+      null
+     ],
+     [
+      "940GZZLUBST-1000011-BusAB-1",
+      "940GZZLUBST-1000011-BusW-20",
+      null
+     ],
+     [
+      "940GZZLUBST-1000011-BusAB-1",
+      "940GZZLUBST-1000011-C-BAK-12",
+      null
+     ],
+     [
+      "940GZZLUBST-1000011-BusAB-1",
+      "940GZZLUBST-1000011-D-M-C-16",
+      null
+     ],
+     [
+      "940GZZLUBST-1000011-BusDE-17",
+      "940GZZLUBST-1000011-BusW-20",
+      null
+     ],
+     [
+      "940GZZLUBST-1000011-BusDE-17",
+      "940GZZLUBST-1000011-C-BAK-12",
+      null
+     ],
+     [
+      "940GZZLUBST-1000011-BusDE-17",
+      "940GZZLUBST-1000011-D-M-C-16",
+      null
+     ],
+     [
+      "940GZZLUBST-1000011-BusW-20",
+      "940GZZLUBST-1000011-C-BAK-12",
+      null
+     ],
+     [
+      "940GZZLUBST-1000011-BusW-20",
+      "940GZZLUBST-1000011-D-M-C-16",
+      null
+     ],
+     [
+      "940GZZLUBST-Plat07-SB-jubilee",
+      "940GZZLUBST-Plat08-SB-bakerloo",
+      null
+     ],
+     [
+      "940GZZLUBST-Plat09-NB-bakerloo",
+      "940GZZLUBST-Plat10-NB-jubilee",
+      null
+     ],
+     [
+      "940GZZLUBST-1000011-HamEB-4",
+      "940GZZLUBST-1000011-MetWB-8",
+      null
+     ]
+    ],
+    "lines": {
+     "jubilee": {
+      "platforms": [
+       "940GZZLUBST-Plat07-SB-jubilee",
+       "940GZZLUBST-Plat10-NB-jubilee"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [
+     {
+      "accessible": false,
+      "radar": false,
+      "insideGate": true,
+      "location": "Located in corridor to platform 5"
+     },
+     {
+      "accessible": false,
+      "radar": false,
+      "insideGate": false,
+      "location": "Located in Metropolitan line ticket hall"
+     }
+    ],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZLUSJW": {
    "id": "940GZZLUSJW",
@@ -165,7 +2599,59 @@
    "hub": null,
    "stepFree": "unknown",
    "stepFreeSource": "TfL StopPoint: no step-free information",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "940GZZLUSJW",
+    "outside": "940GZZLUSJW-Outside",
+    "paths": [
+     [
+      "940GZZLUSJW-1000222-A-FIN-2",
+      "940GZZLUSJW-1000222-BookH-4",
+      null
+     ],
+     [
+      "940GZZLUSJW-1000222-A-FIN-2",
+      "940GZZLUSJW-1000222-Bus-1",
+      null
+     ],
+     [
+      "940GZZLUSJW-1000222-JubNB-3",
+      "940GZZLUSJW-1000222-JubSB-6",
+      null
+     ]
+    ],
+    "lines": {
+     "jubilee": {
+      "platforms": [
+       "940GZZLUSJW-Plat01-NB-jubilee",
+       "940GZZLUSJW-Plat02-SB-jubilee"
+      ],
+      "mapped": true,
+      "train": null
+     }
+    },
+    "toilets": [
+     {
+      "accessible": false,
+      "radar": false,
+      "insideGate": false,
+      "location": "Located in ticket hall"
+     },
+     {
+      "accessible": false,
+      "radar": false,
+      "insideGate": false,
+      "location": "Located in ticket hall"
+     },
+     {
+      "accessible": true,
+      "radar": false,
+      "insideGate": false,
+      "location": "Located in ticket hall"
+     }
+    ],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZLUSWC": {
    "id": "940GZZLUSWC",
@@ -176,7 +2662,50 @@
    "hub": null,
    "stepFree": "unknown",
    "stepFreeSource": "TfL StopPoint: no step-free information",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "940GZZLUSWC",
+    "outside": "940GZZLUSWC-Outside",
+    "paths": [
+     [
+      "940GZZLUSWC-1000230-A-A-E-7",
+      "940GZZLUSWC-1000230-Bus-1",
+      null
+     ],
+     [
+      "940GZZLUSWC-1000230-B-A-W-3",
+      "940GZZLUSWC-1000230-Bus-1",
+      null
+     ],
+     [
+      "940GZZLUSWC-1000230-Bus-1",
+      "940GZZLUSWC-1000230-D-FIN-2",
+      null
+     ],
+     [
+      "940GZZLUSWC-1000230-Bus-1",
+      "940GZZLUSWC-1000230-E-A-E-8",
+      null
+     ],
+     [
+      "940GZZLUSWC-1000230-JubB-10",
+      "940GZZLUSWC-1000230-JubNB-5",
+      null
+     ]
+    ],
+    "lines": {
+     "jubilee": {
+      "platforms": [
+       "940GZZLUSWC-Plat01-NB-jubilee",
+       "940GZZLUSWC-Plat02-SB-jubilee"
+      ],
+      "mapped": true,
+      "train": null
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZLUFYR": {
    "id": "940GZZLUFYR",
@@ -187,7 +2716,133 @@
    "hub": null,
    "stepFree": "unknown",
    "stepFreeSource": "TfL StopPoint: no step-free information",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "940GZZLUFYR",
+    "outside": "940GZZLUFYR-Outside",
+    "paths": [
+     [
+      "940GZZLUFYR-1000082-BCQ-10",
+      "940GZZLUFYR-1000082-BUSCH-14",
+      null
+     ],
+     [
+      "940GZZLUFYR-1000082-BCQ-10",
+      "940GZZLUFYR-1000082-BUSFP-13",
+      null
+     ],
+     [
+      "940GZZLUFYR-1000082-BCQ-10",
+      "940GZZLUFYR-1000082-BusSU-1",
+      null
+     ],
+     [
+      "940GZZLUFYR-1000082-BCQ-10",
+      "940GZZLUFYR-1000082-FINCH-6",
+      null
+     ],
+     [
+      "940GZZLUFYR-1000082-BookH-7",
+      "940GZZLUFYR-1000082-FINCH-6",
+      null
+     ],
+     [
+      "940GZZLUFYR-1000082-BUSCH-14",
+      "940GZZLUFYR-1000082-BUSFP-13",
+      null
+     ],
+     [
+      "940GZZLUFYR-1000082-BUSCH-14",
+      "940GZZLUFYR-1000082-BusRT-8",
+      null
+     ],
+     [
+      "940GZZLUFYR-1000082-BUSCH-14",
+      "940GZZLUFYR-1000082-BusSU-1",
+      null
+     ],
+     [
+      "940GZZLUFYR-1000082-BUSCH-14",
+      "940GZZLUFYR-1000082-FINCH-6",
+      null
+     ],
+     [
+      "940GZZLUFYR-1000082-BUSFP-13",
+      "940GZZLUFYR-1000082-BusRT-8",
+      null
+     ],
+     [
+      "940GZZLUFYR-1000082-BUSFP-13",
+      "940GZZLUFYR-1000082-BusSU-1",
+      null
+     ],
+     [
+      "940GZZLUFYR-1000082-BUSFP-13",
+      "940GZZLUFYR-1000082-FINCH-6",
+      null
+     ],
+     [
+      "940GZZLUFYR-1000082-BusRT-8",
+      "940GZZLUFYR-1000082-BusSU-1",
+      null
+     ],
+     [
+      "940GZZLUFYR-1000082-BusRT-8",
+      "940GZZLUFYR-1000082-FINCH-6",
+      null
+     ],
+     [
+      "940GZZLUFYR-1000082-BusSU-1",
+      "940GZZLUFYR-1000082-FINCH-6",
+      null
+     ],
+     [
+      "940GZZLUFYR-1000082-JubNB-2",
+      "940GZZLUFYR-1000082-MetWB-4",
+      null
+     ],
+     [
+      "940GZZLUFYR-1000082-JubSB-3",
+      "940GZZLUFYR-1000082-MetEB-5",
+      null
+     ],
+     [
+      "940GZZLUFYR-Plat01-NB-metropolitan",
+      "940GZZLUFYR-Plat02-NB-jubilee",
+      null
+     ],
+     [
+      "940GZZLUFYR-Plat03-SB-jubilee",
+      "940GZZLUFYR-Plat04-SB-metropolitan",
+      null
+     ]
+    ],
+    "lines": {
+     "jubilee": {
+      "platforms": [
+       "940GZZLUFYR-Plat02-NB-jubilee",
+       "940GZZLUFYR-Plat03-SB-jubilee"
+      ],
+      "mapped": true,
+      "train": "Step up to 16.3 cm and gap up to 12 cm between platform and train. Staff can put out a manual ramp."
+     }
+    },
+    "toilets": [
+     {
+      "accessible": true,
+      "radar": false,
+      "insideGate": true,
+      "location": "Located in ticket hall"
+     },
+     {
+      "accessible": true,
+      "radar": false,
+      "insideGate": true,
+      "location": "Located in ticket hall"
+     }
+    ],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZLUWHP": {
    "id": "940GZZLUWHP",
@@ -198,7 +2853,40 @@
    "hub": "HUBWHD",
    "stepFree": "unknown",
    "stepFreeSource": "TfL StopPoint: no step-free information",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "940GZZLUWHP",
+    "outside": "940GZZLUWHP-Outside",
+    "paths": [
+     [
+      "940GZZLUWHP-1000263-A-WES-2",
+      "940GZZLUWHP-1000263-BookH-4",
+      null
+     ],
+     [
+      "940GZZLUWHP-1000263-A-WES-2",
+      "940GZZLUWHP-1000263-Bus-1",
+      null
+     ],
+     [
+      "940GZZLUWHP-1000263-JubNB-5",
+      "940GZZLUWHP-1000263-JubSB-3",
+      null
+     ]
+    ],
+    "lines": {
+     "jubilee": {
+      "platforms": [
+       "940GZZLUWHP-Plat01-NB-jubilee",
+       "940GZZLUWHP-Plat02-SB-jubilee"
+      ],
+      "mapped": true,
+      "train": null
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZLUKBN": {
    "id": "940GZZLUKBN",
@@ -209,7 +2897,99 @@
    "hub": null,
    "stepFree": "yes",
    "stepFreeSource": "TfL StopPoint: AccessViaLift = Yes",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "940GZZLUKBN",
+    "outside": "940GZZLUKBN-Outside",
+    "paths": [
+     [
+      "940GZZLUKBN-1000126-A-SHO-2",
+      "940GZZLUKBN-1000126-BookH-4",
+      null
+     ],
+     [
+      "940GZZLUKBN-1000126-A-SHO-2",
+      "940GZZLUKBN-1000126-Bus-3",
+      null
+     ],
+     [
+      "940GZZLUKBN-1000126-Jubil-1",
+      "940GZZLUKBN-1000126-JubNB-6",
+      null
+     ],
+     [
+      "940GZZLUKBN-1000126-BookH-4",
+      "940GZZLUKBN-Outside",
+      null
+     ],
+     [
+      "940GZZLUKBN-1000126-Jubil-1",
+      "940GZZLUKBN-Plat01-NB-jubilee",
+      null
+     ],
+     [
+      "940GZZLUKBN-1000126-Jubil-1",
+      "940GZZLUKBN-Plat02-SB-jubilee",
+      null
+     ],
+     [
+      "940GZZLUKBN-1000126-JubNB-6",
+      "940GZZLUKBN-Plat01-NB-jubilee",
+      null
+     ],
+     [
+      "940GZZLUKBN-1000126-JubNB-6",
+      "940GZZLUKBN-Plat02-SB-jubilee",
+      null
+     ],
+     [
+      "940GZZLUKBN-Plat01-NB-jubilee",
+      "940GZZLUKBN-Plat02-SB-jubilee",
+      null
+     ],
+     [
+      "940GZZLUKBN-1000126-BookH-4",
+      "940GZZLUKBN-1000126-Jubil-1",
+      "940GZZLUKBN-Lift-1"
+     ],
+     [
+      "940GZZLUKBN-1000126-Jubil-1",
+      "940GZZLUKBN-1000126-JubNB-6",
+      "940GZZLUKBN-Lift-1"
+     ]
+    ],
+    "lines": {
+     "jubilee": {
+      "platforms": [
+       "940GZZLUKBN-Plat01-NB-jubilee",
+       "940GZZLUKBN-Plat02-SB-jubilee"
+      ],
+      "mapped": true,
+      "train": "Step up to 14 cm and gap up to 8 cm between platform and train. Staff can put out a manual ramp."
+     }
+    },
+    "toilets": [
+     {
+      "accessible": false,
+      "radar": false,
+      "insideGate": false,
+      "location": "Located in ticket hall"
+     },
+     {
+      "accessible": false,
+      "radar": false,
+      "insideGate": false,
+      "location": "Located in ticket hall"
+     },
+     {
+      "accessible": true,
+      "radar": false,
+      "insideGate": true,
+      "location": "Located on platform"
+     }
+    ],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZLUWIG": {
    "id": "940GZZLUWIG",
@@ -220,7 +3000,63 @@
    "hub": null,
    "stepFree": "unknown",
    "stepFreeSource": "TfL StopPoint: no step-free information",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "940GZZLUWIG",
+    "outside": "940GZZLUWIG-Outside",
+    "paths": [
+     [
+      "940GZZLUWIG-1000270-A-WAL-2",
+      "940GZZLUWIG-1000270-BookH-4",
+      null
+     ],
+     [
+      "940GZZLUWIG-1000270-A-WAL-2",
+      "940GZZLUWIG-1000270-Bus-1",
+      null
+     ],
+     [
+      "940GZZLUWIG-1000270-B-WAL-5",
+      "940GZZLUWIG-1000270-BookH-4",
+      null
+     ],
+     [
+      "940GZZLUWIG-1000270-B-WAL-5",
+      "940GZZLUWIG-1000270-Bus-1",
+      null
+     ],
+     [
+      "940GZZLUWIG-1000270-JubNB-3",
+      "940GZZLUWIG-1000270-JubSB-9",
+      null
+     ]
+    ],
+    "lines": {
+     "jubilee": {
+      "platforms": [
+       "940GZZLUWIG-Plat02-NB-jubilee",
+       "940GZZLUWIG-Plat03-SB-jubilee"
+      ],
+      "mapped": true,
+      "train": null
+     }
+    },
+    "toilets": [
+     {
+      "accessible": false,
+      "radar": false,
+      "insideGate": false,
+      "location": "Located in ticket hall"
+     },
+     {
+      "accessible": true,
+      "radar": false,
+      "insideGate": false,
+      "location": "Located in ticket hall"
+     }
+    ],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZLUDOH": {
    "id": "940GZZLUDOH",
@@ -231,7 +3067,59 @@
    "hub": null,
    "stepFree": "unknown",
    "stepFreeSource": "TfL StopPoint: no step-free information",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "940GZZLUDOH",
+    "outside": "940GZZLUDOH-Outside",
+    "paths": [
+     [
+      "940GZZLUDOH-1000061-B-BUR-2",
+      "940GZZLUDOH-1000061-Bus-1",
+      null
+     ],
+     [
+      "940GZZLUDOH-1000061-JubNB-4",
+      "940GZZLUDOH-1000061-JubSB-7",
+      null
+     ],
+     [
+      "940GZZLUDOH-1000061-A-CHA-3",
+      "940GZZLUDOH-1000061-BookH-5",
+      null
+     ]
+    ],
+    "lines": {
+     "jubilee": {
+      "platforms": [
+       "940GZZLUDOH-Plat01-NB-jubilee",
+       "940GZZLUDOH-Plat02-SB-jubilee"
+      ],
+      "mapped": true,
+      "train": null
+     }
+    },
+    "toilets": [
+     {
+      "accessible": false,
+      "radar": false,
+      "insideGate": true,
+      "location": "Located on platform"
+     },
+     {
+      "accessible": false,
+      "radar": false,
+      "insideGate": true,
+      "location": "Located on platform"
+     },
+     {
+      "accessible": true,
+      "radar": false,
+      "insideGate": true,
+      "location": "Located on platform"
+     }
+    ],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZLUNDN": {
    "id": "940GZZLUNDN",
@@ -242,7 +3130,40 @@
    "hub": null,
    "stepFree": "unknown",
    "stepFreeSource": "TfL StopPoint: no step-free information",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "940GZZLUNDN",
+    "outside": "940GZZLUNDN-Outside",
+    "paths": [
+     [
+      "940GZZLUNDN-1000153-A-NEA-2",
+      "940GZZLUNDN-1000153-BookH-4",
+      null
+     ],
+     [
+      "940GZZLUNDN-1000153-A-NEA-2",
+      "940GZZLUNDN-1000153-Bus-1",
+      null
+     ],
+     [
+      "940GZZLUNDN-1000153-JubNB-3",
+      "940GZZLUNDN-1000153-JubSB-6",
+      null
+     ]
+    ],
+    "lines": {
+     "jubilee": {
+      "platforms": [
+       "940GZZLUNDN-Plat02-NB-jubilee",
+       "940GZZLUNDN-Plat03-SB-jubilee"
+      ],
+      "mapped": true,
+      "train": null
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZLUWYP": {
    "id": "940GZZLUWYP",
@@ -253,7 +3174,184 @@
    "hub": null,
    "stepFree": "yes",
    "stepFreeSource": "TfL StopPoint: AccessViaLift = Yes",
-   "note": "If you are travelling to Wembley Park from stations east of Westminster and require level access, please ensure that you board the correct carriage. If you are travelling to Wembley Park from Green Park and require level access, please continue to Ki"
+   "note": "If you are travelling to Wembley Park from stations east of Westminster and require level access, please ensure that you board the correct carriage. If you are travelling to Wembley Park from Green Park and require level access, please continue to Ki",
+   "access": {
+    "tflId": "940GZZLUWYP",
+    "outside": "940GZZLUWYP-Outside",
+    "paths": [
+     [
+      "940GZZLUWYP-1000257-A-BRI-6",
+      "940GZZLUWYP-1000257-BookH-8",
+      null
+     ],
+     [
+      "940GZZLUWYP-1000257-BookH-8",
+      "940GZZLUWYP-1000257-D-BRI-9",
+      null
+     ],
+     [
+      "940GZZLUWYP-1000257-E-STA-5",
+      "940GZZLUWYP-1000257-BookH-8",
+      null
+     ],
+     [
+      "940GZZLUWYP-1000257-JubNB-2",
+      "940GZZLUWYP-1000257-Met2-12",
+      null
+     ],
+     [
+      "940GZZLUWYP-1000257-JubSB-3",
+      "940GZZLUWYP-1000257-Met5-7",
+      null
+     ],
+     [
+      "940GZZLUWYP-1000257-BookH-8",
+      "940GZZLUWYP-Outside",
+      null
+     ],
+     [
+      "940GZZLUWYP-1000257-JubNB-2",
+      "940GZZLUWYP-Plat02-NB-metropolitan",
+      null
+     ],
+     [
+      "940GZZLUWYP-1000257-JubNB-2",
+      "940GZZLUWYP-Plat03-NB-jubilee",
+      null
+     ],
+     [
+      "940GZZLUWYP-1000257-JubSB-3",
+      "940GZZLUWYP-Plat04-SB-jubilee",
+      null
+     ],
+     [
+      "940GZZLUWYP-1000257-JubSB-3",
+      "940GZZLUWYP-Plat05-SB-metropolitan",
+      null
+     ],
+     [
+      "940GZZLUWYP-1000257-MET1-1",
+      "940GZZLUWYP-Plat01-NB-metropolitan",
+      null
+     ],
+     [
+      "940GZZLUWYP-1000257-Met2-12",
+      "940GZZLUWYP-Plat02-NB-metropolitan",
+      null
+     ],
+     [
+      "940GZZLUWYP-1000257-Met2-12",
+      "940GZZLUWYP-Plat03-NB-jubilee",
+      null
+     ],
+     [
+      "940GZZLUWYP-1000257-Met5-7",
+      "940GZZLUWYP-Plat04-SB-jubilee",
+      null
+     ],
+     [
+      "940GZZLUWYP-1000257-Met5-7",
+      "940GZZLUWYP-Plat05-SB-metropolitan",
+      null
+     ],
+     [
+      "940GZZLUWYP-1000257-MET6-4",
+      "940GZZLUWYP-Plat06-SB-metropolitan",
+      null
+     ],
+     [
+      "940GZZLUWYP-Plat02-NB-metropolitan",
+      "940GZZLUWYP-Plat03-NB-jubilee",
+      null
+     ],
+     [
+      "940GZZLUWYP-Plat04-SB-jubilee",
+      "940GZZLUWYP-Plat05-SB-metropolitan",
+      null
+     ],
+     [
+      "940GZZLUWYP-1000257-A-BRI-6",
+      "940GZZLUWYP-1000257-Bus-11",
+      null
+     ],
+     [
+      "940GZZLUWYP-1000257-BookH-8",
+      "940GZZLUWYP-1000257-Bus-11",
+      null
+     ],
+     [
+      "940GZZLUWYP-1000257-Bus-11",
+      "940GZZLUWYP-1000257-D-BRI-9",
+      null
+     ],
+     [
+      "940GZZLUWYP-1000257-BookH-8",
+      "940GZZLUWYP-1000257-MET1-1",
+      "940GZZLUWYP-Lift-1"
+     ],
+     [
+      "940GZZLUWYP-1000257-BookH-8",
+      "940GZZLUWYP-1000257-JubNB-2",
+      "940GZZLUWYP-Lift-2"
+     ],
+     [
+      "940GZZLUWYP-1000257-JubNB-2",
+      "940GZZLUWYP-1000257-Met2-12",
+      "940GZZLUWYP-Lift-2"
+     ],
+     [
+      "940GZZLUWYP-1000257-BookH-8",
+      "940GZZLUWYP-1000257-JubSB-3",
+      "940GZZLUWYP-Lift-3"
+     ],
+     [
+      "940GZZLUWYP-1000257-JubSB-3",
+      "940GZZLUWYP-1000257-Met5-7",
+      "940GZZLUWYP-Lift-3"
+     ],
+     [
+      "940GZZLUWYP-1000257-BookH-8",
+      "940GZZLUWYP-1000257-MET6-4",
+      "940GZZLUWYP-Lift-4"
+     ],
+     [
+      "940GZZLUWYP-1000257-BookH-8",
+      "940GZZLUWYP-1000257-E-STA-5",
+      "940GZZLUWYP-Lift-5"
+     ]
+    ],
+    "lines": {
+     "jubilee": {
+      "platforms": [
+       "940GZZLUWYP-Plat03-NB-jubilee",
+       "940GZZLUWYP-Plat04-SB-jubilee"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [
+     {
+      "accessible": false,
+      "radar": false,
+      "insideGate": true,
+      "location": "Located on platform 2"
+     },
+     {
+      "accessible": false,
+      "radar": false,
+      "insideGate": true,
+      "location": "Located on platform 1"
+     },
+     {
+      "accessible": true,
+      "radar": false,
+      "insideGate": true,
+      "location": "Located on platform 1"
+     }
+    ],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZLUKBY": {
    "id": "940GZZLUKBY",
@@ -264,7 +3362,79 @@
    "hub": null,
    "stepFree": "yes",
    "stepFreeSource": "TfL StopPoint: AccessViaLift = Yes",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "940GZZLUKBY",
+    "outside": "940GZZLUKBY-Outside",
+    "paths": [
+     [
+      "940GZZLUKBY-1000128-A-KIN-5",
+      "940GZZLUKBY-1000128-BookH-4",
+      null
+     ],
+     [
+      "940GZZLUKBY-1000128-A-KIN-5",
+      "940GZZLUKBY-1000128-Bus-3",
+      null
+     ],
+     [
+      "940GZZLUKBY-1000128-BookH-4",
+      "940GZZLUKBY-Outside",
+      null
+     ],
+     [
+      "940GZZLUKBY-1000128-JubNB-1",
+      "940GZZLUKBY-Plat01-NB-jubilee",
+      null
+     ],
+     [
+      "940GZZLUKBY-1000128-JubSB-2",
+      "940GZZLUKBY-Plat02-SB-jubilee",
+      null
+     ],
+     [
+      "940GZZLUKBY-1000128-BookH-4",
+      "940GZZLUKBY-1000128-JubNB-1",
+      "940GZZLUKBY-Lift-1"
+     ],
+     [
+      "940GZZLUKBY-1000128-BookH-4",
+      "940GZZLUKBY-1000128-JubSB-2",
+      "940GZZLUKBY-Lift-2"
+     ]
+    ],
+    "lines": {
+     "jubilee": {
+      "platforms": [
+       "940GZZLUKBY-Plat01-NB-jubilee",
+       "940GZZLUKBY-Plat02-SB-jubilee"
+      ],
+      "mapped": true,
+      "train": "Level boarding at 2 centre doors on cars 5 and 6; 2 centre doors on cars 2 and 3. Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [
+     {
+      "accessible": false,
+      "radar": false,
+      "insideGate": true,
+      "location": "Located in ticket hall"
+     },
+     {
+      "accessible": false,
+      "radar": false,
+      "insideGate": true,
+      "location": "Located in ticket hall"
+     },
+     {
+      "accessible": true,
+      "radar": false,
+      "insideGate": true,
+      "location": "Located in ticket hall"
+     }
+    ],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZLUQBY": {
    "id": "940GZZLUQBY",
@@ -275,7 +3445,54 @@
    "hub": null,
    "stepFree": "unknown",
    "stepFreeSource": "TfL StopPoint: no step-free information",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "940GZZLUQBY",
+    "outside": "940GZZLUQBY-Outside",
+    "paths": [
+     [
+      "940GZZLUQBY-1000185-A-QUE-2",
+      "940GZZLUQBY-1000185-BookH-4",
+      null
+     ],
+     [
+      "940GZZLUQBY-1000185-A-QUE-2",
+      "940GZZLUQBY-1000185-Bus-1",
+      null
+     ]
+    ],
+    "lines": {
+     "jubilee": {
+      "platforms": [
+       "940GZZLUQBY-Plat01-NB-jubilee",
+       "940GZZLUQBY-Plat02-SB-jubilee"
+      ],
+      "mapped": true,
+      "train": null
+     }
+    },
+    "toilets": [
+     {
+      "accessible": false,
+      "radar": false,
+      "insideGate": false,
+      "location": "Located in ticket hall"
+     },
+     {
+      "accessible": false,
+      "radar": false,
+      "insideGate": false,
+      "location": "Located in ticket hall"
+     },
+     {
+      "accessible": true,
+      "radar": false,
+      "insideGate": false,
+      "location": "Located in ticket hall"
+     }
+    ],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZLUCPK": {
    "id": "940GZZLUCPK",
@@ -286,7 +3503,64 @@
    "hub": null,
    "stepFree": "unknown",
    "stepFreeSource": "TfL StopPoint: no step-free information",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "940GZZLUCPK",
+    "outside": "940GZZLUCPK-Outside",
+    "paths": [
+     [
+      "940GZZLUCPK-1000041-A-W-R-2",
+      "940GZZLUCPK-1000041-BookH-4",
+      null
+     ],
+     [
+      "940GZZLUCPK-1000041-A-W-R-2",
+      "940GZZLUCPK-1000041-Bus-1",
+      null
+     ],
+     [
+      "940GZZLUCPK-1000041-B-W-L-5",
+      "940GZZLUCPK-1000041-BookH-4",
+      null
+     ],
+     [
+      "940GZZLUCPK-1000041-B-W-L-5",
+      "940GZZLUCPK-1000041-Bus-1",
+      null
+     ]
+    ],
+    "lines": {
+     "jubilee": {
+      "platforms": [
+       "940GZZLUCPK-Plat01-NB-jubilee",
+       "940GZZLUCPK-Plat02-SB-jubilee"
+      ],
+      "mapped": true,
+      "train": null
+     }
+    },
+    "toilets": [
+     {
+      "accessible": false,
+      "radar": false,
+      "insideGate": true,
+      "location": "Located in ticket hall"
+     },
+     {
+      "accessible": false,
+      "radar": false,
+      "insideGate": true,
+      "location": "Located in ticket hall"
+     },
+     {
+      "accessible": true,
+      "radar": false,
+      "insideGate": true,
+      "location": "Located in ticket hall"
+     }
+    ],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZLUSTM": {
    "id": "940GZZLUSTM",
@@ -297,7 +3571,120 @@
    "hub": null,
    "stepFree": "unknown",
    "stepFreeSource": "TfL StopPoint: no step-free information",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "940GZZLUSTM",
+    "outside": "940GZZLUSTM-Outside",
+    "paths": [
+     [
+      "940GZZLUSTM-1000219-A-LON-4",
+      "940GZZLUSTM-1000219-Bus-1",
+      null
+     ],
+     [
+      "940GZZLUSTM-1000219-BookH-7",
+      "940GZZLUSTM-1000219-Jub12-2",
+      null
+     ],
+     [
+      "940GZZLUSTM-1000219-BookH-7",
+      "940GZZLUSTM-1000219-Jub3-8",
+      null
+     ],
+     [
+      "940GZZLUSTM-1000219-Bus-1",
+      "940GZZLUSTM-1000219-LON-F-6",
+      null
+     ],
+     [
+      "940GZZLUSTM-Outside",
+      "940GZZLUSTM-1000219-CAR P-5",
+      null
+     ],
+     [
+      "940GZZLUSTM-Outside",
+      "940GZZLUSTM-1000219-A-LON-4",
+      null
+     ],
+     [
+      "940GZZLUSTM-Outside",
+      "940GZZLUSTM-1000219-LON-F-6",
+      null
+     ],
+     [
+      "940GZZLUSTM-1000219-Jub12-2",
+      "940GZZLUSTM-Plat01-SB-jubilee",
+      null
+     ],
+     [
+      "940GZZLUSTM-1000219-Jub12-2",
+      "940GZZLUSTM-Plat02-SB-jubilee",
+      null
+     ],
+     [
+      "940GZZLUSTM-1000219-Jub3-8",
+      "940GZZLUSTM-Plat03-SB-jubilee",
+      null
+     ],
+     [
+      "940GZZLUSTM-Plat01-SB-jubilee",
+      "940GZZLUSTM-Plat02-SB-jubilee",
+      null
+     ],
+     [
+      "940GZZLUSTM-Plat01-SB-jubilee",
+      "940GZZLUSTM-Plat03-SB-jubilee",
+      null
+     ],
+     [
+      "940GZZLUSTM-Plat02-SB-jubilee",
+      "940GZZLUSTM-Plat03-SB-jubilee",
+      null
+     ],
+     [
+      "940GZZLUSTM-1000219-BookH-7",
+      "940GZZLUSTM-1000219-CAR P-5",
+      null
+     ],
+     [
+      "940GZZLUSTM-1000219-Bus-1",
+      "940GZZLUSTM-1000219-CAR P-5",
+      null
+     ]
+    ],
+    "lines": {
+     "jubilee": {
+      "platforms": [
+       "940GZZLUSTM-Plat01-SB-jubilee",
+       "940GZZLUSTM-Plat02-SB-jubilee",
+       "940GZZLUSTM-Plat03-SB-jubilee"
+      ],
+      "mapped": true,
+      "train": "Step up to 17.3 cm and gap up to 10 cm between platform and train. Staff can put out a manual ramp."
+     }
+    },
+    "toilets": [
+     {
+      "accessible": false,
+      "radar": false,
+      "insideGate": true,
+      "location": "Located on platform 1"
+     },
+     {
+      "accessible": false,
+      "radar": false,
+      "insideGate": true,
+      "location": "Located on platform 1"
+     },
+     {
+      "accessible": true,
+      "radar": false,
+      "insideGate": true,
+      "location": "Located on platform 1"
+     }
+    ],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZDLLEW": {
    "id": "940GZZDLLEW",
@@ -308,7 +3695,94 @@
    "hub": "HUBLEW",
    "stepFree": "yes",
    "stepFreeSource": "TfL StopPoint: AccessViaLift = Yes",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "HUBLEW",
+    "outside": "HUBLEW-Outside",
+    "paths": [
+     [
+      "HUBLEW-1001177-Bus-1",
+      "HUBLEW-1001177-Bus-6",
+      null
+     ],
+     [
+      "HUBLEW-1001177-Bus-1",
+      "HUBLEW-1001177-LOAMP-4",
+      null
+     ],
+     [
+      "HUBLEW-1001177-Bus-6",
+      "HUBLEW-1001177-LOAMP-4",
+      null
+     ],
+     [
+      "HUBLEW-1001177-DLR5-2",
+      "HUBLEW-1001177-DLR6-7",
+      null
+     ],
+     [
+      "HUBLEW-1001177-DLRB-5",
+      "HUBLEW-1001177-LOAMP-4",
+      null
+     ],
+     [
+      "HUBLEW-Outside",
+      "HUBLEW-1001177-DLRB-5",
+      null
+     ],
+     [
+      "HUBLEW-1001177-DLR5-2",
+      "HUBLEW-Plat05-NB-dlr",
+      null
+     ],
+     [
+      "HUBLEW-1001177-DLR6-7",
+      "HUBLEW-Plat06-NB-dlr",
+      null
+     ],
+     [
+      "HUBLEW-Plat05-NB-dlr",
+      "HUBLEW-Plat06-NB-dlr",
+      null
+     ],
+     [
+      "HUBLEW-1001177-DLR5-2",
+      "HUBLEW-1001177-DLRB-5",
+      null
+     ]
+    ],
+    "lines": {
+     "dlr": {
+      "platforms": [
+       "HUBLEW-Plat05-NB-dlr",
+       "HUBLEW-Plat06-NB-dlr"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [
+     {
+      "accessible": false,
+      "radar": false,
+      "insideGate": false,
+      "location": "Located in National Rail station"
+     },
+     {
+      "accessible": false,
+      "radar": false,
+      "insideGate": false,
+      "location": "Located in National Rail station"
+     },
+     {
+      "accessible": true,
+      "radar": false,
+      "insideGate": false,
+      "location": "Located in National Rail station"
+     }
+    ],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZDLELV": {
    "id": "940GZZDLELV",
@@ -319,7 +3793,50 @@
    "hub": null,
    "stepFree": "yes",
    "stepFreeSource": "TfL: DLR stations are step-free by lift or ramp (network-wide statement; verify per station)",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "940GZZDLELV",
+    "outside": "940GZZDLELV-Outside",
+    "paths": [
+     [
+      "940GZZDLELV-1002035-Bus-1",
+      "940GZZDLELV-1002035-ELVER-3",
+      null
+     ],
+     [
+      "940GZZDLELV-1002035-CONNI-4",
+      "940GZZDLELV-1002035-DLR-N-5",
+      null
+     ],
+     [
+      "940GZZDLELV-Outside",
+      "940GZZDLELV-Plat01-SB-dlr",
+      null
+     ],
+     [
+      "940GZZDLELV-Outside",
+      "940GZZDLELV-Plat02-NB-dlr",
+      null
+     ],
+     [
+      "940GZZDLELV-Plat01-SB-dlr",
+      "940GZZDLELV-Plat02-NB-dlr",
+      null
+     ]
+    ],
+    "lines": {
+     "dlr": {
+      "platforms": [
+       "940GZZDLELV-Plat01-SB-dlr",
+       "940GZZDLELV-Plat02-NB-dlr"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZDLDEP": {
    "id": "940GZZDLDEP",
@@ -330,7 +3847,85 @@
    "hub": null,
    "stepFree": "yes",
    "stepFreeSource": "TfL StopPoint: AccessViaLift = Yes",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "940GZZDLDEP",
+    "outside": "940GZZDLDEP-Outside",
+    "paths": [
+     [
+      "940GZZDLDEP-1002029-BCQ-6",
+      "940GZZDLDEP-1002029-DEP-N-3",
+      null
+     ],
+     [
+      "940GZZDLDEP-1002029-BCQ-6",
+      "940GZZDLDEP-1002029-DEP-S-4",
+      null
+     ],
+     [
+      "940GZZDLDEP-1002029-BusNP-5",
+      "940GZZDLDEP-1002029-DEP-N-3",
+      null
+     ],
+     [
+      "940GZZDLDEP-1002029-BusNP-5",
+      "940GZZDLDEP-1002029-DEP-S-4",
+      null
+     ],
+     [
+      "940GZZDLDEP-1002029-BusST-1",
+      "940GZZDLDEP-1002029-DEP-N-3",
+      null
+     ],
+     [
+      "940GZZDLDEP-1002029-BusST-1",
+      "940GZZDLDEP-1002029-DEP-S-4",
+      null
+     ],
+     [
+      "940GZZDLDEP-1002029-C-8",
+      "940GZZDLDEP-1002029-DEP-S-4",
+      null
+     ],
+     [
+      "940GZZDLDEP-1002029-C-8",
+      "940GZZDLDEP-Outside",
+      null
+     ],
+     [
+      "940GZZDLDEP-1002029-DLR-N-7",
+      "940GZZDLDEP-Plat02-NB-dlr",
+      null
+     ],
+     [
+      "940GZZDLDEP-1002029-DLR-S-2",
+      "940GZZDLDEP-Plat01-SB-dlr",
+      null
+     ],
+     [
+      "940GZZDLDEP-1002029-C-8",
+      "940GZZDLDEP-1002029-DLR-S-2",
+      "940GZZDLDEP-Lift-1"
+     ],
+     [
+      "940GZZDLDEP-1002029-C-8",
+      "940GZZDLDEP-1002029-DLR-N-7",
+      "940GZZDLDEP-Lift-2"
+     ]
+    ],
+    "lines": {
+     "dlr": {
+      "platforms": [
+       "940GZZDLDEP-Plat01-SB-dlr",
+       "940GZZDLDEP-Plat02-NB-dlr"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZDLGRE": {
    "id": "940GZZDLGRE",
@@ -341,7 +3936,115 @@
    "hub": "HUBGNW",
    "stepFree": "yes",
    "stepFreeSource": "TfL StopPoint: AccessViaLift = Yes",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "HUBGNW",
+    "outside": "HUBGNW-Outside",
+    "paths": [
+     [
+      "HUBGNW-1001123-Bus-1",
+      "HUBGNW-1001123-GREEN-4",
+      null
+     ],
+     [
+      "HUBGNW-1001123-DLR E-8",
+      "HUBGNW-1001123-GREEN-4",
+      null
+     ],
+     [
+      "HUBGNW-1001123-DLR E-8",
+      "HUBGNW-1001123-RPL-W-9",
+      null
+     ],
+     [
+      "HUBGNW-1001123-GREEN-4",
+      "HUBGNW-1001123-RPL-W-9",
+      null
+     ],
+     [
+      "HUBGNW-1001123-Sub-W-10",
+      "HUBGNW-1001123-WALLW-7",
+      null
+     ],
+     [
+      "HUBGNW-1001123-DLR E-8",
+      "HUBGNW-Plat03-NB-dlr",
+      null
+     ],
+     [
+      "HUBGNW-1001123-DLRW-2",
+      "HUBGNW-Plat04-SB-dlr",
+      null
+     ],
+     [
+      "HUBGNW-1001123-RPL-W-9",
+      "HUBGNW-Plat03-NB-dlr",
+      null
+     ],
+     [
+      "HUBGNW-1001123-RPL-E-3",
+      "HUBGNW-Plat01-EB-national-rail",
+      null
+     ],
+     [
+      "HUBGNW-1001123-RPL-W-9",
+      "HUBGNW-Plat02-WB-national-rail",
+      null
+     ],
+     [
+      "HUBGNW-1001123-GREEN-4",
+      "HUBGNW-Outside",
+      null
+     ],
+     [
+      "HUBGNW-1001123-TARVE-5",
+      "HUBGNW-Outside",
+      null
+     ],
+     [
+      "HUBGNW-1001123-WALLW-7",
+      "HUBGNW-Outside",
+      null
+     ],
+     [
+      "HUBGNW-1001123-RPL-E-3",
+      "HUBGNW-1001123-Sub-W-10",
+      null
+     ],
+     [
+      "HUBGNW-1001123-RPL-E-3",
+      "HUBGNW-1001123-TARVE-5",
+      null
+     ],
+     [
+      "HUBGNW-1001123-WALLW-7",
+      "HUBGNW-1001123-DLR E-8",
+      "HUBGNW-Lift-1"
+     ],
+     [
+      "HUBGNW-1001123-DLR E-8",
+      "HUBGNW-1001123-RPL-W-9",
+      "HUBGNW-Lift-1"
+     ],
+     [
+      "HUBGNW-1001123-WALLW-7",
+      "HUBGNW-1001123-DLRW-2",
+      "HUBGNW-Lift-2"
+     ]
+    ],
+    "lines": {
+     "dlr": {
+      "platforms": [
+       "HUBGNW-Plat03-NB-dlr",
+       "HUBGNW-Plat04-SB-dlr"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZDLCUT": {
    "id": "940GZZDLCUT",
@@ -352,7 +4055,80 @@
    "hub": "HUBCUT",
    "stepFree": "yes",
    "stepFreeSource": "TfL StopPoint: AccessViaLift = Yes",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "HUBCUT",
+    "outside": "HUBCUT-Outside",
+    "paths": [
+     [
+      "HUBCUT-1002027-Bus-1",
+      "HUBCUT-1002027-CREEK-3",
+      null
+     ],
+     [
+      "HUBCUT-1002027-Bus-1",
+      "HUBCUT-1002027-GREEN-4",
+      null
+     ],
+     [
+      "HUBCUT-1002027-DLRNB-2",
+      "HUBCUT-1002027-DLRSB-6",
+      null
+     ],
+     [
+      "HUBCUT-1002027-CONC-5",
+      "HUBCUT-Outside",
+      null
+     ],
+     [
+      "HUBCUT-1002027-CREEK-3",
+      "HUBCUT-Outside",
+      null
+     ],
+     [
+      "HUBCUT-1002027-DLRSB-6",
+      "HUBCUT-Plat01-SB-dlr",
+      null
+     ],
+     [
+      "HUBCUT-1002027-DLRNB-2",
+      "HUBCUT-Plat02-NB-dlr",
+      null
+     ],
+     [
+      "HUBCUT-Plat01-SB-dlr",
+      "HUBCUT-Plat02-NB-dlr",
+      null
+     ],
+     [
+      "HUBCUT-1002027-CREEK-3",
+      "HUBCUT-1002027-CONC-5",
+      "HUBCUT-Lift-1"
+     ],
+     [
+      "HUBCUT-1002027-CONC-5",
+      "HUBCUT-1002027-DLRNB-2",
+      "HUBCUT-Lift-1"
+     ],
+     [
+      "HUBCUT-1002027-DLRNB-2",
+      "HUBCUT-1002027-DLRSB-6",
+      "HUBCUT-Lift-1"
+     ]
+    ],
+    "lines": {
+     "dlr": {
+      "platforms": [
+       "HUBCUT-Plat01-SB-dlr",
+       "HUBCUT-Plat02-NB-dlr"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZDLISL": {
    "id": "940GZZDLISL",
@@ -363,7 +4139,65 @@
    "hub": null,
    "stepFree": "yes",
    "stepFreeSource": "TfL StopPoint: AccessViaLift = Yes",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "940GZZDLISL",
+    "outside": "940GZZDLISL-Outside",
+    "paths": [
+     [
+      "940GZZDLISL-1002048-Bus-4",
+      "940GZZDLISL-1002048-MANCH-2",
+      null
+     ],
+     [
+      "940GZZDLISL-1002048-DLRNB-3",
+      "940GZZDLISL-1002048-DLRSB-5",
+      null
+     ],
+     [
+      "940GZZDLISL-1002048-DLRSB-5",
+      "940GZZDLISL-Plat01-SB-dlr",
+      null
+     ],
+     [
+      "940GZZDLISL-1002048-DLRNB-3",
+      "940GZZDLISL-Plat02-NB-dlr",
+      null
+     ],
+     [
+      "940GZZDLISL-1002048-MANCH-2",
+      "940GZZDLISL-Outside",
+      null
+     ],
+     [
+      "940GZZDLISL-Plat01-SB-dlr",
+      "940GZZDLISL-Plat02-NB-dlr",
+      null
+     ],
+     [
+      "940GZZDLISL-1002048-MANCH-2",
+      "940GZZDLISL-1002048-DLRNB-3",
+      "940GZZDLISL-Lift-1"
+     ],
+     [
+      "940GZZDLISL-1002048-DLRNB-3",
+      "940GZZDLISL-1002048-DLRSB-5",
+      "940GZZDLISL-Lift-1"
+     ]
+    ],
+    "lines": {
+     "dlr": {
+      "platforms": [
+       "940GZZDLISL-Plat01-SB-dlr",
+       "940GZZDLISL-Plat02-NB-dlr"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZDLMUD": {
    "id": "940GZZDLMUD",
@@ -374,7 +4208,75 @@
    "hub": null,
    "stepFree": "yes",
    "stepFreeSource": "TfL: DLR stations are step-free by lift or ramp (network-wide statement; verify per station)",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "940GZZDLMUD",
+    "outside": "940GZZDLMUD-Outside",
+    "paths": [
+     [
+      "940GZZDLMUD-1002061-Bus-1",
+      "940GZZDLMUD-1002061-BusS-7",
+      null
+     ],
+     [
+      "940GZZDLMUD-1002061-Bus-1",
+      "940GZZDLMUD-1002061-EAST-2",
+      null
+     ],
+     [
+      "940GZZDLMUD-1002061-Bus-1",
+      "940GZZDLMUD-1002061-SPIND-5",
+      null
+     ],
+     [
+      "940GZZDLMUD-1002061-BusS-7",
+      "940GZZDLMUD-1002061-EAST-2",
+      null
+     ],
+     [
+      "940GZZDLMUD-1002061-BusS-7",
+      "940GZZDLMUD-1002061-SPIND-5",
+      null
+     ],
+     [
+      "940GZZDLMUD-Outside",
+      "940GZZDLMUD-Plat01-SB-dlr",
+      null
+     ],
+     [
+      "940GZZDLMUD-Outside",
+      "940GZZDLMUD-Plat02-NB-dlr",
+      null
+     ],
+     [
+      "940GZZDLMUD-Plat01-SB-dlr",
+      "940GZZDLMUD-Plat02-NB-dlr",
+      null
+     ],
+     [
+      "940GZZDLMUD-1002061-DLR-N-3",
+      "940GZZDLMUD-1002061-SPIND-5",
+      null
+     ],
+     [
+      "940GZZDLMUD-1002061-DLR-S-4",
+      "940GZZDLMUD-1002061-EAST-2",
+      null
+     ]
+    ],
+    "lines": {
+     "dlr": {
+      "platforms": [
+       "940GZZDLMUD-Plat01-SB-dlr",
+       "940GZZDLMUD-Plat02-NB-dlr"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZDLCLA": {
    "id": "940GZZDLCLA",
@@ -385,7 +4287,60 @@
    "hub": null,
    "stepFree": "yes",
    "stepFreeSource": "TfL: DLR stations are step-free by lift or ramp (network-wide statement; verify per station)",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "940GZZDLCLA",
+    "outside": "940GZZDLCLA-Outside",
+    "paths": [
+     [
+      "940GZZDLCLA-1002025-Bus-3",
+      "940GZZDLCLA-1002025-CROSA-1",
+      null
+     ],
+     [
+      "940GZZDLCLA-1002025-CONCA-6",
+      "940GZZDLCLA-1002025-CROSA-1",
+      null
+     ],
+     [
+      "940GZZDLCLA-1002025-CROSA-1",
+      "940GZZDLCLA-Outside",
+      null
+     ],
+     [
+      "940GZZDLCLA-1002025-DLR_S-4",
+      "940GZZDLCLA-Plat01-SB-dlr",
+      null
+     ],
+     [
+      "940GZZDLCLA-1002025-DLR-N-2",
+      "940GZZDLCLA-Plat02-NB-dlr",
+      null
+     ],
+     [
+      "940GZZDLCLA-1002025-CROSA-1",
+      "940GZZDLCLA-1002025-DLR_S-4",
+      "940GZZDLCLA-Lift-1"
+     ],
+     [
+      "940GZZDLCLA-1002025-CROSA-1",
+      "940GZZDLCLA-1002025-DLR-N-2",
+      "940GZZDLCLA-Lift-2"
+     ]
+    ],
+    "lines": {
+     "dlr": {
+      "platforms": [
+       "940GZZDLCLA-Plat01-SB-dlr",
+       "940GZZDLCLA-Plat02-NB-dlr"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZDLSOQ": {
    "id": "940GZZDLSOQ",
@@ -396,7 +4351,60 @@
    "hub": null,
    "stepFree": "yes",
    "stepFreeSource": "TfL: DLR stations are step-free by lift or ramp (network-wide statement; verify per station)",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "940GZZDLSOQ",
+    "outside": "940GZZDLSOQ-Outside",
+    "paths": [
+     [
+      "940GZZDLSOQ-1002074-LSC-5",
+      "940GZZDLSOQ-1002074-SOUL-1",
+      null
+     ],
+     [
+      "940GZZDLSOQ-1002074-RSC-6",
+      "940GZZDLSOQ-1002074-SOUR-4",
+      null
+     ],
+     [
+      "940GZZDLSOQ-1002074-DLR-N-3",
+      "940GZZDLSOQ-Plat02-NB-dlr",
+      null
+     ],
+     [
+      "940GZZDLSOQ-1002074-DLR-S-2",
+      "940GZZDLSOQ-Plat01-SB-dlr",
+      null
+     ],
+     [
+      "940GZZDLSOQ-1002074-LSC-5",
+      "940GZZDLSOQ-Outside",
+      null
+     ],
+     [
+      "940GZZDLSOQ-1002074-LSC-5",
+      "940GZZDLSOQ-1002074-DLR-S-2",
+      "940GZZDLSOQ-Lift-1"
+     ],
+     [
+      "940GZZDLSOQ-1002074-LSC-5",
+      "940GZZDLSOQ-1002074-DLR-N-3",
+      "940GZZDLSOQ-Lift-2"
+     ]
+    ],
+    "lines": {
+     "dlr": {
+      "platforms": [
+       "940GZZDLSOQ-Plat01-SB-dlr",
+       "940GZZDLSOQ-Plat02-NB-dlr"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZDLHEQ": {
    "id": "940GZZDLHEQ",
@@ -407,7 +4415,60 @@
    "hub": null,
    "stepFree": "yes",
    "stepFreeSource": "TfL StopPoint: AccessViaLift = Yes",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "940GZZDLHEQ",
+    "outside": "940GZZDLHEQ-Outside",
+    "paths": [
+     [
+      "940GZZDLHEQ-1002046-Bus-3",
+      "940GZZDLHEQ-1002046-HERON-1",
+      null
+     ],
+     [
+      "940GZZDLHEQ-1002046-CONC-5",
+      "940GZZDLHEQ-1002046-HERON-1",
+      null
+     ],
+     [
+      "940GZZDLHEQ-1002046-CONC-5",
+      "940GZZDLHEQ-Outside",
+      null
+     ],
+     [
+      "940GZZDLHEQ-1002046-DLR-N-4",
+      "940GZZDLHEQ-Plat02-NB-dlr",
+      null
+     ],
+     [
+      "940GZZDLHEQ-1002046-DLR-S-2",
+      "940GZZDLHEQ-Plat01-SB-dlr",
+      null
+     ],
+     [
+      "940GZZDLHEQ-1002046-CONC-5",
+      "940GZZDLHEQ-1002046-DLR-S-2",
+      "940GZZDLHEQ-Lift-1"
+     ],
+     [
+      "940GZZDLHEQ-1002046-CONC-5",
+      "940GZZDLHEQ-1002046-DLR-N-4",
+      "940GZZDLHEQ-Lift-2"
+     ]
+    ],
+    "lines": {
+     "dlr": {
+      "platforms": [
+       "940GZZDLHEQ-Plat01-SB-dlr",
+       "940GZZDLHEQ-Plat02-NB-dlr"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZDLCAN": {
    "id": "940GZZDLCAN",
@@ -418,7 +4479,328 @@
    "hub": "HUBCAW",
    "stepFree": "yes",
    "stepFreeSource": "TfL StopPoint: AccessViaLift = Yes",
-   "note": "200m between Jubilee line and DLR station via the street. If you are boarding the Jubilee line at this station and require level access to leave the train at Green Park, please make sure that you travel in the correct carriage"
+   "note": "200m between Jubilee line and DLR station via the street. If you are boarding the Jubilee line at this station and require level access to leave the train at Green Park, please make sure that you travel in the correct carriage",
+   "access": {
+    "tflId": "HUBCAW",
+    "outside": "HUBCAW-Outside",
+    "paths": [
+     [
+      "HUBCAW-1000038-BUSF-7",
+      "HUBCAW-1000038-BUSG-6",
+      null
+     ],
+     [
+      "HUBCAW-1000038-BUSF-7",
+      "HUBCAW-1000038-PLA-1",
+      null
+     ],
+     [
+      "HUBCAW-1000038-BUSF-7",
+      "HUBCAW-1003008-NORTH-3",
+      null
+     ],
+     [
+      "HUBCAW-1000038-BUSG-6",
+      "HUBCAW-1000038-PLA-1",
+      null
+     ],
+     [
+      "HUBCAW-1000038-BUSG-6",
+      "HUBCAW-1003008-NORTH-3",
+      null
+     ],
+     [
+      "HUBCAW-1000038-BUSG-6",
+      "HUBCAW-1003008-SOUTH-5",
+      null
+     ],
+     [
+      "HUBCAW-1000038-J Mez-11",
+      "HUBCAW-1003008-NORTH-3",
+      null
+     ],
+     [
+      "HUBCAW-1000038-J Mez-11",
+      "HUBCAW-1003008-SOUTH-5",
+      null
+     ],
+     [
+      "HUBCAW-1000038-JubiE-5",
+      "HUBCAW-1000038-JubiW-8",
+      null
+     ],
+     [
+      "HUBCAW-1000038-PLA-1",
+      "HUBCAW-1003008-SOUTH-5",
+      null
+     ],
+     [
+      "HUBCAW-1000038-UBST-13",
+      "HUBCAW-1002163-HLE-3",
+      null
+     ],
+     [
+      "HUBCAW-1002163-HLE-3",
+      "HUBCAW-1003008-NORTH-3",
+      null
+     ],
+     [
+      "HUBCAW-1003008-NORTH-3",
+      "HUBCAW-1000038-Mt Sq-12",
+      null
+     ],
+     [
+      "HUBCAW-1003008-NORTH-3",
+      "HUBCAW-1000038-PLA-1",
+      null
+     ],
+     [
+      "HUBCAW-1003008-NORTH-3",
+      "HUBCAW-1000038-UBST-13",
+      null
+     ],
+     [
+      "HUBCAW-1000038-J Mez-11",
+      "HUBCAW-Outside",
+      null
+     ],
+     [
+      "HUBCAW-1000038-JubiW-8",
+      "HUBCAW-Plat01-WB-jubilee",
+      null
+     ],
+     [
+      "HUBCAW-1000038-JubiE-5",
+      "HUBCAW-Plat02-EB-jubilee",
+      null
+     ],
+     [
+      "HUBCAW-1000038-PLA-1",
+      "HUBCAW-Outside",
+      null
+     ],
+     [
+      "HUBCAW-1000038-UBST-13",
+      "HUBCAW-Outside",
+      null
+     ],
+     [
+      "HUBCAW-1003008-DLR-N-4",
+      "HUBCAW-Plat06-NB-dlr",
+      null
+     ],
+     [
+      "HUBCAW-1003008-DLR-N-4",
+      "HUBCAW-Plat05-NB-dlr",
+      null
+     ],
+     [
+      "HUBCAW-1003008-DLR-N-4",
+      "HUBCAW-Plat04-dlr",
+      null
+     ],
+     [
+      "HUBCAW-1003008-DLR-S-2",
+      "HUBCAW-Plat01-SB-dlr",
+      null
+     ],
+     [
+      "HUBCAW-1003008-DLR-S-2",
+      "HUBCAW-Plat03-dlr",
+      null
+     ],
+     [
+      "HUBCAW-1003008-DLR-S-2",
+      "HUBCAW-Plat02-SB-dlr",
+      null
+     ],
+     [
+      "HUBCAW-1003008-NORTH-3",
+      "HUBCAW-Outside",
+      null
+     ],
+     [
+      "HUBCAW-1003008-SHE-6",
+      "HUBCAW-Outside",
+      null
+     ],
+     [
+      "HUBCAW-1003008-SHW-7",
+      "HUBCAW-Outside",
+      null
+     ],
+     [
+      "HUBCAW-Plat01-WB-jubilee",
+      "HUBCAW-Plat02-EB-jubilee",
+      null
+     ],
+     [
+      "HUBCAW-Plat02-SB-dlr",
+      "HUBCAW-Plat03-dlr",
+      null
+     ],
+     [
+      "HUBCAW-Plat04-dlr",
+      "HUBCAW-Plat05-NB-dlr",
+      null
+     ],
+     [
+      "HUBCAW-Outside",
+      "HUBCAW-1002163-HLE-3",
+      null
+     ],
+     [
+      "HUBCAW-Outside",
+      "HUBCAW-1002163-QE-4",
+      null
+     ],
+     [
+      "HUBCAW-Outside",
+      "HUBCAW-1002163-CAP-7",
+      null
+     ],
+     [
+      "HUBCAW-1002163-EL EB-1",
+      "HUBCAW-PlatA-EB-elizabeth",
+      null
+     ],
+     [
+      "HUBCAW-1002163-EL WB-5",
+      "HUBCAW-PlatB-WB-elizabeth",
+      null
+     ],
+     [
+      "HUBCAW-1003008-DLR M-1",
+      "HUBCAW-1003008-SOUTH-5",
+      null
+     ],
+     [
+      "HUBCAW-1003008-NORTH-3",
+      "HUBCAW-1003008-DLR M-1",
+      "HUBCAW-Lift-DLR 1"
+     ],
+     [
+      "HUBCAW-1003008-NORTH-3",
+      "HUBCAW-1003008-DLR M-1",
+      "HUBCAW-Lift-DLR 2"
+     ],
+     [
+      "HUBCAW-1003008-SHW-7",
+      "HUBCAW-1003008-DLR M-1",
+      "HUBCAW-Lift-DLR S2"
+     ],
+     [
+      "HUBCAW-1003008-DLR M-1",
+      "HUBCAW-1003008-DLR-N-4",
+      "HUBCAW-Lift-DLR S2"
+     ],
+     [
+      "HUBCAW-1003008-SHE-6",
+      "HUBCAW-1003008-DLR M-1",
+      "HUBCAW-Lift-DLR S3"
+     ],
+     [
+      "HUBCAW-1003008-DLR M-1",
+      "HUBCAW-1003008-DLR-S-2",
+      "HUBCAW-Lift-DLR S3"
+     ],
+     [
+      "HUBCAW-1000038-PLA-1",
+      "HUBCAW-1000038-J Mez-11",
+      "HUBCAW-Lift-LU 1"
+     ],
+     [
+      "HUBCAW-1000038-J Mez-11",
+      "HUBCAW-1000038-UBST-13",
+      "HUBCAW-Lift-LU 1"
+     ],
+     [
+      "HUBCAW-1000038-UBST-13",
+      "HUBCAW-1000038-BookJ-2",
+      "HUBCAW-Lift-LU 1"
+     ],
+     [
+      "HUBCAW-1000038-BookJ-2",
+      "HUBCAW-1000038-JubiE-5",
+      "HUBCAW-Lift-LU 2"
+     ],
+     [
+      "HUBCAW-1000038-JubiE-5",
+      "HUBCAW-1000038-JubiW-8",
+      "HUBCAW-Lift-LU 2"
+     ],
+     [
+      "HUBCAW-1002163-HLE-3",
+      "HUBCAW-1002163-QE-4",
+      "HUBCAW-Lift-A"
+     ],
+     [
+      "HUBCAW-1002163-QE-4",
+      "HUBCAW-1002163-BH-2",
+      "HUBCAW-Lift-A"
+     ],
+     [
+      "HUBCAW-1002163-CAP-7",
+      "HUBCAW-1002163-BH-2",
+      "HUBCAW-Lift-B"
+     ],
+     [
+      "HUBCAW-1002163-BH-2",
+      "HUBCAW-1002163-EL EB-1",
+      "HUBCAW-Lift-C"
+     ],
+     [
+      "HUBCAW-1002163-EL EB-1",
+      "HUBCAW-1002163-EL WB-5",
+      "HUBCAW-Lift-C"
+     ],
+     [
+      "HUBCAW-1002163-BH-2",
+      "HUBCAW-1002163-EL EB-1",
+      "HUBCAW-Lift-D"
+     ],
+     [
+      "HUBCAW-1002163-EL EB-1",
+      "HUBCAW-1002163-EL WB-5",
+      "HUBCAW-Lift-D"
+     ]
+    ],
+    "lines": {
+     "dlr": {
+      "platforms": [
+       "HUBCAW-Plat01-SB-dlr",
+       "HUBCAW-Plat02-SB-dlr",
+       "HUBCAW-Plat03-dlr",
+       "HUBCAW-Plat04-dlr",
+       "HUBCAW-Plat05-NB-dlr",
+       "HUBCAW-Plat06-NB-dlr"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [
+     {
+      "accessible": false,
+      "radar": false,
+      "insideGate": false,
+      "location": "Located in ticket hall"
+     },
+     {
+      "accessible": false,
+      "radar": false,
+      "insideGate": false,
+      "location": "Located in ticket hall"
+     },
+     {
+      "accessible": true,
+      "radar": false,
+      "insideGate": false,
+      "location": "Located in ticket hall"
+     }
+    ],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZDLWIQ": {
    "id": "940GZZDLWIQ",
@@ -429,7 +4811,66 @@
    "hub": null,
    "stepFree": "yes",
    "stepFreeSource": "TfL: DLR stations are step-free by lift or ramp (network-wide statement; verify per station)",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "940GZZDLWIQ",
+    "outside": "940GZZDLWIQ-Outside",
+    "paths": [
+     [
+      "940GZZDLWIQ-1002084-CONC-4",
+      "940GZZDLWIQ-Outside",
+      null
+     ],
+     [
+      "940GZZDLWIQ-1002084-DLR-N-3",
+      "940GZZDLWIQ-Plat03-NB-dlr",
+      null
+     ],
+     [
+      "940GZZDLWIQ-1002084-DLR-N-3",
+      "940GZZDLWIQ-Plat04-WB-dlr",
+      null
+     ],
+     [
+      "940GZZDLWIQ-1002084-DLR-S-2",
+      "940GZZDLWIQ-Plat02-SB-dlr",
+      null
+     ],
+     [
+      "940GZZDLWIQ-Plat03-NB-dlr",
+      "940GZZDLWIQ-Plat04-WB-dlr",
+      null
+     ],
+     [
+      "940GZZDLWIQ-1002084-CONC-4",
+      "940GZZDLWIQ-1002084-MARKE-1",
+      null
+     ],
+     [
+      "940GZZDLWIQ-1002084-CONC-4",
+      "940GZZDLWIQ-1002084-DLR-S-2",
+      "940GZZDLWIQ-Lift-1"
+     ],
+     [
+      "940GZZDLWIQ-1002084-CONC-4",
+      "940GZZDLWIQ-1002084-DLR-N-3",
+      "940GZZDLWIQ-Lift-2"
+     ]
+    ],
+    "lines": {
+     "dlr": {
+      "platforms": [
+       "940GZZDLWIQ-Plat02-SB-dlr",
+       "940GZZDLWIQ-Plat03-NB-dlr",
+       "940GZZDLWIQ-Plat04-WB-dlr"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZDLPOP": {
    "id": "940GZZDLPOP",
@@ -440,7 +4881,107 @@
    "hub": null,
    "stepFree": "yes",
    "stepFreeSource": "TfL: DLR stations are step-free by lift or ramp (network-wide statement; verify per station)",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "940GZZDLPOP",
+    "outside": "940GZZDLPOP-Outside",
+    "paths": [
+     [
+      "940GZZDLPOP-1002064-CONC-6",
+      "940GZZDLPOP-1002064-PopHS-1",
+      null
+     ],
+     [
+      "940GZZDLPOP-1002064-DLREB-7",
+      "940GZZDLPOP-1002064-DLRES-2",
+      null
+     ],
+     [
+      "940GZZDLPOP-1002064-DLRWB-8",
+      "940GZZDLPOP-1002064-DLRWL-4",
+      null
+     ],
+     [
+      "940GZZDLPOP-1002064-CONC-6",
+      "940GZZDLPOP-Outside",
+      null
+     ],
+     [
+      "940GZZDLPOP-1002064-DLREB-7",
+      "940GZZDLPOP-Plat01-EB-dlr",
+      null
+     ],
+     [
+      "940GZZDLPOP-1002064-DLRES-2",
+      "940GZZDLPOP-Plat02-NB-dlr",
+      null
+     ],
+     [
+      "940GZZDLPOP-1002064-DLRWL-4",
+      "940GZZDLPOP-Plat03-SB-dlr",
+      null
+     ],
+     [
+      "940GZZDLPOP-1002064-DLRWB-8",
+      "940GZZDLPOP-Plat04-WB-dlr",
+      null
+     ],
+     [
+      "940GZZDLPOP-Plat01-EB-dlr",
+      "940GZZDLPOP-Plat02-NB-dlr",
+      null
+     ],
+     [
+      "940GZZDLPOP-Plat03-SB-dlr",
+      "940GZZDLPOP-Plat04-WB-dlr",
+      null
+     ],
+     [
+      "940GZZDLPOP-1002064-CONC-6",
+      "940GZZDLPOP-1002064-DLRES-2",
+      "940GZZDLPOP-Lift-1"
+     ],
+     [
+      "940GZZDLPOP-1002064-DLRES-2",
+      "940GZZDLPOP-1002064-DLREB-7",
+      "940GZZDLPOP-Lift-1"
+     ],
+     [
+      "940GZZDLPOP-1002064-DLREB-7",
+      "940GZZDLPOP-1002064-BRIDG-5",
+      "940GZZDLPOP-Lift-1"
+     ],
+     [
+      "940GZZDLPOP-1002064-CONC-6",
+      "940GZZDLPOP-1002064-DLRWL-4",
+      "940GZZDLPOP-Lift-2"
+     ],
+     [
+      "940GZZDLPOP-1002064-DLRWL-4",
+      "940GZZDLPOP-1002064-DLRWB-8",
+      "940GZZDLPOP-Lift-2"
+     ],
+     [
+      "940GZZDLPOP-1002064-DLRWB-8",
+      "940GZZDLPOP-1002064-BRIDG-5",
+      "940GZZDLPOP-Lift-2"
+     ]
+    ],
+    "lines": {
+     "dlr": {
+      "platforms": [
+       "940GZZDLPOP-Plat01-EB-dlr",
+       "940GZZDLPOP-Plat02-NB-dlr",
+       "940GZZDLPOP-Plat03-SB-dlr",
+       "940GZZDLPOP-Plat04-WB-dlr"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZDLALL": {
    "id": "940GZZDLALL",
@@ -451,7 +4992,60 @@
    "hub": null,
    "stepFree": "yes",
    "stepFreeSource": "TfL StopPoint: AccessViaLift = Yes",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "940GZZDLALL",
+    "outside": "940GZZDLALL-Outside",
+    "paths": [
+     [
+      "940GZZDLALL-1002003-BUS-3",
+      "940GZZDLALL-1002003-EAST-1",
+      null
+     ],
+     [
+      "940GZZDLALL-1002003-CONC-5",
+      "940GZZDLALL-1002003-EAST-1",
+      null
+     ],
+     [
+      "940GZZDLALL-1002003-CONC-5",
+      "940GZZDLALL-Outside",
+      null
+     ],
+     [
+      "940GZZDLALL-1002003-DLR-N-2",
+      "940GZZDLALL-Plat01-NB-dlr",
+      null
+     ],
+     [
+      "940GZZDLALL-1002003-DLR-S-4",
+      "940GZZDLALL-Plat02-SB-dlr",
+      null
+     ],
+     [
+      "940GZZDLALL-1002003-CONC-5",
+      "940GZZDLALL-1002003-DLR-N-2",
+      "940GZZDLALL-Lift-1"
+     ],
+     [
+      "940GZZDLALL-1002003-CONC-5",
+      "940GZZDLALL-1002003-DLR-S-4",
+      "940GZZDLALL-Lift-2"
+     ]
+    ],
+    "lines": {
+     "dlr": {
+      "platforms": [
+       "940GZZDLALL-Plat01-NB-dlr",
+       "940GZZDLALL-Plat02-SB-dlr"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZDLLDP": {
    "id": "940GZZDLLDP",
@@ -462,7 +5056,70 @@
    "hub": null,
    "stepFree": "yes",
    "stepFreeSource": "TfL: DLR stations are step-free by lift or ramp (network-wide statement; verify per station)",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "940GZZDLLDP",
+    "outside": "940GZZDLLDP-Outside",
+    "paths": [
+     [
+      "940GZZDLLDP-1002034-BOOKH-4",
+      "940GZZDLLDP-1002034-CARME-2",
+      null
+     ],
+     [
+      "940GZZDLLDP-1002034-BOOKH-4",
+      "940GZZDLLDP-1002034-DLR-N-6",
+      null
+     ],
+     [
+      "940GZZDLLDP-1002034-BUS-5",
+      "940GZZDLLDP-1002034-CARME-2",
+      null
+     ],
+     [
+      "940GZZDLLDP-1002034-DLR-S-1",
+      "940GZZDLLDP-1002034-HAYCU-3",
+      null
+     ],
+     [
+      "940GZZDLLDP-1002034-BRDGE-7",
+      "940GZZDLLDP-Outside",
+      null
+     ],
+     [
+      "940GZZDLLDP-1002034-DLR-N-6",
+      "940GZZDLLDP-Plat01-NB-dlr",
+      null
+     ],
+     [
+      "940GZZDLLDP-1002034-DLR-S-1",
+      "940GZZDLLDP-Plat02-SB-dlr",
+      null
+     ],
+     [
+      "940GZZDLLDP-1002034-BRDGE-7",
+      "940GZZDLLDP-1002034-DLR-N-6",
+      "940GZZDLLDP-Lift-1"
+     ],
+     [
+      "940GZZDLLDP-1002034-BRDGE-7",
+      "940GZZDLLDP-1002034-DLR-S-1",
+      "940GZZDLLDP-Lift-2"
+     ]
+    ],
+    "lines": {
+     "dlr": {
+      "platforms": [
+       "940GZZDLLDP-Plat01-NB-dlr",
+       "940GZZDLLDP-Plat02-SB-dlr"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZDLDEV": {
    "id": "940GZZDLDEV",
@@ -473,7 +5130,65 @@
    "hub": null,
    "stepFree": "yes",
    "stepFreeSource": "TfL: DLR stations are step-free by lift or ramp (network-wide statement; verify per station)",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "940GZZDLDEV",
+    "outside": "940GZZDLDEV-Outside",
+    "paths": [
+     [
+      "940GZZDLDEV-1002030-CSB-3",
+      "940GZZDLDEV-1002030-DEVON-1",
+      null
+     ],
+     [
+      "940GZZDLDEV-1002030-DEVON-1",
+      "940GZZDLDEV-1002030-DRB-6",
+      null
+     ],
+     [
+      "940GZZDLDEV-1002030-CONC-5",
+      "940GZZDLDEV-Outside",
+      null
+     ],
+     [
+      "940GZZDLDEV-1002030-DLR-N-2",
+      "940GZZDLDEV-Plat01-NB-dlr",
+      null
+     ],
+     [
+      "940GZZDLDEV-1002030-DLR-S-4",
+      "940GZZDLDEV-Plat02-SB-dlr",
+      null
+     ],
+     [
+      "940GZZDLDEV-1002030-CONC-5",
+      "940GZZDLDEV-1002030-DEVON-1",
+      null
+     ],
+     [
+      "940GZZDLDEV-1002030-CONC-5",
+      "940GZZDLDEV-1002030-DLR-N-2",
+      "940GZZDLDEV-Lift-1"
+     ],
+     [
+      "940GZZDLDEV-1002030-CONC-5",
+      "940GZZDLDEV-1002030-DLR-S-4",
+      "940GZZDLDEV-Lift-2"
+     ]
+    ],
+    "lines": {
+     "dlr": {
+      "platforms": [
+       "940GZZDLDEV-Plat01-NB-dlr",
+       "940GZZDLDEV-Plat02-SB-dlr"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZDLBOW": {
    "id": "940GZZDLBOW",
@@ -484,7 +5199,55 @@
    "hub": null,
    "stepFree": "yes",
    "stepFreeSource": "TfL StopPoint: AccessViaLift = Yes",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "940GZZDLBOW",
+    "outside": "940GZZDLBOW-Outside",
+    "paths": [
+     [
+      "940GZZDLBOW-1002019-BOWRD-3",
+      "940GZZDLBOW-1002019-Bus-1",
+      null
+     ],
+     [
+      "940GZZDLBOW-1002019-BOWRD-3",
+      "940GZZDLBOW-Outside",
+      null
+     ],
+     [
+      "940GZZDLBOW-1002019-DLR-N-2",
+      "940GZZDLBOW-Plat01-NB-dlr",
+      null
+     ],
+     [
+      "940GZZDLBOW-1002019-DLR-S-4",
+      "940GZZDLBOW-Plat02-SB-dlr",
+      null
+     ],
+     [
+      "940GZZDLBOW-1002019-BOWRD-3",
+      "940GZZDLBOW-1002019-DLR-N-2",
+      "940GZZDLBOW-Lift-1"
+     ],
+     [
+      "940GZZDLBOW-1002019-BOWRD-3",
+      "940GZZDLBOW-1002019-DLR-S-4",
+      "940GZZDLBOW-Lift-2"
+     ]
+    ],
+    "lines": {
+     "dlr": {
+      "platforms": [
+       "940GZZDLBOW-Plat01-NB-dlr",
+       "940GZZDLBOW-Plat02-SB-dlr"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZDLPUD": {
    "id": "940GZZDLPUD",
@@ -495,7 +5258,55 @@
    "hub": null,
    "stepFree": "yes",
    "stepFreeSource": "TfL StopPoint: AccessViaLift = Yes",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "940GZZDLPUD",
+    "outside": "940GZZDLPUD-Outside",
+    "paths": [
+     [
+      "940GZZDLPUD-1002066-BOOK-4",
+      "940GZZDLPUD-1002066-PUDDI-1",
+      null
+     ],
+     [
+      "940GZZDLPUD-1002066-BOOK-4",
+      "940GZZDLPUD-Outside",
+      null
+     ],
+     [
+      "940GZZDLPUD-1002066-DLR-E-2",
+      "940GZZDLPUD-Plat01-EB-dlr",
+      null
+     ],
+     [
+      "940GZZDLPUD-1002066-DLR-W-3",
+      "940GZZDLPUD-Plat02-WB-dlr",
+      null
+     ],
+     [
+      "940GZZDLPUD-1002066-BOOK-4",
+      "940GZZDLPUD-1002066-DLR-E-2",
+      "940GZZDLPUD-Lift-1"
+     ],
+     [
+      "940GZZDLPUD-1002066-BOOK-4",
+      "940GZZDLPUD-1002066-DLR-W-3",
+      "940GZZDLPUD-Lift-2"
+     ]
+    ],
+    "lines": {
+     "dlr": {
+      "platforms": [
+       "940GZZDLPUD-Plat01-EB-dlr",
+       "940GZZDLPUD-Plat02-WB-dlr"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZDLSTD": {
    "id": "940GZZDLSTD",
@@ -506,7 +5317,332 @@
    "hub": "HUBSRA",
    "stepFree": "yes",
    "stepFreeSource": "TfL StopPoint: AccessViaLift = Yes",
-   "note": "You need to make a journey of up to 100m including lifts and ramps to change between some lines. If you are boarding the Jubilee line at this station and require level access to leave the train at Green Park, please make sure that you travel in the corr"
+   "note": "You need to make a journey of up to 100m including lifts and ramps to change between some lines. If you are boarding the Jubilee line at this station and require level access to leave the train at Green Park, please make sure that you travel in the corr",
+   "access": {
+    "tflId": "HUBSRA",
+    "outside": "HUBSRA-Outside",
+    "paths": [
+     [
+      "HUBSRA-1000226-BRIDG-91",
+      "HUBSRA-1000226-MEZ-4",
+      null
+     ],
+     [
+      "HUBSRA-1000226-BUS S-90",
+      "HUBSRA-1000226-TH-E-70",
+      null
+     ],
+     [
+      "HUBSRA-1000226-Cen3A-16",
+      "HUBSRA-1000226-CenWB-3",
+      null
+     ],
+     [
+      "HUBSRA-1000226-Cen3A-16",
+      "HUBSRA-1000226-MEZ-4",
+      null
+     ],
+     [
+      "HUBSRA-1000226-CenEB-2",
+      "HUBSRA-1000226-RPL-E-15",
+      null
+     ],
+     [
+      "HUBSRA-1000226-CenWB-3",
+      "HUBSRA-1000226-RPL-W-14",
+      null
+     ],
+     [
+      "HUBSRA-1000226-DLR-17",
+      "HUBSRA-1000226-MEZ-4",
+      null
+     ],
+     [
+      "HUBSRA-1000226-DLR-N-6",
+      "HUBSRA-1000226-TH-W-5",
+      null
+     ],
+     [
+      "HUBSRA-1000226-DLR-S-7",
+      "HUBSRA-1000226-TH-E-70",
+      null
+     ],
+     [
+      "HUBSRA-1000226-GIBBI-93",
+      "HUBSRA-1000226-TH-W-5",
+      null
+     ],
+     [
+      "HUBSRA-1000226-Jubil-8",
+      "HUBSRA-1000226-TH-W-5",
+      null
+     ],
+     [
+      "HUBSRA-1000226-RPL-N-12",
+      "HUBSRA-1000226-RPL-O-9",
+      null
+     ],
+     [
+      "HUBSRA-1000226-CenEB-2",
+      "HUBSRA-Plat06-EB-central",
+      null
+     ],
+     [
+      "HUBSRA-1000226-RPL-E-15",
+      "HUBSRA-Plat08-EB-elizabeth|national-rail",
+      null
+     ],
+     [
+      "HUBSRA-1000226-CenWB-3",
+      "HUBSRA-Plat03-WB-central",
+      null
+     ],
+     [
+      "HUBSRA-1000226-CenWB-3",
+      "HUBSRA-Plat05-WB-elizabeth|national-rail",
+      null
+     ],
+     [
+      "HUBSRA-1000226-DLR-17",
+      "HUBSRA-Plat4A-WB-dlr",
+      null
+     ],
+     [
+      "HUBSRA-1000226-DLR-17",
+      "HUBSRA-Plat4B-WB-dlr",
+      null
+     ],
+     [
+      "HUBSRA-1000226-Jubil-8",
+      "HUBSRA-Plat13-WB-jubilee",
+      null
+     ],
+     [
+      "HUBSRA-1000226-Jubil-8",
+      "HUBSRA-Plat14-WB-jubilee",
+      null
+     ],
+     [
+      "HUBSRA-1000226-Jubil-8",
+      "HUBSRA-Plat15-WB-jubilee",
+      null
+     ],
+     [
+      "HUBSRA-1000226-DLR-S-7",
+      "HUBSRA-Plat17-SB-dlr",
+      null
+     ],
+     [
+      "HUBSRA-1000226-RPL-N-12",
+      "HUBSRA-Plat01-WB-london-overground",
+      null
+     ],
+     [
+      "HUBSRA-1000226-RPL-N-12",
+      "HUBSRA-Plat02-WB-london-overground",
+      null
+     ],
+     [
+      "HUBSRA-1000226-RPL-O-9",
+      "HUBSRA-Plat01-WB-london-overground",
+      null
+     ],
+     [
+      "HUBSRA-1000226-RPL-O-9",
+      "HUBSRA-Plat02-WB-london-overground",
+      null
+     ],
+     [
+      "HUBSRA-1000226-DLR-N-6",
+      "HUBSRA-Plat16-NB-dlr",
+      null
+     ],
+     [
+      "HUBSRA-1000226-WESTF-92",
+      "HUBSRA-Outside",
+      null
+     ],
+     [
+      "HUBSRA-1000226-Cen3A-16",
+      "HUBSRA-Plat3A-WB-central",
+      null
+     ],
+     [
+      "HUBSRA-Outside",
+      "HUBSRA-1000226-GIBBI-93",
+      null
+     ],
+     [
+      "HUBSRA-1000226-Cen3A-16",
+      "HUBSRA-1000226-D-Bri-76",
+      null
+     ],
+     [
+      "HUBSRA-1000226-CenWB-3",
+      "HUBSRA-1000226-D-Bri-76",
+      null
+     ],
+     [
+      "HUBSRA-1000226-D-Bri-76",
+      "HUBSRA-1000226-DLR-17",
+      null
+     ],
+     [
+      "HUBSRA-1000226-D-Bri-76",
+      "HUBSRA-1000226-RPL-W-14",
+      null
+     ],
+     [
+      "HUBSRA-1000226-Sub-W-10",
+      "HUBSRA-1000226-CenEB-2",
+      "HUBSRA-Lift-10"
+     ],
+     [
+      "HUBSRA-1000226-Sub-W-10",
+      "HUBSRA-1000226-RPL-O-9",
+      "HUBSRA-Lift-12"
+     ],
+     [
+      "HUBSRA-1000226-RPL-O-9",
+      "HUBSRA-1000226-RPL-N-12",
+      "HUBSRA-Lift-12"
+     ],
+     [
+      "HUBSRA-1000226-WESTF-92",
+      "HUBSRA-1000226-Sub-W-10",
+      "HUBSRA-Lift-16"
+     ],
+     [
+      "HUBSRA-1000226-WESTF-92",
+      "HUBSRA-1000226-Sub-M-1",
+      "HUBSRA-Lift-17"
+     ],
+     [
+      "HUBSRA-1000226-Sub-W-10",
+      "HUBSRA-1000226-CenWB-3",
+      "HUBSRA-Lift-3"
+     ],
+     [
+      "HUBSRA-1000226-Sub-M-1",
+      "HUBSRA-1000226-CenEB-2",
+      "HUBSRA-Lift-2"
+     ],
+     [
+      "HUBSRA-1000226-Sub-M-1",
+      "HUBSRA-1000226-CenWB-3",
+      "HUBSRA-Lift-18"
+     ],
+     [
+      "HUBSRA-1000226-MEZ-4",
+      "HUBSRA-1000226-TH-E-70",
+      "HUBSRA-Lift-4"
+     ],
+     [
+      "HUBSRA-1000226-MEZ-4",
+      "HUBSRA-1000226-TH-W-5",
+      "HUBSRA-Lift-5"
+     ],
+     [
+      "HUBSRA-1000226-TH-W-5",
+      "HUBSRA-1000226-Jubil-8",
+      "HUBSRA-Lift-5"
+     ],
+     [
+      "HUBSRA-1000226-MEZ-4",
+      "HUBSRA-1000226-TH-E-70",
+      "HUBSRA-Lift-6"
+     ],
+     [
+      "HUBSRA-1000226-MEZ-4",
+      "HUBSRA-1000226-TH-W-5",
+      "HUBSRA-Lift-7"
+     ],
+     [
+      "HUBSRA-1000226-TH-W-5",
+      "HUBSRA-1000226-Jubil-8",
+      "HUBSRA-Lift-7"
+     ],
+     [
+      "HUBSRA-1000226-Sub-W-10",
+      "HUBSRA-1000226-TH-W-5",
+      "HUBSRA-Lift-8"
+     ],
+     [
+      "HUBSRA-1000226-TH-W-5",
+      "HUBSRA-1000226-Jubil-8",
+      "HUBSRA-Lift-8"
+     ],
+     [
+      "HUBSRA-1000226-Sub-M-1",
+      "HUBSRA-1000226-RPL-O-9",
+      "HUBSRA-Lift-9"
+     ],
+     [
+      "HUBSRA-1000226-RPL-O-9",
+      "HUBSRA-1000226-RPL-N-12",
+      "HUBSRA-Lift-9"
+     ],
+     [
+      "HUBSRA-1000226-Sub-M-1",
+      "HUBSRA-1000226-RPL-X-11",
+      "HUBSRA-Lift-1"
+     ],
+     [
+      "HUBSRA-1000226-Sub-W-10",
+      "HUBSRA-1000226-RPL-X-11",
+      "HUBSRA-Lift-11"
+     ],
+     [
+      "HUBSRA-1000226-Sub-E-75",
+      "HUBSRA-1000226-RPL-S-13",
+      "HUBSRA-Lift-13"
+     ],
+     [
+      "HUBSRA-1000226-Sub-E-75",
+      "HUBSRA-1000226-RPL-S-13",
+      "HUBSRA-Lift-14"
+     ]
+    ],
+    "lines": {
+     "dlr": {
+      "platforms": [
+       "HUBSRA-Plat16-NB-dlr",
+       "HUBSRA-Plat17-SB-dlr",
+       "HUBSRA-Plat4A-WB-dlr",
+       "HUBSRA-Plat4B-WB-dlr"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [
+     {
+      "accessible": false,
+      "radar": false,
+      "insideGate": true,
+      "location": "Located in Southern ticket hall, paid side"
+     },
+     {
+      "accessible": false,
+      "radar": false,
+      "insideGate": true,
+      "location": "Located in Southern ticket hall, paid side"
+     },
+     {
+      "accessible": true,
+      "radar": false,
+      "insideGate": true,
+      "location": "Located in Southern ticket hall, paid side. Baby changing standalone area"
+     },
+     {
+      "accessible": true,
+      "radar": false,
+      "insideGate": true,
+      "location": "Adjacent to DLR platform 16."
+     }
+    ],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZDLWFE": {
    "id": "940GZZDLWFE",
@@ -517,7 +5653,90 @@
    "hub": null,
    "stepFree": "yes",
    "stepFreeSource": "TfL: DLR stations are step-free by lift or ramp (network-wide statement; verify per station)",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "940GZZDLWFE",
+    "outside": "940GZZDLWFE-Outside",
+    "paths": [
+     [
+      "940GZZDLWFE-1002083-BUS-4",
+      "940GZZDLWFE-1002083-WIDR-1",
+      null
+     ],
+     [
+      "940GZZDLWFE-1002083-DLR-E-2",
+      "940GZZDLWFE-Plat01-EB-dlr",
+      null
+     ],
+     [
+      "940GZZDLWFE-1002083-DLR-W-3",
+      "940GZZDLWFE-Plat02-WB-dlr",
+      null
+     ],
+     [
+      "940GZZDLWFE-1002083-WFERR-5",
+      "940GZZDLWFE-Outside",
+      null
+     ],
+     [
+      "940GZZDLWFE-1002083-WIDR-1",
+      "940GZZDLWFE-Outside",
+      null
+     ],
+     [
+      "940GZZDLWFE-1002083-WIDR-1",
+      "940GZZDLWFE-1002083-WFERR-5",
+      "940GZZDLWFE-Lift-1"
+     ],
+     [
+      "940GZZDLWFE-1002083-WFERR-5",
+      "940GZZDLWFE-1002083-DLR-E-2",
+      "940GZZDLWFE-Lift-1"
+     ],
+     [
+      "940GZZDLWFE-1002083-WIDR-1",
+      "940GZZDLWFE-1002083-WFERR-5",
+      "940GZZDLWFE-Lift-2"
+     ],
+     [
+      "940GZZDLWFE-1002083-WFERR-5",
+      "940GZZDLWFE-1002083-DLR-W-3",
+      "940GZZDLWFE-Lift-2"
+     ],
+     [
+      "940GZZDLWFE-1002083-WIDR-1",
+      "940GZZDLWFE-1002083-WFERR-5",
+      "940GZZDLWFE-Lift-3"
+     ],
+     [
+      "940GZZDLWFE-1002083-WFERR-5",
+      "940GZZDLWFE-1002083-DLR-E-2",
+      "940GZZDLWFE-Lift-3"
+     ],
+     [
+      "940GZZDLWFE-1002083-WIDR-1",
+      "940GZZDLWFE-1002083-WFERR-5",
+      "940GZZDLWFE-Lift-4"
+     ],
+     [
+      "940GZZDLWFE-1002083-WFERR-5",
+      "940GZZDLWFE-1002083-DLR-W-3",
+      "940GZZDLWFE-Lift-4"
+     ]
+    ],
+    "lines": {
+     "dlr": {
+      "platforms": [
+       "940GZZDLWFE-Plat01-EB-dlr",
+       "940GZZDLWFE-Plat02-WB-dlr"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZDLLIM": {
    "id": "940GZZDLLIM",
@@ -528,7 +5747,90 @@
    "hub": "HUBLHS",
    "stepFree": "yes",
    "stepFreeSource": "TfL: DLR stations are step-free by lift or ramp (network-wide statement; verify per station)",
-   "note": "You can change between westbound National Rail services and eastbound DLR towards Westferry"
+   "note": "You can change between westbound National Rail services and eastbound DLR towards Westferry",
+   "access": {
+    "tflId": "HUBLHS",
+    "outside": "HUBLHS-Outside",
+    "paths": [
+     [
+      "HUBLHS-1001180-Bus-1",
+      "HUBLHS-1001180-BUTCH-2",
+      null
+     ],
+     [
+      "HUBLHS-1001180-DLRE-7",
+      "HUBLHS-1001180-RPLW-4",
+      null
+     ],
+     [
+      "HUBLHS-1001180-BRANC-8",
+      "HUBLHS-Outside",
+      null
+     ],
+     [
+      "HUBLHS-1001180-BUTCH-2",
+      "HUBLHS-Outside",
+      null
+     ],
+     [
+      "HUBLHS-1001180-DLRE-7",
+      "HUBLHS-Plat03-EB-dlr",
+      null
+     ],
+     [
+      "HUBLHS-1001180-DLRW-3",
+      "HUBLHS-Plat04-WB-dlr",
+      null
+     ],
+     [
+      "HUBLHS-Plat01-EB-national-rail",
+      "HUBLHS-1001180-RPLE-6",
+      null
+     ],
+     [
+      "HUBLHS-Plat02-WB-national-rail",
+      "HUBLHS-1001180-RPLW-4",
+      null
+     ],
+     [
+      "HUBLHS-1001180-BRANC-8",
+      "HUBLHS-1001180-DLRE-7",
+      "HUBLHS-Lift-1"
+     ],
+     [
+      "HUBLHS-1001180-BRANC-8",
+      "HUBLHS-1001180-DLRW-3",
+      "HUBLHS-Lift-2"
+     ],
+     [
+      "HUBLHS-1001180-BUTCH-2",
+      "HUBLHS-1001180-DLRE-7",
+      "HUBLHS-Lift-3"
+     ],
+     [
+      "HUBLHS-1001180-BUTCH-2",
+      "HUBLHS-1001180-DLRW-3",
+      "HUBLHS-Lift-4"
+     ],
+     [
+      "HUBLHS-1001180-BUTCH-2",
+      "HUBLHS-1001180-RPLE-6",
+      "HUBLHS-Lift-5"
+     ]
+    ],
+    "lines": {
+     "dlr": {
+      "platforms": [
+       "HUBLHS-Plat03-EB-dlr",
+       "HUBLHS-Plat04-WB-dlr"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZDLSHA": {
    "id": "940GZZDLSHA",
@@ -539,7 +5841,90 @@
    "hub": "HUBSDE",
    "stepFree": "yes",
    "stepFreeSource": "TfL: DLR stations are step-free by lift or ramp (network-wide statement; verify per station)",
-   "note": "DLR only"
+   "note": "DLR only",
+   "access": {
+    "tflId": "HUBSDE",
+    "outside": "HUBSDE-Outside",
+    "paths": [
+     [
+      "HUBSDE-1000202-Bus-1",
+      "HUBSDE-1000202-CORNW-9",
+      null
+     ],
+     [
+      "HUBSDE-1000202-Bus-1",
+      "HUBSDE-1000329-CABLE-6",
+      null
+     ],
+     [
+      "HUBSDE-1000202-Bus-1",
+      "HUBSDE-1000329-WATNE-2",
+      null
+     ],
+     [
+      "HUBSDE-1000202-CORNW-9",
+      "HUBSDE-1000329-BookH-7",
+      null
+     ],
+     [
+      "HUBSDE-1000202-DLREB-3",
+      "HUBSDE-1000202-DLRWB-4",
+      null
+     ],
+     [
+      "HUBSDE-1000329-BookH-7",
+      "HUBSDE-1000329-CABLE-6",
+      null
+     ],
+     [
+      "HUBSDE-1000329-BookH-7",
+      "HUBSDE-1000329-WATNE-2",
+      null
+     ],
+     [
+      "HUBSDE-1000202-CORNW-9",
+      "HUBSDE-Outside",
+      null
+     ],
+     [
+      "HUBSDE-1000202-DLREB-3",
+      "HUBSDE-Plat01-EB-dlr",
+      null
+     ],
+     [
+      "HUBSDE-1000202-DLRWB-4",
+      "HUBSDE-Plat02-WB-dlr",
+      null
+     ],
+     [
+      "HUBSDE-Plat01-EB-dlr",
+      "HUBSDE-Plat02-WB-dlr",
+      null
+     ],
+     [
+      "HUBSDE-1000202-CORNW-9",
+      "HUBSDE-1000202-DLREB-3",
+      "HUBSDE-Lift-1"
+     ],
+     [
+      "HUBSDE-1000202-DLREB-3",
+      "HUBSDE-1000202-DLRWB-4",
+      "HUBSDE-Lift-1"
+     ]
+    ],
+    "lines": {
+     "dlr": {
+      "platforms": [
+       "HUBSDE-Plat01-EB-dlr",
+       "HUBSDE-Plat02-WB-dlr"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZDLBNK": {
    "id": "940GZZDLBNK",
@@ -550,7 +5935,207 @@
    "hub": "HUBBAN",
    "stepFree": "yes",
    "stepFreeSource": "TfL StopPoint: AccessViaLift = Yes",
-   "note": "DLR only Lift from street to ticket hall only available on request – you need to press button to alert staff"
+   "note": "DLR only Lift from street to ticket hall only available on request – you need to press button to alert staff",
+   "access": {
+    "tflId": "HUBBAN",
+    "outside": "HUBBAN-Outside",
+    "paths": [
+     [
+      "HUBBAN-1000013-BookN-2",
+      "HUBBAN-1000013-ConcC-14",
+      null
+     ],
+     [
+      "HUBBAN-1000013-CenEB-5",
+      "HUBBAN-1000013-CenWB-4",
+      null
+     ],
+     [
+      "HUBBAN-1000013-CoNLL-29",
+      "HUBBAN-1000013-CoNNL-30",
+      null
+     ],
+     [
+      "HUBBAN-1000013-CoNNL-30",
+      "HUBBAN-1000013-NorNB-12",
+      null
+     ],
+     [
+      "HUBBAN-1000013-CoNNL-30",
+      "HUBBAN-1000013-NorSB-13",
+      null
+     ],
+     [
+      "HUBBAN-1000013-ConNU-25",
+      "HUBBAN-1000013-Wat8-21",
+      null
+     ],
+     [
+      "HUBBAN-1000013-CSBH-95",
+      "HUBBAN-1000013-T-CAN-96",
+      null
+     ],
+     [
+      "HUBBAN-1000013-DLR 9-98",
+      "HUBBAN-1000013-DLR10-90",
+      null
+     ],
+     [
+      "HUBBAN-1000013-F-WAL-18",
+      "HUBBAN-1000013-S-BLO-99",
+      null
+     ],
+     [
+      "HUBBAN-1000013-F-WAL-18",
+      "HUBBAN-1000013-T-CAN-96",
+      null
+     ],
+     [
+      "HUBBAN-1000013-NLSP-31",
+      "HUBBAN-1000013-NorNB-12",
+      null
+     ],
+     [
+      "HUBBAN-1000013-NLSP-31",
+      "HUBBAN-1000013-NorSB-13",
+      null
+     ],
+     [
+      "HUBBAN-1000013-Wat8-21",
+      "HUBBAN-1000013-Water-9",
+      null
+     ],
+     [
+      "HUBBAN-1000013-DLR 9-98",
+      "HUBBAN-Plat09-EB-dlr",
+      null
+     ],
+     [
+      "HUBBAN-1000013-DLR10-90",
+      "HUBBAN-Plat10-WB-dlr",
+      null
+     ],
+     [
+      "HUBBAN-1000013-R-KWS-7",
+      "HUBBAN-Outside",
+      null
+     ],
+     [
+      "HUBBAN-1000013-S-BLO-99",
+      "HUBBAN-Outside",
+      null
+     ],
+     [
+      "HUBBAN-Outside",
+      "HUBBAN-1000013-T-CAN-96",
+      null
+     ],
+     [
+      "HUBBAN-Plat03-SB-northern",
+      "HUBBAN-1000013-NorSB-13",
+      null
+     ],
+     [
+      "HUBBAN-Plat04-NB-northern",
+      "HUBBAN-1000013-NorNB-12",
+      null
+     ],
+     [
+      "HUBBAN-1000013-Water-9",
+      "HUBBAN-Plat07-WB-waterloo-city",
+      null
+     ],
+     [
+      "HUBBAN-1000013-Wat8-21",
+      "HUBBAN-Plat08-WB-waterloo-city",
+      null
+     ],
+     [
+      "HUBBAN-1000013-BookN-2",
+      "HUBBAN-1000013-ConNL-6",
+      "HUBBAN-Lift-2"
+     ],
+     [
+      "HUBBAN-1000013-BookN-2",
+      "HUBBAN-1000013-ConNL-6",
+      "HUBBAN-Lift-3"
+     ],
+     [
+      "HUBBAN-1000013-BookN-2",
+      "HUBBAN-1000013-ConNL-6",
+      "HUBBAN-Lift-4"
+     ],
+     [
+      "HUBBAN-1000013-BookN-2",
+      "HUBBAN-1000013-ConNL-6",
+      "HUBBAN-Lift-5"
+     ],
+     [
+      "HUBBAN-1000013-ConNL-6",
+      "HUBBAN-1000013-DLR10-90",
+      "HUBBAN-Lift-6"
+     ],
+     [
+      "HUBBAN-1000013-DLR10-90",
+      "HUBBAN-1000013-DLR 9-98",
+      "HUBBAN-Lift-6"
+     ],
+     [
+      "HUBBAN-1000013-R-KWS-7",
+      "HUBBAN-1000013-BookN-2",
+      "HUBBAN-Lift-7"
+     ],
+     [
+      "HUBBAN-1000013-S-BLO-99",
+      "HUBBAN-1000013-BMez-28",
+      "HUBBAN-Lift-8"
+     ],
+     [
+      "HUBBAN-1000013-BMez-28",
+      "HUBBAN-1000013-Water-9",
+      "HUBBAN-Lift-9"
+     ],
+     [
+      "HUBBAN-1000013-CSBH-95",
+      "HUBBAN-1000013-NLSP-31",
+      "HUBBAN-Lift 10"
+     ],
+     [
+      "HUBBAN-1000013-NLSP-31",
+      "HUBBAN-1000013-DLR10-90",
+      "HUBBAN-Lift 10"
+     ],
+     [
+      "HUBBAN-1000013-DLR10-90",
+      "HUBBAN-1000013-DLR 9-98",
+      "HUBBAN-Lift 10"
+     ],
+     [
+      "HUBBAN-1000013-CSBH-95",
+      "HUBBAN-1000013-NLSP-31",
+      "HUBBAN-Lift 11"
+     ]
+    ],
+    "lines": {
+     "dlr": {
+      "platforms": [
+       "HUBBAN-Plat09-EB-dlr",
+       "HUBBAN-Plat10-WB-dlr"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [
+     {
+      "accessible": true,
+      "radar": false,
+      "insideGate": true,
+      "location": "Located at Cannon Street ticket hall"
+     }
+    ],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZDLTWG": {
    "id": "940GZZDLTWG",
@@ -561,7 +6146,75 @@
    "hub": "HUBTOG",
    "stepFree": "yes",
    "stepFreeSource": "TfL: DLR stations are step-free by lift or ramp (network-wide statement; verify per station)",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "HUBTOG",
+    "outside": "HUBTOG-Outside",
+    "paths": [
+     [
+      "HUBTOG-1002076-Bus-3",
+      "HUBTOG-1002076-MANSE-4",
+      null
+     ],
+     [
+      "HUBTOG-1002076-Bus-3",
+      "HUBTOG-1002076-MINOR-2",
+      null
+     ],
+     [
+      "HUBTOG-1002076-DLR 1-5",
+      "HUBTOG-1002076-DLR 2-1",
+      null
+     ],
+     [
+      "HUBTOG-1002076-DLR 1-5",
+      "HUBTOG-Plat01-EB-dlr",
+      null
+     ],
+     [
+      "HUBTOG-1002076-DLR 2-1",
+      "HUBTOG-Plat02-EB-dlr",
+      null
+     ],
+     [
+      "HUBTOG-1002076-MINOR-2",
+      "HUBTOG-Outside",
+      null
+     ],
+     [
+      "HUBTOG-1002076-MANSE-4",
+      "HUBTOG-Outside",
+      null
+     ],
+     [
+      "HUBTOG-Plat01-EB-dlr",
+      "HUBTOG-Plat02-EB-dlr",
+      null
+     ],
+     [
+      "HUBTOG-1002076-MINOR-2",
+      "HUBTOG-1002076-DLR 2-1",
+      "HUBTOG-Lift-1"
+     ],
+     [
+      "HUBTOG-1002076-MINOR-2",
+      "HUBTOG-1002076-DLR 2-1",
+      "HUBTOG-Lift-2"
+     ]
+    ],
+    "lines": {
+     "dlr": {
+      "platforms": [
+       "HUBTOG-Plat01-EB-dlr",
+       "HUBTOG-Plat02-EB-dlr"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZDLBEC": {
    "id": "940GZZDLBEC",
@@ -572,7 +6225,65 @@
    "hub": null,
    "stepFree": "yes",
    "stepFreeSource": "TfL: DLR stations are step-free by lift or ramp (network-wide statement; verify per station)",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "940GZZDLBEC",
+    "outside": "940GZZDLBEC-Outside",
+    "paths": [
+     [
+      "940GZZDLBEC-1002011-Bus-3",
+      "940GZZDLBEC-1002011-WOOLW-1",
+      null
+     ],
+     [
+      "940GZZDLBEC-1002011-CONC-4",
+      "940GZZDLBEC-1002011-WOOLW-1",
+      null
+     ],
+     [
+      "940GZZDLBEC-1002011-DLR1-2",
+      "940GZZDLBEC-1002011-DLR2-5",
+      null
+     ],
+     [
+      "940GZZDLBEC-Outside",
+      "940GZZDLBEC-Plat01-WB-dlr",
+      null
+     ],
+     [
+      "940GZZDLBEC-Outside",
+      "940GZZDLBEC-Plat02-WB-dlr",
+      null
+     ],
+     [
+      "940GZZDLBEC-Plat01-WB-dlr",
+      "940GZZDLBEC-Plat02-WB-dlr",
+      null
+     ],
+     [
+      "940GZZDLBEC-1002011-CONC-4",
+      "940GZZDLBEC-1002011-DLR1-2",
+      null
+     ],
+     [
+      "940GZZDLBEC-1002011-CONC-4",
+      "940GZZDLBEC-1002011-DLR2-5",
+      null
+     ]
+    ],
+    "lines": {
+     "dlr": {
+      "platforms": [
+       "940GZZDLBEC-Plat01-WB-dlr",
+       "940GZZDLBEC-Plat02-WB-dlr"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZDLGAL": {
    "id": "940GZZDLGAL",
@@ -583,7 +6294,60 @@
    "hub": null,
    "stepFree": "yes",
    "stepFreeSource": "TfL StopPoint: AccessViaLift = Yes",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "940GZZDLGAL",
+    "outside": "940GZZDLGAL-Outside",
+    "paths": [
+     [
+      "940GZZDLGAL-1002039-Bus-3",
+      "940GZZDLGAL-1002039-SLIP-1",
+      null
+     ],
+     [
+      "940GZZDLGAL-1002039-CONC-5",
+      "940GZZDLGAL-1002039-SLIP-1",
+      null
+     ],
+     [
+      "940GZZDLGAL-1002039-CONC-5",
+      "940GZZDLGAL-Outside",
+      null
+     ],
+     [
+      "940GZZDLGAL-1002039-DLR-E-2",
+      "940GZZDLGAL-Plat01-EB-dlr",
+      null
+     ],
+     [
+      "940GZZDLGAL-1002039-DLR-W-4",
+      "940GZZDLGAL-Plat02-WB-dlr",
+      null
+     ],
+     [
+      "940GZZDLGAL-1002039-CONC-5",
+      "940GZZDLGAL-1002039-DLR-E-2",
+      "940GZZDLGAL-Lift-1"
+     ],
+     [
+      "940GZZDLGAL-1002039-CONC-5",
+      "940GZZDLGAL-1002039-DLR-W-4",
+      "940GZZDLGAL-Lift-2"
+     ]
+    ],
+    "lines": {
+     "dlr": {
+      "platforms": [
+       "940GZZDLGAL-Plat01-EB-dlr",
+       "940GZZDLGAL-Plat02-WB-dlr"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZDLCYP": {
    "id": "940GZZDLCYP",
@@ -594,7 +6358,65 @@
    "hub": null,
    "stepFree": "yes",
    "stepFreeSource": "TfL StopPoint: AccessViaLift = Yes",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "940GZZDLCYP",
+    "outside": "940GZZDLCYP-Outside",
+    "paths": [
+     [
+      "940GZZDLCYP-1002028-BRDGE-6",
+      "940GZZDLCYP-1002028-STRAI-1",
+      null
+     ],
+     [
+      "940GZZDLCYP-1002028-BRDGE-6",
+      "940GZZDLCYP-1002028-UNIVE-4",
+      null
+     ],
+     [
+      "940GZZDLCYP-1002028-Bus-3",
+      "940GZZDLCYP-1002028-STRAI-1",
+      null
+     ],
+     [
+      "940GZZDLCYP-Outside",
+      "940GZZDLCYP-Plat01-EB-dlr",
+      null
+     ],
+     [
+      "940GZZDLCYP-Outside",
+      "940GZZDLCYP-Plat02-WB-dlr",
+      null
+     ],
+     [
+      "940GZZDLCYP-Plat01-EB-dlr",
+      "940GZZDLCYP-Plat02-WB-dlr",
+      null
+     ],
+     [
+      "940GZZDLCYP-1002028-BRDGE-6",
+      "940GZZDLCYP-1002028-DLR-E-2",
+      null
+     ],
+     [
+      "940GZZDLCYP-1002028-BRDGE-6",
+      "940GZZDLCYP-1002028-DLR-W-5",
+      null
+     ]
+    ],
+    "lines": {
+     "dlr": {
+      "platforms": [
+       "940GZZDLCYP-Plat01-EB-dlr",
+       "940GZZDLCYP-Plat02-WB-dlr"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZDLBPK": {
    "id": "940GZZDLBPK",
@@ -605,7 +6427,65 @@
    "hub": null,
    "stepFree": "yes",
    "stepFreeSource": "TfL StopPoint: AccessViaLift = Yes",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "940GZZDLBPK",
+    "outside": "940GZZDLBPK-Outside",
+    "paths": [
+     [
+      "940GZZDLBPK-1002012-BRDGE-5",
+      "940GZZDLBPK-1002012-STRAI-1",
+      null
+     ],
+     [
+      "940GZZDLBPK-1002012-Bus-3",
+      "940GZZDLBPK-1002012-STRAI-1",
+      null
+     ],
+     [
+      "940GZZDLBPK-Outside",
+      "940GZZDLBPK-Plat01-EB-dlr",
+      null
+     ],
+     [
+      "940GZZDLBPK-Outside",
+      "940GZZDLBPK-Plat02-WB-dlr",
+      null
+     ],
+     [
+      "940GZZDLBPK-Plat01-EB-dlr",
+      "940GZZDLBPK-Plat02-WB-dlr",
+      null
+     ],
+     [
+      "940GZZDLBPK-1002012-BRDGE-5",
+      "940GZZDLBPK-1002012-DLR-E-2",
+      null
+     ],
+     [
+      "940GZZDLBPK-1002012-BRDGE-5",
+      "940GZZDLBPK-1002012-DLR-W-4",
+      null
+     ],
+     [
+      "940GZZDLBPK-1002012-DLR-E-2",
+      "940GZZDLBPK-1002012-STRAI-1",
+      null
+     ]
+    ],
+    "lines": {
+     "dlr": {
+      "platforms": [
+       "940GZZDLBPK-Plat01-EB-dlr",
+       "940GZZDLBPK-Plat02-WB-dlr"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZDLRAL": {
    "id": "940GZZDLRAL",
@@ -616,7 +6496,60 @@
    "hub": null,
    "stepFree": "yes",
    "stepFreeSource": "TfL StopPoint: AccessViaLift = Yes",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "940GZZDLRAL",
+    "outside": "940GZZDLRAL-Outside",
+    "paths": [
+     [
+      "940GZZDLRAL-1002070-Bus-3",
+      "940GZZDLRAL-1002070-ROYAL-1",
+      null
+     ],
+     [
+      "940GZZDLRAL-1002070-CONC-5",
+      "940GZZDLRAL-1002070-ROYAL-1",
+      null
+     ],
+     [
+      "940GZZDLRAL-1002070-CONC-5",
+      "940GZZDLRAL-Outside",
+      null
+     ],
+     [
+      "940GZZDLRAL-1002070-DLR-E-2",
+      "940GZZDLRAL-Plat01-EB-dlr",
+      null
+     ],
+     [
+      "940GZZDLRAL-1002070-DLR-W-4",
+      "940GZZDLRAL-Plat02-WB-dlr",
+      null
+     ],
+     [
+      "940GZZDLRAL-1002070-CONC-5",
+      "940GZZDLRAL-1002070-DLR-E-2",
+      "940GZZDLRAL-Lift-1"
+     ],
+     [
+      "940GZZDLRAL-1002070-CONC-5",
+      "940GZZDLRAL-1002070-DLR-W-4",
+      "940GZZDLRAL-Lift-2"
+     ]
+    ],
+    "lines": {
+     "dlr": {
+      "platforms": [
+       "940GZZDLRAL-Plat01-EB-dlr",
+       "940GZZDLRAL-Plat02-WB-dlr"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZDLPRE": {
    "id": "940GZZDLPRE",
@@ -627,7 +6560,70 @@
    "hub": null,
    "stepFree": "yes",
    "stepFreeSource": "TfL StopPoint: AccessViaLift = Yes",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "940GZZDLPRE",
+    "outside": "940GZZDLPRE-Outside",
+    "paths": [
+     [
+      "940GZZDLPRE-1002065-DLREB-2",
+      "940GZZDLPRE-1002065-DLRWB-5",
+      null
+     ],
+     [
+      "940GZZDLPRE-1002065-EXC-4",
+      "940GZZDLPRE-Outside",
+      null
+     ],
+     [
+      "940GZZDLPRE-1002065-CONNA-1",
+      "940GZZDLPRE-Outside",
+      null
+     ],
+     [
+      "940GZZDLPRE-1002065-DLREB-2",
+      "940GZZDLPRE-Plat01-EB-dlr",
+      null
+     ],
+     [
+      "940GZZDLPRE-1002065-DLRWB-5",
+      "940GZZDLPRE-Plat02-WB-dlr",
+      null
+     ],
+     [
+      "940GZZDLPRE-Plat01-EB-dlr",
+      "940GZZDLPRE-Plat02-WB-dlr",
+      null
+     ],
+     [
+      "940GZZDLPRE-1002065-Bridg-3",
+      "940GZZDLPRE-1002065-DLREB-2",
+      "940GZZDLPRE-Lift-1"
+     ],
+     [
+      "940GZZDLPRE-1002065-DLREB-2",
+      "940GZZDLPRE-1002065-DLRWB-5",
+      "940GZZDLPRE-Lift-1"
+     ],
+     [
+      "940GZZDLPRE-1002065-Bridg-3",
+      "940GZZDLPRE-1002065-CONNA-1",
+      "940GZZDLPRE-Lift-2"
+     ]
+    ],
+    "lines": {
+     "dlr": {
+      "platforms": [
+       "940GZZDLPRE-Plat01-EB-dlr",
+       "940GZZDLPRE-Plat02-WB-dlr"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZDLCUS": {
    "id": "940GZZDLCUS",
@@ -638,7 +6634,157 @@
    "hub": "HUBCUS",
    "stepFree": "yes",
    "stepFreeSource": "TfL StopPoint: AccessViaLift = Yes",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "HUBCUS",
+    "outside": "HUBCUS-Outside",
+    "paths": [
+     [
+      "HUBCUS-1001079-BCD-3",
+      "HUBCUS-1001079-Bus-1",
+      null
+     ],
+     [
+      "HUBCUS-1001079-BCD-3",
+      "HUBCUS-1001079-EXCEL-7",
+      null
+     ],
+     [
+      "HUBCUS-1001079-BCD-3",
+      "HUBCUS-1001079-VIC-4",
+      null
+     ],
+     [
+      "HUBCUS-1001079-Bus-1",
+      "HUBCUS-1001079-VIC-4",
+      null
+     ],
+     [
+      "HUBCUS-1001079-CBH-9",
+      "HUBCUS-1001079-WalkC-6",
+      null
+     ],
+     [
+      "HUBCUS-1001079-DLREB-2",
+      "HUBCUS-1001079-DLRWB-14",
+      null
+     ],
+     [
+      "HUBCUS-1001079-WalkC-6",
+      "HUBCUS-1001079-XREnt-8",
+      null
+     ],
+     [
+      "HUBCUS-1001079-DLREB-2",
+      "HUBCUS-Plat03-EB-dlr",
+      null
+     ],
+     [
+      "HUBCUS-1001079-DLRWB-14",
+      "HUBCUS-Plat04-WB-dlr",
+      null
+     ],
+     [
+      "HUBCUS-1001079-VIC-4",
+      "HUBCUS-Outside",
+      null
+     ],
+     [
+      "HUBCUS-Outside",
+      "HUBCUS-1001079-EXCEL-7",
+      null
+     ],
+     [
+      "HUBCUS-1001079-EL EB-5",
+      "HUBCUS-PlatA-EB-elizabeth",
+      null
+     ],
+     [
+      "HUBCUS-1001079-EL WB-10",
+      "HUBCUS-PlatB-WB-elizabeth",
+      null
+     ],
+     [
+      "HUBCUS-PlatB-WB-elizabeth",
+      "HUBCUS-PlatA-EB-elizabeth",
+      null
+     ],
+     [
+      "HUBCUS-Plat03-EB-dlr",
+      "HUBCUS-Plat04-WB-dlr",
+      null
+     ],
+     [
+      "HUBCUS-1001079-CBH-9",
+      "HUBCUS-1001079-WalkE-13",
+      null
+     ],
+     [
+      "HUBCUS-1001079-WalkC-6",
+      "HUBCUS-1001079-WalkE-13",
+      null
+     ],
+     [
+      "HUBCUS-1001079-WalkC-6",
+      "HUBCUS-1001079-WalkW-12",
+      null
+     ],
+     [
+      "HUBCUS-1001079-WalkW-12",
+      "HUBCUS-1001079-DLREB-2",
+      "HUBCUS-Lift-4"
+     ],
+     [
+      "HUBCUS-1001079-DLREB-2",
+      "HUBCUS-1001079-DLRWB-14",
+      "HUBCUS-Lift-4"
+     ],
+     [
+      "HUBCUS-1001079-VIC-4",
+      "HUBCUS-1001079-WalkC-6",
+      "HUBCUS-Lift-1"
+     ],
+     [
+      "HUBCUS-1001079-DLREB-2",
+      "HUBCUS-1001079-DLRWB-14",
+      "HUBCUS-Lift-2"
+     ],
+     [
+      "HUBCUS-1001079-DLRWB-14",
+      "HUBCUS-1001079-WalkE-13",
+      "HUBCUS-Lift-2"
+     ],
+     [
+      "HUBCUS-1001079-CBH-9",
+      "HUBCUS-1001079-EL EB-5",
+      "HUBCUS-Lift-3"
+     ],
+     [
+      "HUBCUS-1001079-EL EB-5",
+      "HUBCUS-1001079-EL WB-10",
+      "HUBCUS-Lift-3"
+     ]
+    ],
+    "lines": {
+     "dlr": {
+      "platforms": [
+       "HUBCUS-Plat03-EB-dlr",
+       "HUBCUS-Plat04-WB-dlr"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [
+     {
+      "accessible": true,
+      "radar": false,
+      "insideGate": true,
+      "location": null
+     }
+    ],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZDLRVC": {
    "id": "940GZZDLRVC",
@@ -649,7 +6795,75 @@
    "hub": "HUBRVC",
    "stepFree": "yes",
    "stepFreeSource": "TfL StopPoint: AccessViaLift = Yes",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "940GZZDLRVC",
+    "outside": "940GZZDLRVC-Outside",
+    "paths": [
+     [
+      "940GZZDLRVC-1002071-DLR-W-5",
+      "940GZZDLRVC-1002071-SEA-4",
+      null
+     ],
+     [
+      "940GZZDLRVC-1002071-DLR-E-2",
+      "940GZZDLRVC-Plat01-EB-dlr",
+      null
+     ],
+     [
+      "940GZZDLRVC-1002071-DLR-W-5",
+      "940GZZDLRVC-Plat02-WB-dlr",
+      null
+     ],
+     [
+      "940GZZDLRVC-1002071-VICTO-1",
+      "940GZZDLRVC-Plat01-EB-dlr",
+      null
+     ],
+     [
+      "940GZZDLRVC-Outside",
+      "940GZZDLRVC-Plat01-EB-dlr",
+      null
+     ],
+     [
+      "940GZZDLRVC-Outside",
+      "940GZZDLRVC-Plat02-WB-dlr",
+      null
+     ],
+     [
+      "940GZZDLRVC-1002071-DLR-E-2",
+      "940GZZDLRVC-1002071-VICTO-1",
+      null
+     ],
+     [
+      "940GZZDLRVC-1002071-BookH-3",
+      "940GZZDLRVC-1002071-DLR-E-2",
+      "940GZZDLRVC-Lift-1"
+     ],
+     [
+      "940GZZDLRVC-1002071-BookH-3",
+      "940GZZDLRVC-1002071-SEA-4",
+      "940GZZDLRVC-Lift-2"
+     ],
+     [
+      "940GZZDLRVC-1002071-BookH-3",
+      "940GZZDLRVC-1002071-VICTO-1",
+      "940GZZDLRVC-Lift-3"
+     ]
+    ],
+    "lines": {
+     "dlr": {
+      "platforms": [
+       "940GZZDLRVC-Plat01-EB-dlr",
+       "940GZZDLRVC-Plat02-WB-dlr"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZDLCGT": {
    "id": "940GZZDLCGT",
@@ -660,7 +6874,152 @@
    "hub": "HUBCAN",
    "stepFree": "yes",
    "stepFreeSource": "TfL StopPoint: AccessViaLift = Yes",
-   "note": "If you are boarding the Jubilee line at this station and require level access to leave the train at Green Park, please make sure that you travel in the correct carriage"
+   "note": "If you are boarding the Jubilee line at this station and require level access to leave the train at Green Park, please make sure that you travel in the correct carriage",
+   "access": {
+    "tflId": "HUBCAN",
+    "outside": "HUBCAN-Outside",
+    "paths": [
+     [
+      "HUBCAN-1000039-Bus 2-7",
+      "HUBCAN-1000039-ENTRA-3",
+      null
+     ],
+     [
+      "HUBCAN-1000039-DLR1-2",
+      "HUBCAN-1000039-DLR2-16",
+      null
+     ],
+     [
+      "HUBCAN-1000039-DLR3-4",
+      "HUBCAN-1000039-DLR4-6",
+      null
+     ],
+     [
+      "HUBCAN-1000039-JubEB-15",
+      "HUBCAN-1000039-Jubil-1",
+      null
+     ],
+     [
+      "HUBCAN-1000039-BOW-9",
+      "HUBCAN-Outside",
+      null
+     ],
+     [
+      "HUBCAN-1000039-DLR3-4",
+      "HUBCAN-Plat03-EB-dlr",
+      null
+     ],
+     [
+      "HUBCAN-1000039-DLR4-6",
+      "HUBCAN-Plat04-WB-dlr",
+      null
+     ],
+     [
+      "HUBCAN-1000039-DLR1-2",
+      "HUBCAN-Plat01-SB-dlr",
+      null
+     ],
+     [
+      "HUBCAN-1000039-DLR2-16",
+      "HUBCAN-Plat02-NB-dlr",
+      null
+     ],
+     [
+      "HUBCAN-1000039-ENTRA-3",
+      "HUBCAN-Outside",
+      null
+     ],
+     [
+      "HUBCAN-1000039-JubEB-15",
+      "HUBCAN-Plat05-WB-jubilee",
+      null
+     ],
+     [
+      "HUBCAN-1000039-JubEB-15",
+      "HUBCAN-Plat06-EB-jubilee",
+      null
+     ],
+     [
+      "HUBCAN-1000039-Jubil-1",
+      "HUBCAN-Plat05-WB-jubilee",
+      null
+     ],
+     [
+      "HUBCAN-1000039-Jubil-1",
+      "HUBCAN-Plat06-EB-jubilee",
+      null
+     ],
+     [
+      "HUBCAN-Plat01-SB-dlr",
+      "HUBCAN-Plat02-NB-dlr",
+      null
+     ],
+     [
+      "HUBCAN-Plat03-EB-dlr",
+      "HUBCAN-Plat04-WB-dlr",
+      null
+     ],
+     [
+      "HUBCAN-Plat05-WB-jubilee",
+      "HUBCAN-Plat06-EB-jubilee",
+      null
+     ],
+     [
+      "HUBCAN-1000039-BOW-9",
+      "HUBCAN-1000039-BookH-5",
+      "HUBCAN-Lift-1"
+     ],
+     [
+      "HUBCAN-1000039-BookH-5",
+      "HUBCAN-1000039-DLR1-2",
+      "HUBCAN-Lift-2"
+     ],
+     [
+      "HUBCAN-1000039-DLR1-2",
+      "HUBCAN-1000039-DLR2-16",
+      "HUBCAN-Lift-2"
+     ],
+     [
+      "HUBCAN-1000039-ENTRA-3",
+      "HUBCAN-1000039-BookH-5",
+      "HUBCAN-Lift-3"
+     ],
+     [
+      "HUBCAN-1000039-BookH-5",
+      "HUBCAN-1000039-Jubil-1",
+      "HUBCAN-Lift-4"
+     ],
+     [
+      "HUBCAN-1000039-Jubil-1",
+      "HUBCAN-1000039-JubEB-15",
+      "HUBCAN-Lift-4"
+     ],
+     [
+      "HUBCAN-1000039-JubEB-15",
+      "HUBCAN-1000039-DLR3-4",
+      "HUBCAN-Lift-4"
+     ],
+     [
+      "HUBCAN-1000039-DLR3-4",
+      "HUBCAN-1000039-DLR4-6",
+      "HUBCAN-Lift-4"
+     ]
+    ],
+    "lines": {
+     "dlr": {
+      "platforms": [
+       "HUBCAN-Plat01-SB-dlr",
+       "HUBCAN-Plat02-NB-dlr",
+       "HUBCAN-Plat03-EB-dlr",
+       "HUBCAN-Plat04-WB-dlr"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZDLEIN": {
    "id": "940GZZDLEIN",
@@ -671,7 +7030,80 @@
    "hub": null,
    "stepFree": "yes",
    "stepFreeSource": "TfL StopPoint: AccessViaLift = Yes",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "940GZZDLEIN",
+    "outside": "940GZZDLEIN-Outside",
+    "paths": [
+     [
+      "940GZZDLEIN-1002033-BLACK-5",
+      "940GZZDLEIN-1002033-SOUTH-2",
+      null
+     ],
+     [
+      "940GZZDLEIN-1002033-BLACK-5",
+      "940GZZDLEIN-Outside",
+      null
+     ],
+     [
+      "940GZZDLEIN-1002033-ASPEN-1",
+      "940GZZDLEIN-Outside",
+      null
+     ],
+     [
+      "940GZZDLEIN-1002033-DLR-E-3",
+      "940GZZDLEIN-Plat01-EB-dlr",
+      null
+     ],
+     [
+      "940GZZDLEIN-1002033-DLR-W-6",
+      "940GZZDLEIN-Plat02-WB-dlr",
+      null
+     ],
+     [
+      "940GZZDLEIN-1002033-BookH-4",
+      "940GZZDLEIN-1002033-SOUTH-2",
+      null
+     ],
+     [
+      "940GZZDLEIN-1002033-BLACK-5",
+      "940GZZDLEIN-1002033-BookH-4",
+      "940GZZDLEIN-Lift-1"
+     ],
+     [
+      "940GZZDLEIN-1002033-BookH-4",
+      "940GZZDLEIN-1002033-DLR-E-3",
+      "940GZZDLEIN-Lift-1"
+     ],
+     [
+      "940GZZDLEIN-1002033-BLACK-5",
+      "940GZZDLEIN-1002033-BookH-4",
+      "940GZZDLEIN-Lift-2"
+     ],
+     [
+      "940GZZDLEIN-1002033-BookH-4",
+      "940GZZDLEIN-1002033-DLR-W-6",
+      "940GZZDLEIN-Lift-2"
+     ],
+     [
+      "940GZZDLEIN-1002033-ASPEN-1",
+      "940GZZDLEIN-1002033-BookH-4",
+      "940GZZDLEIN-Lift-3"
+     ]
+    ],
+    "lines": {
+     "dlr": {
+      "platforms": [
+       "940GZZDLEIN-Plat01-EB-dlr",
+       "940GZZDLEIN-Plat02-WB-dlr"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZDLBLA": {
    "id": "940GZZDLBLA",
@@ -682,7 +7114,55 @@
    "hub": null,
    "stepFree": "yes",
    "stepFreeSource": "TfL StopPoint: AccessViaLift = Yes",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "940GZZDLBLA",
+    "outside": "940GZZDLBLA-Outside",
+    "paths": [
+     [
+      "940GZZDLBLA-1002018-Bus-3",
+      "940GZZDLBLA-1002018-DITCH-1",
+      null
+     ],
+     [
+      "940GZZDLBLA-1002018-DITCH-1",
+      "940GZZDLBLA-Outside",
+      null
+     ],
+     [
+      "940GZZDLBLA-1002018-DLR-E-2",
+      "940GZZDLBLA-Plat01-EB-dlr",
+      null
+     ],
+     [
+      "940GZZDLBLA-1002018-DLR-W-4",
+      "940GZZDLBLA-Plat02-WB-dlr",
+      null
+     ],
+     [
+      "940GZZDLBLA-1002018-DITCH-1",
+      "940GZZDLBLA-1002018-DLR-E-2",
+      "940GZZDLBLA-Lift-1"
+     ],
+     [
+      "940GZZDLBLA-1002018-DITCH-1",
+      "940GZZDLBLA-1002018-DLR-W-4",
+      "940GZZDLBLA-Lift-2"
+     ]
+    ],
+    "lines": {
+     "dlr": {
+      "platforms": [
+       "940GZZDLBLA-Plat01-EB-dlr",
+       "940GZZDLBLA-Plat02-WB-dlr"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZDLWLA": {
    "id": "940GZZDLWLA",
@@ -693,7 +7173,130 @@
    "hub": "HUBWWA",
    "stepFree": "yes",
    "stepFreeSource": "TfL StopPoint: AccessViaLift = Yes",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "HUBWWA",
+    "outside": "HUBWWA-Outside",
+    "paths": [
+     [
+      "HUBWWA-1001344-BOOK-4",
+      "HUBWWA-1001344-Entr-3",
+      null
+     ],
+     [
+      "HUBWWA-1001344-Bus-1",
+      "HUBWWA-1001344-Entr-3",
+      null
+     ],
+     [
+      "HUBWWA-1001344-Bus-1",
+      "HUBWWA-1003000-BED-2",
+      null
+     ],
+     [
+      "HUBWWA-1001344-Bus-1",
+      "HUBWWA-1003000-WOO-3",
+      null
+     ],
+     [
+      "HUBWWA-1001344-DLRI-7",
+      "HUBWWA-1001344-RPL-E-2",
+      null
+     ],
+     [
+      "HUBWWA-1001344-DLRI-7",
+      "HUBWWA-1003000-DLRI-4",
+      null
+     ],
+     [
+      "HUBWWA-1001344-Entr-3",
+      "HUBWWA-1003000-WOO-3",
+      null
+     ],
+     [
+      "HUBWWA-1003000-BED-2",
+      "HUBWWA-1003000-WOO-3",
+      null
+     ],
+     [
+      "HUBWWA-1003000-BED-2",
+      "HUBWWA-Outside",
+      null
+     ],
+     [
+      "HUBWWA-1003000-DLR-1",
+      "HUBWWA-Plat03-NB-dlr",
+      null
+     ],
+     [
+      "HUBWWA-1003000-DLR-1",
+      "HUBWWA-Plat04-NB-dlr",
+      null
+     ],
+     [
+      "HUBWWA-1003000-WOO-3",
+      "HUBWWA-Outside",
+      null
+     ],
+     [
+      "HUBWWA-Plat03-NB-dlr",
+      "HUBWWA-Plat04-NB-dlr",
+      null
+     ],
+     [
+      "HUBWWA-Plat01-WB-national-rail",
+      "HUBWWA-1001344-RPL-W-5",
+      null
+     ],
+     [
+      "HUBWWA-Plat02-EB-national-rail",
+      "HUBWWA-1001344-RPL-E-2",
+      null
+     ],
+     [
+      "HUBWWA-Outside",
+      "HUBWWA-Plat01-WB-national-rail",
+      null
+     ],
+     [
+      "HUBWWA-Outside",
+      "HUBWWA-Plat02-EB-national-rail",
+      null
+     ],
+     [
+      "HUBWWA-1001344-DLRB-6",
+      "HUBWWA-1001344-RPL-W-5",
+      "HUBWWA-Lift 1"
+     ],
+     [
+      "HUBWWA-1003000-BED-2",
+      "HUBWWA-1003000-DLR-1",
+      "HUBWWA-Lift-2"
+     ],
+     [
+      "HUBWWA-1003000-WOO-3",
+      "HUBWWA-1003000-DLRI-4",
+      "HUBWWA-Lift-3"
+     ],
+     [
+      "HUBWWA-1003000-DLRI-4",
+      "HUBWWA-1003000-DLR-1",
+      "HUBWWA-Lift-3"
+     ]
+    ],
+    "lines": {
+     "dlr": {
+      "platforms": [
+       "HUBWWA-Plat03-NB-dlr",
+       "HUBWWA-Plat04-NB-dlr"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZDLKGV": {
    "id": "940GZZDLKGV",
@@ -704,7 +7307,65 @@
    "hub": null,
    "stepFree": "yes",
    "stepFreeSource": "TfL StopPoint: AccessViaLift = Yes",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "940GZZDLKGV",
+    "outside": "940GZZDLKGV-Outside",
+    "paths": [
+     [
+      "940GZZDLKGV-1002009-DLRNB-1",
+      "940GZZDLKGV-1002009-DLRSB-6",
+      null
+     ],
+     [
+      "940GZZDLKGV-1002009-DLRSB-6",
+      "940GZZDLKGV-Plat01-SB-dlr",
+      null
+     ],
+     [
+      "940GZZDLKGV-1002009-DLRNB-1",
+      "940GZZDLKGV-Plat02-NB-dlr",
+      null
+     ],
+     [
+      "940GZZDLKGV-1002009-PIER-3",
+      "940GZZDLKGV-Outside",
+      null
+     ],
+     [
+      "940GZZDLKGV-Plat01-SB-dlr",
+      "940GZZDLKGV-Plat02-NB-dlr",
+      null
+     ],
+     [
+      "940GZZDLKGV-1002009-BridE-4",
+      "940GZZDLKGV-1002009-DLRNB-1",
+      "940GZZDLKGV-Lift-1"
+     ],
+     [
+      "940GZZDLKGV-1002009-DLRNB-1",
+      "940GZZDLKGV-1002009-DLRSB-6",
+      "940GZZDLKGV-Lift-1"
+     ],
+     [
+      "940GZZDLKGV-1002009-PIER-3",
+      "940GZZDLKGV-1002009-BridE-4",
+      "940GZZDLKGV-Lift-2"
+     ]
+    ],
+    "lines": {
+     "dlr": {
+      "platforms": [
+       "940GZZDLKGV-Plat01-SB-dlr",
+       "940GZZDLKGV-Plat02-NB-dlr"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZDLLCA": {
    "id": "940GZZDLLCA",
@@ -715,7 +7376,95 @@
    "hub": "HUBLCY",
    "stepFree": "yes",
    "stepFreeSource": "TfL StopPoint: AccessViaLift = Yes",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "HUBLCY",
+    "outside": "HUBLCY-Outside",
+    "paths": [
+     [
+      "HUBLCY-1002000-AIRPO-2",
+      "HUBLCY-1002000-DLREB-1",
+      null
+     ],
+     [
+      "HUBLCY-1002000-AIRPO-2",
+      "HUBLCY-1002000-DLRWB-7",
+      null
+     ],
+     [
+      "HUBLCY-1002000-Bus-6",
+      "HUBLCY-1002000-DRERD-5",
+      null
+     ],
+     [
+      "HUBLCY-1002000-Bus-6",
+      "HUBLCY-1002000-HARTM-3",
+      null
+     ],
+     [
+      "HUBLCY-1002000-Bus-6",
+      "HUBLCY-1002000-LCY1-4",
+      null
+     ],
+     [
+      "HUBLCY-1002000-DLREB-1",
+      "HUBLCY-1002000-DLRWB-7",
+      null
+     ],
+     [
+      "HUBLCY-1002000-DLREB-1",
+      "HUBLCY-Plat01-SB-dlr",
+      null
+     ],
+     [
+      "HUBLCY-1002000-DLRWB-7",
+      "HUBLCY-Plat02-NB-dlr",
+      null
+     ],
+     [
+      "HUBLCY-1002000-DRERD-5",
+      "HUBLCY-Outside",
+      null
+     ],
+     [
+      "HUBLCY-Plat01-SB-dlr",
+      "HUBLCY-Plat02-NB-dlr",
+      null
+     ],
+     [
+      "HUBLCY-1002000-DRERD-5",
+      "HUBLCY-1002000-DLREB-1",
+      "HUBLCY-Lift-1"
+     ],
+     [
+      "HUBLCY-1002000-DLREB-1",
+      "HUBLCY-1002000-DLRWB-7",
+      "HUBLCY-Lift-1"
+     ],
+     [
+      "HUBLCY-1002000-DRERD-5",
+      "HUBLCY-1002000-DLREB-1",
+      "HUBLCY-Lift-2"
+     ],
+     [
+      "HUBLCY-1002000-DLREB-1",
+      "HUBLCY-1002000-DLRWB-7",
+      "HUBLCY-Lift-2"
+     ]
+    ],
+    "lines": {
+     "dlr": {
+      "platforms": [
+       "HUBLCY-Plat01-SB-dlr",
+       "HUBLCY-Plat02-NB-dlr"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZDLPDK": {
    "id": "940GZZDLPDK",
@@ -726,7 +7475,50 @@
    "hub": null,
    "stepFree": "yes",
    "stepFreeSource": "TfL StopPoint: AccessViaLift = Yes",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "940GZZDLPDK",
+    "outside": "940GZZDLPDK-Outside",
+    "paths": [
+     [
+      "940GZZDLPDK-1002099-DLR-E-1",
+      "940GZZDLPDK-Plat01-SB-dlr",
+      null
+     ],
+     [
+      "940GZZDLPDK-1002099-DLR-W-3",
+      "940GZZDLPDK-Plat02-NB-dlr",
+      null
+     ],
+     [
+      "940GZZDLPDK-1002099-NWR-2",
+      "940GZZDLPDK-Outside",
+      null
+     ],
+     [
+      "940GZZDLPDK-1002099-NWR-2",
+      "940GZZDLPDK-1002099-DLR-W-3",
+      "940GZZDLPDK-Lift-1"
+     ],
+     [
+      "940GZZDLPDK-1002099-NWR-2",
+      "940GZZDLPDK-1002099-DLR-E-1",
+      "940GZZDLPDK-Lift-2"
+     ]
+    ],
+    "lines": {
+     "dlr": {
+      "platforms": [
+       "940GZZDLPDK-Plat01-SB-dlr",
+       "940GZZDLPDK-Plat02-NB-dlr"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZDLWSV": {
    "id": "940GZZDLWSV",
@@ -737,7 +7529,55 @@
    "hub": null,
    "stepFree": "yes",
    "stepFreeSource": "TfL StopPoint: AccessViaLift = Yes",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "940GZZDLWSV",
+    "outside": "940GZZDLWSV-Outside",
+    "paths": [
+     [
+      "940GZZDLWSV-1002098-Bus-2",
+      "940GZZDLWSV-1002098-Entr-3",
+      null
+     ],
+     [
+      "940GZZDLWSV-1002098-DLR-E-1",
+      "940GZZDLWSV-Plat01-SB-dlr",
+      null
+     ],
+     [
+      "940GZZDLWSV-1002098-DLR-W-4",
+      "940GZZDLWSV-Plat02-NB-dlr",
+      null
+     ],
+     [
+      "940GZZDLWSV-1002098-Entr-3",
+      "940GZZDLWSV-Outside",
+      null
+     ],
+     [
+      "940GZZDLWSV-1002098-Entr-3",
+      "940GZZDLWSV-1002098-DLR-W-4",
+      "940GZZDLWSV-Lift-1"
+     ],
+     [
+      "940GZZDLWSV-1002098-Entr-3",
+      "940GZZDLWSV-1002098-DLR-E-1",
+      "940GZZDLWSV-Lift-2"
+     ]
+    ],
+    "lines": {
+     "dlr": {
+      "platforms": [
+       "940GZZDLWSV-Plat01-SB-dlr",
+       "940GZZDLWSV-Plat02-NB-dlr"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZDLSTL": {
    "id": "940GZZDLSTL",
@@ -748,7 +7588,80 @@
    "hub": null,
    "stepFree": "yes",
    "stepFreeSource": "TfL StopPoint: AccessViaLift = Yes",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "940GZZDLSTL",
+    "outside": "940GZZDLSTL-Outside",
+    "paths": [
+     [
+      "940GZZDLSTL-1003005-B+R-5",
+      "940GZZDLSTL-1003005-STARL-1",
+      null
+     ],
+     [
+      "940GZZDLSTL-1003005-BUS-6",
+      "940GZZDLSTL-1003005-STARL-1",
+      null
+     ],
+     [
+      "940GZZDLSTL-1003005-DLRN-4",
+      "940GZZDLSTL-1003005-DLRS-7",
+      null
+     ],
+     [
+      "940GZZDLSTL-1003005-STARL-1",
+      "940GZZDLSTL-Outside",
+      null
+     ],
+     [
+      "940GZZDLSTL-1003005-DLRS-7",
+      "940GZZDLSTL-Plat01-SB-dlr",
+      null
+     ],
+     [
+      "940GZZDLSTL-1003005-DLRN-4",
+      "940GZZDLSTL-Plat02-NB-dlr",
+      null
+     ],
+     [
+      "940GZZDLSTL-1003005-STEPH-2",
+      "940GZZDLSTL-Outside",
+      null
+     ],
+     [
+      "940GZZDLSTL-1003005-DLRN-4",
+      "940GZZDLSTL-1003005-DLRS-7",
+      "940GZZDLSTL-Lift-1"
+     ],
+     [
+      "940GZZDLSTL-1003005-DLRS-7",
+      "940GZZDLSTL-1003005-BOOKH-3",
+      "940GZZDLSTL-Lift-1"
+     ],
+     [
+      "940GZZDLSTL-1003005-STEPH-2",
+      "940GZZDLSTL-1003005-BOOKH-3",
+      "940GZZDLSTL-Lift-2"
+     ],
+     [
+      "940GZZDLSTL-1003005-BOOKH-3",
+      "940GZZDLSTL-1003005-STARL-1",
+      "940GZZDLSTL-Lift-3"
+     ]
+    ],
+    "lines": {
+     "dlr": {
+      "platforms": [
+       "940GZZDLSTL-Plat01-SB-dlr",
+       "940GZZDLSTL-Plat02-NB-dlr"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZDLWHM": {
    "id": "940GZZDLWHM",
@@ -759,7 +7672,155 @@
    "hub": "HUBWEH",
    "stepFree": "yes",
    "stepFreeSource": "TfL: DLR stations are step-free by lift or ramp (network-wide statement; verify per station)",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "HUBWEH",
+    "outside": "HUBWEH-Outside",
+    "paths": [
+     [
+      "HUBWEH-1000262-A-MAN-7",
+      "HUBWEH-1000262-BookH-6",
+      null
+     ],
+     [
+      "HUBWEH-1000262-A-MAN-7",
+      "HUBWEH-1000262-Bus-8",
+      null
+     ],
+     [
+      "HUBWEH-1000262-DisEB-4",
+      "HUBWEH-1000262-DisWB-9",
+      null
+     ],
+     [
+      "HUBWEH-1000262-DLRNB-5",
+      "HUBWEH-1000262-DLRSB-11",
+      null
+     ],
+     [
+      "HUBWEH-1000262-JubEB-2",
+      "HUBWEH-1000262-JubWB-10",
+      null
+     ],
+     [
+      "HUBWEH-1000262-BookH-6",
+      "HUBWEH-Outside",
+      null
+     ],
+     [
+      "HUBWEH-1000262-DisWB-9",
+      "HUBWEH-Plat01-WB-district|hammersmith-city",
+      null
+     ],
+     [
+      "HUBWEH-1000262-DisEB-4",
+      "HUBWEH-Plat02-EB-district|hammersmith-city",
+      null
+     ],
+     [
+      "HUBWEH-1000262-DLRSB-11",
+      "HUBWEH-Plat03-SB-dlr",
+      null
+     ],
+     [
+      "HUBWEH-1000262-DLRNB-5",
+      "HUBWEH-Plat04-NB-dlr",
+      null
+     ],
+     [
+      "HUBWEH-1000262-JubWB-10",
+      "HUBWEH-Plat05-WB-jubilee",
+      null
+     ],
+     [
+      "HUBWEH-1000262-JubEB-2",
+      "HUBWEH-Plat06-EB-jubilee",
+      null
+     ],
+     [
+      "HUBWEH-1000262-RPL-3",
+      "HUBWEH-Plat07-WB-national-rail",
+      null
+     ],
+     [
+      "HUBWEH-1000262-RPL-3",
+      "HUBWEH-Plat08-EB-national-rail",
+      null
+     ],
+     [
+      "HUBWEH-Plat01-WB-district|hammersmith-city",
+      "HUBWEH-Plat02-EB-district|hammersmith-city",
+      null
+     ],
+     [
+      "HUBWEH-Plat03-SB-dlr",
+      "HUBWEH-Plat04-NB-dlr",
+      null
+     ],
+     [
+      "HUBWEH-Plat05-WB-jubilee",
+      "HUBWEH-Plat06-EB-jubilee",
+      null
+     ],
+     [
+      "HUBWEH-Plat07-WB-national-rail",
+      "HUBWEH-Plat08-EB-national-rail",
+      null
+     ],
+     [
+      "HUBWEH-1000262-BookH-6",
+      "HUBWEH-1000262-Footb-1",
+      "HUBWEH-Lift-1"
+     ],
+     [
+      "HUBWEH-1000262-Footb-1",
+      "HUBWEH-1000262-JubEB-2",
+      "HUBWEH-Lift-2"
+     ],
+     [
+      "HUBWEH-1000262-JubEB-2",
+      "HUBWEH-1000262-JubWB-10",
+      "HUBWEH-Lift-2"
+     ],
+     [
+      "HUBWEH-1000262-BookH-6",
+      "HUBWEH-1000262-DisEB-4",
+      "HUBWEH-Lift-4"
+     ],
+     [
+      "HUBWEH-1000262-DisEB-4",
+      "HUBWEH-1000262-DisWB-9",
+      "HUBWEH-Lift-4"
+     ],
+     [
+      "HUBWEH-1000262-Footb-1",
+      "HUBWEH-1000262-DLRNB-5",
+      "HUBWEH-Lift-5"
+     ],
+     [
+      "HUBWEH-1000262-DLRNB-5",
+      "HUBWEH-1000262-DLRSB-11",
+      "HUBWEH-Lift-5"
+     ],
+     [
+      "HUBWEH-1000262-BookH-6",
+      "HUBWEH-1000262-RPL-3",
+      "HUBWEH-Lift-6"
+     ]
+    ],
+    "lines": {
+     "dlr": {
+      "platforms": [
+       "HUBWEH-Plat03-SB-dlr",
+       "HUBWEH-Plat04-NB-dlr"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZDLABR": {
    "id": "940GZZDLABR",
@@ -770,7 +7831,75 @@
    "hub": null,
    "stepFree": "yes",
    "stepFreeSource": "TfL StopPoint: AccessViaLift = Yes",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "940GZZDLABR",
+    "outside": "940GZZDLABR-Outside",
+    "paths": [
+     [
+      "940GZZDLABR-1003006-ABBEY-1",
+      "940GZZDLABR-1003006-BOOKH-2",
+      null
+     ],
+     [
+      "940GZZDLABR-1003006-B+R-6",
+      "940GZZDLABR-1003006-BAKER-4",
+      null
+     ],
+     [
+      "940GZZDLABR-1003006-B+R-6",
+      "940GZZDLABR-1003006-DLRS-5",
+      null
+     ],
+     [
+      "940GZZDLABR-1003006-DLRN-3",
+      "940GZZDLABR-1003006-DLRS-5",
+      null
+     ],
+     [
+      "940GZZDLABR-1003006-BOOKH-2",
+      "940GZZDLABR-Outside",
+      null
+     ],
+     [
+      "940GZZDLABR-1003006-DLRN-3",
+      "940GZZDLABR-Plat02-NB-dlr",
+      null
+     ],
+     [
+      "940GZZDLABR-1003006-DLRS-5",
+      "940GZZDLABR-Plat01-SB-dlr",
+      null
+     ],
+     [
+      "940GZZDLABR-1003006-ABBEY-1",
+      "940GZZDLABR-1003006-BUS-7",
+      null
+     ],
+     [
+      "940GZZDLABR-1003006-BOOKH-2",
+      "940GZZDLABR-1003006-DLRN-3",
+      "940GZZDLABR-Lift-1"
+     ],
+     [
+      "940GZZDLABR-1003006-BOOKH-2",
+      "940GZZDLABR-1003006-DLRS-5",
+      "940GZZDLABR-Lift-2"
+     ]
+    ],
+    "lines": {
+     "dlr": {
+      "platforms": [
+       "940GZZDLABR-Plat01-SB-dlr",
+       "940GZZDLABR-Plat02-NB-dlr"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZDLSHS": {
    "id": "940GZZDLSHS",
@@ -781,7 +7910,80 @@
    "hub": null,
    "stepFree": "yes",
    "stepFreeSource": "TfL StopPoint: AccessViaLift = Yes",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "940GZZDLSHS",
+    "outside": "940GZZDLSHS-Outside",
+    "paths": [
+     [
+      "940GZZDLSHS-1003007-B+R-5",
+      "940GZZDLSHS-1003007-BRIDG-1",
+      null
+     ],
+     [
+      "940GZZDLSHS-1003007-B+R-5",
+      "940GZZDLSHS-1003007-BRS-4",
+      null
+     ],
+     [
+      "940GZZDLSHS-1003007-BRS-4",
+      "940GZZDLSHS-1003007-DLRS-6",
+      null
+     ],
+     [
+      "940GZZDLSHS-1003007-BOOKH-2",
+      "940GZZDLSHS-Outside",
+      null
+     ],
+     [
+      "940GZZDLSHS-1003007-DLRN-3",
+      "940GZZDLSHS-Plat02-NB-dlr",
+      null
+     ],
+     [
+      "940GZZDLSHS-Outside",
+      "940GZZDLSHS-1003007-BRS-4",
+      null
+     ],
+     [
+      "940GZZDLSHS-Plat01-SB-dlr",
+      "940GZZDLSHS-1003007-DLRS-6",
+      null
+     ],
+     [
+      "940GZZDLSHS-1003007-BOOKH-2",
+      "940GZZDLSHS-1003007-BRIDG-1",
+      null
+     ],
+     [
+      "940GZZDLSHS-1003007-BRS-4",
+      "940GZZDLSHS-1003007-BOOKH-2",
+      null
+     ],
+     [
+      "940GZZDLSHS-1003007-BOOKH-2",
+      "940GZZDLSHS-1003007-DLRS-6",
+      "940GZZDLSHS-Lift-1"
+     ],
+     [
+      "940GZZDLSHS-1003007-BOOKH-2",
+      "940GZZDLSHS-1003007-DLRN-3",
+      "940GZZDLSHS-Lift-2"
+     ]
+    ],
+    "lines": {
+     "dlr": {
+      "platforms": [
+       "940GZZDLSHS-Plat01-SB-dlr",
+       "940GZZDLSHS-Plat02-NB-dlr"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [],
+    "source": "TfL station data (2026-08-03)"
+   }
   },
   "940GZZDLSIT": {
    "id": "940GZZDLSIT",
@@ -792,7 +7994,129 @@
    "hub": null,
    "stepFree": "yes",
    "stepFreeSource": "TfL StopPoint: AccessViaLift = Yes",
-   "note": null
+   "note": null,
+   "access": {
+    "tflId": "940GZZDLSIT",
+    "outside": "940GZZDLSIT-Outside",
+    "paths": [
+     [
+      "940GZZDLSIT-1003009-BH-E-3",
+      "940GZZDLSIT-1003009-ENT-E-1",
+      null
+     ],
+     [
+      "940GZZDLSIT-1003009-BH-W-4",
+      "940GZZDLSIT-1003009-ENT-W-2",
+      null
+     ],
+     [
+      "940GZZDLSIT-1003009-DLR1-5",
+      "940GZZDLSIT-1003009-DLR2-6",
+      null
+     ],
+     [
+      "940GZZDLSIT-1003009-BH-E-3",
+      "940GZZDLSIT-Outside",
+      null
+     ],
+     [
+      "940GZZDLSIT-1003009-BH-W-4",
+      "940GZZDLSIT-Outside",
+      null
+     ],
+     [
+      "940GZZDLSIT-1003009-DLR1-5",
+      "940GZZDLSIT-Plat01-SB-dlr",
+      null
+     ],
+     [
+      "940GZZDLSIT-1003009-DLR2-6",
+      "940GZZDLSIT-Plat02-SB-dlr",
+      null
+     ],
+     [
+      "940GZZDLSIT-Plat01-SB-dlr",
+      "940GZZDLSIT-Plat02-SB-dlr",
+      null
+     ],
+     [
+      "940GZZDLSIT-1003009-BH-E-3",
+      "940GZZDLSIT-1003009-BH-W-4",
+      "940GZZDLSIT-Lift-1"
+     ],
+     [
+      "940GZZDLSIT-1003009-BH-W-4",
+      "940GZZDLSIT-1003009-DLR1-5",
+      "940GZZDLSIT-Lift-1"
+     ],
+     [
+      "940GZZDLSIT-1003009-DLR1-5",
+      "940GZZDLSIT-1003009-DLR2-6",
+      "940GZZDLSIT-Lift-1"
+     ],
+     [
+      "940GZZDLSIT-1003009-BH-E-3",
+      "940GZZDLSIT-1003009-BH-W-4",
+      "940GZZDLSIT-Lift-2"
+     ],
+     [
+      "940GZZDLSIT-1003009-BH-W-4",
+      "940GZZDLSIT-1003009-DLR1-5",
+      "940GZZDLSIT-Lift-2"
+     ],
+     [
+      "940GZZDLSIT-1003009-DLR1-5",
+      "940GZZDLSIT-1003009-DLR2-6",
+      "940GZZDLSIT-Lift-2"
+     ],
+     [
+      "940GZZDLSIT-1003009-BH-E-3",
+      "940GZZDLSIT-1003009-BH-W-4",
+      "940GZZDLSIT-Lift-3"
+     ],
+     [
+      "940GZZDLSIT-1003009-BH-W-4",
+      "940GZZDLSIT-1003009-DLR1-5",
+      "940GZZDLSIT-Lift-3"
+     ],
+     [
+      "940GZZDLSIT-1003009-DLR1-5",
+      "940GZZDLSIT-1003009-DLR2-6",
+      "940GZZDLSIT-Lift-3"
+     ]
+    ],
+    "lines": {
+     "dlr": {
+      "platforms": [
+       "940GZZDLSIT-Plat01-SB-dlr",
+       "940GZZDLSIT-Plat02-SB-dlr"
+      ],
+      "mapped": true,
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+     }
+    },
+    "toilets": [
+     {
+      "accessible": false,
+      "radar": false,
+      "insideGate": false,
+      "location": "Located in National Rail station"
+     },
+     {
+      "accessible": false,
+      "radar": false,
+      "insideGate": false,
+      "location": "Located in National Rail station"
+     },
+     {
+      "accessible": true,
+      "radar": false,
+      "insideGate": false,
+      "location": "Located in National Rail station"
+     }
+    ],
+    "source": "TfL station data (2026-08-03)"
+   }
   }
  },
  "routes": [

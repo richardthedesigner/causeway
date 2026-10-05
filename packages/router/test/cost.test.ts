@@ -194,3 +194,24 @@ describe("powerchair and scooter classes", () => {
     expect(evaluateEdge(unmapped, true, pavementScooter, DRY).reasons.some((r) => r.attr === "pavement")).toBe(true);
   });
 });
+
+describe("ice and gritting (DATA-07)", () => {
+  const ice = { ...DRY, wet: true, ice: true };
+  const gritted = (v: boolean) => ({ gritted: attr(v, "reported", "council", "2026-10-04") });
+
+  it("in ice, a pavement off the gritting routes costs more than one on them, most for wheels", () => {
+    const on = evaluateEdge(edge({}, gritted(true)), true, manual, ice);
+    const off = evaluateEdge(edge({}, gritted(false)), true, manual, ice);
+    expect(off.cost).toBeGreaterThan(on.cost);
+    expect(off.reasons.some((r) => r.attr === "gritted" && /not on a gritting route/.test(r.detail))).toBe(true);
+    expect(on.reasons.some((r) => r.attr === "gritted" && r.detail === "on a gritting route")).toBe(true);
+    const walkOff = evaluateEdge(edge({}, gritted(false)), true, walking, ice);
+    const walkOn = evaluateEdge(edge({}, gritted(true)), true, walking, ice);
+    expect(walkOff.cost - walkOn.cost).toBeLessThan(off.cost - on.cost);
+  });
+
+  it("changes nothing without ice, or where there's no gritting data", () => {
+    expect(evaluateEdge(edge({}, gritted(false)), true, manual, DRY).cost).toBe(evaluateEdge(edge({}, gritted(true)), true, manual, DRY).cost);
+    expect(evaluateEdge(edge(), true, manual, ice).reasons.some((r) => r.attr === "gritted")).toBe(false);
+  });
+});

@@ -1,5 +1,7 @@
 "use client";
-import maplibregl, { type GeoJSONSource, type Map as MLMap } from "maplibre-gl";
+import * as maplibregl from "maplibre-gl";
+import type { GeoJSONSource, Map as MLMap } from "maplibre-gl";
+import type * as GeoJSON from "geojson";
 import { useEffect, useRef, useState } from "react";
 import { basemapLayers, GLYPHS, loadBasemap, registerProtocols } from "@/lib/basemap";
 import type { Place, PlannedRoute } from "@/lib/plan-types";
@@ -50,6 +52,8 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
   const el = useRef<HTMLDivElement>(null);
   const map = useRef<MLMap | null>(null);
   const ready = useRef(false);
+  /** Draws our layers from the latest props; called again once the map loads and on a theme change. */
+  const redraw = useRef<() => void>(() => undefined);
   const clickRef = useRef(onMapClick);
   clickRef.current = onMapClick;
 
@@ -105,7 +109,7 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
       m.addLayer({ id: "me", type: "circle", source: "me", paint: { "circle-radius": 9, "circle-color": css("--accent"), "circle-stroke-color": css("--surface"), "circle-stroke-width": 3 } });
       ready.current = true;
       setMapReady(true);
-      m.fire("causeway:refresh");
+      redraw.current();
     });
     m.on("click", (e) => clickRef.current(e.lngLat.lng, e.lngLat.lat));
     return () => {
@@ -140,10 +144,7 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
       (m.getSource("entrances") as GeoJSONSource).setData(fc(entrances.map((e) => point(e, { c: ec[e.ok] }))));
     };
     draw();
-    m.on("causeway:refresh", draw);
-    return () => {
-      m.off("causeway:refresh", draw);
-    };
+    redraw.current = draw;
   }, [network, routes, selectedId, from, to, pin, showSlopes, entrances, toilets, blockers, preview]);
 
   const [mapReady, setMapReady] = useState(false);
@@ -174,7 +175,7 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
     m.setPaintProperty("me-halo", "circle-color", css("--accent"));
     m.setPaintProperty("me", "circle-color", css("--accent"));
     m.setPaintProperty("me", "circle-stroke-color", css("--surface"));
-    m.fire("causeway:refresh");
+    redraw.current();
   }, [dark, mapReady]);
 
   // Base map: swap in the city's extract under our own layers (and restyle it when the theme changes).
