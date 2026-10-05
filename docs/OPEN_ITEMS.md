@@ -44,6 +44,7 @@ These numbers shape routes but are our estimates, not evidence.
 - The search indexes hold 29 "Changing Places" toilets that reached us through Overture from AllThePlaces, which scraped them from the Changing Places site (no open licence). Filter them out ([DATA_SURVEY_UK §9](DATA_SURVEY_UK.md#9-a-licensing-problem-we-already-have)).
 - Opening hours don't know bank holidays; the app says "may differ on bank holidays" ([D-039](DECISIONS.md#d-039-open-when-you-get-there)).
 - Weather beyond 48 hours ahead falls back to today's ([D-040](DECISIONS.md#d-040-leaving-later)).
+- A guess to check on the next production deploy: Vercel serves MapLibre's worker (`/maplibre/6.12.0/maplibre-gl-worker.mjs`) as JavaScript, so the map draws. The local checks confirm it with our own server ([D-050](DECISIONS.md#d-050-dependency-audit-in-ci-and-maplibre-6)).
 
 ## Deferred by Richard
 

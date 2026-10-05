@@ -93,6 +93,8 @@ Proposal: **accept it, and publish the enriched footway graph under ODbL.** It f
 
 **Decided** (it is the brief's default). The profile is sent with each routing request and never persisted or logged server-side. No analytics on profile contents. Server-side sync only with explicit consent and after a DPIA, and that is a stop-and-ask item for Richard. Routing requests are logged without the profile, and with origin and destination truncated to 3 decimal places (about 100 m).
 
+Update (SEC-05, 2026-10-05): checked. The app logs nothing; its only URL parameter is the demo switch; shared notes carry the opt-in mobility label only (D-030); reports, the share text and router errors carry no profile. `pnpm e2e` now watches every request in every journey and fails if one carries the device's name, type or limits.
+
 ## D-010 Heavy jobs: GitHub Actions for Phase 0 and 1, then Fly.io or Cloud Run workers
 
 **Decided.** Graph builds, LiDAR sampling and imagery inference do not run in Vercel functions. Phase 0 and Phase 1 run builds as scheduled GitHub Actions jobs, which is enough for three cities rebuilt nightly. Minutely OSM diffs and Mapillary inference move to a container worker (Fly.io Machines or Cloud Run jobs) writing to Supabase PostGIS. Reconsider at Phase 3.
@@ -480,3 +482,13 @@ When there is nothing to compare with, it builds. Once DEP-01 makes `main` the p
 - Each place says "checked" (someone verified it on the ground) or "updated", with the month, so an old record looks old.
 - Weekly opening times become OSM opening hours, so "open when you pass" works for them too.
 - Credit in each city line: "Toilets: Great British Public Toilet Map, Public Convenience Ltd (CC BY 4.0)".
+
+## D-050 Dependency audit in CI, and MapLibre 6
+
+**Decided.** 2026-10-05 (SEC-04). CI runs `pnpm audit --audit-level high` after install: a known high or critical hole in any dependency fails the build. Moderate and low ones are left to Dependabot.
+
+**What the first run found.** A critical hole in MapLibre GL 4.7.1 (its HTML sanitiser could be bypassed, GHSA for versions up to 6.4.0) and two high ones in the PostCSS that Next 15 pins (8.4.31: reading files through source map comments).
+- **MapLibre** goes straight to 6.12.0, which also does UPD-02. Version 6 runs its worker as a separate module file, so `copy-graphs.mjs` copies `maplibre-gl-worker.mjs` and `maplibre-gl-shared.mjs` into `public/maplibre/<version>/` and `basemap.ts` points MapLibre at it. Each version has its own folder, so a cached old worker never meets new code. The CSP already allows workers from our own origin.
+- MapLibre 6 types its events, so the map's own "refresh" event became a ref holding the latest draw function.
+- **PostCSS**: a pnpm override (`next>postcss`) lifts Next's copy to 8.5.28. Next only uses it at build time. Drop the override when Next's own pin passes 8.5.23.
+- The local check server serves `.mjs` as JavaScript, as Vercel does; a module worker is refused otherwise.

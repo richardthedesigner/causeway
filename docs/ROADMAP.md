@@ -4,7 +4,7 @@ The one list of work for Causewayside: what's next, in what order, how big it is
 
 This file is the master copy. A read-only copy for sharing and comments lives in Google Drive: [Causewayside roadmap](https://docs.google.com/document/d/1T-RPq188B09LBahJIWPg_Hapm6m_vYbHB88pUzxJXV4/edit). Change this file, then update the Doc to match. Edits made only in the Doc are lost.
 
-Last updated: 2026-10-04.
+Last updated: 2026-10-05.
 
 - What's waiting on Richard, blocked, or a guess: [OPEN_ITEMS.md](OPEN_ITEMS.md)
 - What shipped and when: [BUILD_LOG.md](BUILD_LOG.md) and the phase reports
@@ -50,11 +50,11 @@ The current direction: **fix and fill the pilot cities** with open data that nee
 
 The next five things to pick up, in order.
 
-1. **DATA-23**: TfL station toilets in the toilet layer and search.
-2. **SEC-04**: `pnpm audit` in CI, failing on high severity.
-3. **SEC-05**: check nothing leaks the profile.
-4. **STAB-10**: end-to-end journeys for the device switcher, notes and Leaving later.
-5. **STAB-11**: the device editor's header at 200% text on a small phone.
+1. **STAB-12**: 200% text at 320 px on the other screens.
+2. **STAB-05**: timeouts and fallbacks for every live adapter.
+3. **STAB-06**: fail the weekly data refresh if counts drop too far.
+4. **SEC-06**: export and delete everything about me, in one place.
+5. **SMALL-01**: opening hours that know bank holidays.
 
 The rest of the pilot-city data (DATA-02, DATA-12 to DATA-20) is blocked on access, licences or keys. Research (RES) needs Richard and testers.
 
@@ -85,7 +85,7 @@ Fix and fill the pilot cities. DATA-01 to DATA-10 are in order of value per day 
 | DATA-19 | Tyne and Wear Metro lift status | M | later | blocked | Richard, Claude | Waits on Nexus. [#13](https://github.com/richardthedesigner/causeway/issues/13) |
 | DATA-20 | Live bus and tram departures in Edinburgh and Newcastle | M | later | blocked | Claude | [#8](https://github.com/richardthedesigner/causeway/issues/8). Lothian 403, Transport for Edinburgh 522, Nexus needs a key |
 | DATA-22 | Should the council's pavement surface win over OSM on streets drawn as one line? | S | next | blocked | Richard, Claude | D-046. They disagree on 2,822 of 6,341 edges; OSM wins today. A decision, then a one-line change |
-| DATA-23 | TfL station toilets in the toilet layer and search (65 at our stations, with RADAR and accessible flags) | S | now | doing | Claude | 2026-10-05, `claude/clever-fermat-ij543q`. Data is already in `network.json` (DATA-03) |
+| DATA-23 | TfL station toilets in the toilet layer and search (65 at our stations, with RADAR and accessible flags) | S | now | done (2026-10-05) | Claude | PR #33. One place per station (24 stations, 65 toilets); toilets past the gates are for customers and aren't offered as stops |
 | DATA-24 | Rebuild the council footway layer on the weekly refresh | S | later | done (2026-10-04) | Claude | Done by DATA-11 |
 | DATA-25 | Scotland's flood warnings (SEPA) for the Water of Leith walkway | M | later | todo | Claude | D-047. No open feed matching the EA's found yet; look again |
 | DATA-26 | Pavement gritting routes for Newcastle and London | S | later | todo | Claude | D-047. None open found; City of London has priority pavements (survey §2 #10) |
@@ -133,7 +133,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 
 | ID | Task | Size | Priority | Status | Who | Notes |
 |---|---|---|---|---|---|---|
-| SMALL-01 | Opening hours that know bank holidays | S | next | todo | Claude | D-039 says "may differ on bank holidays" today |
+| SMALL-01 | Opening hours that know bank holidays | S | now | todo | Claude | D-039 says "may differ on bank holidays" today |
 | SMALL-02 | Miles or kilometres setting | S | next | todo | Claude | |
 | SMALL-03 | Choose how often navigation speaks (every turn, hazards only, off) | S | next | todo | Claude | |
 | SMALL-04 | Copy the route as text, for a carer or a message | S | next | todo | Claude | `describeSegments` already writes it |
@@ -144,6 +144,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | SMALL-09 | "Why this way?" one tap from the navigation screen | S | later | todo | Claude | |
 | SMALL-10 | Recent journeys, not just recent places | S | later | todo | Claude | `recents.ts` |
 | SMALL-11 | Weather for trips more than 48 hours ahead | S | later | todo | Claude | D-040 falls back to today's |
+| SMALL-12 | A favicon and app icons (every page load asks for `/favicon.ico` and gets a 404) | S | later | todo | Claude | Found doing SEC-04 |
 
 ## Security and privacy
 
@@ -152,9 +153,9 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | SEC-01 | Security headers and a Content Security Policy in `apps/web/vercel.json` (a static export can't set them in Next) | S | now | done (2026-10-04) | Claude | D-041. `apps/web/vercel.json`. `pnpm a11y` and `pnpm e2e` serve the build with the same headers and fail on anything the policy blocks |
 | SEC-02 | `SECURITY.md`: how to report a vulnerability | S | next | done (2026-10-04) | Claude | `SECURITY.md`. Private reporting has to be turned on (SEC-14) |
 | SEC-03 | Pin GitHub Actions to commit SHAs and give each workflow the least permissions it needs | S | next | done (2026-10-04) | Claude | Pinned to the latest release in each major, version in a comment. CI has `contents: read` |
-| SEC-04 | `pnpm audit` in CI, failing on high severity | S | now | doing | Claude | 2026-10-05, `claude/clever-fermat-ij543q` |
-| SEC-05 | Check nothing leaks the profile (logs, URLs, error messages) | S | now | doing | Claude | 2026-10-05, `claude/clever-fermat-ij543q`. D-009 |
-| SEC-06 | Export and delete everything about me, in one place | M | next | todo | Claude | UK GDPR. Needed with or without accounts |
+| SEC-04 | `pnpm audit` in CI, failing on high severity | S | now | done (2026-10-05) | Claude | PR #33, D-050. Found a critical MapLibre hole and two high PostCSS ones; fixed by MapLibre 6.12 and a PostCSS override |
+| SEC-05 | Check nothing leaks the profile (logs, URLs, error messages) | S | now | done (2026-10-05) | Claude | PR #33, D-009. No leak found. `pnpm e2e` now fails if any request carries the device's name, type or limits |
+| SEC-06 | Export and delete everything about me, in one place | M | now | todo | Claude | UK GDPR. Needed with or without accounts |
 | SEC-07 | Review row-level security and storage bucket rules against a threat model | M | later | todo | Claude | `db/migrations`, `scripts/test-db.sh` |
 | SEC-08 | Harden `/review`: sign-in rate limits, session length | S | later | todo | Claude | |
 | SEC-09 | Cloudflare Turnstile on anonymous sign-up, before any publicity | S | later | blocked | Richard, Claude | D-030 |
@@ -172,12 +173,13 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | STAB-02 | Screenshot tests for the main screens, light and dark, 320 px and 200% text | M | next | todo | Claude | Replaces hand-checked screenshots |
 | STAB-03 | Version the on-device stores (devices, notes, recents) and migrate old data | S | next | done (2026-10-04) | Claude | D-044. `lib/stored.ts` for devices, notes and reports: version in the key, old keys never rewritten, anything unreadable backed up |
 | STAB-04 | Router fuzz test: many random start and end points per city, no crashes, no impossible routes | M | next | todo | Claude | |
-| STAB-05 | Timeouts and fallbacks for every live adapter | S | next | todo | Claude | `packages/live` |
-| STAB-06 | Data refresh guard: fail the weekly PR if counts drop by more than a set amount | S | next | todo | Claude | D-033 |
+| STAB-05 | Timeouts and fallbacks for every live adapter | S | now | todo | Claude | `packages/live` |
+| STAB-06 | Data refresh guard: fail the weekly PR if counts drop by more than a set amount | S | now | todo | Claude | D-033 |
 | STAB-07 | The routing worker recovers if it crashes, and says so | S | later | todo | Claude | `router.worker.ts` |
 | STAB-09 | A city opened from last time started from Edinburgh's Causewayside, 537 km from London | S | next | done (2026-10-04) | Claude | Found by STAB-01. `page.tsx` sets the saved city's start |
-| STAB-10 | End-to-end journeys for the device switcher, notes and Leaving later | S | now | doing | Claude | 2026-10-05, `claude/clever-fermat-ij543q`. Extend `scripts/e2e.mjs` |
-| STAB-11 | The device editor's header fills a 320 by 640 screen at 200% text | S | now | doing | Claude | 2026-10-05, `claude/clever-fermat-ij543q`. Found checking FEAT-01. Shrink or scroll the header with the content |
+| STAB-10 | End-to-end journeys for the device switcher, notes and Leaving later | S | now | done (2026-10-05) | Claude | PR #33. Two devices and a switch, leaving in an hour, a route and a note |
+| STAB-11 | The device editor's header fills a 320 by 640 screen at 200% text | S | now | done (2026-10-05) | Claude | PR #33. Description scrolls with the content; bars, icon buttons and switches in pixels. `pnpm a11y` checks it |
+| STAB-12 | 200% text at 320 px on the other screens: route panel, navigation, search, note and report sheets | S | now | todo | Claude | Found doing STAB-11. Extend the reflow check in `scripts/a11y-check.mjs` |
 | STAB-08 | Offline test: load a city, cut the network, route | S | later | todo | Claude | D-023 |
 
 ## Speed
@@ -207,7 +209,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | ID | Task | Size | Priority | Status | Who | Notes |
 |---|---|---|---|---|---|---|
 | UPD-01 | Dependabot for npm and GitHub Actions, grouped weekly | S | now | done (2026-10-04) | Claude | `.github/dependabot.yml`. MapLibre and Next.js majors left to UPD-02 and UPD-03 |
-| UPD-02 | MapLibre GL 4.7 to 5 | M | next | todo | Claude | Pinned at 4.7.1. Check the Protomaps style still renders |
+| UPD-02 | MapLibre GL 4.7 to 5 | M | next | done (2026-10-05) | Claude | PR #33, with SEC-04: straight to 6.12 for a critical fix. The worker is now a module file in `public/maplibre/` |
 | UPD-03 | Next.js to the current major | M | later | todo | Claude | Static export must keep working |
 | UPD-04 | Keep Node in CI on the current LTS | S | later | todo | Claude | `engines` says 22 |
 
@@ -256,6 +258,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 
 Newest first. One line per change: date, ID, what happened, link.
 
+- 2026-10-05: DATA-23, SEC-04, SEC-05, STAB-10, STAB-11 done in PR #33, and UPD-02 with SEC-04. Added STAB-12, SMALL-12. Now: STAB-12, STAB-05, STAB-06, SEC-06, SMALL-01.
 - 2026-10-04: DATA-07 to DATA-11 done in PR #33, and DATA-24 with them. Added DATA-25, DATA-26. Now: DATA-23, SEC-04, SEC-05, STAB-10, STAB-11.
 - 2026-10-04: DATA-01, DATA-03, DATA-04, DATA-05 and DATA-06 done in PR #33. DATA-02 blocked (SRWR unreachable from the cloud). Added DATA-22 to DATA-24. Now: DATA-07 to DATA-11.
 - 2026-10-04: SEC-01, SEC-02, SEC-03, STAB-01, STAB-03, STAB-09, UPD-01, FEAT-01, DEP-03, DEP-04 and BLOAT-01 done in PR #33 (branch `claude/clever-fermat-ij543q`), carried over from the earlier roadmap's IDs. Added SEC-12 to SEC-14, STAB-10, STAB-11. Now: DATA-01 to DATA-05.

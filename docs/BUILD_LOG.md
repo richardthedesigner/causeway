@@ -2,6 +2,27 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
+## 2026-10-05 (morning)
+
+Security and stability, from the roadmap's Now list.
+
+**TfL station toilets** (DATA-23)
+- London's search and toilet layer gain the toilets TfL lists at 24 of our stations, from the station data we already load. Those past the ticket gates are marked for customers and aren't offered as stops on the way.
+
+**Dependency audit** (D-050, SEC-04, UPD-02)
+- CI fails on any high or critical advisory. The first run found a critical MapLibre hole and two high PostCSS ones.
+- MapLibre 4.7.1 to 6.12.0, with its worker served from `public/maplibre/`. PostCSS lifted by an override.
+
+**The profile never leaves the phone** (D-009, SEC-05)
+- Reviewed logs, URLs, errors, sharing, notes and reports: no leak. `pnpm e2e` now fails if any request carries the device's name, type or limits.
+
+**More end-to-end journeys** (STAB-10)
+- Two devices and a switch, leaving in an hour, a route, and a note kept on the phone.
+
+**Large text on a small phone** (STAB-11)
+- Sheets keep only the title and Close at the top; the description scrolls. Bars, icon buttons and switches are sized in pixels. The device type chips drop to one column when the text is large.
+- `pnpm a11y` checks setup and the device settings at 320 by 640 with 200% text.
+
 ## 2026-10-05 (small hours)
 
 More pilot-city data, from the roadmap's Now list.
