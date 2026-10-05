@@ -22,6 +22,12 @@ Richard chose main as the base; the overnight build's extras (PR #36) are ported
 - `pnpm test` fails if routing the acceptance journeys settles 10% more nodes, or gets 10% slower over a fixed yardstick (on CI, printed and failing only past 50%). Rest presets' "More benches" searches are timed too.
 - Each city's data beside the graph stays under 400 KB compressed. Baseline and sizes: [PERF_BASELINE](plans/PERF_BASELINE.md). Re-measure with `pnpm perf:baseline`.
 
+## 2026-10-05 (later)
+
+**Road speed for road scooters** (D-051, FEAT-02)
+- A road scooter goes at 8 mph on roads without mapped pavements, and at its own pavement pace elsewhere. Pace learning learns only the pavement pace.
+- Central Edinburgh journeys get 20 to 45% quicker, and routes move onto roads (Marchmont to Leith Walk: 48% to 91% on roads).
+
 ## 2026-10-05 (late morning)
 
 **200% text on a small phone, everywhere else** (STAB-12)

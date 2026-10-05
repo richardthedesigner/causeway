@@ -94,6 +94,12 @@ export interface Profile {
    * means not set, and no range warning is given: we never guess someone's battery.
    */
   maxRangeKm?: number | null;
+  /**
+   * Speed on the carriageway for a road-legal scooter, metres per second (8 mph
+   * is 3.6). `speedMps` stays the pavement pace, which is what pace learning
+   * learns. Ignored unless `roadLegal`.
+   */
+  roadSpeedMps?: number;
 }
 
 /** Any powered wheelchair, light or heavy duty. Uses the bus wheelchair space. */
@@ -292,6 +298,7 @@ export const PRESETS: Record<MobilityPreset, Profile> = {
     companion: false,
     buses: false,
     roadLegal: true,
+    roadSpeedMps: 3.6,
   },
   rollator: {
     preset: "rollator",

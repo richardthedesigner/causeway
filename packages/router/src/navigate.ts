@@ -6,7 +6,7 @@
  */
 import { haversine, isKnown, type GraphEdge, type GraphNode } from "@causeway/graph";
 import type { Profile } from "@causeway/profile";
-import { surfaceLabel } from "./cost.js";
+import { onRoad, surfaceLabel } from "./cost.js";
 import { placeName, toGeoJSON, type Route } from "./router.js";
 
 export type ManeuverType = "start" | "turn" | "continue" | "cross" | "lift" | "enter-station" | "board" | "change" | "alight" | "leave-station" | "arrive";
@@ -41,6 +41,8 @@ export interface NavPlan {
   hazards: Hazard[];
   /** Stretches where you're carried (bus, tram, train): [from, to] metres along, and where you get off. */
   rides?: { from: number; to: number; alight: string }[];
+  /** Stretches a road-legal scooter drives on the carriageway, at road speed: [from, to] metres along. */
+  roads?: { from: number; to: number }[];
 }
 
 const RAIL = new Set(["transit", "board", "interchange"]);
@@ -195,7 +197,26 @@ export function buildNavPlan(r: Route, p: Profile): NavPlan {
       rideFrom = null;
     }
   });
-  return { coords, cum, length, maneuvers, hazards, rides };
+  const roads: NonNullable<NavPlan["roads"]> = [];
+  r.steps.forEach((s, i) => {
+    if (!onRoad(s.edge, p)) return;
+    const from = starts[i]!, to = from + s.edge.lengthM;
+    const last = roads[roads.length - 1];
+    if (last && Math.abs(last.to - from) < 0.5) last.to = to;
+    else roads.push({ from, to });
+  });
+  return { coords, cum, length, maneuvers, hazards, rides, roads };
+}
+
+/** On a stretch driven at road speed. Pace learning skips these: it learns the pavement pace. */
+export const onRoadAt = (plan: Pick<NavPlan, "roads">, along: number) => (plan.roads ?? []).some((r) => along >= r.from && along < r.to);
+
+/** Seconds left from `along`, with road stretches at road speed and the rest at the pavement pace. */
+export function secondsLeft(plan: Pick<NavPlan, "roads" | "length">, along: number, speedMps: number, roadSpeedMps?: number): number {
+  const left = Math.max(0, plan.length - along);
+  if (!roadSpeedMps) return left / speedMps;
+  const road = (plan.roads ?? []).reduce((t, r) => t + Math.max(0, r.to - Math.max(r.from, along)), 0);
+  return (left - road) / speedMps + road / roadSpeedMps;
 }
 
 export interface Progress {
