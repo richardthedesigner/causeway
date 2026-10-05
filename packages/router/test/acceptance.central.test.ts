@@ -4,7 +4,8 @@
  */
 import { join } from "node:path";
 import { beforeAll, describe, expect, it } from "vitest";
-import { loadSnapshot } from "@causeway/graph/node";
+import { readFileSync } from "node:fs";
+import { applyCouncilFootways, loadSnapshot, type CouncilFootways } from "@causeway/graph/node";
 import { PRESETS } from "@causeway/profile";
 import { Router, summarise } from "@causeway/router";
 import { EDINBURGH_CENTRAL_JOURNEYS } from "../../../scripts/journeys.js";
@@ -12,7 +13,10 @@ import { EDINBURGH_CENTRAL_JOURNEYS } from "../../../scripts/journeys.js";
 const SNAPSHOT = join(import.meta.dirname, "../../../data/snapshots/edinburgh-central.graph.json.gz");
 let router: Router;
 beforeAll(() => {
-  router = new Router(loadSnapshot(SNAPSHOT));
+  // As the app does: the council's footway surfaces and widths fill what OSM doesn't know (DATA-06).
+  const g = loadSnapshot(SNAPSHOT);
+  applyCouncilFootways(g, JSON.parse(readFileSync(join(import.meta.dirname, "../../../data/council/edinburgh-central.footways.json"), "utf8")) as CouncilFootways);
+  router = new Router(g);
 }, 60_000);
 
 describe("central Edinburgh journeys, manual wheelchair", () => {
@@ -43,5 +47,19 @@ describe("rest stops", () => {
     expect(more!.route).not.toBeNull();
     expect(restStats(router.graph, more!.route!).longestWithoutBenchM).toBeLessThan(gap);
     expect(more!.message).toMatch(/bench/);
+  });
+
+  it("still finds more benches with Inclusive Mobility's 50 m for a walking stick, which mapped benches rarely meet (DATA-10)", async () => {
+    const { restStats, tradeoffs } = await import("@causeway/router");
+    const p = PRESETS["walking-stick"];
+    expect(p.maxRestIntervalM).toBe(50);
+    const a = router.snap(-3.1812, 55.9385, p);
+    const b = router.snap(-3.1925, 55.9405, p);
+    const r = router.route(a, b, p)!;
+    const gap = restStats(router.graph, r).longestWithoutBenchM;
+    const more = tradeoffs(router, r, a, b, p).find((t) => t.id === "more-benches");
+    expect(more?.route).toBeTruthy();
+    expect(restStats(router.graph, more!.route!).longestWithoutBenchM).toBeLessThan(gap);
+    expect(more!.message).toMatch(/Longest stretch without a bench \d+ m instead of \d+ m/);
   });
 });

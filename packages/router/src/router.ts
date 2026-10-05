@@ -391,6 +391,35 @@ export interface RouteSummary {
   verdict: "passable" | "passable-with-unknowns" | "not-passable";
 }
 
+/** Each metre climbed drains the battery like this many metres on the flat (rolling resistance of about 0.03, small wheels on pavement). A starting point; testing replaces it. */
+export const CLIMB_FLAT_EQUIVALENT_M = 30;
+
+export interface RangeUse {
+  /** Battery use as km on the flat: distance plus the climbs. */
+  km: number;
+  rangeKm: number;
+  /** Over the whole range, or over half of it (so the way back needs a charge). */
+  level: "over" | "over-half" | "ok";
+}
+
+/** How much of the device's battery range a route uses. Null when no range is set. */
+export function rangeUse(r: Route, p: Profile, now: Date = DRY.now): RangeUse | null {
+  const rangeKm = p.maxRangeKm;
+  if (!rangeKm || rangeKm <= 0) return null;
+  const s = summarise(r, now);
+  const km = (s.walkM + s.ascentM * CLIMB_FLAT_EQUIVALENT_M) / 1000;
+  return { km, rangeKm, level: km > rangeKm ? "over" : km > rangeKm / 2 ? "over-half" : "ok" };
+}
+
+/** Plain-English range note, or null when there's nothing to say. */
+export function rangeNote(u: RangeUse | null): string | null {
+  if (!u || u.level === "ok") return null;
+  const km = `About ${u.km < 10 ? u.km.toFixed(1) : Math.round(u.km)} km of battery, counting the climbs.`;
+  return u.level === "over"
+    ? `${km} That's more than your ${u.rangeKm} km range, so it may not fit on one charge.`
+    : `${km} That's over half your ${u.rangeKm} km range, so you may need to charge before the way back.`;
+}
+
 export function summarise(r: Route, now: Date = DRY.now): RouteSummary {
   let ascent = 0,
     descent = 0,
@@ -581,6 +610,8 @@ export function explain(router: Router, chosen: Route, from: GraphNode, to: Grap
   }
   if (sum.worstInclinePct !== null && Math.abs(sum.worstInclinePct) >= p.comfortInclinePct)
     notes.push(`Steepest part ${Math.abs(sum.worstInclinePct)}% ${sum.worstInclinePct > 0 ? "uphill" : "downhill"}${sum.worstInclineAt ? ` on ${sum.worstInclineAt}` : ""}.`);
+  const range = rangeNote(rangeUse(chosen, p, c.now));
+  if (range) notes.push(range);
   if (sum.unknownM > 0) notes.push(`${sum.unknownM} m where we don't have full data, shown dashed on the map.`);
 
   const top = avoided.filter((a) => a.reason.kind === "excluded").slice(0, 2);
@@ -731,9 +762,11 @@ export function tradeoffs(router: Router, chosen: Route, from: GraphNode, to: Gr
     const gap = restStats(router.graph, chosen).longestWithoutBenchM;
     if (gap > p.maxRestIntervalM) {
       // Try the user's interval first, then relax: shorter worst gaps are still worth offering.
+      // Short intervals (Inclusive Mobility's 50 m) rarely fit mapped benches, so also try halfway to this route's gap.
       let best: { r: Route; gap: number } | null = null;
-      for (const f of [1, 1.5, 2, 3]) {
-        const r = router.routeWithRests(from, to, p, c, p.maxRestIntervalM * f);
+      const tries = [...new Set([p.maxRestIntervalM, p.maxRestIntervalM * 2, gap * 0.5, gap * 0.7].map(Math.round))].filter((m) => m < gap * 0.85).sort((x, y) => x - y);
+      for (const m of tries) {
+        const r = router.routeWithRests(from, to, p, c, m);
         if (r) {
           const g2 = restStats(router.graph, r).longestWithoutBenchM;
           if (g2 < gap * 0.85) best = { r, gap: g2 };

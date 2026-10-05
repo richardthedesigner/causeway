@@ -5,7 +5,8 @@
  * Map data © OpenStreetMap contributors; schema and layer logic Protomaps (BSD-3).
  */
 import { layers, namedFlavor, type Flavor } from "@protomaps/basemaps";
-import maplibregl, { type LayerSpecification } from "maplibre-gl";
+import * as maplibregl from "maplibre-gl";
+import type { LayerSpecification } from "maplibre-gl";
 import { PMTiles, Protocol, type RangeResponse, type Source } from "pmtiles";
 
 /** Recolour a Protomaps flavour to our tokens: warm-neutral ground, soft water, quiet roads, ink labels. */
@@ -78,10 +79,12 @@ let glyphs: Promise<Record<string, string>> | null = null;
 
 const b64ToBuf = (b64: string) => Uint8Array.from(atob(b64.trim()), (ch) => ch.charCodeAt(0)).buffer;
 
-/** Register the pmtiles:// and glyphs:// protocols once. */
+/** Point MapLibre at its worker, and register the pmtiles:// and glyphs:// protocols, once. */
 export function registerProtocols(glyphsUrl: string) {
   if (registered) return;
   registered = true;
+  // MapLibre 6's worker is a module file copied into public/ by scripts/copy-graphs.mjs (SEC-04).
+  maplibregl.setWorkerUrl(new URL(`maplibre/${maplibregl.getVersion()}/maplibre-gl-worker.mjs`, document.baseURI).href);
   maplibregl.addProtocol("pmtiles", protocol.tile);
   maplibregl.addProtocol("causeway-glyphs", async (params) => {
     glyphs ??= fetch(glyphsUrl).then((r) => r.json());

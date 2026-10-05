@@ -1,8 +1,9 @@
 name: data-refresh
 # Rebuild the open data the app ships with and open a pull request when it changes (issue #14).
-# Weekly: bus, tram and Metro timetables (BODS GTFS), pavement works (Street Manager), and the
-# search index (OSM, plus the pinned Overture release). The street graphs and base maps stay
-# manual: they need LiDAR and a reviewed Protomaps build, and they change slowly.
+# Weekly: bus, tram and Metro timetables (BODS GTFS), pavement works (Street Manager), the
+# search index (OSM, plus the pinned Overture release), the street graphs (fresh OSM, the same
+# LiDAR; DATA-11) and the layers keyed to them, park gates, OSM notes and the Toilet Map.
+# Base maps stay manual: they need a reviewed Protomaps build, and they change slowly.
 on:
   schedule:
     - cron: "17 4 * * 1" # Mondays 04:17 UTC
@@ -20,18 +21,18 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           ref: main
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
           cache: pnpm
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: "3.12"
-      - run: pip install osmium duckdb
+      - run: pip install osmium duckdb pyshp
       - run: pnpm install --frozen-lockfile
 
       # Everything is downloaded fresh each run (about 2 GB, mostly GTFS and the Street Manager archive).
@@ -52,8 +53,27 @@ jobs:
         continue-on-error: true
       - name: Pavement works
         run: |
-          rm -f .data-cache/sm-permit-*.json
+          rm -f .data-cache/sm-permit-*.json .data-cache/sm-activity-*.json
           pnpm build:works
+        continue-on-error: true
+
+      # Street graphs (DATA-11): about a minute each. They reuse the OSM the search index fetched.
+      - name: Street graphs
+        run: |
+          python3 scripts/osm-extract.py .data-cache/Edinburgh.osm.pbf .data-cache/edinburgh-central.osm -3.25 55.92 -3.15 55.975
+          for a in edinburgh-central newcastle-gateshead london-jubilee; do pnpm build:area "$a" || echo "::warning::graph failed for $a"; done
+        continue-on-error: true
+      # Keyed to the graphs' OSM ways and nodes, so they follow a rebuild.
+      - name: Council footways and flood areas
+        run: |
+          pnpm build:footways || echo "::warning::council footways failed"
+          pnpm build:floods || echo "::warning::flood areas failed"
+        continue-on-error: true
+      - name: Park gates, OSM notes and the Toilet Map
+        run: |
+          pnpm build:greenspace || echo "::warning::park gates failed"
+          pnpm build:osm-notes || echo "::warning::OSM notes failed"
+          pnpm build:toilets || echo "::warning::Toilet Map failed"
         continue-on-error: true
 
       - name: Check the app still works with the new data
@@ -74,15 +94,23 @@ jobs:
             echo 'EOF'
           } >> "$GITHUB_OUTPUT"
 
-      - uses: peter-evans/create-pull-request@v7
+      - uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7.0.11
         with:
           branch: data-refresh
           base: main
-          title: "Data refresh: timetables, works and places"
-          commit-message: "Refresh timetables, pavement works and the search index"
+          title: "Data refresh: graphs, timetables, works, places and layers"
+          commit-message: "Refresh street graphs, timetables, pavement works, the search index and the layers on them"
           body: ${{ steps.summary.outputs.body }}
           add-paths: |
             data/places/*.json.gz
+            data/places/*.greenspace.json
+            data/places/*.osm-notes.json
+            data/places/*.toiletmap.json
             data/transit/*/bus.json
             data/live/*.works.json
+            data/live/*.flood-areas.json
+            data/snapshots/edinburgh-central.graph.json.gz
+            data/snapshots/newcastle-gateshead.graph.json.gz
+            data/snapshots/london-jubilee.graph.json.gz
+            data/council/*.json
           delete-branch: true

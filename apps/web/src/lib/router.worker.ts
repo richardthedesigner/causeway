@@ -3,8 +3,8 @@
  * Routing runs on the device, in a worker. The profile (health data) never
  * leaves the phone: it arrives here with each request and is not stored.
  */
-import { addBus, isKnown, mobilityLabelFor, noteSignals, type Graph, type GraphEdge, type Stretch, type TransitNetwork, type BusNetwork } from "@causeway/graph";
-import { applyEdgeStates, applyLiveStates, liftOutageStates, worksStates, type WorksObservation } from "@causeway/live";
+import { addBus, applyCouncilFootways, applyStationAccess, isKnown, refRides, mobilityLabelFor, noteSignals, type Graph, type GraphEdge, type Stretch, type TransitNetwork, type BusNetwork, type CouncilFootways } from "@causeway/graph";
+import { applyEdgeStates, applyKeyedStates, applyLiveStates, floodsHere, floodStates, liftOutageStates, mergeLiveStates, railDisruptionStates, worksStates, type FloodAreas, type WorksObservation } from "@causeway/live";
 import { PRESETS, type Profile } from "@causeway/profile";
 import {
   buildNavPlan,
@@ -26,11 +26,19 @@ import {
   type Route,
 } from "@causeway/router";
 import type { Check, Place, PlannedRoute, PlanResult, RouteStrip, WorkerRequest, WorkerResponse } from "./plan-types";
+import { parkGates, type GreenspaceFile } from "./greenspace";
+import { osmNotesNear, type OsmNotesFile } from "./osm-notes";
 
 declare const self: DedicatedWorkerGlobalScope;
 let router: Router | null = null;
 let graph: Graph | null = null;
 let network: TransitNetwork | null = null;
+/** Environment Agency flood areas over this city's paths (DATA-07). */
+let floodAreas: FloodAreas | null = null;
+/** Park gates from OS Open Greenspace (DATA-08). */
+let greenspace: GreenspaceFile | null = null;
+/** Open OpenStreetMap notes about the ground (DATA-08). */
+let osmNotes: OsmNotesFile | null = null;
 /** Works from the area's built file and from live feeds, kept apart so a refresh replaces only its own. */
 let fileWorks: { works: WorksObservation[]; source: string; builtAt: string } | null = null;
 let liveWorks: { works: WorksObservation[]; fetchedAt: string } | null = null;
@@ -58,7 +66,7 @@ function applyWorks() {
 
 const post = (m: WorkerResponse) => self.postMessage(m);
 
-async function load(url: string, networkUrl: string | undefined, worksUrl: string | undefined, busUrl: string | undefined, demo: Place[]) {
+async function load(url: string, networkUrl: string | undefined, worksUrl: string | undefined, busUrl: string | undefined, footwaysUrl: string | undefined, floodsUrl: string | undefined, greenspaceUrl: string | undefined, osmNotesUrl: string | undefined, demo: Place[]) {
   const res = await fetch(url);
   if (!res.ok || !res.body) throw new Error(`graph: HTTP ${res.status}`);
   // Hosts that won't serve .gz get the same bytes as base64 text (the private preview build).
@@ -75,8 +83,46 @@ async function load(url: string, networkUrl: string | undefined, worksUrl: strin
       buses = null;
     }
   }
-  router = new Router(graph);
+  // Council footway surfaces and widths fill what OSM doesn't know (DATA-06). Missing: OSM alone, as before.
+  if (footwaysUrl) {
+    try {
+      applyCouncilFootways(graph, (await (await fetch(footwaysUrl)).json()) as CouncilFootways);
+    } catch {
+      /* the layer is a bonus */
+    }
+  }
+  osmNotes = null;
+  if (osmNotesUrl) {
+    try {
+      osmNotes = (await (await fetch(osmNotesUrl)).json()) as OsmNotesFile;
+    } catch {
+      /* no notes: nothing extra to say */
+    }
+  }
+  greenspace = null;
+  if (greenspaceUrl) {
+    try {
+      greenspace = (await (await fetch(greenspaceUrl)).json()) as GreenspaceFile;
+    } catch {
+      /* no gates: parks end at their middle, as before */
+    }
+  }
+  floodAreas = null;
+  if (floodsUrl) {
+    try {
+      floodAreas = (await (await fetch(floodsUrl)).json()) as FloodAreas;
+    } catch {
+      /* no flood areas: warnings can't be placed, and the panel says nothing */
+    }
+  }
   network = networkUrl ? ((await (await fetch(networkUrl)).json()) as TransitNetwork) : null;
+  // TfL's per-line step-free facts go on the board edges before the router indexes the graph (DATA-03).
+  if (network) {
+    applyStationAccess(graph, network);
+    // Rides get refs so a line closure can find them (DATA-04).
+    refRides(graph);
+  }
+  router = new Router(graph);
   post({ type: "ready", places: places(graph, demo, network), network: networkLines(graph), bbox: graph.meta.bbox, builtAt: graph.meta.builtAt, buses });
   if (worksUrl) {
     try {
@@ -286,6 +332,19 @@ function plan(req: Extract<WorkerRequest, { type: "plan" }>): PlanResult {
       door = { name: fits.name, osmId: fits.osmId, detail: fits.verdict.detail };
     }
   }
+  // A park: end at the gate nearest the way you're coming (DATA-08), if one can be reached.
+  let gate: { park: string } | null = null;
+  if (!alts.length) {
+    for (const g of parkGates(greenspace, req.to, req.from)) {
+      const bg = router.snap(g.lon, g.lat, p, c);
+      alts = router.alternatives(a, bg, p, c, 3);
+      if (alts.length) {
+        b = bg;
+        gate = { park: g.park };
+        break;
+      }
+    }
+  }
   if (!alts.length) alts = router.alternatives(a, b, p, c, 3);
   if (!alts.length) {
     const bw = router.snap(req.to.lon, req.to.lat, PRESETS.walking, c);
@@ -340,11 +399,13 @@ function plan(req: Extract<WorkerRequest, { type: "plan" }>): PlanResult {
     status: "ok",
     routes,
     headline: ex.headline,
-    notes: ex.notes,
+    // OpenStreetMap notes near the best route: shown, never used to route (DATA-08).
+    notes: [...ex.notes, ...osmNotesNear(osmNotes, routes[0]?.coords ?? [])],
     avoided: ex.avoided.slice(0, 4).map((x) => ({ name: x.name, detail: x.reason.detail })),
     tradeoffs: tos,
     entrances,
     door,
+    gate,
   };
 }
 
@@ -382,7 +443,14 @@ function fits(req: Extract<WorkerRequest, { type: "fits" }>): { key: string; min
 self.onmessage = async (ev: MessageEvent<WorkerRequest>) => {
   const m = ev.data;
   try {
-    if (m.type === "init") await load(m.graphUrl, m.networkUrl, m.worksUrl, m.busUrl, m.places);
+    if (m.type === "init") await load(m.graphUrl, m.networkUrl, m.worksUrl, m.busUrl, m.footwaysUrl, m.floodsUrl, m.greenspaceUrl, m.osmNotesUrl, m.places);
+    else if (m.type === "floods") {
+      if (!graph || !floodAreas) return;
+      // Each refresh replaces the last: a lifted warning lifts here too.
+      for (const e of graph.edges) if (e.live?.source === "Environment Agency flood warnings") delete e.live;
+      applyKeyedStates(graph, floodStates(m.warnings, floodAreas, m.fetchedAt));
+      post({ type: "floods", here: floodsHere(m.warnings, floodAreas), fetchedAt: m.fetchedAt });
+    }
     else if (m.type === "toilets") router?.addToilets(m.points);
     else if (m.type === "works-live") {
       liveWorks = { works: m.works, fetchedAt: m.fetchedAt };
@@ -390,10 +458,15 @@ self.onmessage = async (ev: MessageEvent<WorkerRequest>) => {
     }
     else if (m.type === "live") {
       if (!graph || !network) return;
-      for (const e of graph.edges) if (e.live?.affects === "step-free") delete e.live;
+      // Each refresh replaces every TfL rail state: lifts, line closures, station disruptions.
+      for (const e of graph.edges) if (e.live && (e.live.affects === "step-free" || e.live.source.startsWith("TfL line") || e.live.source.startsWith("TfL station"))) delete e.live;
       const refs = new Set(graph.edges.map((e) => e.ref).filter((r): r is string => !!r));
-      const applied = applyLiveStates(graph, liftOutageStates(m.outages, network, refs));
-      post({ type: "live", applied, fetchedAt: m.outages[0]?.fetchedAt ?? new Date().toISOString() });
+      const lifts = liftOutageStates(m.outages, network, refs);
+      const rail = railDisruptionStates(m.disruptions ?? [], network, refs);
+      applyLiveStates(graph, mergeLiveStates(lifts, rail));
+      const now = Date.now();
+      const lines = [...new Set([...rail.values()].filter((s) => s.source === "TfL line status" && s.status === "closed" && !s.affects && Date.parse(s.validFrom) <= now).map((s) => s.reason))];
+      post({ type: "live", applied: lifts.size, lines, fetchedAt: m.outages[0]?.fetchedAt ?? new Date().toISOString() });
     }
     else if (m.type === "plan") post({ type: "plan", id: m.id, result: plan(m) });
     else if (m.type === "check") post({ type: "check", id: m.id, checks: check(m) });

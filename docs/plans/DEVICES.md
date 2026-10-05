@@ -67,7 +67,7 @@ Each step is one pull request that can go live on its own.
 - Migration: someone with a saved profile and no devices gets it as one unnamed device. Nobody loses settings.
 - Unit tests: migration, favourites-first ordering, the label rule.
 
-**2. Device button and list** (`DeviceMenu.tsx`, replacing the chip in `page.tsx`). Done. Until steps 4 and 5, Edit opens today's mode sheet, and Add makes an unnamed manual wheelchair and opens it.
+**2. Device button and list** (`DeviceMenu.tsx`, replacing the chip in `page.tsx`). Done. Until steps 4 and 5, Edit opens today's mode sheet, and Add makes an unnamed manual wheelchair and opens it. Review screenshots, list open and a device picked, light and dark: [`docs/ux/devices/`](../ux/devices/).
 - Button: the label rule above, chevron, 48 px tall. Accessible name: "Routes are for Cherry, lightweight powerchair. Change device".
 - List: a popover on the top side of the button, as a radio group. Arrow keys move, Enter picks, Escape closes and returns focus to the button.
 - Picking closes the list, re-plans (already reactive on `routeProfile`) and announces "Now using Lulu" in a polite live region, with a short toast.
@@ -116,5 +116,5 @@ Each step is one pull request that can go live on its own.
   - **Why the route is long.** Not the data. From Picardy Place it is 1.6 km (23 min) on foot and 3.2 km (48 min) for Cherry, round by Lothian Road. Every short way in is closed to her: setts on Victoria Street, the High Street and Lawnmarket; West Bow at 12.3% and Victoria Terrace at 10.2%, over her 8% limit; steps on Candlemaker Row and the Vennel. With setts as a heavy penalty instead of never, the route is the same, so the hills alone force it.
   - **Why it "struggled".** There is no mapped alternative. Keeping her off street proxies adds about 1.9 km and 26 minutes. Treating every unknown as free changes the route by about 120 m, so the unknown penalties aren't distorting it.
   - **So.** Mapping those pavements in OSM, plus the York Place kerbs, would turn about 1.1 km of unknowns into known ground without shortening the route. "Unmapped for 200 m" doesn't fit this case, because no short unmapped cut is being avoided. The east end of the Grassmarket itself is setts, so where the destination pin sits matters for Cherry. Still open: check the West Bow and Victoria Terrace gradients on the ground, since they decide the route.
-- **Battery range.** Lightweight chairs have small batteries. A `maxRangeKm` per device, with a warning on long routes, fits the device model.
+- **Battery range.** Engine and warning done (D-043): `maxRangeKm` on the profile, `rangeUse` and `rangeNote` in the router, and a note on the route when a trip uses over half the range. Still to build: a range field in the device editor.
 - **Speeds.** Road scooters do 8 mph on the road but 4 mph on pavements. The router uses one pace; split it if the pace learning shows it matters.

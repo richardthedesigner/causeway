@@ -1,0 +1,851 @@
+[
+{
+"$type": "Tfl.Api.Presentation.Entities.Line, Tfl.Api.Presentation.Entities",
+"id": "dlr",
+"name": "DLR",
+"modeName": "dlr",
+"disruptions": [],
+"created": "2026-09-22T09:53:41.037Z",
+"modified": "2026-09-22T09:53:41.037Z",
+"lineStatuses": [
+{
+"$type": "Tfl.Api.Presentation.Entities.LineStatus, Tfl.Api.Presentation.Entities",
+"id": 0,
+"lineId": "dlr",
+"statusSeverity": 5,
+"statusSeverityDescription": "Part Closure",
+"reason": "DOCKLANDS LIGHT RAILWAY: Sunday 4 October, no service between Shadwell and Tower Gateway.",
+"created": "0001-01-01T00:00:00",
+"validityPeriods": [
+{
+"$type": "Tfl.Api.Presentation.Entities.ValidityPeriod, Tfl.Api.Presentation.Entities",
+"fromDate": "2026-10-04T03:30:00Z",
+"toDate": "2026-10-05T00:29:00Z",
+"isNow": false
+}
+],
+"disruption": {
+"$type": "Tfl.Api.Presentation.Entities.Disruption, Tfl.Api.Presentation.Entities",
+"category": "PlannedWork",
+"categoryDescription": "PlannedWork",
+"description": "DOCKLANDS LIGHT RAILWAY: Sunday 4 October, no service between Shadwell and Tower Gateway.",
+"created": "2026-09-24T14:15:00Z",
+"affectedRoutes": [
+{
+"$type": "Tfl.Api.Presentation.Entities.DisruptedRoute, Tfl.Api.Presentation.Entities",
+"id": "989",
+"name": "Beckton DLR Station - Tower Gateway DLR Station",
+"direction": "inbound",
+"originationName": "Beckton DLR Station",
+"destinationName": "Tower Gateway DLR Station",
+"isEntireRouteSection": false,
+"routeSectionNaptanEntrySequence": [
+{
+"$type": "Tfl.Api.Presentation.Entities.RouteSectionNaptanEntrySequence, Tfl.Api.Presentation.Entities",
+"ordinal": 14,
+"stopPoint": {
+"$type": "Tfl.Api.Presentation.Entities.StopPoint, Tfl.Api.Presentation.Entities",
+"naptanId": "940GZZDLSHA",
+"modes": [],
+"icsCode": "1000202",
+"stationNaptan": "940GZZDLSHA",
+"hubNaptanCode": "HUBSDE",
+"lines": [],
+"lineGroup": [],
+"lineModeGroups": [],
+"status": true,
+"id": "940GZZDLSHA",
+"commonName": "Shadwell DLR Station",
+"placeType": "StopPoint",
+"additionalProperties": [],
+"children": [],
+"lat": 0.0,
+"lon": 0.0
+}
+},
+{
+"$type": "Tfl.Api.Presentation.Entities.RouteSectionNaptanEntrySequence, Tfl.Api.Presentation.Entities",
+"ordinal": 15,
+"stopPoint": {
+"$type": "Tfl.Api.Presentation.Entities.StopPoint, Tfl.Api.Presentation.Entities",
+"naptanId": "940GZZDLTWG",
+"modes": [],
+"icsCode": "1002076",
+"stationNaptan": "940GZZDLTWG",
+"hubNaptanCode": "HUBTOG",
+"lines": [],
+"lineGroup": [],
+"lineModeGroups": [],
+"status": true,
+"id": "940GZZDLTWG",
+"commonName": "Tower Gateway DLR Station",
+"placeType": "StopPoint",
+"additionalProperties": [],
+"children": [],
+"lat": 0.0,
+"lon": 0.0
+}
+}
+]
+},
+{
+"$type": "Tfl.Api.Presentation.Entities.DisruptedRoute, Tfl.Api.Presentation.Entities",
+"id": "990",
+"name": "Tower Gateway DLR Station - Beckton DLR Station",
+"direction": "outbound",
+"originationName": "Tower Gateway DLR Station",
+"destinationName": "Beckton DLR Station",
+"isEntireRouteSection": false,
+"routeSectionNaptanEntrySequence": [
+{
+"$type": "Tfl.Api.Presentation.Entities.RouteSectionNaptanEntrySequence, Tfl.Api.Presentation.Entities",
+"ordinal": 0,
+"stopPoint": {
+"$type": "Tfl.Api.Presentation.Entities.StopPoint, Tfl.Api.Presentation.Entities",
+"naptanId": "940GZZDLTWG",
+"modes": [],
+"icsCode": "1002076",
+"stationNaptan": "940GZZDLTWG",
+"hubNaptanCode": "HUBTOG",
+"lines": [],
+"lineGroup": [],
+"lineModeGroups": [],
+"status": true,
+"id": "940GZZDLTWG",
+"commonName": "Tower Gateway DLR Station",
+"placeType": "StopPoint",
+"additionalProperties": [],
+"children": [],
+"lat": 0.0,
+"lon": 0.0
+}
+},
+{
+"$type": "Tfl.Api.Presentation.Entities.RouteSectionNaptanEntrySequence, Tfl.Api.Presentation.Entities",
+"ordinal": 1,
+"stopPoint": {
+"$type": "Tfl.Api.Presentation.Entities.StopPoint, Tfl.Api.Presentation.Entities",
+"naptanId": "940GZZDLSHA",
+"modes": [],
+"icsCode": "1000202",
+"stationNaptan": "940GZZDLSHA",
+"hubNaptanCode": "HUBSDE",
+"lines": [],
+"lineGroup": [],
+"lineModeGroups": [],
+"status": true,
+"id": "940GZZDLSHA",
+"commonName": "Shadwell DLR Station",
+"placeType": "StopPoint",
+"additionalProperties": [],
+"children": [],
+"lat": 0.0,
+"lon": 0.0
+}
+}
+]
+}
+],
+"affectedStops": [
+{
+"$type": "Tfl.Api.Presentation.Entities.StopPoint, Tfl.Api.Presentation.Entities",
+"naptanId": "940GZZDLSHA",
+"stationNaptan": "940GZZDLSHA",
+"status": true,
+"id": "940GZZDLSHA",
+"commonName": "Shadwell DLR Station",
+"lat": 0.0,
+"lon": 0.0
+},
+{
+"$type": "Tfl.Api.Presentation.Entities.StopPoint, Tfl.Api.Presentation.Entities",
+"naptanId": "940GZZDLTWG",
+"stationNaptan": "940GZZDLTWG",
+"status": true,
+"id": "940GZZDLTWG",
+"commonName": "Tower Gateway DLR Station",
+"lat": 0.0,
+"lon": 0.0
+}
+]
+}
+}
+],
+"routeSections": [
+{
+"$type": "Tfl.Api.Presentation.Entities.MatchedRoute, Tfl.Api.Presentation.Entities",
+"name": "Lewisham DLR Station - Stratford DLR Station",
+"direction": "inbound",
+"originationName": "Lewisham DLR Station",
+"destinationName": "Stratford DLR Station",
+"originator": "940GZZDLLEW",
+"destination": "940GZZDLSTD",
+"serviceType": "Regular",
+"validTo": "2026-12-23T00:00:00Z",
+"validFrom": "2026-09-19T00:00:00Z"
+},
+{
+"$type": "Tfl.Api.Presentation.Entities.MatchedRoute, Tfl.Api.Presentation.Entities",
+"name": "Lewisham DLR Station - Bank DLR Station",
+"direction": "inbound",
+"originationName": "Lewisham DLR Station",
+"destinationName": "Bank DLR Station",
+"originator": "940GZZDLLEW",
+"destination": "940GZZDLBNK",
+"serviceType": "Regular",
+"validTo": "2026-12-23T00:00:00Z",
+"validFrom": "2026-09-19T00:00:00Z"
+},
+{
+"$type": "Tfl.Api.Presentation.Entities.MatchedRoute, Tfl.Api.Presentation.Entities",
+"name": "Beckton DLR Station - Tower Gateway DLR Station",
+"direction": "inbound",
+"originationName": "Beckton DLR Station",
+"destinationName": "Tower Gateway DLR Station",
+"originator": "940GZZDLBEC",
+"destination": "940GZZDLTWG",
+"serviceType": "Regular",
+"validTo": "2026-12-23T00:00:00Z",
+"validFrom": "2026-09-19T00:00:00Z"
+},
+{
+"$type": "Tfl.Api.Presentation.Entities.MatchedRoute, Tfl.Api.Presentation.Entities",
+"name": "Tower Gateway DLR Station - Beckton DLR Station",
+"direction": "outbound",
+"originationName": "Tower Gateway DLR Station",
+"destinationName": "Beckton DLR Station",
+"originator": "940GZZDLTWG",
+"destination": "940GZZDLBEC",
+"serviceType": "Regular",
+"validTo": "2026-12-23T00:00:00Z",
+"validFrom": "2026-09-19T00:00:00Z"
+},
+{
+"$type": "Tfl.Api.Presentation.Entities.MatchedRoute, Tfl.Api.Presentation.Entities",
+"name": "Bank DLR Station - Lewisham DLR Station",
+"direction": "outbound",
+"originationName": "Bank DLR Station",
+"destinationName": "Lewisham DLR Station",
+"originator": "940GZZDLBNK",
+"destination": "940GZZDLLEW",
+"serviceType": "Regular",
+"validTo": "2026-12-23T00:00:00Z",
+"validFrom": "2026-09-19T00:00:00Z"
+},
+{
+"$type": "Tfl.Api.Presentation.Entities.MatchedRoute, Tfl.Api.Presentation.Entities",
+"name": "Woolwich Arsenal DLR Station - Bank DLR Station",
+"direction": "inbound",
+"originationName": "Woolwich Arsenal DLR Station",
+"destinationName": "Bank DLR Station",
+"originator": "940GZZDLWLA",
+"destination": "940GZZDLBNK",
+"serviceType": "Regular",
+"validTo": "2026-12-23T00:00:00Z",
+"validFrom": "2026-09-19T00:00:00Z"
+},
+{
+"$type": "Tfl.Api.Presentation.Entities.MatchedRoute, Tfl.Api.Presentation.Entities",
+"name": "Bank DLR Station - Woolwich Arsenal DLR Station",
+"direction": "outbound",
+"originationName": "Bank DLR Station",
+"destinationName": "Woolwich Arsenal DLR Station",
+"originator": "940GZZDLBNK",
+"destination": "940GZZDLWLA",
+"serviceType": "Regular",
+"validTo": "2026-12-23T00:00:00Z",
+"validFrom": "2026-09-19T00:00:00Z"
+},
+{
+"$type": "Tfl.Api.Presentation.Entities.MatchedRoute, Tfl.Api.Presentation.Entities",
+"name": "Woolwich Arsenal DLR Station - Stratford International DLR Station",
+"direction": "inbound",
+"originationName": "Woolwich Arsenal DLR Station",
+"destinationName": "Stratford International DLR Station",
+"originator": "940GZZDLWLA",
+"destination": "940GZZDLSIT",
+"serviceType": "Regular",
+"validTo": "2026-12-23T00:00:00Z",
+"validFrom": "2026-09-19T00:00:00Z"
+},
+{
+"$type": "Tfl.Api.Presentation.Entities.MatchedRoute, Tfl.Api.Presentation.Entities",
+"name": "Stratford International DLR Station - Woolwich Arsenal DLR Station",
+"direction": "outbound",
+"originationName": "Stratford International DLR Station",
+"destinationName": "Woolwich Arsenal DLR Station",
+"originator": "940GZZDLSIT",
+"destination": "940GZZDLWLA",
+"serviceType": "Regular",
+"validTo": "2026-12-23T00:00:00Z",
+"validFrom": "2026-09-19T00:00:00Z"
+},
+{
+"$type": "Tfl.Api.Presentation.Entities.MatchedRoute, Tfl.Api.Presentation.Entities",
+"name": "Stratford DLR Station - Canary Wharf DLR Station",
+"direction": "outbound",
+"originationName": "Stratford DLR Station",
+"destinationName": "Canary Wharf DLR Station",
+"originator": "940GZZDLSTD",
+"destination": "940GZZDLCAN",
+"serviceType": "Regular",
+"validTo": "2026-12-23T00:00:00Z",
+"validFrom": "2026-09-19T00:00:00Z"
+}
+],
+"serviceTypes": [
+{
+"$type": "Tfl.Api.Presentation.Entities.LineServiceTypeInfo, Tfl.Api.Presentation.Entities",
+"name": "Regular",
+"uri": "/Line/Route?ids=DLR&serviceTypes=Regular"
+}
+],
+"crowding": {
+"$type": "Tfl.Api.Presentation.Entities.Crowding, Tfl.Api.Presentation.Entities"
+}
+},
+{
+"$type": "Tfl.Api.Presentation.Entities.Line, Tfl.Api.Presentation.Entities",
+"id": "jubilee",
+"name": "Jubilee",
+"modeName": "tube",
+"disruptions": [],
+"created": "2026-09-22T09:53:41.037Z",
+"modified": "2026-09-22T09:53:41.037Z",
+"lineStatuses": [
+{
+"$type": "Tfl.Api.Presentation.Entities.LineStatus, Tfl.Api.Presentation.Entities",
+"id": 0,
+"lineId": "jubilee",
+"statusSeverity": 5,
+"statusSeverityDescription": "Part Closure",
+"reason": "JUBILEE LINE: From 0530 Sunday 4 October, no service between Green Park and Canary Wharf. If travelling between Central London and North Greenwich, please travel via Stratford.",
+"created": "0001-01-01T00:00:00",
+"validityPeriods": [
+{
+"$type": "Tfl.Api.Presentation.Entities.ValidityPeriod, Tfl.Api.Presentation.Entities",
+"fromDate": "2026-10-04T04:30:00Z",
+"toDate": "2026-10-05T00:29:00Z",
+"isNow": false
+}
+],
+"disruption": {
+"$type": "Tfl.Api.Presentation.Entities.Disruption, Tfl.Api.Presentation.Entities",
+"category": "PlannedWork",
+"categoryDescription": "PlannedWork",
+"description": "JUBILEE LINE: From 0530 Sunday 4 October, no service between Green Park and Canary Wharf. If travelling between Central London and North Greenwich, please travel via Stratford.",
+"created": "2026-09-24T14:11:00Z",
+"affectedRoutes": [
+{
+"$type": "Tfl.Api.Presentation.Entities.DisruptedRoute, Tfl.Api.Presentation.Entities",
+"id": "1738",
+"name": "Stratford Underground Station - Stanmore Underground Station",
+"direction": "inbound",
+"originationName": "Stratford Underground Station",
+"destinationName": "Stanmore Underground Station",
+"isEntireRouteSection": false,
+"routeSectionNaptanEntrySequence": [
+{
+"$type": "Tfl.Api.Presentation.Entities.RouteSectionNaptanEntrySequence, Tfl.Api.Presentation.Entities",
+"ordinal": 4,
+"stopPoint": {
+"$type": "Tfl.Api.Presentation.Entities.StopPoint, Tfl.Api.Presentation.Entities",
+"naptanId": "940GZZLUCYF",
+"modes": [],
+"icsCode": "1000038",
+"stationNaptan": "940GZZLUCYF",
+"hubNaptanCode": "HUBCAW",
+"lines": [],
+"lineGroup": [],
+"lineModeGroups": [],
+"status": true,
+"id": "940GZZLUCYF",
+"commonName": "Canary Wharf Underground Station",
+"placeType": "StopPoint",
+"additionalProperties": [],
+"children": [],
+"lat": 0.0,
+"lon": 0.0
+}
+},
+{
+"$type": "Tfl.Api.Presentation.Entities.RouteSectionNaptanEntrySequence, Tfl.Api.Presentation.Entities",
+"ordinal": 5,
+"stopPoint": {
+"$type": "Tfl.Api.Presentation.Entities.StopPoint, Tfl.Api.Presentation.Entities",
+"naptanId": "940GZZLUCWR",
+"modes": [],
+"icsCode": "1000037",
+"stationNaptan": "940GZZLUCWR",
+"hubNaptanCode": "HUBZCW",
+"lines": [],
+"lineGroup": [],
+"lineModeGroups": [],
+"status": true,
+"id": "940GZZLUCWR",
+"commonName": "Canada Water Underground Station",
+"placeType": "StopPoint",
+"additionalProperties": [],
+"children": [],
+"lat": 0.0,
+"lon": 0.0
+}
+},
+{
+"$type": "Tfl.Api.Presentation.Entities.RouteSectionNaptanEntrySequence, Tfl.Api.Presentation.Entities",
+"ordinal": 6,
+"stopPoint": {
+"$type": "Tfl.Api.Presentation.Entities.StopPoint, Tfl.Api.Presentation.Entities",
+"naptanId": "940GZZLUBMY",
+"modes": [],
+"icsCode": "1000021",
+"stationNaptan": "940GZZLUBMY",
+"lines": [],
+"lineGroup": [],
+"lineModeGroups": [],
+"status": true,
+"id": "940GZZLUBMY",
+"commonName": "Bermondsey Underground Station",
+"placeType": "StopPoint",
+"additionalProperties": [],
+"children": [],
+"lat": 0.0,
+"lon": 0.0
+}
+},
+{
+"$type": "Tfl.Api.Presentation.Entities.RouteSectionNaptanEntrySequence, Tfl.Api.Presentation.Entities",
+"ordinal": 7,
+"stopPoint": {
+"$type": "Tfl.Api.Presentation.Entities.StopPoint, Tfl.Api.Presentation.Entities",
+"naptanId": "940GZZLULNB",
+"modes": [],
+"icsCode": "1000139",
+"stationNaptan": "940GZZLULNB",
+"hubNaptanCode": "HUBLBG",
+"lines": [],
+"lineGroup": [],
+"lineModeGroups": [],
+"status": true,
+"id": "940GZZLULNB",
+"commonName": "London Bridge Underground Station",
+"placeType": "StopPoint",
+"additionalProperties": [],
+"children": [],
+"lat": 0.0,
+"lon": 0.0
+}
+},
+{
+"$type": "Tfl.Api.Presentation.Entities.RouteSectionNaptanEntrySequence, Tfl.Api.Presentation.Entities",
+"ordinal": 8,
+"stopPoint": {
+"$type": "Tfl.Api.Presentation.Entities.StopPoint, Tfl.Api.Presentation.Entities",
+"naptanId": "940GZZLUSWK",
+"modes": [],
+"icsCode": "1000215",
+"stationNaptan": "940GZZLUSWK",
+"lines": [],
+"lineGroup": [],
+"lineModeGroups": [],
+"status": true,
+"id": "940GZZLUSWK",
+"commonName": "Southwark Underground Station",
+"placeType": "StopPoint",
+"additionalProperties": [],
+"children": [],
+"lat": 0.0,
+"lon": 0.0
+}
+},
+{
+"$type": "Tfl.Api.Presentation.Entities.RouteSectionNaptanEntrySequence, Tfl.Api.Presentation.Entities",
+"ordinal": 9,
+"stopPoint": {
+"$type": "Tfl.Api.Presentation.Entities.StopPoint, Tfl.Api.Presentation.Entities",
+"naptanId": "940GZZLUWLO",
+"modes": [],
+"icsCode": "1000254",
+"stationNaptan": "940GZZLUWLO",
+"hubNaptanCode": "HUBWAT",
+"lines": [],
+"lineGroup": [],
+"lineModeGroups": [],
+"status": true,
+"id": "940GZZLUWLO",
+"commonName": "Waterloo Underground Station",
+"placeType": "StopPoint",
+"additionalProperties": [],
+"children": [],
+"lat": 0.0,
+"lon": 0.0
+}
+},
+{
+"$type": "Tfl.Api.Presentation.Entities.RouteSectionNaptanEntrySequence, Tfl.Api.Presentation.Entities",
+"ordinal": 10,
+"stopPoint": {
+"$type": "Tfl.Api.Presentation.Entities.StopPoint, Tfl.Api.Presentation.Entities",
+"naptanId": "940GZZLUWSM",
+"modes": [],
+"icsCode": "1000266",
+"stationNaptan": "940GZZLUWSM",
+"hubNaptanCode": "HUBWSM",
+"lines": [],
+"lineGroup": [],
+"lineModeGroups": [],
+"status": true,
+"id": "940GZZLUWSM",
+"commonName": "Westminster Underground Station",
+"placeType": "StopPoint",
+"additionalProperties": [],
+"children": [],
+"lat": 0.0,
+"lon": 0.0
+}
+},
+{
+"$type": "Tfl.Api.Presentation.Entities.RouteSectionNaptanEntrySequence, Tfl.Api.Presentation.Entities",
+"ordinal": 11,
+"stopPoint": {
+"$type": "Tfl.Api.Presentation.Entities.StopPoint, Tfl.Api.Presentation.Entities",
+"naptanId": "940GZZLUGPK",
+"modes": [],
+"icsCode": "1000093",
+"stationNaptan": "940GZZLUGPK",
+"lines": [],
+"lineGroup": [],
+"lineModeGroups": [],
+"status": true,
+"id": "940GZZLUGPK",
+"commonName": "Green Park Underground Station",
+"placeType": "StopPoint",
+"additionalProperties": [],
+"children": [],
+"lat": 0.0,
+"lon": 0.0
+}
+}
+]
+},
+{
+"$type": "Tfl.Api.Presentation.Entities.DisruptedRoute, Tfl.Api.Presentation.Entities",
+"id": "1742",
+"name": "Stanmore Underground Station - Stratford Underground Station",
+"direction": "outbound",
+"originationName": "Stanmore Underground Station",
+"destinationName": "Stratford Underground Station",
+"isEntireRouteSection": false,
+"routeSectionNaptanEntrySequence": [
+{
+"$type": "Tfl.Api.Presentation.Entities.RouteSectionNaptanEntrySequence, Tfl.Api.Presentation.Entities",
+"ordinal": 15,
+"stopPoint": {
+"$type": "Tfl.Api.Presentation.Entities.StopPoint, Tfl.Api.Presentation.Entities",
+"naptanId": "940GZZLUGPK",
+"modes": [],
+"icsCode": "1000093",
+"stationNaptan": "940GZZLUGPK",
+"lines": [],
+"lineGroup": [],
+"lineModeGroups": [],
+"status": true,
+"id": "940GZZLUGPK",
+"commonName": "Green Park Underground Station",
+"placeType": "StopPoint",
+"additionalProperties": [],
+"children": [],
+"lat": 0.0,
+"lon": 0.0
+}
+},
+{
+"$type": "Tfl.Api.Presentation.Entities.RouteSectionNaptanEntrySequence, Tfl.Api.Presentation.Entities",
+"ordinal": 16,
+"stopPoint": {
+"$type": "Tfl.Api.Presentation.Entities.StopPoint, Tfl.Api.Presentation.Entities",
+"naptanId": "940GZZLUWSM",
+"modes": [],
+"icsCode": "1000266",
+"stationNaptan": "940GZZLUWSM",
+"hubNaptanCode": "HUBWSM",
+"lines": [],
+"lineGroup": [],
+"lineModeGroups": [],
+"status": true,
+"id": "940GZZLUWSM",
+"commonName": "Westminster Underground Station",
+"placeType": "StopPoint",
+"additionalProperties": [],
+"children": [],
+"lat": 0.0,
+"lon": 0.0
+}
+},
+{
+"$type": "Tfl.Api.Presentation.Entities.RouteSectionNaptanEntrySequence, Tfl.Api.Presentation.Entities",
+"ordinal": 17,
+"stopPoint": {
+"$type": "Tfl.Api.Presentation.Entities.StopPoint, Tfl.Api.Presentation.Entities",
+"naptanId": "940GZZLUWLO",
+"modes": [],
+"icsCode": "1000254",
+"stationNaptan": "940GZZLUWLO",
+"hubNaptanCode": "HUBWAT",
+"lines": [],
+"lineGroup": [],
+"lineModeGroups": [],
+"status": true,
+"id": "940GZZLUWLO",
+"commonName": "Waterloo Underground Station",
+"placeType": "StopPoint",
+"additionalProperties": [],
+"children": [],
+"lat": 0.0,
+"lon": 0.0
+}
+},
+{
+"$type": "Tfl.Api.Presentation.Entities.RouteSectionNaptanEntrySequence, Tfl.Api.Presentation.Entities",
+"ordinal": 18,
+"stopPoint": {
+"$type": "Tfl.Api.Presentation.Entities.StopPoint, Tfl.Api.Presentation.Entities",
+"naptanId": "940GZZLUSWK",
+"modes": [],
+"icsCode": "1000215",
+"stationNaptan": "940GZZLUSWK",
+"lines": [],
+"lineGroup": [],
+"lineModeGroups": [],
+"status": true,
+"id": "940GZZLUSWK",
+"commonName": "Southwark Underground Station",
+"placeType": "StopPoint",
+"additionalProperties": [],
+"children": [],
+"lat": 0.0,
+"lon": 0.0
+}
+},
+{
+"$type": "Tfl.Api.Presentation.Entities.RouteSectionNaptanEntrySequence, Tfl.Api.Presentation.Entities",
+"ordinal": 19,
+"stopPoint": {
+"$type": "Tfl.Api.Presentation.Entities.StopPoint, Tfl.Api.Presentation.Entities",
+"naptanId": "940GZZLULNB",
+"modes": [],
+"icsCode": "1000139",
+"stationNaptan": "940GZZLULNB",
+"hubNaptanCode": "HUBLBG",
+"lines": [],
+"lineGroup": [],
+"lineModeGroups": [],
+"status": true,
+"id": "940GZZLULNB",
+"commonName": "London Bridge Underground Station",
+"placeType": "StopPoint",
+"additionalProperties": [],
+"children": [],
+"lat": 0.0,
+"lon": 0.0
+}
+},
+{
+"$type": "Tfl.Api.Presentation.Entities.RouteSectionNaptanEntrySequence, Tfl.Api.Presentation.Entities",
+"ordinal": 20,
+"stopPoint": {
+"$type": "Tfl.Api.Presentation.Entities.StopPoint, Tfl.Api.Presentation.Entities",
+"naptanId": "940GZZLUBMY",
+"modes": [],
+"icsCode": "1000021",
+"stationNaptan": "940GZZLUBMY",
+"lines": [],
+"lineGroup": [],
+"lineModeGroups": [],
+"status": true,
+"id": "940GZZLUBMY",
+"commonName": "Bermondsey Underground Station",
+"placeType": "StopPoint",
+"additionalProperties": [],
+"children": [],
+"lat": 0.0,
+"lon": 0.0
+}
+},
+{
+"$type": "Tfl.Api.Presentation.Entities.RouteSectionNaptanEntrySequence, Tfl.Api.Presentation.Entities",
+"ordinal": 21,
+"stopPoint": {
+"$type": "Tfl.Api.Presentation.Entities.StopPoint, Tfl.Api.Presentation.Entities",
+"naptanId": "940GZZLUCWR",
+"modes": [],
+"icsCode": "1000037",
+"stationNaptan": "940GZZLUCWR",
+"hubNaptanCode": "HUBZCW",
+"lines": [],
+"lineGroup": [],
+"lineModeGroups": [],
+"status": true,
+"id": "940GZZLUCWR",
+"commonName": "Canada Water Underground Station",
+"placeType": "StopPoint",
+"additionalProperties": [],
+"children": [],
+"lat": 0.0,
+"lon": 0.0
+}
+},
+{
+"$type": "Tfl.Api.Presentation.Entities.RouteSectionNaptanEntrySequence, Tfl.Api.Presentation.Entities",
+"ordinal": 22,
+"stopPoint": {
+"$type": "Tfl.Api.Presentation.Entities.StopPoint, Tfl.Api.Presentation.Entities",
+"naptanId": "940GZZLUCYF",
+"modes": [],
+"icsCode": "1000038",
+"stationNaptan": "940GZZLUCYF",
+"hubNaptanCode": "HUBCAW",
+"lines": [],
+"lineGroup": [],
+"lineModeGroups": [],
+"status": true,
+"id": "940GZZLUCYF",
+"commonName": "Canary Wharf Underground Station",
+"placeType": "StopPoint",
+"additionalProperties": [],
+"children": [],
+"lat": 0.0,
+"lon": 0.0
+}
+}
+]
+}
+],
+"affectedStops": [
+{
+"$type": "Tfl.Api.Presentation.Entities.StopPoint, Tfl.Api.Presentation.Entities",
+"naptanId": "940GZZLUBMY",
+"stationNaptan": "940GZZLUBMY",
+"status": true,
+"id": "940GZZLUBMY",
+"commonName": "Bermondsey Underground Station",
+"lat": 0.0,
+"lon": 0.0
+},
+{
+"$type": "Tfl.Api.Presentation.Entities.StopPoint, Tfl.Api.Presentation.Entities",
+"naptanId": "940GZZLUCWR",
+"stationNaptan": "940GZZLUCWR",
+"status": true,
+"id": "940GZZLUCWR",
+"commonName": "Canada Water Underground Station",
+"lat": 0.0,
+"lon": 0.0
+},
+{
+"$type": "Tfl.Api.Presentation.Entities.StopPoint, Tfl.Api.Presentation.Entities",
+"naptanId": "940GZZLUCYF",
+"stationNaptan": "940GZZLUCYF",
+"status": true,
+"id": "940GZZLUCYF",
+"commonName": "Canary Wharf Underground Station",
+"lat": 0.0,
+"lon": 0.0
+},
+{
+"$type": "Tfl.Api.Presentation.Entities.StopPoint, Tfl.Api.Presentation.Entities",
+"naptanId": "940GZZLUGPK",
+"stationNaptan": "940GZZLUGPK",
+"status": true,
+"id": "940GZZLUGPK",
+"commonName": "Green Park Underground Station",
+"lat": 0.0,
+"lon": 0.0
+},
+{
+"$type": "Tfl.Api.Presentation.Entities.StopPoint, Tfl.Api.Presentation.Entities",
+"naptanId": "940GZZLULNB",
+"stationNaptan": "940GZZLULNB",
+"status": true,
+"id": "940GZZLULNB",
+"commonName": "London Bridge Underground Station",
+"lat": 0.0,
+"lon": 0.0
+},
+{
+"$type": "Tfl.Api.Presentation.Entities.StopPoint, Tfl.Api.Presentation.Entities",
+"naptanId": "940GZZLUSWK",
+"stationNaptan": "940GZZLUSWK",
+"status": true,
+"id": "940GZZLUSWK",
+"commonName": "Southwark Underground Station",
+"lat": 0.0,
+"lon": 0.0
+},
+{
+"$type": "Tfl.Api.Presentation.Entities.StopPoint, Tfl.Api.Presentation.Entities",
+"naptanId": "940GZZLUWLO",
+"stationNaptan": "940GZZLUWLO",
+"status": true,
+"id": "940GZZLUWLO",
+"commonName": "Waterloo Underground Station",
+"lat": 0.0,
+"lon": 0.0
+},
+{
+"$type": "Tfl.Api.Presentation.Entities.StopPoint, Tfl.Api.Presentation.Entities",
+"naptanId": "940GZZLUWSM",
+"stationNaptan": "940GZZLUWSM",
+"status": true,
+"id": "940GZZLUWSM",
+"commonName": "Westminster Underground Station",
+"lat": 0.0,
+"lon": 0.0
+}
+]
+}
+}
+],
+"routeSections": [
+{
+"$type": "Tfl.Api.Presentation.Entities.MatchedRoute, Tfl.Api.Presentation.Entities",
+"name": "Stratford Underground Station - Stanmore Underground Station",
+"direction": "inbound",
+"originationName": "Stratford Underground Station",
+"destinationName": "Stanmore Underground Station",
+"originator": "940GZZLUSTD",
+"destination": "940GZZLUSTM",
+"serviceType": "Regular",
+"validTo": "2026-12-23T00:00:00Z",
+"validFrom": "2026-09-19T00:00:00Z"
+},
+{
+"$type": "Tfl.Api.Presentation.Entities.MatchedRoute, Tfl.Api.Presentation.Entities",
+"name": "Stanmore Underground Station - Stratford Underground Station",
+"direction": "outbound",
+"originationName": "Stanmore Underground Station",
+"destinationName": "Stratford Underground Station",
+"originator": "940GZZLUSTM",
+"destination": "940GZZLUSTD",
+"serviceType": "Regular",
+"validTo": "2026-12-23T00:00:00Z",
+"validFrom": "2026-09-19T00:00:00Z"
+}
+],
+"serviceTypes": [
+{
+"$type": "Tfl.Api.Presentation.Entities.LineServiceTypeInfo, Tfl.Api.Presentation.Entities",
+"name": "Regular",
+"uri": "/Line/Route?ids=Jubilee&serviceTypes=Regular"
+},
+{
+"$type": "Tfl.Api.Presentation.Entities.LineServiceTypeInfo, Tfl.Api.Presentation.Entities",
+"name": "Night",
+"uri": "/Line/Route?ids=Jubilee&serviceTypes=Night"
+}
+],
+"crowding": {
+"$type": "Tfl.Api.Presentation.Entities.Crowding, Tfl.Api.Presentation.Entities"
+}
+}
+]

@@ -93,6 +93,8 @@ Proposal: **accept it, and publish the enriched footway graph under ODbL.** It f
 
 **Decided** (it is the brief's default). The profile is sent with each routing request and never persisted or logged server-side. No analytics on profile contents. Server-side sync only with explicit consent and after a DPIA, and that is a stop-and-ask item for Richard. Routing requests are logged without the profile, and with origin and destination truncated to 3 decimal places (about 100 m).
 
+Update (SEC-05, 2026-10-05): checked. The app logs nothing; its only URL parameter is the demo switch; shared notes carry the opt-in mobility label only (D-030); reports, the share text and router errors carry no profile. `pnpm e2e` now watches every request in every journey and fails if one carries the device's name, type or limits.
+
 ## D-010 Heavy jobs: GitHub Actions for Phase 0 and 1, then Fly.io or Cloud Run workers
 
 **Decided.** Graph builds, LiDAR sampling and imagery inference do not run in Vercel functions. Phase 0 and Phase 1 run builds as scheduled GitHub Actions jobs, which is enough for three cities rebuilt nightly. Minutely OSM diffs and Mapillary inference move to a container worker (Fly.io Machines or Cloud Run jobs) writing to Supabase PostGIS. Reconsider at Phase 3.
@@ -109,7 +111,11 @@ Proposal: **accept it, and publish the enriched footway graph under ODbL.** It f
 
 ## D-013 Unknown-risk weights and preset thresholds are placeholders
 
-**Decided**, explicitly provisional. The presets cite Inclusive Mobility (2021) where it applies (5% preferred, 8% absolute over short distances; cross-fall 2.5%) and are otherwise judgement. The unknown-risk weights (60 s per 100 m for unknown gradient, 120 s per unmapped kerb at a crossing) are guesses. Both are calibrated in Phase 2 with disabled testers in each city. Every number lives in one place (`packages/profile`, `packages/router/src/cost.ts`).
+**Decided**, explicitly provisional. The presets cite Inclusive Mobility (2021) where it applies (5% preferred, 8% absolute over short distances; cross-fall 2.5%) and are otherwise judgement.
+
+Update (DATA-10): rest distances now follow Inclusive Mobility (2021) section 3.4, "Recommended distance limit without a rest": walking stick and crutches 50 m (were 500 and 400), fatigue or chronic illness 100 m, IM's figure for people with a mobility impairment and no stick (was 250). IM's 150 m for wheelchair users and people with a vision impairment isn't used: they can stop anywhere, so a bench isn't the point. The rollator keeps 300 m: it has a seat. Mapped benches rarely come every 50 m, so "More benches" also tries half and seven-tenths of the route's longest gap, and offers the best it finds with the real figure.
+- Kerbs stay as they were. IM's "flush, with a maximum 6 mm tolerance" is how a dropped kerb should be built, not what someone can manage, and real lowered kerbs often aren't. So an OSM `lowered` kerb with no height still counts as 2 cm.
+- Gradients and cross-fall already cite IM (above). Users can change every figure, and Phase 2 testing (RES-01, RES-02) replaces them. The unknown-risk weights (60 s per 100 m for unknown gradient, 120 s per unmapped kerb at a crossing) are guesses. Both are calibrated in Phase 2 with disabled testers in each city. Every number lives in one place (`packages/profile`, `packages/router/src/cost.ts`).
 
 ## D-014 Phase 1 area: central Edinburgh first, whole city with the worker
 
@@ -147,6 +153,17 @@ Proposal: **accept it, and publish the enriched footway graph under ODbL.** It f
 - Ride times are distance-based (about 30 km/h including dwell) plus a 4-minute boarding allowance. There are no timetables yet: OpenTripPlanner replaces the ride layer when departure times matter (D-003).
 - Step-free status: TfL StopPoint `AccessViaLift = Yes` means step-free. Otherwise it is unknown, except on the DLR, which TfL describes as step-free throughout by lift or ramp (marked reported, verify per station). `AccessViaLift = No` is *not* treated as "has steps"; on the DLR it usually means ramp access.
 - Lift outages close only the edges the message supports: the named line's platforms ("to the Jubilee line"), the street link ("between the street and the ticket hall"), or every platform at the station if the message names neither. They affect only step-free users (`affects: "step-free"`), and they expire after 15 minutes unless refreshed.
+
+Update (DATA-03): TfL's station data (`tfl-stationdata-detailed.zip`, TfL open data) maps each station's areas and the level paths, ramps and lifts between them. `scripts/transit-london.ts` adds it to `network.json` for all 72 stations, and the app puts it on the board edges when London loads (`applyStationAccess`), per line:
+- **Step-free** means every platform of that line can be reached from "Outside" by level paths, ramps and lifts. Some platforms only (one direction) stays unknown. None, where TfL has mapped the routes, now means not step-free: 10 Jubilee line stations north of Baker Street, which wheelchair users are routed around. Canada Water and Canning Town's Jubilee platforms are now confirmed step-free.
+- **Lift outages** are joined on `LiftUniqueId`: a line is closed only if the lifts out cut every step-free route to its platforms. A lift outage on the District line at Westminster no longer touches the Jubilee line. Stations without TfL station data fall back to reading the message, as before.
+- The platform-to-train step and gap (and level-boarding doors, and manual ramps) are kept with the fact and shown with it.
+
+Update (DATA-04): TfL line status and station disruptions now act on the rail graph too (`packages/live/src/tfl-disruptions.ts`), refreshed with the lifts.
+- **Line closures** come from `/Line/{ids}/Status?detail=true`, which lists the stations a closure affects. A part closure closes only the rides between those stations, for everyone, with TfL's own start and end times, so "Leaving later" sees planned closures. A closure naming no stations closes the whole line. Rides get refs (`ride:<line>:<a>:<b>`) when the city loads, so no rebuild was needed.
+- **Station messages** are free text, so only three plain cases act: the station is closed, trains don't call, or there's no step-free access. If the message is about part of the station (an entrance, one direction, a footbridge), it is flagged as unknown rather than closed. A message naming only lines we don't model is ignored, and "step-free access is still available" never closes anything.
+- Where a lift outage and a disruption land on one edge, the stronger wins: closed for everyone, then closed for step-free, then flagged.
+- The route panel names any line closure in force.
 
 ## D-021 Movable bridges
 
@@ -196,11 +213,15 @@ Open: whether notes should carry the conditions ("when wet") as a field rather t
 
 First use: pavement works. Street Manager (England, OGL) permits that close the footway close those pavement edges for everyone until the works' end date; works on the footway that don't close it, including a temporary walkway in the road, are "degraded" and counted as unknown; carriageway-only works are left out. In London TfL street disruptions that mention the pavement top this up live every 5 minutes. The build reads Street Manager's monthly archive (`pnpm build:works`, 1 GB, about a minute); production should subscribe to Street Manager's live notifications (free, needs registering an endpoint) through the same adapter. Scotland's register (SRWR) has no open feed: Edinburgh says "No open roadworks feed here yet" rather than implying there are none.
 
+Update (DATA-05): the build also reads Street Manager's activity archive (`activity/YYYY/MM.zip`, about 12 MB a month, same bucket, OGL): skips, scaffolding, hoardings, cranes and mobile platforms, events and other non-works licences. Only those on the footway or a footpath are kept. The archive doesn't say whether the pavement is closed, so each one is "on the pavement" and counted as unknown, never closed. With no end time given, an activity runs to the end of its last day. September 2026 added 9 in Newcastle and 5 in London.
+
 Next adapters, in order of value: Overture places (more venues and addresses; release 2026-09-23.1 is on S3), National Rail Knowledgebase stations (step-free access and staffing; needs a free key), Met Office DataHub (warnings; key), Mapillary (kerb and surface detections; key), accessibility.cloud (venue accessibility; key, and its own sources' licences). Keys stay server-side once there is a backend; until then these run in the build.
 
 ## D-028 Overture fills search gaps; OSM stays the source of access facts
 
 **Decided.** 2026-10-04. OSM has the access tags but misses many venues (Newcastle: 2,214 OSM places against 5,376 in Overture). Overture places are added to each city's search index when they are confident (0.7 and over), open, somewhere people go, and not already in OSM under a similar name within 75 m (word overlap, "&" read as "and", and spelling variants within 40 m). They show with their category and address and no access line, and an "accessible" search never lists them, because nothing says they are. When names tie, OSM ranks first.
+
+Update (DATA-01, survey §9): AllThePlaces labels its output CC0, but some of its spiders scrape sites with no open licence (Changing Places, NHS inform, nhs.uk), which breaks rule 5 in DATA_SOURCES.md. Its records don't say which spider made them, so an Overture place whose only source is AllThePlaces is left out when it's a toilet, a pharmacy or a health service (`scrapedOnly` in `scripts/overture-merge.ts`). The same place from another source, or mapped in OSM with `changing_places=yes`, stays. This removed 29 "Changing Places" records and 24 GP, dentist, hospital and pharmacy records from the committed indexes.
 
 Update (issue #15): an Overture place is also a duplicate when an OSM place within 40 m has the same house number and street and either shares a name word or is the same kind of place. An address alone isn't enough, because one building can hold many businesses. This removed 409 more duplicates in Edinburgh, 58 in Newcastle and 16 in London.
 
@@ -264,6 +285,8 @@ Bridged: Edinburgh 172 of 446 islands, Newcastle 9 of 24, London 23 of 48. `scri
 - **Fails softly:** each source is a separate step, so one feed being down doesn't block the rest. The PR body asks the reviewer to check for sudden drops, which mean an outage rather than real change.
 
 **Stay manual:** street graphs and base maps. They need LiDAR and a reviewed Protomaps build, and they change slowly.
+
+Update (DATA-11): the street graphs join the weekly refresh. They read the same OSM the search index has just fetched and the same LiDAR, and take about a minute each (Newcastle: 37 seconds here). The layers keyed to graph edges follow them (council footways, flood areas), and so do park gates, OSM notes and the Toilet Map. The summary table now counts graph edges, edges with a known gradient and each layer, so a broken build shows as a sudden drop, and the acceptance journeys run against the new graphs before the pull request opens. Base maps stay manual.
 
 **Known limit:** pull requests opened with the workflow token don't trigger CI themselves; the workflow runs the tests before opening one.
 
@@ -373,3 +396,99 @@ The visual-impairment preset sets 60 s per 100 m; anyone can turn it on with "Af
 - **Live bus times** are hidden when leaving later: they're for now. The timetable frequency is for the leaving time.
 
 **Not stored.** The leaving time lasts for the visit; it isn't saved, so a stale "tomorrow 08:30" can't surprise anyone next week. A time that has passed counts as now.
+
+## D-041 Security headers and a Content Security Policy
+
+**Decided.** 2026-10-04. A static export can't set response headers, so they go in `apps/web/vercel.json` (the Vercel project's root directory is `apps/web`).
+
+**What we send.** A Content Security Policy that allows only our own origin plus what the app really calls: Supabase (`*.supabase.co`, for sharing and review photos), Open-Meteo, postcodes.io, Photon, TfL and the Environment Agency, and Google Fonts for the typeface. No framing (`frame-ancestors 'none'`), no plugins, forms only to ourselves. Also HSTS, `nosniff`, a strict referrer policy, `Cross-Origin-Opener-Policy`, and a permissions policy that allows location for this site only and turns off camera, microphone and payment.
+
+**Two compromises.** `script-src` keeps `'unsafe-inline'`: Next's static export writes inline scripts whose hashes change every build (SEC-13 is the follow-up). `style-src` keeps `'unsafe-inline'`: MapLibre, Radix and our own components set inline styles.
+
+**How we know it doesn't break anything.** The accessibility check and the end-to-end journeys serve the build with the same headers (`scripts/serve-out.mjs`) and fail on anything the policy blocks. A new live data source has to be added to `connect-src`, or those checks fail.
+
+## D-042 Fewer Vercel builds
+
+**Decided.** 2026-10-04. The free plan allows 100 deployments a day, and on 2026-10-04 we hit it. `ignoreCommand` in `apps/web/vercel.json` runs `apps/web/scripts/vercel-ignore.sh`, which skips a build when:
+- the branch is `main`, which the mirror workflow keeps equal to the production branch, so the same commit was already built there; or
+- nothing changed since the last deployed commit except docs, Markdown, workflows or database migrations.
+
+When there is nothing to compare with, it builds. Once DEP-01 makes `main` the production branch, the `main` rule goes and the mirror branch gets it instead.
+
+## D-043 Battery range is a warning, set by the user
+
+**Decided.** 2026-10-04. From tester feedback: lightweight chairs have small batteries.
+- A device can carry `maxRangeKm`, its range on one charge on the flat. It is unset by default, and with no range there is no warning: we never guess someone's battery. The demo Cherry (`?demo=devices`) has 12 km.
+- Battery use is the route's distance on wheels plus each metre climbed counted as 30 m of flat (`CLIMB_FLAT_EQUIVALENT_M`, from a rolling resistance of about 0.03). Train and bus legs don't count. The figure is a starting point; user testing replaces it.
+- Warn only. Over half the range: "you may need to charge before the way back". Over the whole range: "it may not fit on one charge". Both say "about" and "counting the climbs". The router never changes or refuses a route because of range.
+- Rejected: range as a hard limit (a wrong figure would block routes the device can do), and favouring shorter routes near the limit (hard to explain why a route was picked).
+- **In the editor** (FEAT-01): powered chairs and scooters get "Warn me about battery range" in Your limits. It is off by default, 15 km when first turned on, and 3 to 60 km. The range is the person's own figure, not a limit the type sets, so it carries over to another powered type and on "Reset", and goes for a type with no battery.
+
+## D-044 What's on the phone can't be lost to a change of shape
+
+**Decided.** 2026-10-04 (STAB-03). Devices, notes and reports live only in the browser's storage (D-009). A bad migration, or an older build still cached by the service worker, could wipe someone's devices with one save.
+
+**What we do** (`apps/web/src/lib/stored.ts`):
+- **The version is in the key** (`causewayside.devices.v1`). A new shape gets a new key and reads the old one once. Old keys are read, never rewritten or deleted, so an older build keeps working and going back a version loses nothing. The single profile from before devices is read this way.
+- **Nothing unreadable is overwritten.** Bad JSON, a reader that throws, or items a reader has to drop (such as a device type from a newer build) are copied to `<key>.backup` before the next save. It can be recovered by hand.
+- Rejected: a version number inside the stored value, because older builds would read the new shape as empty and save over it.
+
+## D-045 Saying when a new version is ready
+
+**Decided.** 2026-10-04 (DEP-04). The service worker (D-023) takes over as soon as a new build is installed, but a page that's already open keeps running the old code until it's reloaded. People keep a map open for days.
+
+**What we do.** The app looks for a new version when it comes back to the front and every hour. When one takes over, a card says "A new version of Causewayside is ready" with **Reload** and **Later**. It never reloads by itself, and waits while navigating, since a reload mid-journey would drop the route. It is rendered outside `<main>`, which the bottom sheet hides from screen readers.
+
+## D-046 Council footway data as a separate layer
+
+**Decided.** 2026-10-04 (DATA-06). Edinburgh's Adopted Roads layer (OGL v3) has a surface and width for each adopted footway polygon. OSM has a width on only about 5% of central Edinburgh's pavement edges.
+
+**What we do.** `pnpm build:footways` matches each pavement edge to the footway polygon its middle sits in. A street drawn as one line in OSM (a street proxy) takes the footways within 12 m of its middle, the narrowest width and the roughest surface. The result is a separate file keyed by `<osm way>:<from node>:<to node>`, joined when Edinburgh loads (`applyCouncilFootways`) and never written into the snapshot, as D-008 proposes for non-OSM data.
+- **OSM first.** The layer only fills a surface or width OSM doesn't have. Widths on pavement edges went from 1,731 to 8,707; surfaces from 22,085 to 24,641 of 31,750.
+- **Where both know, they often disagree** (2,822 of 6,341 edges), mostly OSM "asphalt" against council flags, and OSM "sett" against council flags or asphalt. Many are probably street proxies carrying the carriageway's surface, not the pavement's. OSM still wins. Whether the council should win on street proxies is a question for Richard (DATA-22).
+- Widths outside 0.5 to 10 m are ignored; a few large polygons carry area-like figures.
+- Credit: "Pavement surfaces and widths: City of Edinburgh Council, Open Government Licence v3.0", in the city credit line.
+
+
+## D-047 Ice, gritting and floods
+
+**Decided.** 2026-10-04 (DATA-07). Two kinds of weather danger the ground itself can't show: an icy pavement nobody has gritted, and a riverside path under a flood warning.
+
+**Gritting (Edinburgh).** The council's priority-1 pavement gritting routes (OGL, 55 km in the central area) go into the council layer (D-046): 1,130 pavement edges are on a route. With that data, every pavement is known to be on a route or not (`gritted`). In ice, a pavement off the routes costs 100% more time for wheelchair users and 50% more for everyone else, and a route on them says "on a gritting route". The steep and sett exclusions in ice stay as they were. Both figures are guesses for testing (RES-01). Newcastle and London have no open pavement gritting data yet, so nothing changes there.
+
+**Floods (England).** `pnpm build:floods` maps each Environment Agency flood area (OGL) to the walking edges inside it: 4 areas over our Newcastle paths, 9 in London, where the tidal Thames areas cover whole districts. The app fetches the warnings in force every 10 minutes (`/flood-monitoring/id/floods`, keyless):
+- **Severe Flood Warning:** the paths inside are closed.
+- **Flood Warning:** they count as unknown ("may be flooded").
+- **Flood Alert:** named in the route panel only. Alerts are common on the tidal Thames, and flagging whole districts would bury the routes in unknowns.
+- A flood state never weakens one already there (works closing a pavement stay closed), and each refresh replaces the last, so a lifted warning lifts.
+
+**Not yet.** Met Office weather warnings need a key (DATA-17). Scotland's flood warnings come from SEPA, which has no matching open feed we've found (DATA-25).
+
+## D-048 Park gates and OpenStreetMap notes
+
+**Decided.** 2026-10-04 (DATA-08).
+
+**Park gates.** A route to a park used to end at the park's middle, which might be a pond or the far side of a fence. OS Open Greenspace (OGL) draws parks as sites with access points (`pnpm build:greenspace`: 153 named sites and 648 pedestrian gates in central Edinburgh, 12 and 73 in Newcastle, 73 and 299 in London). When the destination is a park or garden in our search and sits inside a site (the smallest, so a garden inside a park wins), or shares its name with one nearby, the route ends at the gate nearest the way you're coming, trying up to three, and says which park. OS splits some parks (The Meadows is "West Meadow Park" and "East Meadow Park"), so position matters more than name. A door that fits (D-018) still comes first.
+
+**OpenStreetMap notes.** Open notes are people saying a path is blocked or steps have appeared, but also shop closures and StreetComplete's questions. `pnpm build:osm-notes` keeps those about the ground (paths, steps, kerbs, gates, bridges and so on: 28 in Edinburgh, 23 in London), at build time, so no route's area is sent to a third party (D-009). Up to three within 20 m of the best route are shown with it, dated and marked "Not checked by us". They never change the route: anyone can write a note, and many are stale.
+
+## D-049 The Toilet Map fills OSM's gaps
+
+**Decided.** 2026-10-04 (DATA-09). OSM knows many public toilets but often not whether they're accessible, need a RADAR key, or when they open. The Great British Public Toilet Map (CC BY 4.0) is exported daily with those facts and the date each was last checked.
+
+**What we do.** `pnpm build:toilets` cuts the export to each city (Edinburgh 62 toilets, 44 accessible; Newcastle 22; London 73). The app merges it into the search index when a city loads (`mergeToiletMap`):
+- **Same toilet** (an OSM toilet within 30 m): OSM's own tags win; the Toilet Map only fills what OSM lacks. The place then names both sources.
+- **A toilet OSM hasn't mapped** is added, and an accessible one counts for "Accessible toilet at least every…" like any other.
+- Each place says "checked" (someone verified it on the ground) or "updated", with the month, so an old record looks old.
+- Weekly opening times become OSM opening hours, so "open when you pass" works for them too.
+- Credit in each city line: "Toilets: Great British Public Toilet Map, Public Convenience Ltd (CC BY 4.0)".
+
+## D-050 Dependency audit in CI, and MapLibre 6
+
+**Decided.** 2026-10-05 (SEC-04). CI runs `pnpm audit --audit-level high` after install: a known high or critical hole in any dependency fails the build. Moderate and low ones are left to Dependabot.
+
+**What the first run found.** A critical hole in MapLibre GL 4.7.1 (its HTML sanitiser could be bypassed, GHSA for versions up to 6.4.0) and two high ones in the PostCSS that Next 15 pins (8.4.31: reading files through source map comments).
+- **MapLibre** goes straight to 6.12.0, which also does UPD-02. Version 6 runs its worker as a separate module file, so `copy-graphs.mjs` copies `maplibre-gl-worker.mjs` and `maplibre-gl-shared.mjs` into `public/maplibre/<version>/` and `basemap.ts` points MapLibre at it. Each version has its own folder, so a cached old worker never meets new code. The CSP already allows workers from our own origin.
+- MapLibre 6 types its events, so the map's own "refresh" event became a ref holding the latest draw function.
+- **PostCSS**: a pnpm override (`next>postcss`) lifts Next's copy to 8.5.28. Next only uses it at build time. Drop the override when Next's own pin passes 8.5.23.
+- The local check server serves `.mjs` as JavaScript, as Vercel does; a module worker is refused otherwise.

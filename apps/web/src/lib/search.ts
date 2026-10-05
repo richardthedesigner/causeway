@@ -173,10 +173,19 @@ export function accessFacts(a: Record<string, string> | undefined, cat?: string)
   return out;
 }
 
+/** A search entry for a place: its words, run-together name and rank (lower first). */
+export const makeEntry = (place: Place, rank: number, extraWords = "", cat?: string, access?: Record<string, string>): Entry => ({
+  place,
+  rank,
+  cat,
+  access,
+  words: norm(`${place.name} ${extraWords}`).split(" "),
+  joined: norm(place.name).replace(/ /g, ""),
+});
+
 export function buildIndex(file: PlacesFile | null, extra: Place[]): Index {
   const entries: Entry[] = [];
-  const add = (place: Place, rank: number, extraWords = "", cat?: string, access?: Record<string, string>) =>
-    entries.push({ place, rank, cat, access, words: norm(`${place.name} ${extraWords}`).split(" "), joined: norm(place.name).replace(/ /g, "") });
+  const add = (place: Place, rank: number, extraWords = "", cat?: string, access?: Record<string, string>) => entries.push(makeEntry(place, rank, extraWords, cat, access));
 
   for (const p of extra) add(p, p.kind === "Street" ? 1 : 0, p.kind);
   const postcodes = new Map<string, Place>();

@@ -1,3 +1,4 @@
+import type { FloodWarning } from "@causeway/live";
 import type { Conditions, EntranceOption, NavPlan, RouteSummary } from "@causeway/router";
 import type { Profile } from "@causeway/profile";
 import type { WorksObservation } from "@causeway/live";
@@ -77,6 +78,8 @@ export type PlanResult =
       entrances: EntranceOption[];
       /** The entrance the route ends at, when one near a building fits this person; null means the building's centre. */
       door: { name: string | null; osmId: number; detail: string } | null;
+      /** A park: the route ends at one of its gates (DATA-08). */
+      gate?: { park: string } | null;
     }
   | {
       status: "none";
@@ -105,12 +108,31 @@ export interface LiftOutageMsg {
   fetchedAt: string;
 }
 
+export interface RailDisruptionMsg {
+  kind: "line-closed" | "line-no-step-free" | "station";
+  line: string | null;
+  stations: string[];
+  message: string;
+  validFrom: string;
+  validUntil: string;
+}
+
+/** A flood warning in force over this city's paths: 1 severe, 2 warning, 3 alert. */
+export interface FloodHere {
+  severity: 1 | 2 | 3;
+  name: string;
+  label: string;
+}
+
 export type WorkerRequest =
-  | { type: "init"; graphUrl: string; networkUrl?: string; worksUrl?: string; busUrl?: string; places: Place[] }
+  | { type: "init"; graphUrl: string; networkUrl?: string; worksUrl?: string; busUrl?: string; footwaysUrl?: string; floodsUrl?: string; greenspaceUrl?: string; osmNotesUrl?: string; places: Place[] }
+  /** Environment Agency warnings in force (DATA-07). */
+  | { type: "floods"; warnings: FloodWarning[]; fetchedAt: string }
   | { type: "works-live"; works: WorksObservation[]; fetchedAt: string }
   /** Venues with an accessible toilet, from the search index, so routing can pass them. */
   | { type: "toilets"; points: { lon: number; lat: number; name: string }[] }
-  | { type: "live"; outages: LiftOutageMsg[] }
+  /** Lift outages, and TfL line and station disruptions where they could be fetched (DATA-04). */
+  | { type: "live"; outages: LiftOutageMsg[]; disruptions?: RailDisruptionMsg[] }
   | {
       type: "plan";
       id: number;
@@ -129,7 +151,10 @@ export type WorkerResponse =
   | { type: "ready"; places: Place[]; network: { coords: [number, number][]; bin: number }[]; bbox: [number, number, number, number]; builtAt: string; buses: { stops: number; lines: number; source: string } | null }
   | { type: "error"; message: string }
   | { type: "works"; summary: WorksSummary }
-  | { type: "live"; applied: number; fetchedAt: string }
+  /** Flood warnings that touch this city's paths, worst first. */
+  | { type: "floods"; here: FloodHere[]; fetchedAt: string }
+  /** `applied`: platforms closed to step-free travel by lifts. `lines`: line closures in force now, in TfL's words. */
+  | { type: "live"; applied: number; lines: string[]; fetchedAt: string }
   | { type: "plan"; id: number; result: PlanResult }
   | { type: "check"; id: number; checks: Check[] }
   | { type: "fits"; id: number; fits: { key: string; minutes: number | null }[] };

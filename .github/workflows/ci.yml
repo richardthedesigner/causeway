@@ -5,24 +5,34 @@ on:
     branches: [main, claude/sleepy-johnson-mavbrs]
   pull_request:
 
+# Read the code, nothing more (SEC-03).
+permissions:
+  contents: read
+
 jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # Known high or critical holes in any dependency fail the build (SEC-04).
+      - run: pnpm audit --audit-level high
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm --filter @causeway/web typecheck
       - run: pnpm web:build
-      # Accessibility: axe-core WCAG 2.2 AA on the built app, light and dark (scripts/a11y-check.mjs).
+      # Accessibility: axe-core WCAG 2.2 AA on the built app, light and dark, under the real security headers (scripts/a11y-check.mjs).
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm a11y
+      # End to end: search, route, start, arrive and end in each city, under the real security headers (scripts/e2e.mjs).
+      - run: pnpm e2e
 
   migrations:
     runs-on: ubuntu-latest
@@ -35,7 +45,9 @@ jobs:
         options: >-
           --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
       - run: |
           for f in db/migrations/*.sql; do
             PGPASSWORD=postgres psql -h localhost -U postgres -v ON_ERROR_STOP=1 -q -f "$f"

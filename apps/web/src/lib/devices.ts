@@ -7,16 +7,15 @@
  * wheelchair, and the device button offers setup. `?demo=devices` instead
  * starts as the tester from 2026-10 feedback, with Cherry (a lightweight
  * powerchair that gets stuck on setts and cobbles) and Lulu (a pavement
- * scooter) already saved and favourited.
+ * scooter) already saved and favourited. Cherry has a demo 12 km battery range.
  */
-import { PRESETS, savedDevice, type MobilityPreset, type Profile, type SavedDevice } from "@causeway/profile";
+import { hasBattery, PRESETS, savedDevice, type MobilityPreset, type Profile, type SavedDevice } from "@causeway/profile";
+import { defaultStore, loadStored, readList, type Store, type StoredVersion } from "./stored";
 
 const DEVICES_KEY = "causewayside.devices.v1";
 const ACTIVE_KEY = "causewayside.device.active.v1";
 /** The single profile from before devices. Still written, so an older build reads the active device. */
 const LEGACY_PROFILE_KEY = "causewayside.profile.v1";
-
-type Store = Pick<Storage, "getItem" | "setItem">;
 
 export interface DeviceState {
   devices: SavedDevice[];
@@ -29,7 +28,7 @@ export interface DeviceState {
 export const FIRST_VISIT: DeviceState = { devices: [savedDevice("device-1", "", "manual-wheelchair", {}, true)], activeId: "device-1", fresh: true };
 
 export const SEED_DEVICES: SavedDevice[] = [
-  savedDevice("cherry", "Cherry", "powerchair-light", { surfaces: { ...PRESETS["powerchair-light"].surfaces, sett: null, cobblestone: null } }, true),
+  savedDevice("cherry", "Cherry", "powerchair-light", { surfaces: { ...PRESETS["powerchair-light"].surfaces, sett: null, cobblestone: null }, maxRangeKm: 12 }, true),
   savedDevice("lulu", "Lulu", "mobility-scooter", {}, true),
 ];
 
@@ -49,13 +48,33 @@ const read = (store: Store | undefined, key: string): string | null => {
   }
 };
 
-const defaultStore = (): Store | undefined => {
-  try {
-    return globalThis.localStorage;
-  } catch {
-    return undefined;
-  }
-};
+/**
+ * Devices, newest shape first (STAB-03). Today's list, then the single
+ * profile from before devices, which becomes one unnamed device. A device
+ * this build can't read (say, a type from a newer build) is left out, and
+ * the stored list is backed up before anything overwrites it.
+ */
+const DEVICE_VERSIONS: StoredVersion<SavedDevice[]>[] = [
+  {
+    key: DEVICES_KEY,
+    read: (json, dropped) => {
+      const list = readList(json, dropped, (x) => {
+        const d = x as Partial<SavedDevice> | null;
+        const profile = d && typeof d.id === "string" ? revive(d.profile as Profile) : null;
+        return profile ? { id: d!.id!, name: d!.name ?? "", favourite: !!d!.favourite, profile } : null;
+      });
+      // Nothing usable: try the older profile instead.
+      return list?.length ? list : null;
+    },
+  },
+  {
+    key: LEGACY_PROFILE_KEY,
+    read: (json) => {
+      const legacy = revive(json as Profile);
+      return legacy ? [{ id: "device-1", name: "", favourite: true, profile: legacy }] : null;
+    },
+  },
+];
 
 /** Favourites first, otherwise in the order they were saved. */
 export function orderDevices(list: SavedDevice[]): SavedDevice[] {
@@ -78,32 +97,8 @@ export function deviceLabel(d: SavedDevice): string {
  * devices keeps it, as one unnamed device; nobody loses their settings.
  */
 export function loadDeviceState(store: Store | undefined = defaultStore(), { demo = false } = {}): DeviceState {
-  let devices: SavedDevice[] | null = null;
-  const raw = read(store, DEVICES_KEY);
-  if (raw) {
-    try {
-      const list = JSON.parse(raw) as SavedDevice[];
-      if (Array.isArray(list)) {
-        devices = list.flatMap((d) => {
-          const profile = d && typeof d.id === "string" ? revive(d.profile) : null;
-          return profile ? [{ id: d.id, name: d.name ?? "", favourite: !!d.favourite, profile }] : [];
-        });
-      }
-    } catch {
-      /* corrupt: fall through */
-    }
-  }
-  if (!devices?.length) {
-    const legacyRaw = read(store, LEGACY_PROFILE_KEY);
-    let legacy: Profile | null = null;
-    try {
-      legacy = legacyRaw ? revive(JSON.parse(legacyRaw) as Profile) : null;
-    } catch {
-      legacy = null;
-    }
-    if (!legacy) return demo ? { devices: SEED_DEVICES, activeId: SEED_DEVICES[0]!.id } : FIRST_VISIT;
-    devices = [{ id: "device-1", name: "", favourite: true, profile: legacy }];
-  }
+  const devices = loadStored(DEVICE_VERSIONS, store)?.value ?? [];
+  if (!devices.length) return demo ? { devices: SEED_DEVICES, activeId: SEED_DEVICES[0]!.id } : FIRST_VISIT;
   const stored = read(store, ACTIVE_KEY);
   const activeId = devices.some((d) => d.id === stored) ? stored! : defaultDevice(devices)!.id;
   return { devices, activeId };
@@ -202,3 +197,20 @@ export function compareLine(minutes: number, prev: { label: string; minutes: num
   if (d === 0) return `Same time as ${prev.label}'s route.`;
   return `${Math.abs(d)} min ${d < 0 ? "quicker" : "longer"} than ${prev.label}'s route.`;
 }
+
+/**
+ * A device's limits after picking a type (or resetting to it). The battery range
+ * isn't a limit the type sets: it's the person's own figure, so it carries over
+ * to another powered type and goes when the type has no battery (D-043).
+ */
+export function presetProfile(current: Profile, preset: MobilityPreset): Profile {
+  const next: Profile = { ...PRESETS[preset] };
+  if (current.maxRangeKm && hasBattery(next)) next.maxRangeKm = current.maxRangeKm;
+  return next;
+}
+
+/** Range choices in the editor, in km on one charge. */
+export const RANGE_MIN_KM = 3;
+export const RANGE_MAX_KM = 60;
+/** A starting figure when someone turns the range on: a typical lightweight powerchair. */
+export const RANGE_DEFAULT_KM = 15;

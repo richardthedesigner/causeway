@@ -4,6 +4,8 @@
  * it stores location data from members of the public). No profile data is
  * ever attached to a report.
  */
+import { loadStored, readList, saveStored, type StoredVersion } from "./stored";
+
 export type ReportKind = "blocked" | "kerb" | "surface" | "lift" | "steep" | "other";
 
 export const REPORT_KINDS: { kind: ReportKind; label: string }[] = [
@@ -32,29 +34,22 @@ export interface Report {
 
 const KEY = "causewayside.reports.v1";
 
+/** Newest shape first (STAB-03). Anything unreadable is backed up before it can be overwritten. */
+const VERSIONS: StoredVersion<Report[]>[] = [
+  { key: KEY, read: (json, dropped) => readList(json, dropped, (x) => (x && typeof (x as Report).id === "string" ? (x as Report) : null)) },
+];
+
 export function loadReports(): Report[] {
-  try {
-    return JSON.parse(localStorage.getItem(KEY) ?? "[]") as Report[];
-  } catch {
-    return [];
-  }
+  return loadStored(VERSIONS)?.value ?? [];
 }
 
 export function saveReport(r: Report): boolean {
-  try {
-    localStorage.setItem(KEY, JSON.stringify([r, ...loadReports()].slice(0, 200)));
-    return true;
-  } catch {
-    return false;
-  }
+  return saveStored(KEY, [r, ...loadReports()].slice(0, 200));
 }
 
 export function markSent(id: string): void {
-  try {
-    localStorage.setItem(KEY, JSON.stringify(loadReports().map((r) => (r.id === id ? { ...r, sentAt: new Date().toISOString() } : r))));
-  } catch {
-    /* tried again next time */
-  }
+  // If it doesn't save, it's tried again next time.
+  saveStored(KEY, loadReports().map((r) => (r.id === id ? { ...r, sentAt: new Date().toISOString() } : r)));
 }
 
 /** Shrink a photo to at most 640 px on its long side, as JPEG, so it fits on the device. */

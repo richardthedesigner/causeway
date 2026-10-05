@@ -24,6 +24,109 @@ export interface TransitStation {
   stepFreeSource: string;
   /** TfL's own interchange or access note, verbatim. */
   note: string | null;
+  /** How the station's areas join up, from TfL's station data (DATA-03). Absent where TfL has none. */
+  access?: StationAccess;
+}
+
+/**
+ * A station's step-free layout from TfL's station data: the areas (ticket hall,
+ * concourse, platforms) and the level paths, ramps and lifts between them.
+ * Anything not listed (stairs, escalators) isn't step-free. A lift outage then
+ * closes exactly the lines it cuts off, with no reading of the message text.
+ */
+export interface StationAccess {
+  /** TfL's station id, as the lift feed names it ("HUBWSM", "940GZZLUCYF"). */
+  tflId: string;
+  /** Where the street is in `paths`. */
+  outside: string;
+  /** Area to area. The third value is the lift joining them, or null for a level path or ramp. Both ways. */
+  paths: [string, string, string | null][];
+  lines: Record<string, StationLineAccess>;
+  /** Toilets TfL lists at the station. */
+  toilets: { accessible: boolean; radar: boolean; insideGate: boolean; location: string | null }[];
+  source: string;
+}
+
+export interface StationLineAccess {
+  /** This line's platform areas (one per direction, usually). */
+  platforms: string[];
+  /** TfL says it has step-free route information for these platforms. */
+  mapped: boolean;
+  /** Platform to train, in words: the step and gap, or where level boarding is. */
+  train: string | null;
+}
+
+/**
+ * Which of a station's lines can be reached from the street without steps,
+ * given lifts that are out. "yes": every platform of the line; "part": some
+ * (one direction only); "no": none, where TfL has mapped the routes; "unknown":
+ * none, and TfL hasn't mapped them.
+ */
+export function stepFreeLines(a: StationAccess, liftsOut: ReadonlySet<string> = new Set()): Record<string, "yes" | "part" | "no" | "unknown"> {
+  const next = new Map<string, string[]>();
+  const link = (x: string, y: string) => (next.get(x) ?? next.set(x, []).get(x)!).push(y);
+  for (const [x, y, lift] of a.paths) {
+    if (lift && liftsOut.has(lift)) continue;
+    link(x, y);
+    link(y, x);
+  }
+  const seen = new Set([a.outside]);
+  const queue = [a.outside];
+  while (queue.length) for (const y of next.get(queue.pop()!) ?? []) if (!seen.has(y)) seen.add(y), queue.push(y);
+  const out: Record<string, "yes" | "part" | "no" | "unknown"> = {};
+  for (const [line, l] of Object.entries(a.lines)) {
+    const n = l.platforms.filter((p) => seen.has(p)).length;
+    out[line] = n && n === l.platforms.length ? "yes" : n ? "part" : l.mapped ? "no" : "unknown";
+  }
+  return out;
+}
+
+/**
+ * Give every ride edge a ref, `ride:<line>:<station>:<station>`, so a line
+ * closure can find the stretch it closes (DATA-04). Snapshots built before
+ * rides had refs get them from the board edges at either end. Returns how many
+ * were labelled.
+ */
+export function refRides(g: Graph): number {
+  const platform = new Map<number, { line: string; station: string }>();
+  for (const e of g.edges) {
+    if (e.kind !== "board" || !e.ref || e.service) continue;
+    const [, line, station] = e.ref.split(":");
+    if (line && station) platform.set(e.to, { line, station });
+  }
+  let n = 0;
+  for (const e of g.edges) {
+    if (e.kind !== "transit" || e.ref || e.service) continue;
+    const a = platform.get(e.from),
+      b = platform.get(e.to);
+    if (!a || !b || a.line !== b.line) continue;
+    e.ref = `ride:${a.line}:${a.station}:${b.station}`;
+    n++;
+  }
+  return n;
+}
+
+/**
+ * Put TfL's per-line step-free facts on a graph's board edges (`board:<line>:<station>`).
+ * Run when a city loads, so a refreshed network.json needs no graph rebuild.
+ * Returns how many board edges changed.
+ */
+export function applyStationAccess(g: Graph, net: TransitNetwork): number {
+  let n = 0;
+  const byRef = new Map(g.edges.filter((e) => e.kind === "board" && e.ref).map((e) => [e.ref!, e]));
+  for (const s of Object.values(net.stations)) {
+    if (!s.access) continue;
+    for (const [line, state] of Object.entries(stepFreeLines(s.access))) {
+      const e = byRef.get(`board:${line}:${s.id}`);
+      if (!e) continue;
+      const train = s.access.lines[line]?.train;
+      const why = `${s.access.source}: ${state === "yes" ? "step-free from street to every platform" : state === "part" ? "step-free to some platforms only" : state === "no" ? "no step-free route to the platform" : "no step-free route information"}${train ? `. ${train}` : ""}`;
+      e.attrs.stepCount = state === "yes" ? attr(0, "reported", "tfl", net.fetchedAt, why) : state === "no" ? attr(1, "reported", "tfl", net.fetchedAt, why) : { ...unknownAttr<number>(), method: why };
+      e.attrs.wheelchair = state === "yes" ? attr("yes", "reported", "tfl", net.fetchedAt, why) : state === "no" ? attr("no", "reported", "tfl", net.fetchedAt, why) : unknownAttr();
+      n++;
+    }
+  }
+  return n;
 }
 
 export interface TransitRoute {
@@ -165,6 +268,7 @@ export function addTransit(g: Graph, net: TransitNetwork): { stationNode: Map<st
         from,
         to,
         kind: "transit",
+        ref: `ride:${r.line}:${a.id}:${b.id}`,
         geometry: [
           [a.lon, a.lat],
           [b.lon, b.lat],

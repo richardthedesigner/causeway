@@ -20,16 +20,17 @@ export function SheetContent({ title, description, children, className }: { titl
           className,
         )}
       >
-        <header className="flex items-start gap-3 border-b border-line px-5 pt-5 pb-4">
-          <div className="min-w-0 flex-1">
-            <Dialog.Title className="m-0 text-xl font-bold">{title}</Dialog.Title>
-            {description ? <Dialog.Description className="mt-1 text-muted">{description}</Dialog.Description> : null}
-          </div>
-          <Dialog.Close className="grid size-12 shrink-0 place-items-center rounded-full bg-surface-2" aria-label="Close">
-            <X aria-hidden className="size-6" />
+        {/* Only the title and Close stay put. The description scrolls with the content, so large text on a small phone still leaves room for it (STAB-11). The bar is sized in pixels: it needn't grow with the text. */}
+        <header className="flex items-start gap-3 border-b border-line px-[20px] pt-[12px] pb-[12px]">
+          <Dialog.Title className="m-0 min-w-0 flex-1 self-center text-xl font-bold [overflow-wrap:anywhere]">{title}</Dialog.Title>
+          <Dialog.Close className="grid size-[48px] shrink-0 place-items-center rounded-full bg-surface-2" aria-label="Close">
+            <X aria-hidden className="size-[24px]" />
           </Dialog.Close>
         </header>
-        <div className="min-h-0 flex-1 overflow-y-auto px-5 pt-4 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]">{children}</div>
+        <div className="min-h-0 flex-1 overflow-y-auto px-5 pt-4 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]">
+          {description ? <Dialog.Description className="m-0 mb-4 text-muted">{description}</Dialog.Description> : null}
+          {children}
+        </div>
       </Dialog.Content>
     </Dialog.Portal>
   );

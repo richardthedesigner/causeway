@@ -89,12 +89,19 @@ export interface Profile {
    * at up to 8 mph, so a street with no pavement is an ordinary road, not a hazard.
    */
   roadLegal?: boolean;
+  /**
+   * How far the battery goes on one charge, in km on the flat. Absent or null
+   * means not set, and no range warning is given: we never guess someone's battery.
+   */
+  maxRangeKm?: number | null;
 }
 
 /** Any powered wheelchair, light or heavy duty. Uses the bus wheelchair space. */
 export const isPowerchair = (p: Pick<Profile, "preset">) => p.preset === "powerchair" || p.preset === "powerchair-light";
 /** Any mobility scooter, pavement or road. */
 export const isScooter = (p: Pick<Profile, "preset">) => p.preset === "mobility-scooter" || p.preset === "mobility-scooter-road";
+/** Runs on a battery, so a range on one charge means something (D-043). */
+export const hasBattery = (p: Pick<Profile, "preset">) => isPowerchair(p) || isScooter(p);
 
 const SMOOTH: SurfaceTolerance = {
   asphalt: 0,
@@ -314,7 +321,8 @@ export const PRESETS: Record<MobilityPreset, Profile> = {
     escalators: true,
     surfaces: { ...ANY, sett: 0.3, cobblestone: 0.5, gravel: 0.4, grass: 0.5 },
     wetSurfaceSensitivity: 1.8,
-    maxRestIntervalM: 500,
+    // Inclusive Mobility (2021) 3.4: stick and cane users, 50 m without a rest (DATA-10).
+    maxRestIntervalM: 50,
     maxToiletIntervalM: null,
     uncertaintyTolerance: 0.6,
     companion: false,
@@ -333,7 +341,8 @@ export const PRESETS: Record<MobilityPreset, Profile> = {
     escalators: false,
     surfaces: { ...ANY, sett: 0.4, cobblestone: 0.7, gravel: 0.6, grass: 0.8 },
     wetSurfaceSensitivity: 2,
-    maxRestIntervalM: 400,
+    // Inclusive Mobility (2021) 3.4: walking-aid users, 50 m without a rest (DATA-10).
+    maxRestIntervalM: 50,
     maxToiletIntervalM: null,
     uncertaintyTolerance: 0.6,
     companion: false,
@@ -371,7 +380,8 @@ export const PRESETS: Record<MobilityPreset, Profile> = {
     escalators: true,
     surfaces: ANY,
     wetSurfaceSensitivity: 1.2,
-    maxRestIntervalM: 250,
+    // Inclusive Mobility (2021) 3.4: mobility impaired without a stick, 100 m without a rest (DATA-10).
+    maxRestIntervalM: 100,
     maxToiletIntervalM: 800,
     uncertaintyTolerance: 0.6,
     companion: false,
