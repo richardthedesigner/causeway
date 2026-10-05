@@ -10,6 +10,14 @@ Research only. No code, data or workflow changes.
 - Gaps: Scotland's council-level disability tables sit behind a bot check at the UK Data Service, so Dundee and Aberdeen use an estimate; Blue Badges by council exist for England only. Both are in RES-11.
 - DEF-10 (Leeds) added. DEF-09 is unchanged until Richard decides (OPEN_ITEMS).
 
+## 2026-10-05 (security review)
+
+SEC-07 and REV-02: [security review](reviews/security-2026-10.md), with a threat model. Read-only: no code changed.
+- Critical, before sharing goes live: Supabase grants everything in `public` to `anon` by default, and the migrations never take it back. Signed out, anyone could delete any note through `note_public`, and write the graph tables. Shown on a local Postgres with Supabase's grants; CI's plain Postgres can't see it. SEC-16.
+- Medium: a backdated `created_at` skips the 30-a-day limit, and reports can arrive already "fixed" (SEC-17); `author_key` links one person's notes across a city (SEC-18); the data refresh leaves a write token on disk while running third-party code (SEC-19, SEC-23).
+- Low: photo paths, photo bucket limits, the CSP's Supabase wildcard, BACKEND.md out of date (SEC-17, SEC-18, SEC-20 to SEC-22).
+- Fine: the row-level security on notes, flags, reports and the review log (all 38 database checks pass), reviewer powers, storage folders, headers, workflow pinning, `pnpm audit`, and the profile still never leaves the phone.
+
 ## 2026-10-05 (merging PR #42 into PR #44)
 
 DEP-08: PR #44 merged with PR #42 so it lands cleanly after it. No D-number or task ID collided.
