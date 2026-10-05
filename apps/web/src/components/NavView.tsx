@@ -1,5 +1,5 @@
 "use client";
-import { hazardText, Navigator, type Progress } from "@causeway/router";
+import { hazardText, Navigator, onRoadAt, secondsLeft, type Progress } from "@causeway/router";
 import { Accessibility, AlertTriangle, ArrowUp, CornerUpLeft, CornerUpRight, Flag, MessageSquarePlus, TrainFront, TriangleAlert, Volume2, VolumeX } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { RouteStrip } from "@/components/RouteStrip";
@@ -17,6 +17,8 @@ export interface Me {
 interface Props {
   route: PlannedRoute;
   speedMps: number;
+  /** Road speed for a road-legal scooter, used on road stretches (route.nav.roads). */
+  roadSpeedMps?: number;
   onEnd: () => void;
   onOffRoute: (me: Me) => void;
   onPosition: (me: Me | null) => void;
@@ -41,7 +43,7 @@ const AHEAD_M = 300;
  * that moves along the route. Instructions are also in a live region for
  * screen readers; speech is opt-in so it never talks over one.
  */
-export function NavView({ route, speedMps, onEnd, onOffRoute, onPosition, onReport, onNote, onPace, device }: Props) {
+export function NavView({ route, speedMps, roadSpeedMps, onEnd, onOffRoute, onPosition, onReport, onNote, onPace, device }: Props) {
   const [asking, setAsking] = useState(false);
   const nav = useRef(new Navigator(route.nav));
   const [p, setP] = useState<Progress | null>(null);
@@ -66,8 +68,9 @@ export function NavView({ route, speedMps, onEnd, onOffRoute, onPosition, onRepo
     if (mode === "live") {
       const now = Date.now(), pc = pace.current;
       const dt = (now - pc.lastT) / 1000, dd = pr.along - pc.lastAlong;
-      // Count only intervals where they were actually moving (not waiting at a crossing or for a lift).
-      if (pc.lastT && dt > 0 && dt < 30 && dd > 0.5 && dd / dt < 3) {
+      // Count only intervals where they were actually moving (not waiting at a crossing or for a lift),
+      // and not on a road stretch: a road scooter's pace there is its road speed, not its pavement pace.
+      if (pc.lastT && dt > 0 && dt < 30 && dd > 0.5 && dd / dt < 3 && !onRoadAt(route.nav, pc.lastAlong + dd / 2)) {
         pc.movingS += dt;
         pc.movedM += dd;
       }
@@ -141,7 +144,7 @@ export function NavView({ route, speedMps, onEnd, onOffRoute, onPosition, onRepo
   const next = p?.next ?? route.nav.maneuvers[1] ?? null;
   const along = p?.along ?? 0;
   const remaining = Math.max(0, route.nav.length - along);
-  const minutes = Math.max(1, Math.round(remaining / speedMps / 60));
+  const minutes = Math.max(1, Math.round(secondsLeft(route.nav, along, speedMps, roadSpeedMps) / 60));
   const eta = new Date(Date.now() + minutes * 60_000).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
   const ahead = route.nav.hazards.find((h) => h.at + h.length > along && h.at - along <= AHEAD_M) ?? null;
   const aheadIn = ahead ? Math.max(0, Math.round((ahead.at - along) / 10) * 10) : 0;

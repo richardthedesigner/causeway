@@ -492,3 +492,12 @@ When there is nothing to compare with, it builds. Once DEP-01 makes `main` the p
 - MapLibre 6 types its events, so the map's own "refresh" event became a ref holding the latest draw function.
 - **PostCSS**: a pnpm override (`next>postcss`) lifts Next's copy to 8.5.28. Next only uses it at build time. Drop the override when Next's own pin passes 8.5.23.
 - The local check server serves `.mjs` as JavaScript, as Vercel does; a module worker is refused otherwise.
+
+## D-051 Road scooters go at road speed on roads
+
+**Decided.** 2026-10-05. Tester feedback: a road scooter (class 3) does 8 mph on the road but 4 mph on pavements, and the router used one pace for both.
+- A road-legal profile carries `roadSpeedMps`, its carriageway speed: 3.6 m/s (8 mph, the legal limit for class 3) by default. `speedMps` stays the pavement pace, capped by law at 4 mph.
+- Road speed applies on street proxies (`street_proxy`), the roads with no separately mapped pavement, which a road scooter drives along. Footways, pavements, pedestrian streets and crossings stay at the pavement pace. Gradient slows both the same way.
+- Pace learning learns only the pavement pace: stretches driven at road speed (`NavPlan.roads`) don't count. Time left while navigating uses both speeds.
+- **Effect.** Central Edinburgh journeys get 20 to 45% quicker, and routes move onto roads. Marchmont to Leith Walk went from 48% to 91% on roads, with only 7% of the route kept. That fits the law, but some riders keep to pavements or avoid busy roads. Ask them (RES-10) before adding a "prefer pavements" or "avoid busy roads" option.
+- Not built: a road speed setting in the device editor (FEAT-18). Until then every road scooter gets 8 mph on roads.

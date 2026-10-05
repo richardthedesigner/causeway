@@ -107,13 +107,14 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | RES-07 | Accessibility testing on real devices: VoiceOver, TalkBack, Switch Control, Voice Control | M | next | todo | Richard, Claude | [UX_ASSESSMENT.md](UX_ASSESSMENT.md). axe catches about a third of WCAG issues |
 | RES-08 | Benchmark every acceptance journey against openrouteservice's wheelchair profile | M | later | todo | Claude | D-003 |
 | RES-09 | Choose where to go next with census disability data, Blue Badge statistics and station usage | M | later | todo | Claude | §5 |
+| RES-10 | Ask road scooter riders whether they want routes on roads, and whether to avoid busy ones | S | next | todo | Richard | D-051: routes now move onto roads at 8 mph |
 
 ## Features
 
 | ID | Task | Size | Priority | Status | Who | Notes |
 |---|---|---|---|---|---|---|
 | FEAT-01 | Battery range per device (`maxRangeKm`), with a warning on long routes | M | next | done (2026-10-04) | Claude | D-043. Range engine from PR #26, and "Warn me about battery range" in the device editor |
-| FEAT-02 | Separate road and pavement speeds for road scooters | M | later | todo | Claude | Only if pace learning shows it matters |
+| FEAT-02 | Separate road and pavement speeds for road scooters | M | later | done (2026-10-05) | Claude | D-051. Road speed setting is FEAT-18 |
 | FEAT-03 | "Report what's there" from "What we don't know" on a route | M | next | todo | Claude | UX_ASSESSMENT open finding. Reports stay on the device until the backend is back on |
 | FEAT-04 | Saved places (home, work, a friend's) | M | next | todo | Claude | On the device, like devices (D-009) |
 | FEAT-05 | Arrive by a time, as well as leave at one | M | later | todo | Claude | D-040 built "Leaving later" |
@@ -129,6 +130,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | FEAT-15 | Street-level imagery for complex junctions (Mapillary) | L | later | blocked | Richard, Claude | Licence (D-008) and a key ([#9](https://github.com/richardthedesigner/causeway/issues/9)) |
 | FEAT-16 | Welsh and Scottish Gaelic, with one place for all copy | L | later | todo | Claude | |
 | FEAT-17 | Indoor and station routing (lifts, platforms, step-free interchanges) | XL | later | todo | Claude | Start with one big station |
+| FEAT-18 | Road speed setting for road scooters in the device editor | S | later | todo | Claude | D-051. Everyone gets 8 mph on roads until then |
 
 ## Small features
 
@@ -260,6 +262,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 
 Newest first. One line per change: date, ID, what happened, link.
 
+- 2026-10-05: FEAT-02 done: road scooters go at road speed on roads, and pace learning skips road stretches (D-051). Added FEAT-18 (road speed setting) and RES-10 (ask riders about road routes).
 - 2026-10-05: STAB-12 done. Added STAB-13. Now: STAB-05, STAB-06, SEC-06, SMALL-01, STAB-13.
 - 2026-10-05: Added DATA-27 (the remaining AllThePlaces-only places), found doing DATA-01 in a parallel session (closed PR #37).
 - 2026-10-05: DATA-23, SEC-04, SEC-05, STAB-10, STAB-11 done in PR #33, and UPD-02 with SEC-04. Added STAB-12, SMALL-12. Now: STAB-12, STAB-05, STAB-06, SEC-06, SMALL-01.
