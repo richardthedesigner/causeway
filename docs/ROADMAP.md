@@ -173,7 +173,8 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | SEC-08 | Harden `/review`: sign-in rate limits, session length | S | later | todo | Claude | |
 | SEC-09 | Cloudflare Turnstile on anonymous sign-up, before any publicity | S | later | blocked | Richard, Claude | D-030 |
 | SEC-10 | Data protection impact assessment (DPIA), before wider launch | M | later | blocked | Richard | D-030 |
-| SEC-12 | Check the headers are live on production (`curl -I`), and score them on securityheaders.com | S | next | done (2026-10-05) | Claude | D-041. Headers confirmed live on production. securityheaders.com score still blocked by Vercel login protection; needs custom domain or relaxed login protection for Richard to check. |
+| SEC-12 | Check the headers are live on production (`curl -I`) | S | next | done (2026-10-05) | Claude | D-041. Headers confirmed live on production (commit `023b781`, deployment `dpl_7wg8rrU5ZACcB7DYG7BuwDH8Aopp`). |
+| SEC-16 | Score the headers on securityheaders.com | S | next | blocked | Richard, Claude | SEC-12's headers are live; score blocked by Vercel login protection on `vercel.app` URLs. Needs custom domain (DEP-07) or relaxed login protection. |
 | SEC-13 | Drop `'unsafe-inline'` from the CSP's `script-src`: hashes for Next's inline scripts at build time | S | later | todo | Claude | D-041. They change every build |
 | SEC-14 | Turn on private vulnerability reporting (Settings, then Code security) | S | next | blocked | Richard | `SECURITY.md` points people to it |
 | SEC-15 | Remove a deleted note's approved photo from the public bucket | S | later | todo | Claude | D-059. Hidden once the note's gone, but the copy stays. A reviewer step or a server job, once sharing is on |
