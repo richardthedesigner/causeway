@@ -12,7 +12,6 @@ import { cn } from "@/lib/utils";
  */
 export const Drawer = Vaul.Root;
 export const DrawerTitle = Vaul.Title;
-export const DrawerDescription = Vaul.Description;
 
 export const DrawerContent = React.forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<typeof Vaul.Content>>(
   ({ className, children, ...props }, ref) => (

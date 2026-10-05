@@ -59,6 +59,8 @@ select pg_temp.check((select count(*) = 0 from note_public where id = '11111111-
 
 -- Reports: write only.
 insert into report (geom, kind, detail) values (st_setsrid(st_point(-3.19, 55.95), 4326), 'blocked', 'Bins across the pavement');
+-- Its author may read it back (0006, to delete it); nobody else can.
+select set_config('request.jwt.claim.sub', :b, false);
 -- Refused outright, or (once 0005 lets reviewers read them) filtered to nothing: either way the public sees no reports.
 do $$
 declare n int;
@@ -68,6 +70,7 @@ begin
   raise notice 'ok: reports are write-only for the public';
 exception when insufficient_privilege then raise notice 'ok: reports are write-only for the public';
 end $$;
+select set_config('request.jwt.claim.sub', :c, false);
 
 -- Rate limit: the 31st note in a day is refused.
 do $$ begin

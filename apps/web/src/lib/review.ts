@@ -5,6 +5,8 @@
  * file never holds the service key, and its session is kept apart from the
  * anonymous one the app uses for notes.
  */
+import { timedFetch } from "./timed-fetch";
+
 const URL_ = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "") ?? "";
 const KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
 const SESSION_KEY = "causewayside.review-session.v1";
@@ -35,7 +37,7 @@ const store = (s: Session | null) => {
 };
 
 async function auth(path: string, body: unknown): Promise<Response> {
-  return fetch(`${URL_}/auth/v1/${path}`, { method: "POST", headers: { apikey: KEY, "content-type": "application/json" }, body: JSON.stringify(body) });
+  return timedFetch(`${URL_}/auth/v1/${path}`, { method: "POST", headers: { apikey: KEY, "content-type": "application/json" }, body: JSON.stringify(body) }, "Sign-in");
 }
 
 function keep(json: Session & { expires_in?: number }): Session {
@@ -79,10 +81,10 @@ async function session(): Promise<Session> {
 
 async function call(path: string, init: RequestInit = {}): Promise<Response> {
   const s = await session();
-  const r = await fetch(`${URL_}${path}`, {
+  const r = await timedFetch(`${URL_}${path}`, {
     ...init,
     headers: { apikey: KEY, authorization: `Bearer ${s.access_token}`, "content-type": "application/json", ...(init.headers as Record<string, string>) },
-  });
+  }, "Review");
   if (!r.ok) throw new Error(`HTTP ${r.status}`);
   return r;
 }

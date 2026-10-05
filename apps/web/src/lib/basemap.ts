@@ -8,11 +8,14 @@ import { layers, namedFlavor, type Flavor } from "@protomaps/basemaps";
 import * as maplibregl from "maplibre-gl";
 import type { LayerSpecification } from "maplibre-gl";
 import { PMTiles, Protocol, type RangeResponse, type Source } from "pmtiles";
+import { HIGH_CONTRAST } from "./map-contrast";
 
 /** Recolour a Protomaps flavour to our tokens: warm-neutral ground, soft water, quiet roads, ink labels. */
-export function causewaysideFlavor(dark: boolean): Flavor {
+function causewaysideFlavor(dark: boolean, highContrast: boolean): Flavor {
   const base = namedFlavor(dark ? "dark" : "light");
-  const c = dark
+  const c = highContrast
+    ? HIGH_CONTRAST[dark ? "dark" : "light"]
+    : dark
     ? { ground: "#141816", earth: "#181c1a", park: "#1d2a22", water: "#16222c", building: "#222825", road: "#2b322e", roadCasing: "#141816", label: "#c9cfc8", labelHalo: "#141816", minor: "#262c29", rail: "#3a423d" }
     : { ground: "#e8ebe5", earth: "#eceee8", park: "#d7e3d2", water: "#c8d8e2", building: "#dcdfd8", road: "#fbfbf8", roadCasing: "#d2d8d0", label: "#3d4540", labelHalo: "#f4f5f1", minor: "#f4f5f1", rail: "#b9c0ba" };
   return {
@@ -59,8 +62,8 @@ export function causewaysideFlavor(dark: boolean): Flavor {
 }
 
 /** Basemap layers (no POI icons: we draw our own access layers instead). */
-export function basemapLayers(dark: boolean): LayerSpecification[] {
-  return (layers("basemap", causewaysideFlavor(dark), { lang: "en" }) as LayerSpecification[]).filter((l) => l.id !== "pois");
+export function basemapLayers(dark: boolean, highContrast = false): LayerSpecification[] {
+  return (layers("basemap", causewaysideFlavor(dark, highContrast), { lang: "en" }) as LayerSpecification[]).filter((l) => l.id !== "pois");
 }
 
 class BufferSource implements Source {

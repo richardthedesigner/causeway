@@ -1,0 +1,26 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "workspaces": {
+    ".": {
+      "entry": [
+        "scripts/*.{ts,mjs}"
+      ],
+      "project": [
+        "scripts/**/*.{ts,mjs}"
+      ]
+    },
+    "apps/web": {
+      "entry": [
+        "public/sw.js",
+        "scripts/*.mjs"
+      ],
+      "project": [
+        "src/**/*.{ts,tsx,css}",
+        "test/**/*.ts"
+      ]
+    }
+  },
+  "rules": {
+    "types": "off"
+  }
+}

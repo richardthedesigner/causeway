@@ -14,6 +14,8 @@ interface Props {
   onCity: (c: City) => void;
   showSlopes: boolean;
   onSlopes: (v: boolean) => void;
+  highContrast: boolean;
+  onHighContrast: (v: boolean) => void;
   onLocate: () => void;
   locating: boolean;
   credit: string;
@@ -27,9 +29,8 @@ export const GROUND = {
   ice: { icon: Snowflake, label: "Icy", long: "Icy ground" },
 } as const;
 
-// Padding, gaps and the icon-only buttons are in pixels, so 200% text grows the words, not the space around them (STAB-13, as STAB-11).
-// A long city name wraps rather than being cut off: "Newcastle and Gateshead" can't fit one line at 200% on a 320 px phone.
-const chip = "pointer-events-auto inline-flex max-w-full min-h-[48px] items-center gap-[8px] rounded-[24px] bg-glass px-[16px] py-[6px] text-left font-bold leading-tight shadow-[0_2px_12px_rgb(0_0_0/0.16)] backdrop-blur-md";
+// The bar over the map is sized in pixels: with large text, rem sizes would double the buttons and squeeze out the city name (STAB-13).
+const chip = "pointer-events-auto inline-flex max-w-full min-h-12 items-center gap-[6px] rounded-full bg-glass px-[12px] text-left font-bold break-words shadow-[0_2px_12px_rgb(0_0_0/0.16)] backdrop-blur-md";
 const fab = "pointer-events-auto grid size-[48px] place-items-center rounded-2xl bg-glass shadow-[0_2px_12px_rgb(0_0_0/0.16)] backdrop-blur-md";
 // A menu stays on screen at 200% text: no wider than the screen less the 12 px margins, and it scrolls if it's taller than the space below its button.
 const panel = "fixed z-[60] grid min-w-[240px] max-w-[calc(100vw-24px)] content-start gap-1 overflow-y-auto rounded-2xl border border-line bg-surface p-2 text-base text-ink shadow-[0_8px_30px_rgb(0_0_0/0.2)]";
@@ -54,7 +55,7 @@ export function MapChrome(props: Props) {
   /**
    * An open menu is drawn at the end of the page, above the sheet, just under its button.
    * Inside the map it sat under the bottom sheet (drawn later, on top), so at
-   * 200% text the sheet hid half the city list (STAB-13).
+   * 200% text the sheet hid half the city list (STAB-17).
    */
   const [at, setAt] = useState<{ top: number; left?: number; right?: number } | null>(null);
   useLayoutEffect(() => {
@@ -99,11 +100,11 @@ export function MapChrome(props: Props) {
   return (
     <div ref={root} className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start gap-[8px] px-[12px] pt-[calc(12px+env(safe-area-inset-top,0px))] md:left-[452px]">
       {!props.minimal ? (
-        <div className="flex min-w-0 flex-wrap items-start gap-[8px]">
+        <div className="flex min-w-0 flex-wrap items-start gap-2">
           <div className="relative max-w-full">
             <button type="button" data-menu="city" aria-haspopup="menu" aria-expanded={open === "city"} onClick={() => toggle("city")} className={chip}>
               <span className="sr-only">City: </span>
-              <span className="min-w-0">{props.city.name}</span>
+              {props.city.name}
               <ChevronDown aria-hidden className="size-[16px] shrink-0" strokeWidth={2.6} />
             </button>
             {open === "city" ? (
@@ -113,7 +114,7 @@ export function MapChrome(props: Props) {
                     key={c.id}
                     on={c.id === props.city.id}
                     onClick={() => {
-                      setOpen(null);
+                      close();
                       if (c.id !== props.city.id) props.onCity(c);
                     }}
                   >
@@ -126,13 +127,13 @@ export function MapChrome(props: Props) {
           </div>
         </div>
       ) : null}
-      <div className="ml-auto grid shrink-0 gap-[8px]">
+      <div className="ml-auto grid shrink-0 gap-2">
         <div className="relative">
           <button type="button" data-menu="layers" aria-haspopup="menu" aria-expanded={open === "layers"} aria-label="Map layers" onClick={() => toggle("layers")} className={cn(fab, props.showSlopes && "bg-ink text-surface")}>
             <Layers aria-hidden className="size-[24px]" />
           </button>
           {open === "layers" ? (
-            floating("Map layers", "w-72", <>
+            floating("Map layers", "w-[288px]", <>
               <button
                 type="button"
                 role="menuitemcheckbox"
@@ -140,9 +141,9 @@ export function MapChrome(props: Props) {
                 onClick={() => props.onSlopes(!props.showSlopes)}
                 className="flex min-h-12 items-center gap-3 rounded-xl px-3 text-left hover:bg-surface-2"
               >
-                <span className="flex-1 font-bold">Slopes on every street</span>
-                <span aria-hidden className={cn("relative h-7 w-12 rounded-full transition-colors", props.showSlopes ? "bg-accent" : "bg-line")}>
-                  <span className={cn("absolute top-1 size-5 rounded-full bg-surface transition-[left]", props.showSlopes ? "left-6" : "left-1")} />
+                <span className="min-w-0 flex-1 font-bold">Slopes on every street</span>
+                <span aria-hidden className={cn("relative h-[28px] w-[48px] shrink-0 rounded-full transition-colors", props.showSlopes ? "bg-accent" : "bg-line")}>
+                  <span className={cn("absolute top-[4px] size-[20px] rounded-full bg-surface transition-[left]", props.showSlopes ? "left-[24px]" : "left-[4px]")} />
                 </span>
               </button>
               <ul aria-label="Slope key" className="m-0 grid list-none grid-cols-2 gap-x-3 gap-y-1 px-3 py-2 text-sm">
@@ -157,6 +158,18 @@ export function MapChrome(props: Props) {
                   Not known
                 </li>
               </ul>
+              <button
+                type="button"
+                role="menuitemcheckbox"
+                aria-checked={props.highContrast}
+                onClick={() => props.onHighContrast(!props.highContrast)}
+                className="flex min-h-12 items-center gap-3 rounded-xl px-3 text-left hover:bg-surface-2"
+              >
+                <span className="min-w-0 flex-1 font-bold">High contrast map</span>
+                <span aria-hidden className={cn("relative h-[28px] w-[48px] shrink-0 rounded-full transition-colors", props.highContrast ? "bg-accent" : "bg-line")}>
+                  <span className={cn("absolute top-[4px] size-[20px] rounded-full bg-surface transition-[left]", props.highContrast ? "left-[24px]" : "left-[4px]")} />
+                </span>
+              </button>
               <details className="px-3 pb-2 text-sm text-muted">
                 <summary className="min-h-10 cursor-pointer py-2 font-bold text-ink">About this map</summary>
                 {props.credit}

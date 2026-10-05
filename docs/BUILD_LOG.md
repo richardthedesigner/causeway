@@ -2,13 +2,65 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
+## 2026-10-05 (late night)
+
+**The map controls by keyboard** (STAB-17, D-069)
+- The sheet trapped keyboard focus and hid the map from screen readers, so Tab never reached the city, layers or location buttons. vaul never passed `modal={false}` on to Radix; a pnpm patch fixes that, and the sheet no longer loops Tab inside itself.
+- The city and layers menus opened behind the sheet. They now open above it, take focus, and give it back to their button.
+- `pnpm a11y` checks the map controls by keyboard. Opening `<details>` in the script is now one call, which fixes a race.
+
+## 2026-10-05 (night)
+
+Recovery, time limits, speech, contrast and saved places, from the roadmap's Now list.
+
+**The routing worker recovers** (STAB-07)
+- If routing crashes or goes silent for 60 s, a fresh worker starts with the last plan, and the sheet says so. After three crashes in two minutes it offers a reload. `pnpm e2e` crashes it on purpose.
+
+**Time limits for sharing and review** (STAB-14)
+- Calls to Supabase give up after 15 s (30 s for a photo upload), with the same error as the live feeds.
+
+**How often navigation speaks** (SMALL-03)
+- Off, hazards only, or every turn. Hazards only still says when you arrive, get off or leave the route. Kept on the phone.
+
+**A high-contrast map** (SMALL-05)
+- Plain ground, roads edged in ink, black or white labels and a wider route. On by itself for the low-vision device or when the phone asks for more contrast. A switch in the layers menu.
+
+**Saved places** (FEAT-04, D-060)
+- "Save this place" on a route: home, work, or a name of your own. Saved places come first in search with a verdict, and in "Starting from?". On the phone only, and in Your data.
+
 ## 2026-10-05 (evening)
 
-**Map controls at 200% text, and by keyboard** (STAB-13, STAB-17, D-069)
-- At 320 px with text at 200%, "Edinburgh" was cut to "Edinbur" under the layers button. Padding and icons on the map controls are now in pixels, long city names wrap, and the city menu fits the screen.
-- The city and layers menus opened behind the sheet. They now open above it.
-- Found on the way: the sheet trapped keyboard focus and hid the map from screen readers, so Tab never reached the city, layers or location buttons. vaul never passed `modal={false}` on to Radix; a pnpm patch fixes that. Menus now take focus and give it back.
-- `pnpm a11y` checks the map controls by keyboard, and all three city names at 200% text.
+Large text, tests, copying a route, no signal and dead code, from the roadmap's Now list.
+
+**The city name at 200% text** (STAB-13)
+- The bar over the map is sized in pixels, so the city name no longer slides under the map buttons. `pnpm a11y` checks it.
+
+**Router fuzz test** (STAB-04)
+- 60 seeded random journeys per city, for four people in three kinds of weather. Every route must join up, avoid anything the person can't use, and come back the same twice.
+
+**Copy the route as text** (SMALL-04)
+- "Route in words" can be copied for a message: what it's like, what isn't known, and the steps. Never the device.
+- Keyboard focus moving into the half-open sheet now opens it fully, so focus is never under the screen's edge.
+
+**No signal** (SMALL-06, STAB-08)
+- Offline, the sheet and navigation say what still works and what's paused. `pnpm e2e` cuts the network and still routes.
+
+**Dead code** (BLOAT-02)
+- `pnpm knip` runs in CI. Removed an unused component, three packages and twelve stray exports, and declared the workspace dependencies we use.
+
+## 2026-10-05 (late afternoon)
+
+Privacy, a refresh guard and bank holidays, from the roadmap's Now list.
+
+**A guard on the weekly refresh** (D-033, STAB-06)
+- Each count has a limit on how far it may fall. Past one, the refresh pull request opens as a draft that lists the drops, and the run fails.
+
+**Bank holidays** (D-039, SMALL-01)
+- GOV.UK's dates for England and Wales and for Scotland, bundled and refreshed weekly. On a bank holiday a place's holiday hours apply; without any, it says the hours may differ that day only.
+
+**Your data** (D-059, SEC-06)
+- One sheet says what the phone keeps, downloads it as a file, and deletes everything, including what was shared. Migration 0006 lets people delete their own reports, flags and photos.
+- `pnpm e2e` downloads a copy and deletes it all; `pnpm a11y` checks the sheet, including at 200% text.
 
 ## 2026-10-05 (afternoon)
 

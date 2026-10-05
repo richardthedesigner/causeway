@@ -10,6 +10,7 @@
  */
 import { fromPublicRow, toNoteRow, type NotePublicRow, type UserNote } from "@causeway/graph";
 import type { Report } from "./reports";
+import { timedFetch, UPLOAD_TIMEOUT_MS } from "./timed-fetch";
 
 const URL_ = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "") ?? "";
 const KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
@@ -45,7 +46,7 @@ function storeSession(s: Session) {
 }
 
 async function auth(path: string, body: unknown): Promise<Session> {
-  const r = await fetch(`${URL_}/auth/v1/${path}`, { method: "POST", headers: { apikey: KEY, "content-type": "application/json" }, body: JSON.stringify(body) });
+  const r = await timedFetch(`${URL_}/auth/v1/${path}`, { method: "POST", headers: { apikey: KEY, "content-type": "application/json" }, body: JSON.stringify(body) }, "Sign-in");
   if (!r.ok) throw new Error(`sign-in: HTTP ${r.status}`);
   const s = (await r.json()) as Session & { expires_in?: number };
   if (!s.expires_at && s.expires_in) s.expires_at = Math.floor(Date.now() / 1000) + s.expires_in;
@@ -70,7 +71,7 @@ async function session(): Promise<Session> {
 async function rest(path: string, init: RequestInit & { signedIn?: boolean } = {}): Promise<Response> {
   const headers: Record<string, string> = { apikey: KEY, "content-type": "application/json", ...(init.headers as Record<string, string>) };
   if (init.signedIn !== false) headers.authorization = `Bearer ${(await session()).access_token}`;
-  return fetch(`${URL_}${path}`, { ...init, headers });
+  return timedFetch(`${URL_}${path}`, { ...init, headers }, "Sharing");
 }
 
 async function uploadPhoto(n: UserNote): Promise<string | null> {
@@ -78,11 +79,11 @@ async function uploadPhoto(n: UserNote): Promise<string | null> {
   const s = await session();
   const path = `${s.user.id}/${n.id}.jpg`;
   const blob = await (await fetch(n.photo)).blob();
-  const r = await fetch(`${URL_}/storage/v1/object/${PHOTO_BUCKET}/${path}`, {
+  const r = await timedFetch(`${URL_}/storage/v1/object/${PHOTO_BUCKET}/${path}`, {
     method: "POST",
     headers: { apikey: KEY, authorization: `Bearer ${s.access_token}`, "content-type": "image/jpeg", "x-upsert": "true" },
     body: blob,
-  });
+  }, "Photo upload", UPLOAD_TIMEOUT_MS);
   return r.ok ? path : null;
 }
 
@@ -127,6 +128,36 @@ export async function fetchSharedNotes(city: string, deviceAuthor: string): Prom
   const rows = (await r.json()) as NotePublicRow[];
   const photo = (p: string) => `${URL_}/storage/v1/object/public/${APPROVED_BUCKET}/${p}`;
   return rows.map((row) => fromPublicRow(row, deviceAuthor, photo)).filter((n): n is UserNote => n !== null);
+}
+
+/**
+ * Delete everything this phone has shared (SEC-06): photos, flags, reports and notes, by
+ * the anonymous id the server knows it by. "none" when nothing was ever shared from here.
+ * "failed" leaves the session in place so it can be tried again; the id is the only key.
+ */
+export async function deleteEverythingShared(): Promise<"none" | "done" | "failed"> {
+  const stored = loadSession();
+  if (!sharing || !stored) return "none";
+  try {
+    const s = await session();
+    // A refresh that failed starts a new id, which owns nothing: the old one can't be reached.
+    if (s.user.id !== stored.user.id) return "failed";
+    const id = s.user.id;
+    const headers = { apikey: KEY, authorization: `Bearer ${s.access_token}`, "content-type": "application/json" };
+    const list = await timedFetch(`${URL_}/storage/v1/object/list/${PHOTO_BUCKET}`, { method: "POST", headers, body: JSON.stringify({ prefix: id, limit: 1000 }) }, "Photo list");
+    if (!list.ok) return "failed";
+    const files = (await list.json()) as { name: string }[];
+    if (files.length) {
+      const del = await timedFetch(`${URL_}/storage/v1/object/${PHOTO_BUCKET}`, { method: "DELETE", headers, body: JSON.stringify({ prefixes: files.map((f) => `${id}/${f.name}`) }) }, "Photo delete");
+      if (!del.ok) return "failed";
+    }
+    for (const q of [`note_flag?flagger_id=eq.${id}`, `report?author_id=eq.${id}`, `note?author_id=eq.${id}`]) {
+      if (!(await rest(`/rest/v1/${q}`, { method: "DELETE" })).ok) return "failed";
+    }
+    return "done";
+  } catch {
+    return "failed";
+  }
 }
 
 /** Send a problem report for triage. Reports are never shown publicly. */

@@ -4,8 +4,8 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 // Minimum target 48px, primary 56px (brief: reach and touch).
-export const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 rounded-full font-bold transition-colors disabled:opacity-50 disabled:pointer-events-none select-none",
+const buttonVariants = cva(
+  "inline-flex max-w-full items-center justify-center gap-[8px] rounded-full font-bold transition-colors disabled:opacity-50 disabled:pointer-events-none select-none",
   {
     variants: {
       variant: {
@@ -14,7 +14,7 @@ export const buttonVariants = cva(
         ghost: "text-ink hover:bg-surface-2",
       },
       // Icon buttons keep a 48 px target at any text size: they hold no text, and growing them would squeeze what does (STAB-11).
-      size: { md: "min-h-12 px-5 text-base", lg: "min-h-14 px-6 text-lg", icon: "size-[48px] shrink-0" },
+      size: { md: "min-h-12 px-[20px] text-base", lg: "min-h-14 px-[24px] text-lg", icon: "size-[48px] shrink-0" },
     },
     defaultVariants: { variant: "secondary", size: "md" },
   },

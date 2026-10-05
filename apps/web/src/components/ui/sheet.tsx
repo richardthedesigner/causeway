@@ -6,8 +6,6 @@ import { cn } from "@/lib/utils";
 
 /** Full-height sheet for focused tasks (changing how you get around). Modal, focus-trapped, Escape closes. */
 export const Sheet = Dialog.Root;
-export const SheetTrigger = Dialog.Trigger;
-export const SheetClose = Dialog.Close;
 
 export function SheetContent({ title, description, children, className }: { title: string; description?: string; children: React.ReactNode; className?: string }) {
   return (
@@ -27,7 +25,7 @@ export function SheetContent({ title, description, children, className }: { titl
             <X aria-hidden className="size-[24px]" />
           </Dialog.Close>
         </header>
-        <div className="min-h-0 flex-1 overflow-y-auto px-5 pt-4 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]">
+        <div className="min-h-0 flex-1 overflow-y-auto px-[20px] pt-4 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]">
           {description ? <Dialog.Description className="m-0 mb-4 text-muted">{description}</Dialog.Description> : null}
           {children}
         </div>
