@@ -20,7 +20,7 @@ Last updated: 2026-10-05 (after release check).
 | Decide whether chain-store websites scraped by AllThePlaces count as scraping under our rule | 348 places in search come only from AllThePlaces: mostly chain stores, parcel lockers and scout halls. Its Changing Places and NHS records are already out | A decision | ROADMAP DATA-27, [D-028](DECISIONS.md#d-028-overture-fills-search-gaps-osm-stays-the-source-of-access-facts) |
 | Turn on private vulnerability reporting: Settings, then Code security | `SECURITY.md` sends people there; until it's on they have nowhere private to report | 1 minute | [ROADMAP](ROADMAP.md) SEC-14 |
 | Check branch protection on `main` and `claude/sleepy-johnson-mavbrs`: Settings, then Branches. Direct pushes from Actions should be blocked, except the mirror | A compromised package in the data refresh could otherwise push straight to production | 5 minutes | [ROADMAP](ROADMAP.md) SEC-23, [security review](reviews/security-2026-10.md) M3 |
-| Don't run the migrations on Supabase (BACKEND.md step 3) until SEC-16 is done | With Supabase's default grants, anyone could delete every shared note and write the graph tables | None: just wait | [ROADMAP](ROADMAP.md) SEC-16, [security review](reviews/security-2026-10.md) C1 |
+| There is no Causeway Supabase project yet. When one is made, run db/migrations 0001 to 0007 in order, and only after SEC-16 (PR #55) is merged | Supabase starts with default grants: anyone could delete every shared note and write the graph tables. SEC-16 fixes the grants; migrations must follow | A setup step, deferred until Supabase exists | [ROADMAP](ROADMAP.md) SEC-16, [security review](reviews/security-2026-10.md) C1 |
 
 ## Blocked outside the project
 
@@ -67,6 +67,7 @@ Not now, on purpose: a phone app, whole cities, a reports backend, app accounts.
 
 ## Done
 
+- 2026-10-05: City expansion decided: Glasgow next (once DATA-13 is licensed), then Leeds. After that, cities by built-up area population (ONS/NRS, largest first), skipping done cities. Richard's call ([D-072](DECISIONS.md#d-072-which-city-next), [ROADMAP](ROADMAP.md) DEF-09).
 - 2026-10-05: MapLibre worker confirmed on production: Vercel serves `maplibre-gl-worker.mjs` as JavaScript (content-type: application/javascript), so the map draws ([D-050](DECISIONS.md#d-050-dependency-audit-in-ci-and-maplibre-6), [REL-01](ROADMAP.md)).
 - 2026-10-05: TfL's informational station messages (a reduced escalator service) are shown, under Worth knowing in "On this route" on routes through the station ([D-067](DECISIONS.md#d-067-more-data-same-calm)).
 - 2026-10-05: the weather and health lines (alerts, gusts, air, the Water of Leith) moved from "Why this way?" into "On this route", with their source and time ([D-067](DECISIONS.md#d-067-more-data-same-calm)).

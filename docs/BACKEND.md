@@ -6,7 +6,7 @@ Decision: [D-030](DECISIONS.md). Without the two environment variables below, th
 
 1. **Supabase project** in the London region (`eu-west-2`).
 2. **Extensions:** turn on `postgis` (Database > Extensions).
-3. **Migrations,** in order: `db/migrations/0001_graph.sql` to `0005_review.sql`.
+3. **Migrations,** in order: `db/migrations/0001_graph.sql` to `0007_sharing.sql` (or the latest migration in `db/migrations/`).
 4. **Auth:** turn on *Anonymous sign-ins* (Authentication > Sign In / Providers). Turn on *CAPTCHA protection* with Cloudflare Turnstile before any publicity, so sign-ups can't be scripted.
 5. **Vercel:** set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` (Supabase: Project settings > API) on the `causeway` project, then redeploy. The anon key is meant to be public; the database rules do the protecting.
 
