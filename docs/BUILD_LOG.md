@@ -6,6 +6,13 @@ A running record of what was built, newest first. Each entry links the decision 
 
 Richard chose main as the base; the overnight build's extras (PR #36) are ported by hand, smallest and safest first.
 
+**On this route** (D-067, FEAT-19)
+- One section under the route card, the first you can open: Blocked (closed for you, so the route went round it), Slower (works on the pavement, a station we can't confirm, a flood area, the council's setts or a narrow pavement where it adds a fifth or more for this person) and Worth knowing (unmapped stretches, lighting after dark for people who asked, TfL's station messages such as a reduced escalator service, the staff ramp, gritting in ice, mappers' notes, alerts, gusts, air, the river). Every fact says Live, Static data or Reported by people, with its source, date and end.
+- Blocked comes only from what the route went round: the explanation's closures and one search as if nothing were closed, made once per plan and only when something is closed somewhere. A closure beside the route isn't listed (the overnight build's fix 8d9a917).
+- The route card says only what changed the route or needs doing: a failed feed, "Goes round a closure on the way. See On this route.", or a flood area on the route. London's lift outages and the city's flood warnings are counted under "Where this comes from" only.
+- It opens by itself when something is blocked or slower; the summary row says "1 blocked, 6 worth knowing" or "Nothing known". Headings per group with counts for screen readers. `pnpm a11y` checks a London route round a lift out (TfL's recorded feeds), light, dark and at 320 px with 200% text; `pnpm e2e` checks the card line, the list and the escalator message.
+- "Why this way?" no longer repeats live closures, alerts, gusts, air, the river or mappers' notes. Lighting after dark, unmapped metres and boarding notes stay in both.
+
 **Weather and health extras** (D-066, DATA-32, DATA-25 in part)
 - UKHSA heat and cold alerts for London and the North East. Amber and red are said on every route with UKHSA's end date, and nudge routes for presets with a rest limit towards benches (and cover, in heat). An alert counts only in its season and before its end: the feed still lists February's cold status in October.
 - Gusts from Open-Meteo, now and next hour or at the hour you leave. From 50 km/h an exposed bridge costs as much again for scooters, manual wheelchairs and lightweight powerchairs, and a route over one says so.

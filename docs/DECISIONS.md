@@ -693,7 +693,7 @@ Main fetched line status and station disruptions together and dropped both silen
 **Conservative calls.**
 - Held answers expire; a closure from a feed that keeps failing is dropped after 15 minutes, and the card says we couldn't check, rather than keep a closure that may have ended.
 - `ignoreClosures` never plans a route we offer; it only finds what to name.
-- Escalator notes for everyone, which the overnight build listed under "On this route", wait for that list, the last step of the port: main shows no informational station messages today.
+- Escalator notes for everyone, which the overnight build listed under "On this route", waited for that list. Since D-067 TfL's informational station messages are listed under Worth knowing on routes through the station.
 
 ## D-062 Council footways matched along each edge, on the British National Grid
 
@@ -782,8 +782,43 @@ Four open feeds, none needing a key, all open to browsers. Each is fetched with 
 
 **The Water of Leith (Edinburgh).** SEPA's KiWIS service (OGL v3) gives the level at Murrayfield every 15 minutes. SEPA publishes no level at which the walkway floods, so a line goes on a route only when it uses the Water of Leith Walkway or Path and the level is 1.05 m or above, the lowest peak in SEPA's peaks-over-threshold record for the station since 2015 (a typical level is about 0.5 m). It says it's worth knowing, not a warning. SEPA's flood warnings still have no open feed, so DATA-25 stays open.
 
-**Where the lines go.** Main's route notes ("Why this way?") for now. The "On this route" list (next in the port) will take them over.
+**Where the lines go.** Main's route notes ("Why this way?") at first. Since D-067 they are in the "On this route" list, under Worth knowing, with their source and time.
 
 **Conservative calls.** An alert outside its season doesn't count even if UKHSA issued it: UKHSA can issue alerts outside the core seasons, and we would miss those (OPEN_ITEMS). A region's record that doesn't answer leaves an in-season alert counting, with no end date shown. The thresholds (50 km/h, a quarter, 5%, 1.05 m) are guesses to check.
 
 **CSP.** `connect-src` gains `https://ukhsa-dashboard.data.gov.uk`, `https://air-quality-api.open-meteo.com` and `https://timeseries.sepa.org.uk` (D-041). The a11y and e2e servers take their headers from `vercel.json`.
+
+## D-067 More data, same calm
+
+**Decided.** 2026-10-05 (FEAT-19; ported from the overnight build, PR #36, where it was its D-041, by hand into main's structures). Builds on D-035; amends where D-061 and D-066 put their lines. Code: `packages/router/src/on-route.ts`, `stationInfoNotes` in `packages/live/src/tfl-disruptions.ts`, the worker's `plan`, `apps/web/src/lib/on-route.ts`, `apps/web/src/components/OnThisRoute.tsx`, `RoutePanel.tsx`.
+
+The app now knows about works, lift outages, line and station disruptions, floods, council surfaces and widths, gritting, mappers' notes, health alerts, gusts, air quality and the Water of Leith. Shown naively, every route would carry a dozen warnings. The app should know more and look the same.
+
+**Principles**
+- **The verdict comes first** (D-035): Fits, Unsure or Doesn't fit, then the time.
+- **New data mostly acts through route cost.** A closure closes edges; works on the pavement cost time. The person sees a better route, not a warning.
+- **The route card says only what changed the route or needs doing.** A failed live feed ("Couldn't get live lift status from TfL. Check before you travel.") stays there (D-061). A closure the route went round is one line with a count: "Goes round a closure on the way. See On this route." A flood warning area this route passes through is one line too. Nothing else.
+- **Everything else goes in one grouped list, "On this route"**, the first of the sections you open, under the route card and Start:
+  - **Blocked**: closed for you, so the route went round it;
+  - **Slower**: on the route, and may slow you down: works on the pavement (café tables, scaffolding), a station we can't confirm, a flood warning area, and the council's setts or narrow pavement where they add a fifth or more to that stretch's time for this person (setts for a wheelchair, not for someone walking);
+  - **Worth knowing**: unmapped stretches, lighting after dark (only for people whose settings avoid unlit streets, D-038), TfL's informational station messages for everyone (a reduced escalator service), boarding with the staff ramp, gritting in ice, OpenStreetMap notes (three, then "N more places a mapper flagged on this route", D-048), and the area lines: a UKHSA alert, gusts on an exposed bridge the route crosses, air quality, pollen and UV when high, the Water of Leith on routes using the walkway (D-066).
+- **Every fact is labelled** "Live", "Static data" or "Reported by people", with its source and date, and an end date when the source gives one: "Static data, Scottish Road Works Register, dated 5 Oct 2026, until 31 Mar 2027"; "Live, TfL, at 14:58".
+- **Map layers stay off by default.**
+- **WCAG 2.2 AA.** A details section whose summary row counts what's inside ("1 blocked, 6 worth knowing", or "Nothing known"); a heading per group with its count for screen readers; a list for the facts; words wherever the eye gets an icon. It opens by itself when something is blocked or slower.
+
+**Blocked comes from two places.** What the explanation says the route avoided, when that was a closure; and one search as if nothing were closed (`closureBlind`, using `Conditions.ignoreClosures`), whose closed edges this route doesn't use. A closure that only sits next to the route is never listed: the route never needed it, so it did not change the route. (The overnight build first listed every closed edge touching the route, which would have put "Goes round a closure" on most routes once a city has a works feed; its fix, 8d9a917, is kept, with a test that closes side edges one at a time.)
+
+**Speed.** The closure-blind search is made at most once per plan, and only when something is closed for this person somewhere in the area (a scan of live states, no search). Every route on show is compared with that one search; none makes its own. The speed budget's "route plus trade-offs" workload now also builds the list, as the worker does; with no live data in it the extra search never runs there, so it times the scan and the list. A unit test counts the searches: none when nothing is closed, one when something is.
+
+**Dates.** A works file's items are dated by the file's export (the register's or Street Manager's), not the build; live feeds by the time they were read. Works carry their end. TfL's line and station disruptions carry an end only when TfL gave a period. Lift outages and flood warnings show none: they last until the next refresh, and that time isn't an end anyone set. An end over a year away is a placeholder and isn't shown.
+
+**What moved out of "Why this way?"** Live closures gone round, a station we can't confirm, health alerts, gusts, air quality, the river and mappers' notes are now only in the list. **What stays in both**: lighting after dark ("Why this way?" also says when every stretch is lit), how much isn't fully mapped (it says it's dashed on the map; the list gives the streets; both use the route summary's measure, so the numbers agree), and boarding with the staff ramp or an unpublished step ("Why this way?" says to check before you travel). Benches, toilets, lifts, moving bridges, setts in total, the steepest part and battery range stay in "Why this way?" only.
+
+**The area's counts** (lifts out across London, line closures, every flood warning over the city, pavement closures nearby) left the route card. They stay under "Where this comes from".
+
+**Not ported.** The overnight build's attribute layers (its D-042) and its per-edge layer facts. Council values come from main's council layer, read off the edge's attributes (D-062); main's live states feed the rest.
+
+**Conservative calls**
+- Toilet Map disagreements (D-065) stay in "Accessible toilets", not in the list: they're about stops, not the way.
+- An informational TfL message is listed for routes boarding, leaving or passing through that station's entrances, even when it names a platform the route doesn't use: we don't read which platform. Messages naming only lines we don't route are left out.
+- Station messages are listed for everyone, with no step-free filter: an escalator note matters to people who don't count as step-free.

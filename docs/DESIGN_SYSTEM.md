@@ -14,6 +14,16 @@ Every screen answers one question first: **can I get there?** A wheelchair user'
 4. **Never a dead end.** When nothing fits, say what's in the way and offer something you can do.
 5. **Thumb reach.** Search and the main action sit at the bottom. The map gets everything above.
 
+### More data, same calm (D-067)
+
+The app keeps learning more about the streets (works, station messages, disruptions, gritting, floods, notes). It should look the same.
+
+- The verdict comes first. New data mostly acts through route cost: the person sees a better route, not a warning.
+- The route card says only what changed the route or needs doing, one line each.
+- Everything else goes in **On this route**, grouped Blocked, Slower, Worth knowing.
+- Every fact says whether it's live, static data or reported by people, with its source and date.
+- Map layers are off by default.
+
 ## Layout
 
 | Surface | Phone | Desktop (≥ 768 px) |
@@ -162,7 +172,19 @@ Glass chips and buttons over the map. City chip (menu of cities, with the covera
 
 ### Route card (`RoutePanel.tsx`)
 
-Selected route: 2 px ink border. Verdict pill, time, distance and steepest slope, the strip, one sentence on why this way, extras (rides, lifts, setts, how much isn't mapped), the door it ends at, live lift or works notes. Other ways below as 56 px rows: time, name, meta, verdict. Then the details you open when you want them: getting in, why this way, what we don't know, hills, buses, route in words, where this comes from.
+Selected route: 2 px ink border. Verdict pill, time, distance and steepest slope, the strip, one sentence on why this way, extras (rides, lifts, setts, how much isn't mapped), the door or gate it ends at, and one line each, only when they apply: a live feed that failed (`--caution`, "Couldn't get live lift status from TfL. Check before you travel."), a closure the route went round ("Goes round a closure on the way. See On this route."), a flood warning area it passes through. Counts for the whole area (lifts out across London, every flood warning) live under "Where this comes from", not here. Other ways below as 56 px rows: time, name, meta, verdict. Then the details you open when you want them: on this route, getting in, why this way, buses, toilets, what we don't know, hills, route in words, where this comes from.
+
+### On this route (`OnThisRoute.tsx`)
+
+The facts about the route that don't change the verdict (D-067), in one section you open, the first of them. The summary row counts them: "1 blocked, 2 worth knowing", or "Nothing known". It opens by itself when something is blocked or slower.
+
+| Group | Icon | Means |
+|---|---|---|
+| Blocked | CircleX, `--stop` | Closed for you, so this route goes round it |
+| Slower | CircleAlert, `--caution` | On this route, and may slow you down |
+| Worth knowing | Info, `--muted` | Good to know before you set off |
+
+Each group is a heading (with its count for screen readers), a one-line hint, and a list. Each fact is up to three lines: the plain words ("Café tables on the pavement"), where ("On Grassmarket", up to two places then "and 2 more"), and its label, source and date in `--muted` ("Static data, Scottish Road Works Register, dated 5 Oct 2026, until 31 Mar 2027"; "Live, TfL, at 14:58"). A 2 px `--line` rule on the left holds the lines of one fact together. Words for the labels: Live, Static data, Reported by people (`apps/web/src/lib/on-route.ts`). The summary row wraps under large text, as the other sections' do.
 
 ### Nothing fits (`RoutePanel.tsx`, `NoFit`)
 
@@ -201,7 +223,7 @@ The screenshots in `docs/ux/` (not `v2/`) and [UX_ASSESSMENT.md](UX_ASSESSMENT.m
 
 Run on every change to the UI:
 
-- axe-core (WCAG 2.0 to 2.2 A/AA plus best practice) on home, route, nothing fits and navigation. Last run: no violations.
+- axe-core (WCAG 2.0 to 2.2 A/AA plus best practice) on home, route, nothing fits and navigation, and a London route round a lift out with "On this route" open. Last run: no violations.
 - 200% root text: nothing wider than the screen. Last run: none.
 - Light and dark.
 - Still owed (as in UX_ASSESSMENT): VoiceOver and TalkBack on real phones, and testing with disabled people.

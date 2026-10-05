@@ -95,7 +95,7 @@ Fix and fill the pilot cities. DATA-01 to DATA-10 are in order of value per day 
 | DATA-29 | TfL station data on the platforms: a lift out that leaves some platforms step-free counts as unknown, and the step and gap to the train against each person's limits, with level-access doors | M | now | done (2026-10-05) | Claude | D-058, D-060. Ported from PR #36. No gap-limit setting yet (OPEN_ITEMS) |
 | DATA-30 | When TfL's disruption feeds fail: each feed apart, the last good answer kept for 15 minutes, the route card says which couldn't be checked, and "nothing fits" names the closure in the way | S | now | done (2026-10-05) | Claude | D-061. Ported from PR #36. Builds on D-052 (STAB-05) |
 | DATA-31 | Council footways and gritting matched along each edge, not at its middle: surface and width from points every 5 m, gritting only where the route runs the same way, each with the council's own published date | S | now | done (2026-10-05) | Claude | D-062, D-064. Ported from PR #36. In British National Grid: the server's WGS84 was tens of metres out. Council surfaces 2,556 to 12,182 edges, widths 6,976 to 12,069, gritted 1,130 to 1,648 from the council's licensed layer (2021) |
-| DATA-32 | Weather and health extras: UKHSA heat and cold alerts (England), gusts on exposed bridges, air quality, pollen and UV when high | M | now | done (2026-10-05) | Claude | D-066. Ported from PR #36. Alerts count only in season and before their end; Open-Meteo times now read as UTC on every phone. Lines in the route notes until "On this route" lands |
+| DATA-32 | Weather and health extras: UKHSA heat and cold alerts (England), gusts on exposed bridges, air quality, pollen and UV when high | M | now | done (2026-10-05) | Claude | D-066. Ported from PR #36. Alerts count only in season and before their end; Open-Meteo times now read as UTC on every phone. Lines in "On this route" since FEAT-19 (D-067) |
 | DATA-21 | Map York Place and the western way into the Grassmarket in OSM (about 1.1 km) | M | later | todo | Richard | [DEVICES.md](plans/DEVICES.md). Turns unknowns into known ground |
 
 ## Research: check our guesses with real people
@@ -137,7 +137,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | FEAT-16 | Welsh and Scottish Gaelic, with one place for all copy | L | later | todo | Claude | |
 | FEAT-17 | Indoor and station routing (lifts, platforms, step-free interchanges) | XL | later | todo | Claude | Start with one big station |
 | FEAT-18 | Road speed setting for road scooters in the device editor | S | later | done (2026-10-05) | Claude | D-051. 4 to 8 mph, and a per-device mph or km/h choice for speeds |
-| FEAT-19 | "On this route": what a route went round, what may slow you and what's worth knowing, in one grouped list, each with its label, source and date; the route card says only what changed the route or needs doing | M | now | doing | Claude | 2026-10-05, claude/vibrant-heisenberg-3j1kl2. Ported from PR #36 |
+| FEAT-19 | "On this route": what a route went round, what may slow you and what's worth knowing, in one grouped list, each with its label, source and date; the route card says only what changed the route or needs doing | M | now | done (2026-10-05) | Claude | D-067. Ported from PR #36 (its D-041). Blocked from the explanation and one closure-blind search per plan, only when something is closed. TfL's informational station messages, the weather and health lines and mappers' notes moved into it |
 
 ## Small features
 
@@ -273,6 +273,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 
 Newest first. One line per change: date, ID, what happened, link.
 
+- 2026-10-05: FEAT-19 done: "On this route" under the route card, grouped Blocked, Slower and Worth knowing, each fact labelled live, static data or reported by people with its source and date; the route card keeps only failed feeds, a count of closures gone round and a flood area on the route (D-067, ported from PR #36).
 - 2026-10-05: DATA-32 done: UKHSA heat and cold alerts (only in season and before their end), gusts on exposed bridges, and air quality, pollen and UV when high; Open-Meteo times read as UTC (D-066). DATA-25 in part: SEPA's Water of Leith level on routes using the walkway.
 - 2026-10-05: SMALL-13 done: a park found by name ends at its gate, not a neighbouring building's door; OpenStreetMap notes over 3 years old and business questions left out, the rest past three counted (D-048 update).
 - 2026-10-05: SMALL-14 done: where OSM and the Toilet Map disagree on access the toilet says so first and stays off routes; old records say they may be out of date (D-065).
