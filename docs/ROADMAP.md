@@ -237,8 +237,8 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 |---|---|---|---|---|---|---|
 | UPD-01 | Dependabot for npm and GitHub Actions, grouped weekly | S | now | done (2026-10-04) | Claude | `.github/dependabot.yml`. MapLibre and Next.js majors left to UPD-02 and UPD-03 |
 | UPD-02 | MapLibre GL 4.7 to 5 | M | next | done (2026-10-05) | Claude | PR #33, with SEC-04: straight to 6.12 for a critical fix. The worker is now a module file in `public/maplibre/` |
-| UPD-03 | Next.js to the current major | M | later | todo | Claude | Static export must keep working |
-| UPD-04 | Keep Node in CI on the current LTS | S | later | todo | Claude | `engines` says 22 |
+| UPD-03 | Next.js to the current major | M | later | doing | Claude | Static export must keep working. Claimed 2026-10-05, branch `claude/upd-03-next-major` |
+| UPD-04 | Keep Node in CI on the current LTS | S | later | doing | Claude | `engines` says 22. Claimed 2026-10-05, branch `claude/upd-03-next-major` |
 
 ## Deployment and release
 
