@@ -496,11 +496,12 @@ When there is nothing to compare with, it builds. Once DEP-01 makes `main` the p
 ## D-051 Road scooters go at road speed on roads
 
 **Decided.** 2026-10-05. Tester feedback: a road scooter (class 3) does 8 mph on the road but 4 mph on pavements, and the router used one pace for both.
-- A road-legal profile carries `roadSpeedMps`, its carriageway speed: 3.6 m/s (8 mph, the legal limit for class 3) by default. `speedMps` stays the pavement pace, capped by law at 4 mph.
+- A road-legal profile carries `roadSpeedMps`, its carriageway speed: 3.576 m/s (8 mph, the legal limit for class 3) by default. `speedMps` stays the pavement pace, capped by law at 4 mph.
 - Road speed applies on street proxies (`street_proxy`), the roads with no separately mapped pavement, which a road scooter drives along. Footways, pavements, pedestrian streets and crossings stay at the pavement pace. Gradient slows both the same way.
 - Pace learning learns only the pavement pace: stretches driven at road speed (`NavPlan.roads`) don't count. Time left while navigating uses both speeds.
 - **Effect.** Central Edinburgh journeys get 20 to 45% quicker, and routes move onto roads. Marchmont to Leith Walk went from 48% to 91% on roads, with only 7% of the route kept. That fits the law, but some riders keep to pavements or avoid busy roads. Ask them (RES-10) before adding a "prefer pavements" or "avoid busy roads" option.
-- Not built: a road speed setting in the device editor (FEAT-18). Until then every road scooter gets 8 mph on roads.
+- **In the editor** (FEAT-18, 2026-10-05): road scooters get "Speed on the road", 4 to 8 mph in half-mph steps. Below 4 mph the road isn't worth using (that's the pavement limit), and 8 mph is the legal top speed.
+- **Speed units** (FEAT-18): each device has "Show speeds in: mph or km/h" (`speedUnit`), used for pace and road speed. Scooters default to mph, the unit they're sold and regulated in; everyone else to km/h, as before. Distances stay metric; a full miles or kilometres setting is SMALL-02.
 
 ## D-052 Live feeds get a time limit
 
