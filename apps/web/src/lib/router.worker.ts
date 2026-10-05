@@ -227,7 +227,7 @@ function toPlanned(r: Route, start: Parameters<typeof elevationProfile>[1], id: 
     unknownCoords,
     summary: summarise(r, now),
     elevation: elevationProfile(r, start),
-    segments: describeSegments(r),
+    segments: describeSegments(r, p),
     minutesExtra: Math.max(0, Math.round((r.seconds - baseSeconds) / 60)),
   };
 }

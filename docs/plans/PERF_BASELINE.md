@@ -62,8 +62,8 @@ The machine: 4 cores, 15 GB, Node 22, a cloud session container.
 | Toilet Map | 17 KB | 4 KB |
 | Flood areas | 270 KB | 64 KB |
 | Pavement works | 8 KB | 2 KB |
-| Rail network (lifts, station data) | 170 KB | 15 KB |
-| **Total** | | **6513 KB** (609 KB without the base map; 76 KB beside the graph, the budgeted part) |
+| Rail network (lifts, station data) | 213 KB | 17 KB |
+| **Total** | | **6515 KB** (610 KB without the base map; 76 KB beside the graph, the budgeted part) |
 
 ## Route time
 

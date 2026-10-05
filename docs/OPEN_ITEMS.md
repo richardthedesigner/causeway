@@ -39,10 +39,13 @@ These numbers shape routes but are our estimates, not evidence.
 | Rest distances from Inclusive Mobility (50 m with a stick or crutches, 100 m with fatigue): right for real people, given how few benches are mapped? | [D-013](DECISIONS.md#d-013-unknown-risk-weights-and-preset-thresholds-are-placeholders) |
 | A manual wheelchair held to 6 mm kerbs, with every unmeasured dropped kerb taken as 6 mm: right for real chairs and real kerbs? | [D-054](DECISIONS.md#d-054-presets-on-inclusive-mobility-values-kerbs-credit-and-more-benches) |
 | Road scooters: 8 mph on every road without a mapped pavement, and whether riders want those road routes at all (RES-10) | [D-051](DECISIONS.md#d-051-road-scooters-go-at-road-speed-on-roads) |
+| Boarding with the staff ramp: 3 minutes to find staff and get the ramp | [D-059](DECISIONS.md#d-059-boarding-the-train-against-each-persons-limits) |
 | Screen reader and switch-access testing: axe only catches about a third of WCAG issues | [BUILD_LOG](BUILD_LOG.md) |
 
 ## Known gaps
 
+- The profile has a gap limit for boarding trains (`maxGapMm`), but no setting in the app: everyone gets TfL's 85 mm level band. Add a setting once research says people want one ([D-059](DECISIONS.md#d-059-boarding-the-train-against-each-persons-limits)).
+- TfL's level-access doors are in the spoken route only, not on the visual route card ([D-059](DECISIONS.md#d-059-boarding-the-train-against-each-persons-limits)).
 - Opening hours don't know bank holidays; the app says "may differ on bank holidays" ([D-039](DECISIONS.md#d-039-open-when-you-get-there)).
 - Weather beyond 48 hours ahead falls back to today's ([D-040](DECISIONS.md#d-040-leaving-later)).
 - The speed budget's timing checks hold 10% off CI. On a busy machine they can fail when nothing changed; run the test again before looking for a cause. A data refresh that rebuilds a graph can trip the settled-node check: re-baseline on purpose ([D-056](DECISIONS.md#d-056-a-speed-budget-the-tests-enforce), ROADMAP SPEED-07).

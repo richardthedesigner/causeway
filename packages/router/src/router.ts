@@ -5,7 +5,8 @@
  */
 import { confidence, haversine, isKnown, type Graph, type GraphEdge, type GraphNode, type NoteSignal } from "@causeway/graph";
 import type { Profile } from "@causeway/profile";
-import { baseSpeed, darkCost, DRY, entranceVerdict, evaluateEdge, evaluateNode, surfaceLabel, type Conditions, type EdgeContext, type EntranceVerdict, type Evaluation, type Reason } from "./cost.js";
+import { levelAccessAdvice } from "./boarding.js";
+import { baseSpeed, darkCost, DRY, entranceVerdict, evaluateEdge, evaluateNode, needsStepFree, surfaceLabel, type Conditions, type EdgeContext, type EntranceVerdict, type Evaluation, type Reason } from "./cost.js";
 
 interface Arc {
   edge: GraphEdge;
@@ -614,10 +615,23 @@ export function explain(router: Router, chosen: Route, from: GraphNode, to: Grap
   }
   for (const s of chosen.steps) {
     const live = s.eval.reasons.find((x) => x.attr === "live" && x.kind === "unknown");
-    if ((s.edge.kind === "board" || s.edge.kind === "station_link") && live && s.edge.live?.affects === "step-free") {
+    if ((s.edge.kind === "board" || s.edge.kind === "station_link") && live) {
       const note = `${s.edge.name}: ${live.detail} (TfL, live). Check before you travel.`;
       if (!notes.includes(note)) notes.push(note);
-    } else if (s.edge.kind === "board" && s.eval.passable === "unknown") notes.push(`TfL doesn't confirm step-free access at ${s.edge.name}. Check before you travel.`);
+      continue;
+    }
+    if (s.edge.kind !== "board") continue;
+    // Platform to train (D-059): an unknown says which platform and why; the staff ramp says to ask.
+    const why = s.eval.reasons.find((x) => x.attr === "boarding" || x.attr === "ramp");
+    const note =
+      why?.kind === "unknown"
+        ? `${s.edge.name}: ${why.detail} (TfL station data). Check before you travel.`
+        : s.eval.passable === "unknown"
+          ? `TfL doesn't confirm step-free access at ${s.edge.name}. Check before you travel.`
+          : why?.attr === "ramp"
+            ? `${s.edge.name}: board with the staff ramp, so ask staff (TfL station data).`
+            : null;
+    if (note && !notes.includes(note)) notes.push(note);
   }
   if (sum.lifts) {
     const live = router.graph.meta.liveFeeds?.some((f) => f.endsWith("lifts"));
@@ -684,8 +698,10 @@ export function placeName(e: GraphEdge): string {
 /**
  * The route as an ordered spoken list, for the non-visual route mode.
  * Consecutive steps on the same named way and kind merge into one segment.
+ * With a profile that needs step-free access, a train leg says where TfL's
+ * level-access doors are, when it says (D-059).
  */
-export function describeSegments(r: Route): string[] {
+export function describeSegments(r: Route, p?: Profile): string[] {
   // Rail legs read as one instruction each; walking parts as before.
   const out: string[] = [];
   let walk: Step[] = [];
@@ -695,7 +711,7 @@ export function describeSegments(r: Route): string[] {
   };
   const rides = ridesOf(r);
   let ri = 0;
-  for (const s of r.steps) {
+  for (const [i, s] of r.steps.entries()) {
     const k = s.edge.kind;
     if (k === "station_link" && s.edge.ref?.startsWith("link:bus:")) {
       // The few metres to the stop flag: the boarding instruction names the stop.
@@ -706,7 +722,8 @@ export function describeSegments(r: Route): string[] {
     } else if (k === "board" && s.forward) {
       flush();
       const ride = rides[ri++];
-      if (ride) out.push(`Take the ${ride.line} from ${ride.from} to ${ride.to}, ${ride.stops} stop${ride.stops === 1 ? "" : "s"}.`);
+      const doors = p && needsStepFree(p) ? levelAccessAdvice(r.steps, i) : null;
+      if (ride) out.push(`Take the ${ride.line} from ${ride.from} to ${ride.to}, ${ride.stops} stop${ride.stops === 1 ? "" : "s"}.${doors ? ` ${doors}` : ""}`);
     } else if (k === "interchange") {
       flush();
       out.push(`${s.edge.name}.`);

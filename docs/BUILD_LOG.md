@@ -6,8 +6,11 @@ A running record of what was built, newest first. Each entry links the decision 
 
 Richard chose main as the base; the overnight build's extras (PR #36) are ported by hand, smallest and safest first.
 
-**Platforms and lifts** (D-058, DATA-29)
+**Platforms and lifts** (D-058, D-059, DATA-29)
 - A lift out that leaves some of a line's platforms step-free makes that line unknown, not closed, and costs a step-free user as much as a station we can't confirm. 46 of the 76 lifts whose loss changes a line are like this.
+- TfL's step and gap from platform to train, per platform and in figures, are held to each person's limits: within TfL's level band (50 mm step, 85 mm gap) for everyone, beyond it against their kerb limit and a gap limit (no setting yet). Missing figures are unknown. The staff ramp costs 3 minutes and says to ask. Kilburn, Stanmore and Bond Street need the ramp for wheeled presets; nothing else changes on today's data.
+- The spoken route says where TfL's level-access doors are, for step-free users ("For level access, board at the 2 centre doors on cars 5 and 6").
+- `data/transit/london/network.json` rebuilt from the same feed (2026-08-03): 15 KB to 17 KB compressed.
 
 **Honesty fixes** (D-053)
 - Edinburgh council widths and surfaces are inferred: a narrow council width costs time and no longer closes a pavement.

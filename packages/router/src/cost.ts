@@ -7,7 +7,7 @@
  * scaled by (1 - uncertaintyTolerance): a cautious user pays more to avoid
  * the unknown, an adventurous one barely notices it.
  */
-import { confidence, isKnown, type EntranceInfo, type GraphEdge, type GraphNode, type NoteSignal, type Surface } from "@causeway/graph";
+import { confidence, isKnown, type EntranceInfo, type GraphEdge, type GraphNode, type NoteSignal, type PlatformBoarding, type Surface } from "@causeway/graph";
 import { isPowerchair, isScooter, type Profile } from "@causeway/profile";
 
 export interface Conditions {
@@ -169,6 +169,55 @@ const UNKNOWN_STATION_S = 900;
 /** Someone who needs lifts or ramps rather than stairs and escalators. */
 export const needsStepFree = (p: Profile) => p.maxSteps < 10 || !p.escalators;
 
+/** TfL's level-access band between platform and train: a step of up to 50 mm and a gap of up to 85 mm (D-059). */
+export const LEVEL_STEP_MM = 50;
+export const LEVEL_GAP_MM = 85;
+/** Getting the staff ramp: finding someone and them bringing it. A working guess. */
+export const STAFF_RAMP_S = 180;
+
+/**
+ * One platform against this person's limits (D-059). Within TfL's level-access
+ * band it fits everyone. Beyond it, the measured step is held to the kerb they
+ * can manage (never less than the band) and the gap to their gap limit (the
+ * band unless they set one). Where the figures run past their limits: the
+ * level-access doors if TfL says where they are and some of the platform fits,
+ * then the staff ramp if TfL lists one, otherwise "part" (some of the platform
+ * fits) or "no". No figures: unknown, or the staff ramp if TfL lists one.
+ */
+export type PlatformFit = "level" | "fits" | "doors" | "ramp" | "part" | "no" | "unknown";
+export function platformFit(b: PlatformBoarding, p: Profile): PlatformFit {
+  if (!b.stepMm || !b.gapMm) return b.ramp ? "ramp" : "unknown";
+  if (b.stepMm[1] <= LEVEL_STEP_MM && b.gapMm[1] <= LEVEL_GAP_MM) return "level";
+  const stepLimit = Math.max(LEVEL_STEP_MM, p.maxKerbCm * 10);
+  const gapLimit = p.maxGapMm ?? LEVEL_GAP_MM;
+  if (b.stepMm[1] <= stepLimit && b.gapMm[1] <= gapLimit) return "fits";
+  const somewhere = b.stepMm[0] <= stepLimit && b.gapMm[0] <= gapLimit;
+  if (somewhere && b.levelAccessAt) return "doors";
+  if (b.ramp) return "ramp";
+  return somewhere ? "part" : "no";
+}
+
+const mmText = (b: PlatformBoarding) => [b.stepMm ? `step up to ${b.stepMm[1]} mm` : null, b.gapMm ? `gap up to ${b.gapMm[1]} mm` : null].filter(Boolean).join(", ");
+
+/** A line's platforms at a station, judged together: the board edge doesn't know which way you'll go. */
+export function boardingReason(platforms: PlatformBoarding[], p: Profile): Reason | null {
+  if (!platforms.length) return null;
+  const fits = platforms.map((b) => ({ b, f: platformFit(b, p) }));
+  const worst = (f: PlatformFit) => fits.filter((x) => x.f === f);
+  const no = worst("no");
+  if (no.length === fits.length) return { kind: "excluded", attr: "boarding", detail: `${mmText(no[0]!.b)} between platform and train`, seconds: Infinity };
+  const unsure = [...no, ...worst("part"), ...worst("unknown")];
+  if (unsure.length) {
+    const s = UNKNOWN_STATION_S * (1 - p.uncertaintyTolerance);
+    const x = unsure[0]!;
+    const detail =
+      x.f === "unknown" ? `TfL doesn't publish the step and gap to the train on ${x.b.platform}` : x.f === "no" ? `${mmText(x.b)} to the train on ${x.b.platform}` : `${mmText(x.b)} to the train on parts of ${x.b.platform}`;
+    return { kind: "unknown", attr: "boarding", detail, seconds: s };
+  }
+  if (worst("ramp").length) return { kind: "penalty", attr: "ramp", detail: "staff ramp onto the train: ask staff", seconds: STAFF_RAMP_S };
+  return null;
+}
+
 /** Speed multiplier for a signed gradient. Wheeled users slow hard uphill; walkers follow Tobler. */
 export function speedFactor(p: Profile, gradePct: number): number {
   if (!WHEELED(p)) {
@@ -282,6 +331,15 @@ function evaluateEdgeBase(e: GraphEdge, forward: boolean, p: Profile, c: Conditi
       const s = UNKNOWN_STATION_S * (1 - p.uncertaintyTolerance);
       return { passable: "unknown", seconds, cost: seconds + s, reasons: [...reasons.map((r) => (r.attr === "live" ? { ...r, seconds: 0 } : r)), { kind: "unknown", attr: "station", detail: "step-free access not confirmed", seconds: s }] };
     }
+    // Platform to train: TfL's measured step and gap against this person's limits (D-059).
+    const boarding = e.kind === "board" && e.boarding && needsStepFree(p) ? boardingReason(e.boarding.platforms, p) : null;
+    if (boarding?.kind === "excluded") return exclude(boarding.attr, boarding.detail);
+    if (boarding?.kind === "unknown") {
+      // One unknown is enough: a live doubt on top of an unpublished step doesn't count twice.
+      const s = Math.max(boarding.seconds, livePenalty);
+      return { passable: "unknown", seconds, cost: seconds + s, reasons: [...reasons.map((r) => (r.attr === "live" ? { ...r, seconds: 0 } : r)), { ...boarding, seconds: s }] };
+    }
+    if (boarding) return { passable: unknownCritical ? "unknown" : "yes", seconds, cost: seconds + livePenalty + boarding.seconds, reasons: [...reasons, boarding] };
     return { passable: unknownCritical ? "unknown" : "yes", seconds, cost: seconds + livePenalty, reasons };
   }
 

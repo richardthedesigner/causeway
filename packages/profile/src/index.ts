@@ -50,6 +50,11 @@ export interface Profile {
   maxCrossSlopePct: number;
   /** Highest kerb upstand the user can mount or descend, centimetres. 0 = needs dropped/flush. */
   maxKerbCm: number;
+  /**
+   * Widest gap between platform and train the user can cross, millimetres (D-059).
+   * Absent: TfL's level-access band, 85 mm. No setting in the app yet.
+   */
+  maxGapMm?: number;
   /** Minimum usable width, metres. */
   minWidthM: number;
   /** Steps: never, or a maximum count the user can manage. */
