@@ -1,5 +1,5 @@
 // Copy the city graphs (and London's rail network), base maps and search indexes into public/ for the app.
-import { copyFileSync, mkdirSync } from "node:fs";
+import { copyFileSync, mkdirSync, readFileSync } from "node:fs";
 mkdirSync("public/graph", { recursive: true });
 for (const n of ["edinburgh-central", "newcastle-gateshead", "london-jubilee"]) copyFileSync(`../../data/snapshots/${n}.graph.json.gz`, `public/graph/${n}.graph.json.gz`);
 copyFileSync("../../data/transit/london/network.json", "public/graph/london-network.json");
@@ -19,3 +19,8 @@ for (const n of ["edinburgh-central", "newcastle-gateshead", "london-jubilee"]) 
   copyFileSync(`../../data/places/${n}.osm-notes.json`, `public/places/${n}.osm-notes.json`);
   copyFileSync(`../../data/places/${n}.toiletmap.json`, `public/places/${n}.toiletmap.json`);
 }
+// MapLibre 6 runs its worker as a separate module file. Each version gets its own folder, so a cached old copy is never mixed with new code.
+const mlDir = "node_modules/maplibre-gl";
+const mlVersion = JSON.parse(readFileSync(`${mlDir}/package.json`, "utf8")).version;
+mkdirSync(`public/maplibre/${mlVersion}`, { recursive: true });
+for (const f of ["maplibre-gl-worker.mjs", "maplibre-gl-shared.mjs"]) copyFileSync(`${mlDir}/dist/${f}`, `public/maplibre/${mlVersion}/${f}`);

@@ -22,6 +22,8 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # Known high or critical holes in any dependency fail the build (SEC-04).
+      - run: pnpm audit --audit-level high
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm --filter @causeway/web typecheck
