@@ -11,6 +11,13 @@ SEC-16 and SEC-19: the critical and high findings of the [security review](revie
 - Data refresh: `persist-credentials: false` on checkout, the token passed to `create-pull-request` itself, and `pip install --require-hashes -r scripts/requirements.txt` (osmium 4.3.1, duckdb 1.5.6, pyshp 3.1.6, the same versions it fetched unpinned).
 - BACKEND.md: migrations up to `0007`, PostGIS in the `extensions` schema, who can do what.
 
+## 2026-10-05 (late night)
+
+**The map controls by keyboard** (STAB-17, D-069)
+- The sheet trapped keyboard focus and hid the map from screen readers, so Tab never reached the city, layers or location buttons. vaul never passed `modal={false}` on to Radix; a pnpm patch fixes that, and the sheet no longer loops Tab inside itself.
+- The city and layers menus opened behind the sheet. They now open above it, take focus, and give it back to their button.
+- `pnpm a11y` checks the map controls by keyboard. Opening `<details>` in the script is now one call, which fixes a race.
+
 ## 2026-10-05 (security review)
 
 SEC-07 and REV-02: [security review](reviews/security-2026-10.md), with a threat model. Read-only: no code changed.
