@@ -116,7 +116,9 @@ for (const j of JOURNEYS) {
       await fn();
       console.log(`  ok   ${label}`);
     } catch (e) {
-      throw new Error(`${label}: ${e.message.split("\n")[0]}`);
+      // Playwright's own reason (covered, hidden, off screen) is further down its message; keep it.
+      const why = e.message.split("\n").filter((l) => /intercepts|not visible|outside of the viewport|not stable|detached/.test(l)).slice(-2).map((l) => l.trim());
+      throw new Error([`${label}: ${e.message.split("\n")[0]}`, ...why].join(" / "));
     }
   };
   const deviceButton = () => page.getByRole("button", { name: /^Routes are for/ }).first();
@@ -150,9 +152,15 @@ for (const j of JOURNEYS) {
       await page.getByRole("menu", { name: "Getting around as" }).waitFor();
       await page.getByRole("menuitemradio", { name: new RegExp(DEVICE) }).click();
       await page.getByRole("button", { name: new RegExp(`^Routes are for ${DEVICE}`) }).first().waitFor();
+      await page.getByRole("menu", { name: "Getting around as" }).waitFor({ state: "hidden" });
+      // With two devices, a tip about switching follows the switch and sits over the trip settings. Dismiss it, as a person would.
+      const tip = page.getByRole("note").filter({ hasText: "to switch device" });
+      await tip.waitFor({ timeout: 6_000 }).then(() => tip.getByRole("button", { name: "Got it" }).click(), () => undefined);
     });
     await step("leave in an hour", async () => {
-      await page.getByRole("button", { name: "In 1 hour" }).click();
+      const soon = page.getByRole("button", { name: "In 1 hour" });
+      await soon.scrollIntoViewIfNeeded();
+      await soon.click();
       await page.getByText(/^Routes, bus waits, opening hours, daylight and the forecast are for/).waitFor();
     });
     await step("a route for later", async () => {
