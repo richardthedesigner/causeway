@@ -1,0 +1,4 @@
+# What the data-refresh scripts import. Compiled to requirements.txt with hashes (SEC-19).
+osmium   # osm-extract.py, places-extract.py, osm-bus-stops.py
+duckdb   # overture-places.py
+pyshp    # greenspace-extract.py

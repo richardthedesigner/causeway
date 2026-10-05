@@ -19,7 +19,6 @@ Last updated: 2026-10-05.
 | Turn on private vulnerability reporting: Settings, then Code security | `SECURITY.md` sends people there; until it's on they have nowhere private to report | 1 minute | [ROADMAP](ROADMAP.md) SEC-14 |
 | Decide whether to change DEF-09 from "Glasgow, then Wales" to "Glasgow, then Leeds", and whether Glasgow starts before its licence is confirmed | RES-09 ranks Cardiff and Swansea last of 14 (no open roadworks, new terrain source, little council data). Glasgow's best layers are unlicensed, so DATA-13 is the one thing that can slow it | A decision | [where-next.md](research/where-next.md) |
 | Check branch protection on `main` and `claude/sleepy-johnson-mavbrs`: Settings, then Branches. Direct pushes from Actions should be blocked, except the mirror | A compromised package in the data refresh could otherwise push straight to production | 5 minutes | [ROADMAP](ROADMAP.md) SEC-23, [security review](reviews/security-2026-10.md) M3 |
-| Don't run the migrations on Supabase (BACKEND.md step 3) until SEC-16 is done | With Supabase's default grants, anyone could delete every shared note and write the graph tables | None: just wait | [ROADMAP](ROADMAP.md) SEC-16, [security review](reviews/security-2026-10.md) C1 |
 
 ## Blocked outside the project
 
@@ -67,6 +66,7 @@ Not now, on purpose: a phone app, whole cities, a reports backend, app accounts.
 
 ## Done
 
+- 2026-10-05: the migrations can run on Supabase (BACKEND.md step 3). `0007_supabase_grants.sql` takes back Supabase's default grants, so nobody signed out can delete notes or write the graph tables. Run all seven in one go (SEC-16, [D-070](DECISIONS.md#d-070-every-grant-by-name-row-level-security-on-every-table)).
 - 2026-10-05: TfL's informational station messages (a reduced escalator service) are shown, under Worth knowing in "On this route" on routes through the station ([D-067](DECISIONS.md#d-067-more-data-same-calm)).
 - 2026-10-05: the weather and health lines (alerts, gusts, air, the Water of Leith) moved from "Why this way?" into "On this route", with their source and time ([D-067](DECISIONS.md#d-067-more-data-same-calm)).
 - 2026-10-05: Open-Meteo's times were read as the phone's local time, an hour out in British Summer Time. Now read as UTC everywhere, with a test ([D-066](DECISIONS.md#d-066-heat-and-cold-alerts-gusts-air-quality-and-the-water-of-leith)).
