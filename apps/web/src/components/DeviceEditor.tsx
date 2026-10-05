@@ -81,7 +81,7 @@ export function DeviceEditor({ open, onOpenChange, device, onChange, onRename, o
               onChange={(e) => onRename(e.target.value.slice(0, 40))}
               placeholder={PRESETS[profile.preset].label}
               autoComplete="off"
-              className="min-h-12 rounded-xl border border-line bg-surface-2 px-3 text-base text-ink focus:border-accent focus:outline-none"
+              className="min-h-12 w-full min-w-0 rounded-xl border border-line bg-surface-2 px-3 text-base text-ink focus:border-accent focus:outline-none"
             />
             <span className="text-sm text-muted">Optional. For example: Cherry, Dad&apos;s chair, the red one.</span>
           </label>
@@ -96,7 +96,8 @@ export function DeviceEditor({ open, onOpenChange, device, onChange, onRename, o
                 <span id={`group-${g.id}`} className="text-sm text-muted">
                   {g.label}
                 </span>
-                <div className="grid grid-cols-2 gap-2">
+                {/* Two columns, or one when large text would clip the names (STAB-11). */}
+                <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,9rem),1fr))] gap-2">
                   {g.presets.map((k) => {
                     const on = profile.preset === k;
                     return (
@@ -312,7 +313,7 @@ export function DeviceEditor({ open, onOpenChange, device, onChange, onRename, o
 function Limit({ label, value, help, onStep, children }: { label: string; value: string; help?: string; onStep?: (dir: -1 | 1) => void; children: React.ReactNode }) {
   return (
     <div>
-      <div className="flex items-baseline justify-between gap-3">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-3">
         <span className="text-base">{label}</span>
         <span className="tabular font-mono text-base font-semibold">{value}</span>
       </div>
@@ -337,7 +338,7 @@ function Limit({ label, value, help, onStep, children }: { label: string; value:
 function Toggle({ id, label, checked, onChange }: { id: string; label: string; checked: boolean; onChange: (v: boolean) => void }) {
   return (
     <label htmlFor={id} className="flex min-h-12 cursor-pointer items-center justify-between gap-4">
-      <span className="text-base">{label}</span>
+      <span className="min-w-0 text-base">{label}</span>
       <Switch id={id} checked={checked} onCheckedChange={onChange} />
     </label>
   );

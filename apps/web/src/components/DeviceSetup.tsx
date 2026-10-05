@@ -75,7 +75,7 @@ export function DeviceSetup({ open, mode, onDone, onSkip }: Props) {
         role="radio"
         aria-checked={on}
         onClick={() => setPreset(k)}
-        className={cn("grid min-h-14 rounded-2xl border px-4 py-2 text-left leading-tight", on ? "border-2 border-ink bg-surface-2 px-[15px] py-[7px]" : "border-line hover:border-ink")}
+        className={cn("grid min-h-14 min-w-0 rounded-2xl border px-4 py-2 text-left leading-tight [overflow-wrap:anywhere]", on ? "border-2 border-ink bg-surface-2 px-[15px] py-[7px]" : "border-line hover:border-ink")}
       >
         <span className="font-bold">{PRESETS[k].label}</span>
         {hint ? <span className="mt-0.5 text-sm text-muted">{hint}</span> : null}
@@ -120,7 +120,7 @@ export function DeviceSetup({ open, mode, onDone, onSkip }: Props) {
                 placeholder={PRESETS[chosen].label}
                 autoComplete="off"
                 autoFocus
-                className="min-h-12 rounded-xl border-2 border-ink bg-surface px-3 text-lg text-ink focus:border-accent focus:outline-none"
+                className="min-h-12 w-full min-w-0 rounded-xl border-2 border-ink bg-surface px-3 text-lg text-ink focus:border-accent focus:outline-none"
               />
               <span className="text-sm text-muted">For example: Cherry, Dad&apos;s chair, the red one.</span>
             </label>
@@ -135,7 +135,7 @@ export function DeviceSetup({ open, mode, onDone, onSkip }: Props) {
         ) : (
           <dl className="m-0 grid border-t border-line">
             {keyLimits(PRESETS[chosen]).map(([k, v]) => (
-              <div key={k} className="flex min-h-12 items-center justify-between gap-3 border-b border-line">
+              <div key={k} className="flex min-h-12 flex-wrap items-center justify-between gap-x-3 border-b border-line py-1">
                 <dt>{k}</dt>
                 <dd className="m-0 font-mono font-semibold tabular">{v}</dd>
               </div>

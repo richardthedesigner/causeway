@@ -2,7 +2,9 @@
  * WCAG 2.2 AA check of the built app with axe-core, light and dark, on the
  * screens people use most: start, search results, a route with buses and
  * toilets (every section open), first-visit setup, the device list and the
- * device settings, with a battery range, and the update prompt.
+ * device settings, with a battery range, and the update prompt. Then the
+ * setup and device settings sheets on a 320 by 640 phone at 200% text: the
+ * header takes at most a third of the screen, and nothing runs off the side (STAB-11).
  *   pnpm web:build && pnpm a11y
  * Exits 1 on any violation, or anything the Content Security Policy blocks. Runs in CI (.github/workflows/ci.yml).
  */
@@ -79,6 +81,44 @@ for (const scheme of ["light", "dark"]) {
   await page.getByRole("button", { name: "Reload" }).waitFor();
   await check("update prompt");
 }
+// Reflow (WCAG 1.4.4, 1.4.10): the device sheets at 320 by 640 with text at 200% (STAB-11).
+{
+  const page = await (await browser.newContext({ viewport: { width: 320, height: 640 } })).newPage();
+  watchCsp(page, csp);
+  await page.goto(url);
+  await page.getByPlaceholder("Where to?").waitFor({ timeout: 60_000 });
+  await page.addStyleTag({ content: "html { font-size: 200% !important }" });
+  const reflow = async (name) => {
+    const r = await page.evaluate(() => {
+      const d = [...document.querySelectorAll("[role=dialog]")].pop();
+      const box = d.getBoundingClientRect();
+      const off = [...d.querySelectorAll("*")].filter((e) => {
+        const b = e.getBoundingClientRect();
+        return b.width > 0 && (b.right > box.right + 1 || b.left < box.left - 1);
+      });
+      return { off: off.slice(0, 3).map((e) => `${e.tagName.toLowerCase()} "${(e.textContent ?? "").trim().slice(0, 30)}"`), header: d.querySelector("header")?.getBoundingClientRect().height ?? 0 };
+    });
+    const problems = [...r.off.map((o) => `${o} runs off the side`), ...(r.header > 640 / 3 ? [`the header takes ${Math.round(r.header)} of 640 px, over a third`] : [])];
+    console.log(`200% text / ${name}: ${problems.length ? problems.join("; ") : "fits"}`);
+    for (const p of problems) failures.push(`200% text / ${name} / ${p}`);
+  };
+  await page.getByRole("button", { name: "Set up how you get around" }).first().click();
+  await page.getByRole("dialog", { name: "What do you use?" }).waitFor();
+  await reflow("setup: what do you use?");
+  await page.getByRole("radio", { name: /Powerchair, lightweight/ }).click();
+  await page.getByRole("button", { name: "Next" }).click();
+  await reflow("setup: name");
+  await page.getByLabel("Name").fill("Cherry");
+  await page.getByRole("button", { name: "Next" }).click();
+  await reflow("setup: limits");
+  await page.getByRole("button", { name: "Save Cherry" }).click();
+  await page.getByRole("button", { name: /Routes are for/ }).first().click();
+  await page.getByRole("menuitem", { name: /^Edit/ }).click();
+  await page.getByRole("dialog").filter({ hasText: "Your limits" }).waitFor();
+  for (const d of await page.locator("[role=dialog] details").all()) await d.evaluate((el) => (el.open = true));
+  await page.getByRole("switch", { name: "Warn me about battery range" }).click();
+  await reflow("device settings, every section open");
+}
 await browser.close();
 server.close();
 // axe fetches the page's stylesheets itself to check them; the app never fetches the font CSS, it links it.
@@ -87,4 +127,4 @@ if (failures.length) {
   console.error(`\n${failures.length} accessibility or Content Security Policy problem(s).`);
   process.exit(1);
 }
-console.log("\nNo WCAG 2.2 AA violations found by axe.");
+console.log("\nNo WCAG 2.2 AA violations found by axe, and the device sheets reflow at 200% text.");

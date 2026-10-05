@@ -13,7 +13,8 @@ export const buttonVariants = cva(
         secondary: "bg-surface-2 text-ink border border-line hover:border-ink",
         ghost: "text-ink hover:bg-surface-2",
       },
-      size: { md: "min-h-12 px-5 text-base", lg: "min-h-14 px-6 text-lg", icon: "size-12" },
+      // Icon buttons keep a 48 px target at any text size: they hold no text, and growing them would squeeze what does (STAB-11).
+      size: { md: "min-h-12 px-5 text-base", lg: "min-h-14 px-6 text-lg", icon: "size-[48px] shrink-0" },
     },
     defaultVariants: { variant: "secondary", size: "md" },
   },
