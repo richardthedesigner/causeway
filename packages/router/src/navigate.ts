@@ -230,6 +230,8 @@ export interface Progress {
   distanceToNext: number;
   /** Something to say now, if anything: a new manoeuvre or a hazard coming up. */
   announce: string | null;
+  /** What the announcement is about. Everything but "turn" matters even to someone who only wants hazards spoken (SMALL-03). */
+  announceKind: "arrive" | "alight" | "off-route" | "hazard" | "turn" | null;
   /** The hazard within warning range, for the banner. */
   hazard: (Hazard & { inM: number }) | null;
 }
@@ -283,14 +285,18 @@ export class Navigator {
     const banner = this.plan.hazards.find(live) ?? null;
     const ahead = this.plan.hazards.find((h, i) => live(h) && !this.said.has(`h:${i}`)) ?? null;
     let announce: string | null = null;
+    let announceKind: Progress["announceKind"] = null;
     if (arrived && !this.said.has("arrive")) {
       announce = "You have arrived.";
+      announceKind = "arrive";
       this.said.add("arrive");
     } else if (alightSoon) {
       announce = `Get ready to get off. Your stop is ${rideNow!.alight}.`;
+      announceKind = "alight";
       this.said.add(alightKey!);
     } else if (offRoute && !this.said.has(`off:${Math.round(this.along / 50)}`)) {
       announce = "You're off the route. Working out a new one.";
+      announceKind = "off-route";
       this.said.add(`off:${Math.round(this.along / 50)}`);
     } else if (ahead && !this.said.has(`h:${this.plan.hazards.indexOf(ahead)}`)) {
       // Everything starting at about the same place is said together: "Steep section in 50 metres: 7% downhill for 70 m. Setts for 70 m."
@@ -301,9 +307,11 @@ export class Navigator {
       const rest = others.filter((h, i) => hazardText(h) !== hazardText(first!) && others.findIndex((o) => hazardText(o) === hazardText(h)) === i);
       const lead = inM > 5 ? `${first!.title} in ${inM} metres${first!.detail ? (first!.detail.startsWith("for ") ? `, ${first!.detail}` : `: ${first!.detail}`) : ""}.` : `${hazardText(first!)}.`;
       announce = [lead, ...rest.map((h) => `${hazardText(h)}.`)].join(" ");
+      announceKind = "hazard";
     } else if (next && next.type !== "arrive" && distanceToNext <= MANEUVER_WARN_M && !this.said.has(`m:${next.at}`)) {
       announce = distanceToNext > 10 ? `In ${Math.round(distanceToNext / 10) * 10} metres, ${next.text.charAt(0).toLowerCase()}${next.text.slice(1)}` : next.text;
       this.said.add(`m:${next.at}`);
+      announceKind = "turn";
     }
     return {
       along: this.along,
@@ -313,6 +321,7 @@ export class Navigator {
       next,
       distanceToNext,
       announce,
+      announceKind,
       hazard: banner ? { ...banner, inM: Math.max(0, Math.round(banner.at - this.along)) } : null,
     };
   }
