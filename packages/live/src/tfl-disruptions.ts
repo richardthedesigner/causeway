@@ -13,6 +13,7 @@
  * closures, and a refresh replaces them all.
  */
 import type { LiveState } from "@causeway/graph";
+import { getJson, type LiveOptions } from "./http.js";
 
 export const TFL_RAIL_LINES = ["jubilee", "dlr"];
 export const tflLineStatusUrl = (lines: string[] = TFL_RAIL_LINES) => `https://api.tfl.gov.uk/Line/${lines.join(",")}/Status?detail=true`;
@@ -79,12 +80,10 @@ export function parseStationDisruptions(json: unknown, fetchedAt: string): RailD
     );
 }
 
-export async function fetchRailDisruptions(fetchImpl: typeof fetch = fetch, now = new Date()): Promise<RailDisruption[]> {
+export async function fetchRailDisruptions(fetchImpl: typeof fetch = fetch, now = new Date(), opts: Omit<LiveOptions, "fetchImpl"> = {}): Promise<RailDisruption[]> {
   const at = now.toISOString();
-  const [lines, stations] = await Promise.all([fetchImpl(tflLineStatusUrl()), fetchImpl(tflStationDisruptionUrl())]);
-  if (!lines.ok) throw new Error(`TfL line status: HTTP ${lines.status}`);
-  if (!stations.ok) throw new Error(`TfL station disruptions: HTTP ${stations.status}`);
-  return [...parseLineStatus(await lines.json(), at), ...parseStationDisruptions(await stations.json(), at)];
+  const [lines, stations] = await Promise.all([getJson(tflLineStatusUrl(), "TfL line status", { ...opts, fetchImpl }), getJson(tflStationDisruptionUrl(), "TfL station disruptions", { ...opts, fetchImpl })]);
+  return [...parseLineStatus(lines, at), ...parseStationDisruptions(stations, at)];
 }
 
 /** What a station message means for the graph, if anything. Exported for tests. */
