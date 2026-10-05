@@ -2,6 +2,13 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
+## 2026-10-04 (evening)
+
+**One roadmap** (`docs/ROADMAP.md`, #31 merged with #34)
+- Keeps #34's order: fill the pilot cities from the data survey, then check our guesses with real people. Keeps the read-only Google Doc copy.
+- Every task now has an ID, size, priority, status and owner, across data, research, features, small features, security, stability, speed, bloat, updates, deployment, reviews and work Richard has deferred.
+- `CLAUDE.md` tells every session to read it first, mark its row, and write back to it in the same pull request.
+
 ## 2026-10-04 (evening, tester follow-ups)
 
 **Battery range** (D-041)
