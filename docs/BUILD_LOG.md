@@ -32,7 +32,7 @@ Privacy, a refresh guard and bank holidays, from the roadmap's Now list.
 **Bank holidays** (D-039, SMALL-01)
 - GOV.UK's dates for England and Wales and for Scotland, bundled and refreshed weekly. On a bank holiday a place's holiday hours apply; without any, it says the hours may differ that day only.
 
-**Your data** (D-053, SEC-06)
+**Your data** (D-059, SEC-06)
 - One sheet says what the phone keeps, downloads it as a file, and deletes everything, including what was shared. Migration 0006 lets people delete their own reports, flags and photos.
 - `pnpm e2e` downloads a copy and deletes it all; `pnpm a11y` checks the sheet, including at 200% text.
 

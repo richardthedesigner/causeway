@@ -116,7 +116,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | FEAT-01 | Battery range per device (`maxRangeKm`), with a warning on long routes | M | next | done (2026-10-04) | Claude | D-043. Range engine from PR #26, and "Warn me about battery range" in the device editor |
 | FEAT-02 | Separate road and pavement speeds for road scooters | M | later | done (2026-10-05) | Claude | D-051. Road speed setting is FEAT-18 |
 | FEAT-03 | "Report what's there" from "What we don't know" on a route | M | next | todo | Claude | UX_ASSESSMENT open finding. Reports stay on the device until the backend is back on |
-| FEAT-04 | Saved places (home, work, a friend's) | M | now | todo | Claude | On the device, like devices (D-009) |
+| FEAT-04 | Saved places (home, work, a friend's) | M | now | doing | Claude | 2026-10-05, `claude/clever-fermat-ij543q` (PR #42). On the device, like devices (D-009) |
 | FEAT-05 | Arrive by a time, as well as leave at one | M | later | todo | Claude | D-040 built "Leaving later" |
 | FEAT-06 | Changing Places toilets as their own search and route option | M | later | blocked | Claude | Needs a licensed source first (DATA-01, §9) |
 | FEAT-07 | Rest points on the route for people with a rest limit (benches, seats) | M | later | todo | Claude | D-018 |
@@ -138,9 +138,9 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 |---|---|---|---|---|---|---|
 | SMALL-01 | Opening hours that know bank holidays | S | now | done (2026-10-05) | Claude | PR #42, D-039. GOV.UK bank holidays for each city's nation, refreshed weekly. PH rules apply on the day |
 | SMALL-02 | Miles or kilometres setting | S | next | todo | Claude | |
-| SMALL-03 | Choose how often navigation speaks (every turn, hazards only, off) | S | now | todo | Claude | |
+| SMALL-03 | Choose how often navigation speaks (every turn, hazards only, off) | S | now | doing | Claude | 2026-10-05, `claude/clever-fermat-ij543q` (PR #42) |
 | SMALL-04 | Copy the route as text, for a carer or a message | S | now | done (2026-10-05) | Claude | PR #42. "Copy the route as text" in Route in words, never the device. Keyboard focus now opens the drawer fully (WCAG 2.4.11) |
-| SMALL-05 | A high-contrast map style | S | now | todo | Claude | For the low-vision profile |
+| SMALL-05 | A high-contrast map style | S | now | doing | Claude | 2026-10-05, `claude/clever-fermat-ij543q` (PR #42). For the low-vision profile |
 | SMALL-06 | A clear "no signal" state that says what still works offline | S | now | done (2026-10-05) | Claude | PR #42. A "No signal" notice on the sheet and in navigation, saying what still works and what's paused |
 | SMALL-07 | Print-friendly route | S | later | todo | Claude | |
 | SMALL-08 | Keyboard shortcuts on desktop (search, swap ends, start) | S | later | todo | Claude | |
@@ -158,7 +158,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | SEC-03 | Pin GitHub Actions to commit SHAs and give each workflow the least permissions it needs | S | next | done (2026-10-04) | Claude | Pinned to the latest release in each major, version in a comment. CI has `contents: read` |
 | SEC-04 | `pnpm audit` in CI, failing on high severity | S | now | done (2026-10-05) | Claude | PR #33, D-050. Found a critical MapLibre hole and two high PostCSS ones; fixed by MapLibre 6.12 and a PostCSS override |
 | SEC-05 | Check nothing leaks the profile (logs, URLs, error messages) | S | now | done (2026-10-05) | Claude | PR #33, D-009. No leak found. `pnpm e2e` now fails if any request carries the device's name, type or limits |
-| SEC-06 | Export and delete everything about me, in one place | M | now | done (2026-10-05) | Claude | PR #42, D-053. "Your data": what's kept, a copy as a file, and delete everything, shared notes, reports, flags and photos included. Migration 0006 |
+| SEC-06 | Export and delete everything about me, in one place | M | now | done (2026-10-05) | Claude | PR #42, D-059. "Your data": what's kept, a copy as a file, and delete everything, shared notes, reports, flags and photos included. Migration 0006 |
 | SEC-07 | Review row-level security and storage bucket rules against a threat model | M | later | todo | Claude | `db/migrations`, `scripts/test-db.sh` |
 | SEC-08 | Harden `/review`: sign-in rate limits, session length | S | later | todo | Claude | |
 | SEC-09 | Cloudflare Turnstile on anonymous sign-up, before any publicity | S | later | blocked | Richard, Claude | D-030 |
@@ -166,7 +166,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | SEC-12 | Check the headers are live on production (`curl -I`), and score them on securityheaders.com | S | next | todo | Claude | D-041. Production has Vercel login protection on its `vercel.app` URLs, which may need Richard |
 | SEC-13 | Drop `'unsafe-inline'` from the CSP's `script-src`: hashes for Next's inline scripts at build time | S | later | todo | Claude | D-041. They change every build |
 | SEC-14 | Turn on private vulnerability reporting (Settings, then Code security) | S | next | blocked | Richard | `SECURITY.md` points people to it |
-| SEC-15 | Remove a deleted note's approved photo from the public bucket | S | later | todo | Claude | D-053. Hidden once the note's gone, but the copy stays. A reviewer step or a server job, once sharing is on |
+| SEC-15 | Remove a deleted note's approved photo from the public bucket | S | later | todo | Claude | D-059. Hidden once the note's gone, but the copy stays. A reviewer step or a server job, once sharing is on |
 | SEC-11 | Name the weekly reviewer for flags, photos and reports | S | later | blocked | Richard | [BACKEND.md](BACKEND.md). Only once sharing is on |
 
 ## Stability and testing
@@ -179,13 +179,13 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | STAB-04 | Router fuzz test: many random start and end points per city, no crashes, no impossible routes | M | now | done (2026-10-05) | Claude | PR #42. `packages/router/test/fuzz.test.ts`: 60 seeded journeys per city, 4 people, dry, wet and icy. About 14 s |
 | STAB-05 | Timeouts and fallbacks for every live adapter | S | now | done (2026-10-05) | Claude | D-052. `getJson` in `packages/live/src/http.ts`: 10 s for feeds, 6 s for live search. `pnpm e2e` hangs every feed in London and checks the fallbacks |
 | STAB-06 | Data refresh guard: fail the weekly PR if counts drop by more than a set amount | S | now | done (2026-10-05) | Claude | PR #42, D-033. Per-row limits on falls; past one, the refresh PR opens as a draft that says not to merge, and the run fails |
-| STAB-07 | The routing worker recovers if it crashes, and says so | S | now | todo | Claude | `router.worker.ts` |
+| STAB-07 | The routing worker recovers if it crashes, and says so | S | now | doing | Claude | 2026-10-05, `claude/clever-fermat-ij543q` (PR #42). `router.worker.ts` |
 | STAB-09 | A city opened from last time started from Edinburgh's Causewayside, 537 km from London | S | next | done (2026-10-04) | Claude | Found by STAB-01. `page.tsx` sets the saved city's start |
 | STAB-10 | End-to-end journeys for the device switcher, notes and Leaving later | S | now | done (2026-10-05) | Claude | PR #33. Two devices and a switch, leaving in an hour, a route and a note. Found and fixed the drawer's last 6% being unreachable |
 | STAB-11 | The device editor's header fills a 320 by 640 screen at 200% text | S | now | done (2026-10-05) | Claude | PR #33. Description scrolls with the content; bars, icon buttons and switches in pixels. `pnpm a11y` checks it |
 | STAB-12 | 200% text at 320 px on the other screens: route panel, navigation, search, note and report sheets | S | now | done (2026-10-05) | Claude | `pnpm a11y` checks six more screens. Grids hold their width, chip rows and section headings wrap, navigation's two panels take half the screen each and scroll |
 | STAB-13 | The city name at the top of the map is cut off at 200% text on a 320 px phone ("Edinbur", under the layers button) | S | now | done (2026-10-05) | Claude | PR #42. The bar over the map is sized in pixels. `pnpm a11y` checks the name neither spills nor runs under the layers button |
-| STAB-14 | Time limits for the sharing and review calls to Supabase | S | now | todo | Claude | Found doing STAB-05. `lib/sync.ts`, `lib/review.ts`. Sharing is off today (D-030), so nothing waits on them yet |
+| STAB-14 | Time limits for the sharing and review calls to Supabase | S | now | doing | Claude | 2026-10-05, `claude/clever-fermat-ij543q` (PR #42). Found doing STAB-05. `lib/sync.ts`, `lib/review.ts`. Sharing is off today (D-030), so nothing waits on them yet |
 | STAB-15 | The e2e preview walk runs at a fixed speed, so a slower runner can miss the 2-minute arrival limit (Edinburgh took 2 min 44 s on a 4-core box) | S | later | todo | Claude | Found doing SEC-06. `E2E_ARRIVE_MS` raises the limit locally; better to step the walk by distance, not time |
 | STAB-08 | Offline test: load a city, cut the network, route | S | now | done (2026-10-05) | Claude | PR #42, with SMALL-06. `pnpm e2e` loads Edinburgh, cuts the network and routes. A reload offline (the service worker) isn't covered |
 

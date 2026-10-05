@@ -519,7 +519,7 @@ Update (BLOAT-02, 2026-10-05): CI also runs `pnpm knip` for unused files, export
 - **Tested.** `getJson` unit tests (`packages/live/test/http.test.ts`), and a `pnpm e2e` journey in London where TfL, Open-Meteo and the Environment Agency never answer: the route still comes, and the weather and lift lines fall back.
 - **Not covered.** The Supabase calls for sharing and review (STAB-14). Sharing is off today.
 
-## D-053 Your data: a copy, and delete everything
+## D-059 Your data: a copy, and delete everything
 
 **Decided.** 2026-10-05 (SEC-06, UK GDPR). "Your data", under the trip settings, says what's kept on the phone, gives a copy as one JSON file, and deletes everything in one step.
 - **The copy** holds every `causewayside.` key on the phone, backups included. The sign-in tokens are left out: they're credentials, not information about the person.
