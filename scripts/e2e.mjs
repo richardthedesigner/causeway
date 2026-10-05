@@ -9,7 +9,8 @@
  * and switch between them, leave later, copy the route as text, add a note,
  * then download a copy of your data and delete it all (SEC-06). One with no
  * signal (SMALL-06): the route still comes, and the app says what still works.
- * And one in London with every live feed hanging (STAB-05): the route still
+ * One where the routing worker crashes (STAB-07): it starts again and the route
+ * comes back. And one in London with every live feed hanging (STAB-05): the route still
  * comes, and the weather and lift lines fall back within their time limit
  * instead of waiting for ever. Every request any
  * journey makes is checked for the profile (SEC-05, D-009): the device's name,
@@ -299,6 +300,46 @@ for (const j of JOURNEYS) {
   } catch (e) {
     failures.push(`${name}: ${e.message}`);
     console.log(`  FAIL ${e.message}`);
+  }
+  for (const p of problems) failures.push(`${name}: ${p}`), console.log(`  FAIL ${p}`);
+  await context.close();
+}
+
+// The routing worker crashes (STAB-07): it's started again, says so, and the route comes back.
+{
+  const name = "edinburgh: the routing worker crashes";
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const page = await context.newPage();
+  const problems = [];
+  watchCsp(page, problems);
+  watchProfile(page, problems);
+  page.on("pageerror", (e) => problems.push(`page error: ${e.message}`));
+  await page.addInitScript(() => localStorage.setItem("causewayside.city.v1", "edinburgh"));
+  console.log(name);
+  try {
+    await page.goto(server.url);
+    await page.getByPlaceholder("Where to?").waitFor({ timeout: 60_000 });
+    await page.getByPlaceholder("Where to?").fill("Hamilton Place");
+    await page.getByRole("option").first().click();
+    await page.getByText("Why this way?").waitFor({ timeout: 60_000 });
+    console.log("  ok   a route");
+    // Throw inside the worker, outside any handler: what a real crash looks like from the page.
+    // The routing worker is one of the app's own chunks; MapLibre's workers are served from /maplibre/.
+    const router = page.workers().find((w) => w.url().includes("/_next/"));
+    if (!router) throw new Error("no routing worker found");
+    await router.evaluate(() => setTimeout(() => {
+      throw new Error("test crash");
+    }));
+    await page.getByText("Routing hit a problem and was started again").waitFor({ timeout: 60_000 });
+    console.log("  ok   it says routing was started again");
+    // A new worker, and the asked-for route back from it.
+    const fresh = page.workers().find((w) => w.url().includes("/_next/") && w !== router);
+    if (!fresh) throw new Error("no new routing worker");
+    await page.getByText("Why this way?").waitFor({ timeout: 60_000 });
+    console.log("  ok   a new worker, and the route is worked out again");
+  } catch (e) {
+    failures.push(`${name}: ${e.message.split("\n")[0]}`);
+    console.log(`  FAIL ${e.message.split("\n")[0]}`);
   }
   for (const p of problems) failures.push(`${name}: ${p}`), console.log(`  FAIL ${p}`);
   await context.close();

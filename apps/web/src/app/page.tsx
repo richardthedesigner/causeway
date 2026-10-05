@@ -358,6 +358,18 @@ export default function Home() {
       }}
       className="min-h-0 flex-1 overflow-y-auto px-4 pt-1 pb-[calc(1.5rem+6dvh+env(safe-area-inset-bottom,0px))] [scroll-padding-bottom:calc(1rem+6dvh)] md:pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] md:[scroll-padding-bottom:1rem]">
       {!online ? <NoSignal city={city.name} /> : null}
+      {planner.restarted === "restarting" || planner.restarted === "restarted" ? (
+        <p role="status" className="mb-3 rounded-2xl border-2 border-caution bg-caution-soft p-3">
+          {planner.restarted === "restarting" ? "Routing hit a problem on this phone. Starting it again…" : "Routing hit a problem and was started again. Anything you'd asked for has been worked out again."}
+        </p>
+      ) : planner.restarted === "gave-up" ? (
+        <div role="alert" className="mb-3 grid gap-2 rounded-2xl border-2 border-stop p-3">
+          <p className="m-0">Routing stopped working on this phone, and starting it again didn&apos;t help.</p>
+          <Button variant="secondary" onClick={() => location.reload()} className="justify-self-start">
+            Reload
+          </Button>
+        </div>
+      ) : null}
       {pin ? (
         <section aria-live="polite" aria-label="Dropped pin" className="mb-3 flex flex-wrap items-center gap-3 rounded-2xl border-2 border-accent p-3">
           <p className="m-0 min-w-0 flex-1">
