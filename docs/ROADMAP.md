@@ -139,9 +139,9 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | SMALL-01 | Opening hours that know bank holidays | S | now | done (2026-10-05) | Claude | PR #42, D-039. GOV.UK bank holidays for each city's nation, refreshed weekly. PH rules apply on the day |
 | SMALL-02 | Miles or kilometres setting | S | next | todo | Claude | |
 | SMALL-03 | Choose how often navigation speaks (every turn, hazards only, off) | S | next | todo | Claude | |
-| SMALL-04 | Copy the route as text, for a carer or a message | S | now | todo | Claude | `describeSegments` already writes it |
+| SMALL-04 | Copy the route as text, for a carer or a message | S | now | doing | Claude | 2026-10-05, `claude/clever-fermat-ij543q`. `describeSegments` already writes it |
 | SMALL-05 | A high-contrast map style | S | next | todo | Claude | For the low-vision profile |
-| SMALL-06 | A clear "no signal" state that says what still works offline | S | now | todo | Claude | |
+| SMALL-06 | A clear "no signal" state that says what still works offline | S | now | doing | Claude | 2026-10-05, `claude/clever-fermat-ij543q` |
 | SMALL-07 | Print-friendly route | S | later | todo | Claude | |
 | SMALL-08 | Keyboard shortcuts on desktop (search, swap ends, start) | S | later | todo | Claude | |
 | SMALL-09 | "Why this way?" one tap from the navigation screen | S | later | todo | Claude | |
@@ -176,7 +176,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | STAB-01 | End-to-end test in the built app: search, route, start, end | M | next | done (2026-10-04) | Claude | `pnpm e2e` in CI, one journey per city. Found STAB-09 on its first run |
 | STAB-02 | Screenshot tests for the main screens, light and dark, 320 px and 200% text | M | next | todo | Claude | Replaces hand-checked screenshots |
 | STAB-03 | Version the on-device stores (devices, notes, recents) and migrate old data | S | next | done (2026-10-04) | Claude | D-044. `lib/stored.ts` for devices, notes and reports: version in the key, old keys never rewritten, anything unreadable backed up |
-| STAB-04 | Router fuzz test: many random start and end points per city, no crashes, no impossible routes | M | now | todo | Claude | |
+| STAB-04 | Router fuzz test: many random start and end points per city, no crashes, no impossible routes | M | now | doing | Claude | 2026-10-05, `claude/clever-fermat-ij543q` |
 | STAB-05 | Timeouts and fallbacks for every live adapter | S | now | done (2026-10-05) | Claude | PR #42, D-052. Every live feed gives up after 10 s, body included, and its fallback takes over |
 | STAB-06 | Data refresh guard: fail the weekly PR if counts drop by more than a set amount | S | now | done (2026-10-05) | Claude | PR #42, D-033. Per-row limits on falls; past one, the refresh PR opens as a draft that says not to merge, and the run fails |
 | STAB-07 | The routing worker recovers if it crashes, and says so | S | later | todo | Claude | `router.worker.ts` |
@@ -184,7 +184,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | STAB-10 | End-to-end journeys for the device switcher, notes and Leaving later | S | now | done (2026-10-05) | Claude | PR #33. Two devices and a switch, leaving in an hour, a route and a note. Found and fixed the drawer's last 6% being unreachable |
 | STAB-11 | The device editor's header fills a 320 by 640 screen at 200% text | S | now | done (2026-10-05) | Claude | PR #33. Description scrolls with the content; bars, icon buttons and switches in pixels. `pnpm a11y` checks it |
 | STAB-12 | 200% text at 320 px on the other screens: route panel, navigation, search, note and report sheets | S | now | done (2026-10-05) | Claude | `pnpm a11y` checks six more screens. Grids hold their width, chip rows and section headings wrap, navigation's two panels take half the screen each and scroll |
-| STAB-13 | The city name at the top of the map is cut off at 200% text on a 320 px phone ("Edinbur", under the layers button) | S | now | todo | Claude | Found doing STAB-12. `MapChrome.tsx`. Not caught by `pnpm a11y`: it's clipped, not off the side |
+| STAB-13 | The city name at the top of the map is cut off at 200% text on a 320 px phone ("Edinbur", under the layers button) | S | now | doing | Claude | 2026-10-05, `claude/clever-fermat-ij543q`. Found doing STAB-12. `MapChrome.tsx`. Not caught by `pnpm a11y`: it's clipped, not off the side |
 | STAB-14 | The e2e preview walk runs at a fixed speed, so a slower runner can miss the 2-minute arrival limit (Edinburgh took 2 min 44 s on a 4-core box) | S | later | todo | Claude | Found doing SEC-06. `E2E_ARRIVE_MS` raises the limit locally; better to step the walk by distance, not time |
 | STAB-08 | Offline test: load a city, cut the network, route | S | later | todo | Claude | D-023 |
 
@@ -204,7 +204,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | ID | Task | Size | Priority | Status | Who | Notes |
 |---|---|---|---|---|---|---|
 | BLOAT-01 | Move the four `step2-*.png` screenshots out of the repo root (about 760 KB) | S | next | done (2026-10-04) | Richard, Claude | Moved to `docs/ux/devices/` and linked from DEVICES.md. Delete them if they aren't wanted |
-| BLOAT-02 | Find unused files, exports and dependencies (`knip`) | S | now | todo | Claude | |
+| BLOAT-02 | Find unused files, exports and dependencies (`knip`) | S | now | doing | Claude | 2026-10-05, `claude/clever-fermat-ij543q` |
 | BLOAT-03 | Split `page.tsx` and `RoutePanel.tsx`, the two largest components | M | next | todo | Claude | About 600 lines each |
 | BLOAT-04 | Retire the Phase 0 scripts (`build-snapshot`, `build-edinburgh`, `spike-edinburgh`) if `build-area` covers them | S | later | todo | Claude | Keep the acceptance snapshot working |
 | BLOAT-05 | Keep the 18 MB base map out of git history (release assets or LFS) | M | later | todo | Richard, Claude | `.git` is 52 MB and grows with every refresh |

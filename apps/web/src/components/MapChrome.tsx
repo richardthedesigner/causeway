@@ -25,9 +25,10 @@ export const GROUND = {
   ice: { icon: Snowflake, label: "Icy", long: "Icy ground" },
 } as const;
 
-const chip = "pointer-events-auto inline-flex max-w-full min-h-12 items-center gap-2 rounded-full bg-glass px-4 font-bold shadow-[0_2px_12px_rgb(0_0_0/0.16)] backdrop-blur-md";
-const fab = "pointer-events-auto grid size-12 place-items-center rounded-2xl bg-glass shadow-[0_2px_12px_rgb(0_0_0/0.16)] backdrop-blur-md";
-const panel = "pointer-events-auto absolute z-30 mt-2 grid min-w-60 gap-1 rounded-2xl border border-line bg-surface p-2 text-base shadow-[0_8px_30px_rgb(0_0_0/0.2)]";
+// The bar over the map is sized in pixels: with large text, rem sizes would double the buttons and squeeze out the city name (STAB-13).
+const chip = "pointer-events-auto inline-flex max-w-full min-h-12 items-center gap-[6px] rounded-full bg-glass px-[12px] text-left font-bold break-words shadow-[0_2px_12px_rgb(0_0_0/0.16)] backdrop-blur-md";
+const fab = "pointer-events-auto grid size-[48px] place-items-center rounded-2xl bg-glass shadow-[0_2px_12px_rgb(0_0_0/0.16)] backdrop-blur-md";
+const panel = "pointer-events-auto absolute z-30 mt-2 grid min-w-[240px] max-w-[calc(100vw-24px)] gap-1 rounded-2xl border border-line bg-surface p-2 text-base shadow-[0_8px_30px_rgb(0_0_0/0.2)]";
 
 function Option({ on, onClick, children }: { on: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
@@ -46,14 +47,14 @@ function Option({ on, onClick, children }: { on: boolean; onClick: () => void; c
 export function MapChrome(props: Props) {
   const { open, setOpen, toggle, root } = useMenu();
   return (
-    <div ref={root} className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start gap-2 px-3 pt-[calc(0.75rem+env(safe-area-inset-top,0px))] md:left-[452px]">
+    <div ref={root} className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start gap-[8px] px-[12px] pt-[calc(12px+env(safe-area-inset-top,0px))] md:left-[452px]">
       {!props.minimal ? (
         <div className="flex min-w-0 flex-wrap items-start gap-2">
           <div className="relative max-w-full">
             <button type="button" data-menu="city" aria-haspopup="menu" aria-expanded={open === "city"} onClick={() => toggle("city")} className={chip}>
               <span className="sr-only">City: </span>
               {props.city.name}
-              <ChevronDown aria-hidden className="size-4" strokeWidth={2.6} />
+              <ChevronDown aria-hidden className="size-[16px] shrink-0" strokeWidth={2.6} />
             </button>
             {open === "city" ? (
               <div role="menu" aria-label="City" className={cn(panel, "left-0")}>
@@ -78,10 +79,10 @@ export function MapChrome(props: Props) {
       <div className="ml-auto grid shrink-0 gap-2">
         <div className="relative">
           <button type="button" data-menu="layers" aria-haspopup="menu" aria-expanded={open === "layers"} aria-label="Map layers" onClick={() => toggle("layers")} className={cn(fab, props.showSlopes && "bg-ink text-surface")}>
-            <Layers aria-hidden className="size-6" />
+            <Layers aria-hidden className="size-[24px]" />
           </button>
           {open === "layers" ? (
-            <div role="menu" aria-label="Map layers" className={cn(panel, "right-0 w-72 max-w-[calc(100vw-2rem)]")}>
+            <div role="menu" aria-label="Map layers" className={cn(panel, "right-0 w-[288px]")}>
               <button
                 type="button"
                 role="menuitemcheckbox"
@@ -89,9 +90,9 @@ export function MapChrome(props: Props) {
                 onClick={() => props.onSlopes(!props.showSlopes)}
                 className="flex min-h-12 items-center gap-3 rounded-xl px-3 text-left hover:bg-surface-2"
               >
-                <span className="flex-1 font-bold">Slopes on every street</span>
-                <span aria-hidden className={cn("relative h-7 w-12 rounded-full transition-colors", props.showSlopes ? "bg-accent" : "bg-line")}>
-                  <span className={cn("absolute top-1 size-5 rounded-full bg-surface transition-[left]", props.showSlopes ? "left-6" : "left-1")} />
+                <span className="min-w-0 flex-1 font-bold">Slopes on every street</span>
+                <span aria-hidden className={cn("relative h-[28px] w-[48px] shrink-0 rounded-full transition-colors", props.showSlopes ? "bg-accent" : "bg-line")}>
+                  <span className={cn("absolute top-[4px] size-[20px] rounded-full bg-surface transition-[left]", props.showSlopes ? "left-[24px]" : "left-[4px]")} />
                 </span>
               </button>
               <ul aria-label="Slope key" className="m-0 grid list-none grid-cols-2 gap-x-3 gap-y-1 px-3 py-2 text-sm">
@@ -115,7 +116,7 @@ export function MapChrome(props: Props) {
         </div>
         {!props.minimal ? (
           <button type="button" aria-label={props.locating ? "Finding your location" : "Start from your location"} onClick={props.onLocate} className={fab}>
-            <LocateFixed aria-hidden className={cn("size-6", props.locating && "animate-pulse text-accent")} />
+            <LocateFixed aria-hidden className={cn("size-[24px]", props.locating && "animate-pulse text-accent")} />
           </button>
         ) : null}
       </div>

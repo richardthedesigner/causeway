@@ -154,7 +154,15 @@ for (const scheme of ["light", "dark"]) {
     console.log(`200% text / ${name}: ${problems.length ? problems.join("; ") : "fits"}`);
     for (const p of problems) failures.push(`200% text / ${name} / ${p}`);
   };
-  await reflow("start, with This trip");
+  // The city name sits beside the map buttons; with large text it slid under them, cut off but on screen (STAB-13).
+  const city = await page.evaluate(() => {
+    const c = document.querySelector('[data-menu="city"]');
+    const l = document.querySelector('[data-menu="layers"]').getBoundingClientRect();
+    const r = c.getBoundingClientRect();
+    return { spills: c.scrollWidth > c.clientWidth + 1, under: r.right > l.left && r.top < l.bottom && r.bottom > l.top };
+  });
+  const cityProblems = [...(city.spills ? ["the city name spills out of its button"] : []), ...(city.under ? ["the city name runs under the map layers button"] : [])];
+  await reflow("start, with This trip", cityProblems);
   await page.getByRole("button", { name: "Your data", exact: true }).click();
   await page.getByRole("dialog", { name: "Your data" }).waitFor();
   await page.getByRole("button", { name: "Delete everything" }).click();
