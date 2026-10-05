@@ -852,3 +852,20 @@ The bottom sheet is meant to be non-modal (`modal={false}`), so the map stays us
 - Radix still loops Tab inside a non-modal dialog, so `DrawerContent` stops Tab reaching that loop. Tab now runs from the sheet to the map controls and back, in page order.
 - The city and layers menus are drawn at the end of the page, above the sheet. Inside the map they opened behind it. They take focus when they open; Escape, Tab or a choice gives it back to their button.
 - `pnpm a11y` checks that Tab reaches all three map controls, that `<main>` isn't hidden, and that both menus take and return focus.
+
+## D-070 Every grant by name, row-level security on every table
+
+**Decided.** 2026-10-05 (SEC-16, SEC-19). Fixes [security review](reviews/security-2026-10.md) C1, H1 and M3. Code: `db/migrations/0007_supabase_grants.sql`, `db/test/supabase-stub.sql`, `db/test/grants.test.sql`, `scripts/requirements.txt`, `.github/workflows/data-refresh.yml`.
+
+A new Supabase project grants everything in `public` to `anon` and `authenticated` in full. Our migrations were written and tested on a plain Postgres, where nothing is granted, so they never took those grants back.
+
+- **Grants are explicit.** `anon` and `authenticated` hold only what a migration grants by name. `0007` revokes the rest, and alters the default privileges so new tables, views, sequences and functions in `public` start with nothing. A new table needs its grants written in its own migration, or the app can't see it.
+- **Row-level security on every table in `public`.** The graph tables (`source`, `area`, `graph_node`, `graph_edge`, `edge_attribute`, `node_attribute`, `live_state`, `partner_venue_access`) get it with no policies and no grants. The app routes from JSON files and reads none of them, so nobody but the owner and the service role reads or writes them. When routing or live state reads from Supabase, add a `select` policy and grant then, never insert, update or delete.
+- **Views run as their owner,** so row-level security on the table underneath doesn't protect them. `note_public` is select only; `edge_attribute_resolved` has no grants.
+- **Tests see what production sees.** `scripts/test-db.sh` and CI's `migrations` job apply Supabase's default grants before the migrations. A test checks that every table in `public` has row-level security on, outside extensions.
+- **PostGIS's tables.** Supabase puts PostGIS in the `extensions` schema. Where it lands in `public` (CI, or a manual install), `0007` makes its tables read only. Moving it out of `public` in the migrations is SEC-24.
+- **The data refresh** checks out without keeping its token (`persist-credentials: false`). `create-pull-request` is given the token itself. Its pip packages are pinned to exact versions with hashes, so a changed package fails the install.
+
+**Conservative calls.**
+- The graph tables get no `select` for the public, though the data is open: the app doesn't need it, and a grant is easy to add later.
+- The trigger functions lose `execute` for everyone. Triggers still fire; nothing calls them directly.

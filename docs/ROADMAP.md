@@ -177,14 +177,15 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | SEC-13 | Drop `'unsafe-inline'` from the CSP's `script-src`: hashes for Next's inline scripts at build time | S | later | todo | Claude | D-041. They change every build |
 | SEC-14 | Turn on private vulnerability reporting (Settings, then Code security) | S | next | blocked | Richard | `SECURITY.md` points people to it |
 | SEC-15 | Remove a deleted note's approved photo from the public bucket | S | later | todo | Claude | D-059. Hidden once the note's gone, but the copy stays. A reviewer step or a server job, once sharing is on |
-| SEC-16 | Before the migrations run on Supabase: revoke Supabase's default grants, row-level security on every `public` table, and CI that tests with Supabase's grants | S | now | todo | Claude | [Review](reviews/security-2026-10.md) C1, H1. Signed out, anyone can delete any note through `note_public` and write the graph tables. Blocks turning sharing on |
+| SEC-16 | Before the migrations run on Supabase: revoke Supabase's default grants, row-level security on every `public` table, and CI that tests with Supabase's grants | S | now | done (2026-10-05) | Claude | [Review](reviews/security-2026-10.md) C1, H1. `0007_supabase_grants.sql`, [D-070](DECISIONS.md#d-070-every-grant-by-name-row-level-security-on-every-table). CI applies Supabase's default grants before the migrations |
 | SEC-17 | Server sets the fields the client shouldn't: note `created_at` and `photo_path`, report `status` and `verified_by` | S | next | todo | Claude | [Review](reviews/security-2026-10.md) M1, L1. A backdated `created_at` skips the 30-a-day limit |
 | SEC-18 | Stop shared notes linking one person: a per-target `author_key`, and approved photos stored by note id, not user id | S | next | todo | Claude | [Review](reviews/security-2026-10.md) M2, L2. D-009 |
-| SEC-19 | Data refresh: `persist-credentials: false` on checkout and pinned pip packages | S | now | todo | Claude | [Review](reviews/security-2026-10.md) M3. A bad package could push to `main`, and so to production |
+| SEC-19 | Data refresh: `persist-credentials: false` on checkout and pinned pip packages | S | now | done (2026-10-05) | Claude | [Review](reviews/security-2026-10.md) M3. `scripts/requirements.txt` with hashes. Branch protection is still SEC-23 |
 | SEC-20 | Size and file type limits on the photo buckets | S | later | todo | Claude | [Review](reviews/security-2026-10.md) L3. `0004_storage.sql` |
 | SEC-21 | Name the one Supabase host in the CSP instead of `*.supabase.co` | S | later | todo | Claude | [Review](reviews/security-2026-10.md) L4. Once the project exists. With SEC-13 |
 | SEC-22 | `BACKEND.md`: add `0006`, fix who can do what, add running Supabase's Security Advisor | S | next | todo | Claude | [Review](reviews/security-2026-10.md) L5 |
 | SEC-23 | Check branch protection on `main` and the production branch blocks direct pushes | S | next | blocked | Richard | [Review](reviews/security-2026-10.md) M3. Needs repo admin |
+| SEC-24 | Create PostGIS in the `extensions` schema in the migrations, as Supabase does, not in `public` | S | later | todo | Claude | Found in SEC-16. `0001_graph.sql` creates PostGIS in `public` when it isn't there; `0007` makes its tables read only, but Supabase's Security Advisor will still flag `spatial_ref_sys` |
 | SEC-11 | Name the weekly reviewer for flags, photos and reports | S | later | blocked | Richard | [BACKEND.md](BACKEND.md). Only once sharing is on |
 
 ## Stability and testing
@@ -287,6 +288,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 
 Newest first. One line per change: date, ID, what happened, link.
 
+- 2026-10-05: SEC-16 and SEC-19 done. `0007_supabase_grants.sql` takes back Supabase's default grants: `note_public` is read only, the graph tables have row-level security and no grants, and new objects in `public` start with none ([D-070](DECISIONS.md#d-070-every-grant-by-name-row-level-security-on-every-table)). CI and `scripts/test-db.sh` apply Supabase's grants first, with 13 new checks. The data refresh no longer leaves its token on disk, and installs pinned pip packages with hashes. BACKEND.md now lists `0006` and `0007` (part of SEC-22). Added SEC-24.
 - 2026-10-05: STAB-17 done: Tab leaves the sheet for the map controls, and the map menus open above the sheet (D-069). Now unchanged.
 - 2026-10-05: SEC-07 done and REV-02 run: [security review](reviews/security-2026-10.md). One critical and one high, both before sharing goes live: Supabase's default grants let anyone delete notes through `note_public` and write the graph tables. Added SEC-16 to SEC-23. REV-02 next due January 2027.
 - 2026-10-05: DEP-08 (PORT-44) done: PR #44 merged with PR #42. No D-number or task ID collided: #42 holds D-059 and D-060, #44 D-053 to D-058 and D-061 to D-068. SPEED-02 was done in #44, so SPEED-01 joins Now in its place.

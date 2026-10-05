@@ -2,6 +2,15 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
+## 2026-10-05 (Supabase grants and data-refresh token)
+
+SEC-16 and SEC-19: the critical and high findings of the [security review](reviews/security-2026-10.md), and its data-refresh token finding ([D-070](DECISIONS.md#d-070-every-grant-by-name-row-level-security-on-every-table)).
+- `0007_supabase_grants.sql`: `note_public` is select only; row-level security, and no grants, on the eight graph tables; no grants on `edge_attribute_resolved` or the sequences; new objects in `public` start with no grants for `anon` and `authenticated`.
+- `scripts/test-db.sh` and CI apply Supabase's default grants before the migrations (`db/test/supabase-stub.sql`). `db/test/grants.test.sql` adds 13 checks: nobody can delete or write through `note_public`, nobody can write a graph table, every table in `public` has row-level security on, new tables aren't granted. The 38 earlier checks still pass.
+- The review's probes, signed out as `anon` with Supabase's grants: before, `delete from note_public` gave `DELETE 1`, `insert into area` `INSERT 0 1`, `delete from source where id = 'crowd'` `DELETE 1`, and eight tables had no row-level security. After, all three are `permission denied` and every table has it.
+- Data refresh: `persist-credentials: false` on checkout, the token passed to `create-pull-request` itself, and `pip install --require-hashes -r scripts/requirements.txt` (osmium 4.3.1, duckdb 1.5.6, pyshp 3.1.6, the same versions it fetched unpinned).
+- BACKEND.md: migrations up to `0007`, PostGIS in the `extensions` schema, who can do what.
+
 ## 2026-10-05 (late night)
 
 **The map controls by keyboard** (STAB-17, D-069)
