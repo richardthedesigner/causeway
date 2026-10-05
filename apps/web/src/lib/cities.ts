@@ -33,7 +33,7 @@ export interface City {
   credit: string;
 }
 
-const OSM = "Map data © OpenStreetMap contributors (ODbL). Base map: Protomaps. Extra places: Overture Maps Foundation (CDLA Permissive 2.0). Bus timetables: Bus Open Data Service, Open Government Licence v3.0. Toilets: Great British Public Toilet Map, Public Convenience Ltd (CC BY 4.0).";
+const OSM = "Map data © OpenStreetMap contributors (ODbL). Base map: Protomaps. Extra places: Overture Maps Foundation (CDLA Permissive 2.0). Bus timetables: Bus Open Data Service, Open Government Licence v3.0. Toilets: Great British Public Toilet Map, Public Convenience Ltd (CC BY 4.0). Starting limits for kerbs and rest stops: Inclusive Mobility (Department for Transport, 2021), Open Government Licence v3.0.";
 
 export const CITIES: City[] = [
   {

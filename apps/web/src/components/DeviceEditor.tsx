@@ -1,5 +1,5 @@
 "use client";
-import { hasBattery, PRESETS, type MobilityPreset, type Profile, type SavedDevice } from "@causeway/profile";
+import { hasBattery, kerbLimitText, PRESETS, stepKerbCm, type MobilityPreset, type Profile, type SavedDevice } from "@causeway/profile";
 import { useState } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Slider } from "@/components/ui/slider";
@@ -42,7 +42,7 @@ const PRESET_GROUPS: { id: string; label: string; presets: MobilityPreset[] }[] 
 /** The closed "Your limits" row still says what matters: "Uphill 6% / Kerb 2 cm / No steps / 12 km battery". */
 function limitsSummary(p: Profile, steps: number): string {
   const up = p.maxInclineUpPct >= 50 ? "Any slope" : `Uphill ${p.maxInclineUpPct}%`;
-  const kerb = p.maxKerbCm === 0 ? "Flush kerbs" : `Kerb ${p.maxKerbCm} cm`;
+  const kerb = p.maxKerbCm === 0 ? "Flush kerbs" : `Kerb ${kerbLimitText(p.maxKerbCm)}`;
   const st = steps === 0 ? "No steps" : steps >= STEP_LIMIT ? "Any steps" : `Up to ${steps} steps`;
   return [up, kerb, st, p.maxRangeKm ? `${p.maxRangeKm} km battery` : null].filter(Boolean).join(" / ");
 }
@@ -160,8 +160,8 @@ export function DeviceEditor({ open, onOpenChange, device, onChange, onRename, o
               onValueChange={([v]) => set({ maxInclineDownPct: v! })}
             />
           </Limit>
-          <Limit label="Highest kerb" value={profile.maxKerbCm === 0 ? "Flush only" : `${profile.maxKerbCm} cm`} onStep={(d) => set({ maxKerbCm: clamp(Math.min(profile.maxKerbCm, 20) + d, 0, 20) })}>
-            <Slider thumbLabel="Highest kerb" valueText={`${profile.maxKerbCm} centimetres`} min={0} max={20} step={1} value={[Math.min(profile.maxKerbCm, 20)]} onValueChange={([v]) => set({ maxKerbCm: v! })} />
+          <Limit label="Highest kerb" value={kerbLimitText(profile.maxKerbCm)} onStep={(d) => set({ maxKerbCm: stepKerbCm(profile.maxKerbCm, d) })}>
+            <Slider thumbLabel="Highest kerb" valueText={profile.maxKerbCm > 0 && profile.maxKerbCm < 1 ? `${Math.round(profile.maxKerbCm * 10)} millimetres` : `${profile.maxKerbCm} centimetres`} min={0} max={20} step={1} value={[Math.min(profile.maxKerbCm, 20)]} onValueChange={([v]) => set({ maxKerbCm: v! })} />
           </Limit>
           <Limit label="Steps" value={stepsAllowed === 0 ? "None" : stepsAllowed >= STEP_LIMIT ? "Any" : `Up to ${stepsAllowed}`} onStep={(d) => { const v = clamp(stepsAllowed + d, 0, STEP_LIMIT); set({ maxSteps: v >= STEP_LIMIT ? Infinity : v }); }}>
             <Slider

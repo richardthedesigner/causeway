@@ -90,6 +90,7 @@ Fix and fill the pilot cities. DATA-01 to DATA-10 are in order of value per day 
 | DATA-25 | Scotland's flood warnings (SEPA) for the Water of Leith walkway | M | later | todo | Claude | D-047. No open feed matching the EA's found yet; look again |
 | DATA-26 | Pavement gritting routes for Newcastle and London | S | later | todo | Claude | D-047. None open found; City of London has priority pavements (survey §2 #10) |
 | DATA-27 | Do the 348 places that come only from AllThePlaces break the no-scraping rule (DATA_SOURCES rule 5)? | S | next | blocked | Richard, Claude | D-028. Mostly chain stores, parcel lockers and scout halls. Overture doesn't say which spider a record came from. Richard decides; then filter in `scrapedOnly` or leave as is |
+| DATA-28 | Presets on Inclusive Mobility values: manual wheelchair kerb 6 mm, unmeasured dropped kerbs at 6 mm, kerb text in mm, "More benches" ladder and speed | S | now | done (2026-10-05) | Claude | D-052, D-053. Ported from PR #36. Rollator keeps 300 m (Richard). Outcomes for all 91 journey and preset pairs in D-052 |
 | DATA-21 | Map York Place and the western way into the Grassmarket in OSM (about 1.1 km) | M | later | todo | Richard | [DEVICES.md](plans/DEVICES.md). Turns unknowns into known ground |
 
 ## Research: check our guesses with real people
@@ -259,6 +260,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 
 Newest first. One line per change: date, ID, what happened, link.
 
+- 2026-10-05: Added DATA-28 (presets on Inclusive Mobility values, ported from PR #36) and marked it done.
 - 2026-10-05: Added DATA-27 (the remaining AllThePlaces-only places), found doing DATA-01 in a parallel session (closed PR #37).
 - 2026-10-05: DATA-23, SEC-04, SEC-05, STAB-10, STAB-11 done in PR #33, and UPD-02 with SEC-04. Added STAB-12, SMALL-12. Now: STAB-12, STAB-05, STAB-06, SEC-06, SMALL-01.
 - 2026-10-04: DATA-07 to DATA-11 done in PR #33, and DATA-24 with them. Added DATA-25, DATA-26. Now: DATA-23, SEC-04, SEC-05, STAB-10, STAB-11.

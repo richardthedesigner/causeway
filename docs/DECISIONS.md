@@ -113,8 +113,8 @@ Update (SEC-05, 2026-10-05): checked. The app logs nothing; its only URL paramet
 
 **Decided**, explicitly provisional. The presets cite Inclusive Mobility (2021) where it applies (5% preferred, 8% absolute over short distances; cross-fall 2.5%) and are otherwise judgement.
 
-Update (DATA-10): rest distances now follow Inclusive Mobility (2021) section 3.4, "Recommended distance limit without a rest": walking stick and crutches 50 m (were 500 and 400), fatigue or chronic illness 100 m, IM's figure for people with a mobility impairment and no stick (was 250). IM's 150 m for wheelchair users and people with a vision impairment isn't used: they can stop anywhere, so a bench isn't the point. The rollator keeps 300 m: it has a seat. Mapped benches rarely come every 50 m, so "More benches" also tries half and seven-tenths of the route's longest gap, and offers the best it finds with the real figure.
-- Kerbs stay as they were. IM's "flush, with a maximum 6 mm tolerance" is how a dropped kerb should be built, not what someone can manage, and real lowered kerbs often aren't. So an OSM `lowered` kerb with no height still counts as 2 cm.
+Update (DATA-10): rest distances now follow Inclusive Mobility (2021) section 3.4, "Recommended distance limit without a rest": walking stick and crutches 50 m (were 500 and 400), fatigue or chronic illness 100 m, IM's figure for people with a mobility impairment and no stick (was 250). IM's 150 m for wheelchair users and people with a vision impairment isn't used: they can stop anywhere, so a bench isn't the point. The rollator keeps 300 m: it has a seat (confirmed by Richard, 2026-10-05, D-052). Mapped benches rarely come every 50 m, so "More benches" also tries half and seven-tenths of the route's longest gap, and offers the best it finds with the real figure. *Since D-052 and D-053 it starts from the loosest of these and makes at most two searches.*
+- Kerbs stay as they were. IM's "flush, with a maximum 6 mm tolerance" is how a dropped kerb should be built, not what someone can manage, and real lowered kerbs often aren't. So an OSM `lowered` kerb with no height still counts as 2 cm. *Superseded by D-052: Richard decided to apply IM's 6 mm to the manual wheelchair, and an unmeasured dropped kerb now counts as 6 mm.*
 - Gradients and cross-fall already cite IM (above). Users can change every figure, and Phase 2 testing (RES-01, RES-02) replaces them. The unknown-risk weights (60 s per 100 m for unknown gradient, 120 s per unmapped kerb at a crossing) are guesses. Both are calibrated in Phase 2 with disabled testers in each city. Every number lives in one place (`packages/profile`, `packages/router/src/cost.ts`).
 
 ## D-014 Phase 1 area: central Edinburgh first, whole city with the worker
@@ -501,7 +501,7 @@ Update (D-051): the council's surface and width are now written as inferred, not
 
 **Decided.** 2026-10-05. Ported by hand from the overnight build (PR #36) onto main. Each one stops the app saying more than its data supports. Code: `packages/graph/src/council.ts`, `packages/live/src/works.ts`, `packages/live/src/tfl.ts`, `apps/web/src/components/PlaceSearch.tsx`.
 
-- **Council widths and surfaces are inferred** (amends D-046). They cost time and never close a pavement on their own. OSM's own reported width still closes one.
+- **Council widths and surfaces are inferred** (amends D-046). They cost time and never close a pavement on their own. OSM's own reported width still closes one. On the 91 acceptance journey and preset pairs (`scripts/preset-outcomes.ts`), three Edinburgh routes changed, all by scooter: Causewayside to the museum by road scooter (17.0 to 18.4 minutes, now with no unknowns), and Causewayside to Waverley by scooter (29.5 to 23.4 minutes) and road scooter (29.7 to 25.2 minutes), through pavements that had been closed by a council width.
 - **Denied closures don't close.** TfL's street disruption comments are free text. "No footway closed" or "footway closed: not required" used to match the closure words and close the pavement. Now a closure phrase counts only when the words just before and after it don't deny it (`saysClosed`). One plain closure anywhere in the text still closes.
 - **Street Manager activities without their free text** (amends D-027). The details field can name addresses, businesses and people. We show the activity type in our own words and the street.
 - **Lift outages grouped by station.** TfL can report two lifts at one station on two messages. Each message was checked alone, so two lifts that between them cut off a line closed nothing. At Canning Town, lifts 1 and 3 are the two ways from the street to the ticket hall: either alone leaves a way, both out cut off the Jubilee line. Now every lift out at a station goes into one search, and the reason quotes each message once.
@@ -510,4 +510,43 @@ Update (D-051): the council's surface and width are now written as inferred, not
 **Conservative calls.**
 - An inferred council surface still counts in full, as an inferred OSM surface does: council setts or flags in ice still close the pavement for wheeled users. Only the width is softened. No preset refuses outright any surface the council layer can name. Every other reader of surface and width (the route's surface mix, the setts warning in navigation, "relax a limit" suggestions) still needs checking against inferred council values; that's a follow-up.
 - The committed London works file was edited in place rather than rebuilt: rebuilding would also have moved every other date in it.
+
+## D-052 Presets on Inclusive Mobility values: kerbs, credit and "More benches"
+
+**Decided.** 2026-10-05. Richard decided to apply these values (overnight build, PR #36, ported by hand). Updates D-013. Source: DfT, Inclusive Mobility, December 2021, Open Government Licence v3.0: the dropped kerbs paragraph ("preferably flush with the road, but with a maximum 6mm tolerance") and section 3.4. Code: `packages/profile/src/index.ts`, `LOWERED_KERB_CM` in `packages/router/src/cost.ts`, `tradeoffs` in `packages/router/src/router.ts`, `DeviceEditor.tsx`, `DeviceSetup.tsx`.
+
+**What changed.**
+- **Manual wheelchair: highest kerb 2 cm to 6 mm**, IM's flush band. Other wheeled presets keep their limits: 6 mm is how a kerb should be built, not what a powerchair or scooter can climb.
+- **An unmeasured dropped kerb counts as 6 mm**, not 2 cm (`LOWERED_KERB_CM`). Without this the 6 mm limit shuts out nearly every inferred dropped kerb (D-015): measured on main, the manual wheelchair then had no route on 3 of 7 journeys (Waverley to the Grassmarket, Causewayside to the museum, Parliament Square to Canada Square), and Causewayside to Waverley went from 32 to 63 minutes. "Flush only" (0) still avoids such kerbs. A measured kerb is always held to its measured height. Recorded so the two changes are never split.
+- **Kerb limits under 1 cm read in millimetres** ("6 mm"). The plus and minus buttons step to whole centimetres (6 mm goes to 1 cm or to flush).
+- **Rest intervals stay as D-013 set them**: walking stick and crutches 50 m, fatigue 100 m, **rollator 300 m**. The overnight build had the rollator at 50 m; Richard confirmed on 2026-10-05 that it keeps 300 m because it has a seat.
+- **"More benches" starts from the loosest interval worth offering and tightens once.** The candidates are 8, 6, 4, 3, 2, 1.5 and 1 times the user's interval, and seven-tenths and half of the route's own worst gap, all clearly shorter than that gap (under 85%). It searches the loosest, then the next, at most two searches, and stops early when a search finds nothing. Each search gives up past double the chosen route's cost or 15 minutes more (D-053). The best result is offered.
+- **The credits name Inclusive Mobility**, in every city's line.
+
+**Before and after.** All 7 acceptance journeys with all 13 presets, 91 pairs, recorded with `scripts/preset-outcomes.ts` (Monday lunchtime, dry, daylight; each city loaded as the worker loads it, without live data). "Before" is main with D-051.
+- **Verdict, time, distance and route:** no change in any of the 91.
+- **"More benches":** two changes, both Waverley to the Grassmarket.
+  - Walking stick: before, "No way there has mapped benches closer together than this". Now a route whose longest stretch without a bench is 470 m instead of 890 m, 4 minutes longer.
+  - Crutches: before, 860 m instead of 1,260 m, 10 minutes longer. Now 890 m instead of 1,260 m, no longer than the chosen route.
+- The other 25 rest-preset pairs say "No way there has mapped benches closer together than this", before and after.
+- **Speed** (route plus trade-offs for the four rest presets, 28 pairs, three runs each on a busy machine): 13.5 to 15.4 s before, 12.2 to 12.6 s after. Waverley to the Grassmarket by rollator is slower, 1.5 to 1.7 s to 1.7 to 2.2 s, because it now makes two searches where it used to stop at the first success.
+
+**Conservative calls.**
+- The overnight build's ladder (8 down to 1 times the interval) alone lost the crutches offer above, and stopped when the looser search found nothing better. So the route's own seven-tenths and half rungs from D-013 stay in the ladder, and a search that finds nothing better moves on to the second rung instead of stopping. Still at most two searches.
+- Saved devices keep the numbers they were saved with. Presets are starting points, and nobody's own settings change under them.
+- Treating an unmeasured dropped kerb as 6 mm is no more permissive than before for any preset with a limit of 2 cm or more. It is more permissive only for someone who sets 1 cm by hand.
+
+## D-053 "More benches" kept off the verdict's time
+
+**Decided.** 2026-10-05 (overnight build, PR #36, ported by hand). The router worker runs the trade-offs before it posts the verdict, so their time is the verdict's time. Code: `routeWithRests` and `tradeoffs` in `packages/router/src/router.ts`.
+
+**What changed.**
+- `routeWithRests` keys its states by number, not by string, and costs each edge and node once per search, not once for every gap bucket that reaches it. It finds the same routes: with this and D-052 together, `scripts/preset-outcomes.ts` gives the same verdict, time, distance and route for all 91 pairs. The "Past more toilets" search shares the code and gains too.
+- It takes a cost limit (`maxCost`). "More benches" passes double the chosen route's cost or 15 minutes more, so a search that can't succeed stops instead of exhausting the graph. The overnight build measured 1.25, 1.5 and 2 times and found no speed difference: failing searches run out of reachable benches first.
+- At most two searches per plan (D-052).
+
+**Conservative calls.**
+- The search stays in the plan reply, not after it. Moving it later would change the worker's messages and the route screen.
+- The cost limit is not lowered: that would offer fewer routes for no measurable gain.
+- The speed budget's measure of route plus trade-offs for rest presets is SPEED-02's (D-054).
 

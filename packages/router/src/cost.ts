@@ -156,6 +156,8 @@ const UNKNOWN_RISK_PER_100M: Record<string, number> = {
 };
 /** Unknown kerb at a crossing is the classic strand point: a flat cost per crossing. */
 const UNKNOWN_KERB_S = 120;
+/** A dropped kerb with no measured height, centimetres: the top of Inclusive Mobility's flush band, 6 mm (D-052). */
+export const LOWERED_KERB_CM = 0.6;
 const LIFT_WAIT_S = 45;
 const RIDE_MPS = 8.5;
 /** Average wait plus platform walk when boarding; alighting is quicker. */
@@ -478,7 +480,8 @@ function evaluateNodeBase(n: GraphNode, viaCrossing: boolean, p: Profile, _c: Co
   }
   if (n.kerb) {
     const t = n.kerb.type.value;
-    const h = isKnown(n.kerb.heightCm) ? n.kerb.heightCm.value : t === "raised" ? 12 : t === "flush" ? 0 : t === "lowered" ? 2 : null;
+    // No measured height: a dropped kerb is taken at the most Inclusive Mobility 2021 allows (flush, 0 to 6 mm), so "flush only" still avoids it (D-052).
+    const h = isKnown(n.kerb.heightCm) ? n.kerb.heightCm.value : t === "raised" ? 12 : t === "flush" ? 0 : t === "lowered" ? LOWERED_KERB_CM : null;
     if (h === null) {
       if (p.maxKerbCm < 10) {
         const s = UNKNOWN_KERB_S * (1 - p.uncertaintyTolerance);

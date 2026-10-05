@@ -13,6 +13,11 @@ Richard chose main as the base; the overnight build's extras (PR #36) are ported
 - Lift outages at one station count together: Canning Town lifts 1 and 3 out now cut off the Jubilee line.
 - A search result's first fact may take two lines before it is cut off.
 
+**Presets on Inclusive Mobility values** (D-052, D-053, DATA-28)
+- Manual wheelchair kerb limit 2 cm to 6 mm; a dropped kerb with no measured height counts as 6 mm. Kerb limits under 1 cm read in millimetres. The rollator keeps 300 m between rests (Richard).
+- "More benches" starts loosest and makes at most two searches, each with a cost limit; its search is quicker. Waverley to the Grassmarket with a walking stick now gets an offer (470 m instead of 890 m).
+- `scripts/preset-outcomes.ts` records verdict, time, route and "More benches" for every journey and preset. No verdict, time or route changed.
+
 ## 2026-10-05 (morning)
 
 Security and stability, from the roadmap's Now list.

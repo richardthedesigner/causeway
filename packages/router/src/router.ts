@@ -217,9 +217,10 @@ export class Router {
    * (within 30 m of the edge), or with `stop: "toilet"` an accessible toilet
    * (within 80 m). Resource-constrained A*: the state is the node plus
    * distance since the last stop, in eight buckets. Null when no such route
-   * exists in the mapped data.
+   * exists in the mapped data, or none costs `maxCost` or less (the search
+   * stops there instead of exhausting the graph).
    */
-  routeWithRests(from: GraphNode, to: GraphNode, p: Profile, c: Conditions = DRY, maxGapM = p.maxRestIntervalM ?? 400, stop: "bench" | "toilet" = "bench"): Route | null {
+  routeWithRests(from: GraphNode, to: GraphNode, p: Profile, c: Conditions = DRY, maxGapM = p.maxRestIntervalM ?? 400, stop: "bench" | "toilet" = "bench", maxCost = Infinity): Route | null {
     // A bench counts within 30 m of the path; a toilet within 80 m (worth a short detour off it).
     const near = stop === "bench" ? this.benchM : this.toiletM;
     const reach = stop === "bench" ? 30 : 80;
@@ -228,16 +229,22 @@ export class Router {
     const vmax = this.fastest(p);
     const h = (n: GraphNode) => haversine([n.lon, n.lat], [to.lon, to.lat]) / vmax;
     type Lab = { node: number; gap: number; cost: number; prev: Lab | null; step: Step | null };
-    const best = new Map<string, number>();
+    // State keys are numbers (node times buckets plus bucket), not strings, and each edge and node is costed once
+    // per search rather than once per bucket that reaches it: the same results, faster (D-053).
+    const K = B + 1;
+    const best = new Map<number, number>();
     const heap = new MinHeap();
     const labels: Lab[] = [{ node: from.id, gap: 0, cost: 0, prev: null, step: null }];
     heap.push(0, h(from));
-    const closed = new Set<string>();
+    const closed = new Set<number>();
+    const edgeEval = new Map<number, Evaluation>();
+    const nodeEval = new Map<number, Evaluation>();
+    const hOf = new Map<number, number>();
     let goal: Lab | null = null;
     while (heap.size) {
       const li = heap.pop()!;
       const L = labels[li]!;
-      const key = `${L.node}:${Math.floor(L.gap / bucketM)}`;
+      const key = L.node * K + Math.floor(L.gap / bucketM);
       if (closed.has(key)) continue;
       closed.add(key);
       if (L.node === to.id) {
@@ -248,17 +255,34 @@ export class Router {
         const benchHere = (near.get(a.edge.id) ?? Infinity) <= reach;
         const gap = RAIL.has(a.edge.kind) ? 0 : benchHere ? 0 : L.gap + a.edge.lengthM;
         if (gap > maxGapM) continue;
-        const ev = evaluateEdge(a.edge, a.forward, p, c, { note: this.noteSignals.get(a.edge.id) });
+        const ek = a.edge.id * 2 + (a.forward ? 1 : 0);
+        let ev = edgeEval.get(ek);
+        if (!ev) {
+          ev = evaluateEdge(a.edge, a.forward, p, c, { note: this.noteSignals.get(a.edge.id) });
+          edgeEval.set(ek, ev);
+        }
         if (ev.cost === Infinity) continue;
         const v = this.nodes.get(a.to)!;
-        const nv = evaluateNode(v, a.edge.kind === "crossing", p, c);
+        const crossing = a.edge.kind === "crossing";
+        const nk = a.to * 2 + (crossing ? 1 : 0);
+        let nv = nodeEval.get(nk);
+        if (!nv) {
+          nv = evaluateNode(v, crossing, p, c);
+          nodeEval.set(nk, nv);
+        }
         if (nv.cost === Infinity) continue;
         const cost = L.cost + ev.cost + nv.cost;
-        const k = `${a.to}:${Math.floor(gap / bucketM)}`;
+        const k = a.to * K + Math.floor(gap / bucketM);
         if (cost >= (best.get(k) ?? Infinity)) continue;
+        let hv = hOf.get(a.to);
+        if (hv === undefined) {
+          hv = h(v);
+          hOf.set(a.to, hv);
+        }
+        if (cost + hv > maxCost) continue;
         best.set(k, cost);
         labels.push({ node: a.to, gap, cost, prev: L, step: { edge: a.edge, forward: a.forward, eval: ev, node: v, nodeEval: nv } });
-        heap.push(labels.length - 1, cost + h(v));
+        heap.push(labels.length - 1, cost + hv);
       }
     }
     if (!goal) return null;
@@ -761,17 +785,21 @@ export function tradeoffs(router: Router, chosen: Route, from: GraphNode, to: Gr
   if (p.maxRestIntervalM) {
     const gap = restStats(router.graph, chosen).longestWithoutBenchM;
     if (gap > p.maxRestIntervalM) {
-      // Try the user's interval first, then relax: shorter worst gaps are still worth offering.
-      // Short intervals (Inclusive Mobility's 50 m) rarely fit mapped benches, so also try halfway to this route's gap.
+      // Inclusive Mobility's 50 m (D-013) is shorter than most mapped benches are apart, so a search at the user's
+      // own interval rarely finds anything. Start from the loosest interval worth offering (up to 8 times theirs,
+      // or seven-tenths or half of this route's worst gap, and clearly shorter than that gap), then tighten once
+      // and keep the better. At most two searches, each given up once it costs more than double the chosen route
+      // (or 15 minutes more). When the looser search finds nothing, the tighter one won't either: stop (D-052, D-053).
+      const maxCost = Math.max(chosen.cost * 2, chosen.cost + 900);
       let best: { r: Route; gap: number } | null = null;
-      const tries = [...new Set([p.maxRestIntervalM, p.maxRestIntervalM * 2, gap * 0.5, gap * 0.7].map(Math.round))].filter((m) => m < gap * 0.85).sort((x, y) => x - y);
-      for (const m of tries) {
-        const r = router.routeWithRests(from, to, p, c, m);
-        if (r) {
-          const g2 = restStats(router.graph, r).longestWithoutBenchM;
-          if (g2 < gap * 0.85) best = { r, gap: g2 };
-          break;
-        }
+      const ladder = [...new Set([...[8, 6, 4, 3, 2, 1.5, 1].map((f) => p.maxRestIntervalM! * f), gap * 0.7, gap * 0.5].map(Math.round))]
+        .filter((g) => g < gap * 0.85)
+        .sort((x, y) => y - x);
+      for (const g of ladder.slice(0, 2)) {
+        const r = router.routeWithRests(from, to, p, c, g, "bench", maxCost);
+        if (!r) break;
+        const g2 = restStats(router.graph, r).longestWithoutBenchM;
+        if (g2 < (best?.gap ?? gap * 0.85)) best = { r, gap: g2 };
       }
       out.push({
         id: "more-benches",
