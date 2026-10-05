@@ -32,6 +32,7 @@ These numbers shape routes but are our estimates, not evidence.
 | Bus, tram and Metro costs: waits, wheelchair space taken, seats at stops | [#12](https://github.com/richardthedesigner/causeway/issues/12) |
 | How much detour a crossing with no lights, a silent signal or no tactile paving is worth | [D-037](DECISIONS.md#d-037-crossings-for-people-who-cross-by-sound-and-touch) |
 | How much detour an unlit street is worth after dark | [D-038](DECISIONS.md#d-038-lit-streets-after-dark) |
+| Road scooters: 8 mph on every road without a mapped pavement, and whether riders want those road routes at all (RES-10) | [D-051](DECISIONS.md#d-051-road-scooters-go-at-road-speed-on-roads) |
 | Screen reader and switch-access testing: axe only catches about a third of WCAG issues | [BUILD_LOG](BUILD_LOG.md) |
 
 ## Known gaps

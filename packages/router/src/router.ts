@@ -5,7 +5,7 @@
  */
 import { confidence, haversine, isKnown, type Graph, type GraphEdge, type GraphNode, type NoteSignal } from "@causeway/graph";
 import type { Profile } from "@causeway/profile";
-import { darkCost, DRY, entranceVerdict, evaluateEdge, evaluateNode, surfaceLabel, type Conditions, type EdgeContext, type EntranceVerdict, type Evaluation, type Reason } from "./cost.js";
+import { baseSpeed, darkCost, DRY, entranceVerdict, evaluateEdge, evaluateNode, surfaceLabel, type Conditions, type EdgeContext, type EntranceVerdict, type Evaluation, type Reason } from "./cost.js";
 
 interface Arc {
   edge: GraphEdge;
@@ -86,7 +86,9 @@ export class Router {
    */
   private fastest(p: Profile): number {
     if (this.hasRides === undefined) this.hasRides = this.graph.edges.some((e) => e.kind === "transit");
-    return this.hasRides ? Math.max(p.speedMps, 15) : p.speedMps;
+    // Admissible heuristic: never slower than the fastest way this profile can move.
+    const own = Math.max(p.speedMps, p.roadLegal ? (p.roadSpeedMps ?? 0) : 0);
+    return this.hasRides ? Math.max(own, 15) : own;
   }
   private hasRides: boolean | undefined;
 
@@ -531,7 +533,7 @@ export function explain(router: Router, chosen: Route, from: GraphNode, to: Grap
     (a, b) => Number(b.reason.kind === "excluded") - Number(a.reason.kind === "excluded") || b.lengthM - a.lengthM,
   );
   // The direct route's time at this user's pace (rides take the same time for everyone).
-  const baseSeconds = base ? base.steps.reduce((t, st) => t + (RAIL.has(st.edge.kind) ? st.eval.seconds : st.edge.lengthM / p.speedMps), 0) : 0;
+  const baseSeconds = base ? base.steps.reduce((t, st) => t + (RAIL.has(st.edge.kind) ? st.eval.seconds : st.edge.lengthM / baseSpeed(st.edge, p)), 0) : 0;
   const addedMinutes = base ? Math.max(0, Math.round((chosen.seconds - baseSeconds) / 60)) : 0;
 
   const notes: string[] = [];

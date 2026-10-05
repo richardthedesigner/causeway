@@ -89,6 +89,12 @@ export interface Profile {
    * at up to 8 mph, so a street with no pavement is an ordinary road, not a hazard.
    */
   roadLegal?: boolean;
+  /**
+   * Speed on the carriageway for a road-legal scooter, metres per second (8 mph
+   * is 3.6). `speedMps` stays the pavement pace, which is what pace learning
+   * learns. Ignored unless `roadLegal`.
+   */
+  roadSpeedMps?: number;
 }
 
 /** Any powered wheelchair, light or heavy duty. Uses the bus wheelchair space. */
@@ -280,6 +286,7 @@ export const PRESETS: Record<MobilityPreset, Profile> = {
     companion: false,
     buses: false,
     roadLegal: true,
+    roadSpeedMps: 3.6,
   },
   rollator: {
     preset: "rollator",

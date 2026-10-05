@@ -373,3 +373,12 @@ The visual-impairment preset sets 60 s per 100 m; anyone can turn it on with "Af
 - **Live bus times** are hidden when leaving later: they're for now. The timetable frequency is for the leaving time.
 
 **Not stored.** The leaving time lasts for the visit; it isn't saved, so a stale "tomorrow 08:30" can't surprise anyone next week. A time that has passed counts as now.
+
+## D-051 Road scooters go at road speed on roads
+
+**Decided.** 2026-10-05. Tester feedback: a road scooter (class 3) does 8 mph on the road but 4 mph on pavements, and the router used one pace for both. Numbered D-051 because PR #33 holds D-041 to D-050.
+- A road-legal profile carries `roadSpeedMps`, its carriageway speed: 3.6 m/s (8 mph, the legal limit for class 3) by default. `speedMps` stays the pavement pace, capped by law at 4 mph.
+- Road speed applies on street proxies (`street_proxy`), the roads with no separately mapped pavement, which a road scooter drives along. Footways, pavements, pedestrian streets and crossings stay at the pavement pace. Gradient slows both the same way.
+- Pace learning learns only the pavement pace: stretches driven at road speed (`NavPlan.roads`) don't count. Time left while navigating uses both speeds.
+- **Effect.** Central Edinburgh journeys get 20 to 45% quicker, and routes move onto roads. Marchmont to Leith Walk went from 48% to 91% on roads, with only 7% of the route kept. That fits the law, but some riders keep to pavements or avoid busy roads. Ask them (RES-10) before adding a "prefer pavements" or "avoid busy roads" option.
+- Not built: a road speed setting in the device editor (FEAT-18). Until then every road scooter gets 8 mph on roads.

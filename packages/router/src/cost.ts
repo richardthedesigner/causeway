@@ -174,6 +174,10 @@ export function speedFactor(p: Profile, gradePct: number): number {
   return Math.max(0.5, 1 - 0.03 * Math.max(0, -gradePct - 2));
 }
 
+/** A road-legal scooter goes at road speed on a road; everyone else, and every other path, at their own pace. */
+export const onRoad = (e: Pick<GraphEdge, "kind">, p: Pick<Profile, "roadLegal" | "roadSpeedMps">) => !!p.roadLegal && !!p.roadSpeedMps && e.kind === "street_proxy";
+export const baseSpeed = (e: Pick<GraphEdge, "kind">, p: Profile) => (onRoad(e, p) ? p.roadSpeedMps! : p.speedMps);
+
 /** Signed value as traversed: incline flips when walking an edge backwards. */
 const signed = (v: number, forward: boolean) => (forward ? v : -v);
 
@@ -287,7 +291,7 @@ function evaluateEdgeBase(e: GraphEdge, forward: boolean, p: Profile, c: Conditi
   const grade = isKnown(a.incline) ? signed(a.incline.value, forward) : 0;
   let worst = isKnown(a.inclineMax) ? signed(a.inclineMax.value, forward) : grade;
   if (Math.abs(grade) > Math.abs(worst)) worst = grade;
-  const speed = p.speedMps * (e.kind === "steps" ? 0.4 : speedFactor(p, grade));
+  const speed = baseSpeed(e, p) * (e.kind === "steps" ? 0.4 : speedFactor(p, grade));
   const seconds = e.lengthM / speed;
   let penalty = 0;
 
