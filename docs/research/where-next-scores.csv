@@ -1,0 +1,15 @@
+rank,city,nation,code,pop,disabled,disabled_pct,prev_basis,limited_a_lot_pct,need_index,bluebadges_held,bluebadge_pct_pop,stations,station_entries_exits,data_score,licence_score,reuse_score,s_reach,s_need,s_transit,score,benefit_only,feasibility_only,rank_benefit_only,rank_feasibility_only
+1,Glasgow,Scotland,S12000049,620700,161382,26.0,published (Glasgow indicators site),,1.08,,,Glasgow Central + Glasgow Queen Street,40244682,5,2,5,4.51,3.0,4.63,83.8,84.1,83.6,2,1
+2,Leeds,England,E08000035,811953,135681,16.7,Census 2021 TS038,6.9,0.95,41000,4.8,Leeds,27309508,3,4,4,4.14,2.19,3.81,72.7,72.7,72.7,4,4
+3,Sheffield,England,E08000019,556521,109869,19.7,Census 2021 TS038,8.5,1.13,29000,5.0,Sheffield,10315220,3,4,4,3.72,3.31,2.34,69.9,66.5,72.7,6,5
+4,Bristol,England,E06000023,472466,81159,17.2,Census 2021 TS038,6.9,0.98,22000,4.4,Bristol Temple Meads,10877308,4,4,4,3.2,2.38,2.41,69.6,56.8,80.0,8,2
+5,Manchester,England,E08000003,551938,96737,17.5,Census 2021 TS038,8.2,1.0,22000,3.7,Manchester Piccadilly + Manchester Victoria + Manchester Oxford Road,42172726,3,3,4,3.49,2.5,4.74,69.0,71.0,67.3,5,7
+6,Birmingham,England,E08000025,1144919,198064,17.3,Census 2021 TS038,8.1,0.99,54000,4.5,Birmingham New Street + Birmingham Moor Street + Birmingham Snow Hill,46925660,1,3,4,5.0,2.44,5.0,68.9,88.6,52.7,1,10
+7,Nottingham,England,E06000018,323632,60218,18.6,Census 2021 TS038,8.2,1.06,12000,3.5,Nottingham,8112724,3,4,4,2.76,2.88,2.08,63.7,52.7,72.7,10,6
+8,Liverpool,England,E08000012,486088,105962,21.8,Census 2021 TS038,11.2,1.24,22000,4.4,Liverpool Lime Street + Liverpool Central,29250430,1,3,4,3.66,4.0,3.95,63.2,76.0,52.7,3,11
+9,Dundee,Scotland,S12000042,148100,33158,22.4,estimated from age-standardised bad health (see report),,0.93,,,Dundee,1763546,3,3,5,2.05,2.06,0.97,57.3,36.2,74.5,14,3
+10,Aberdeen,Scotland,S12000033,224000,43950,19.6,estimated from age-standardised bad health (see report),,0.81,,,Aberdeen,2377660,2,3,5,2.36,1.31,1.13,53.7,37.0,67.3,13,8
+11,Leicester,England,E06000016,368571,57148,15.5,Census 2021 TS038,7.0,0.88,18000,4.8,Leicester,5527136,2,3,4,2.69,1.75,1.72,53.4,45.2,60.0,12,9
+12,Brighton and Hove,England,E06000043,277103,51797,18.7,Census 2021 TS038,7.3,1.07,13000,4.5,Brighton,15328450,1,3,4,2.56,2.94,2.86,53.4,54.2,52.7,9,12
+13,Cardiff,Wales,W06000015,362307,67506,18.6,Census 2021 TS038,8.2,1.06,,,Cardiff Central + Cardiff Queen Street,14524304,2,3,2,2.92,2.88,2.78,50.9,57.6,45.5,7,13
+14,Swansea,Wales,W06000011,238490,53484,22.4,Census 2021 TS038,11.1,1.28,,,Swansea,2303850,2,3,2,2.6,4.25,1.11,48.7,52.7,45.5,11,14

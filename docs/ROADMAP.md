@@ -112,8 +112,9 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | RES-06 | Measure gradients on the ground in each city, starting with West Bow and Victoria Terrace | M | next | todo | Richard | Validates LiDAR. Those two decide Cherry's Grassmarket route |
 | RES-07 | Accessibility testing on real devices: VoiceOver, TalkBack, Switch Control, Voice Control | M | next | todo | Richard, Claude | [UX_ASSESSMENT.md](UX_ASSESSMENT.md). axe catches about a third of WCAG issues |
 | RES-08 | Benchmark every acceptance journey against openrouteservice's wheelchair profile | M | later | todo | Claude | D-003 |
-| RES-09 | Choose where to go next with census disability data, Blue Badge statistics and station usage | M | later | todo | Claude | §5 |
+| RES-09 | Choose where to go next with census disability data, Blue Badge statistics and station usage | M | later | done (2026-10-05) | Claude | §5. [where-next.md](research/where-next.md): Glasgow, then Leeds. Wales scores last, so DEF-09 needs a decision (OPEN_ITEMS) |
 | RES-10 | Ask road scooter riders whether they want routes on roads, and whether to avoid busy ones | S | next | todo | Richard | D-051: routes now move onto roads at 8 mph |
+| RES-11 | Scottish council-level census disability and Blue Badge figures for Scotland and Wales; a proper data pass on Birmingham and Liverpool; then rerun the RES-09 scores | S | later | todo | Claude | [where-next.md](research/where-next.md), \"What the sources do not give us\". Scotland's UV303 tables need a browser download |
 
 ## Features
 
@@ -283,11 +284,13 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 | DEF-07 | Optional accounts: sync devices and saved places between phones, encrypted on the device, sign in with a passkey or email code | L | later | blocked | Richard, Claude | Health data makes this a privacy decision first (D-009) |
 | DEF-08 | Opt-in surface sensing from the accelerometer | L | later | blocked | Claude | Needs DEF-01 and a privacy review |
 | DEF-09 | Beyond the pilot cities: Glasgow first (once DATA-13 is licensed), then Wales | XL | later | blocked | Richard, Claude | §5 |
+| DEF-10 | Leeds as the second expansion city: pull its open crossing, rights-of-way and café-licence data and run the England stack on it | XL | later | blocked | Claude | RES-09 ranks Leeds second. Needs a plan in `docs/plans/` and Richard's call on DEF-09 |
 
 ## Log
 
 Newest first. One line per change: date, ID, what happened, link.
 
+- 2026-10-05: RES-09 done: 14 UK cities scored on Census 2021 and 2022, Blue Badge and station usage, open data, licences and code reuse. Glasgow first, then Leeds, then Sheffield; Cardiff and Swansea last, so DEF-09's "then Wales" isn't supported. Follow-ups RES-11 and DEF-10 added ([report](research/where-next.md)).
 - 2026-10-05: SEC-16 and SEC-19 done. `0007_supabase_grants.sql` takes back Supabase's default grants: `note_public` is read only, the graph tables have row-level security and no grants, and new objects in `public` start with none ([D-070](DECISIONS.md#d-070-every-grant-by-name-row-level-security-on-every-table)). CI and `scripts/test-db.sh` apply Supabase's grants first, with 13 new checks. The data refresh no longer leaves its token on disk, and installs pinned pip packages with hashes. BACKEND.md now lists `0006` and `0007` (part of SEC-22). Added SEC-24.
 - 2026-10-05: STAB-17 done: Tab leaves the sheet for the map controls, and the map menus open above the sheet (D-069). Now unchanged.
 - 2026-10-05: SEC-07 done and REV-02 run: [security review](reviews/security-2026-10.md). One critical and one high, both before sharing goes live: Supabase's default grants let anyone delete notes through `note_public` and write the graph tables. Added SEC-16 to SEC-23. REV-02 next due January 2027.

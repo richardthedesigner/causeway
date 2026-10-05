@@ -2,6 +2,14 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
+## 2026-10-05 (RES-09: where next)
+
+Research only. No code, data or workflow changes.
+- Scored 14 UK cities on reach (Census 2021 TS038 for England and Wales, Scotland's Census 2022), need, rail station usage (ORR 2024-25), open accessibility data, licence and code reuse. Report and scores: [where-next.md](research/where-next.md) and [where-next-scores.csv](research/where-next-scores.csv).
+- Result: Glasgow, then Leeds, then Sheffield. Bristol, Manchester and Birmingham are within a point of Sheffield. Cardiff and Swansea score last, so DEF-09's "then Wales" isn't supported.
+- Gaps: Scotland's council-level disability tables sit behind a bot check at the UK Data Service, so Dundee and Aberdeen use an estimate; Blue Badges by council exist for England only. Both are in RES-11.
+- DEF-10 (Leeds) added. DEF-09 is unchanged until Richard decides (OPEN_ITEMS).
+
 ## 2026-10-05 (Supabase grants and data-refresh token)
 
 SEC-16 and SEC-19: the critical and high findings of the [security review](reviews/security-2026-10.md), and its data-refresh token finding ([D-070](DECISIONS.md#d-070-every-grant-by-name-row-level-security-on-every-table)).
