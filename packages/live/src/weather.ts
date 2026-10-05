@@ -5,7 +5,7 @@
  * The cost model already takes { wet, ice }; this decides them.
  */
 import type { Conditions } from "@causeway/router";
-import { getJson } from "./timeout.js";
+import { getJson, type LiveOptions } from "./http.js";
 
 export interface OpenMeteoResponse {
   current: {
@@ -88,6 +88,6 @@ export function forecastConditions(r: OpenMeteoResponse, when: Date, now = new D
   return { now: when, wet, ice, summary, source: "Open-Meteo forecast (CC BY 4.0)", observedAt: h.time[at]! };
 }
 
-export async function fetchConditions(lat: number, lon: number, fetchImpl: typeof fetch = fetch, now = new Date()): Promise<WeatherConditions> {
-  return conditionsFromOpenMeteo(await getJson<OpenMeteoResponse>(openMeteoUrl(lat, lon), "Open-Meteo", { fetchImpl }), now);
+export async function fetchConditions(lat: number, lon: number, fetchImpl: typeof fetch = fetch, now = new Date(), opts: Omit<LiveOptions, "fetchImpl"> = {}): Promise<WeatherConditions> {
+  return conditionsFromOpenMeteo(await getJson<OpenMeteoResponse>(openMeteoUrl(lat, lon), "Open-Meteo", { ...opts, fetchImpl }), now);
 }

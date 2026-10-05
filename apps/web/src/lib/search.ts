@@ -4,8 +4,8 @@
  * a category plus an access filter. Access facts are OpenStreetMap's own
  * tags, shown with their date and never turned into a verdict.
  */
+import { getJson, LiveHttpError } from "@causeway/live";
 import type { Place } from "./plan-types";
-import { getJson } from "@causeway/live";
 
 export interface PlacesFile {
   area: string;
@@ -313,18 +313,19 @@ export function search(index: Index, q: string, near: { lon: number; lat: number
 /** Inside the area the router has a network for. */
 export const inZones = (index: Index, p: { lon: number; lat: number }) => !index.zones.length || index.zones.some((z) => z[0] <= p.lon && p.lon <= z[2] && z[1] <= p.lat && p.lat <= z[3]);
 
-/** An unknown postcode, an error or no answer in time all mean "nothing found"; a newer search replacing this one still aborts it (STAB-05). */
-const notFound =
-  <T,>(empty: T) =>
-  (e: unknown): T => {
-    if ((e as Error).name === "AbortError") throw e;
-    return empty;
-  };
+/** How long a live search lookup gets. Someone is waiting on the list, so it's shorter than the feeds' limit. */
+const SEARCH_TIMEOUT_MS = 6_000;
 
 /** A full postcode the local index doesn't have, from postcodes.io (Open Government Licence; ONS and Royal Mail data). */
 export async function lookupPostcode(pc: string, signal?: AbortSignal): Promise<Place | null> {
-  const j = await getJson<{ result?: { postcode: string; longitude: number | null; latitude: number | null; admin_ward?: string } }>(`https://api.postcodes.io/postcodes/${encodeURIComponent(pc)}`, "postcodes.io", { signal }).catch(notFound(null));
-  const r = j?.result;
+  type Found = { result?: { postcode: string; longitude: number | null; latitude: number | null; admin_ward?: string } };
+  // A live lookup gets a few seconds; past that the local results stand (STAB-05). Unknown postcodes are a 404.
+  const j = await getJson<Found>(`https://api.postcodes.io/postcodes/${encodeURIComponent(pc)}`, "postcodes.io", { signal, timeoutMs: SEARCH_TIMEOUT_MS }).catch((e: unknown) => {
+    if (e instanceof LiveHttpError) return null;
+    throw e;
+  });
+  if (!j) return null;
+  const r = j.result;
   if (!r || r.longitude == null || r.latitude == null) return null;
   return { id: `pc:${r.postcode}`, name: r.postcode, kind: r.admin_ward ? `Postcode / ${r.admin_ward}` : "Postcode", lon: r.longitude, lat: r.latitude };
 }
@@ -338,7 +339,11 @@ export async function photon(q: string, near: { lon: number; lat: number }, bbox
   u.searchParams.set("limit", "8");
   u.searchParams.set("lang", "en");
   u.searchParams.set("bbox", bbox.join(","));
-  const j = await getJson<{ features: { geometry: { coordinates: [number, number] }; properties: Record<string, string | undefined> }[] }>(u.toString(), "Photon", { signal }).catch(notFound(null));
+  type Found = { features: { geometry: { coordinates: [number, number] }; properties: Record<string, string | undefined> }[] };
+  const j = await getJson<Found>(u.toString(), "Photon", { signal, timeoutMs: SEARCH_TIMEOUT_MS }).catch((e: unknown) => {
+    if (e instanceof LiveHttpError) return null;
+    throw e;
+  });
   if (!j) return [];
   return j.features.map((f) => {
     const p = f.properties;

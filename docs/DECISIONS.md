@@ -497,17 +497,27 @@ When there is nothing to compare with, it builds. Once DEP-01 makes `main` the p
 - **PostCSS**: a pnpm override (`next>postcss`) lifts Next's copy to 8.5.28. Next only uses it at build time. Drop the override when Next's own pin passes 8.5.23.
 - The local check server serves `.mjs` as JavaScript, as Vercel does; a module worker is refused otherwise.
 
+Update (BLOAT-02, 2026-10-05): CI also runs `pnpm knip` for unused files, exports and dependencies. `knip.json` names the entry points it can't see (build scripts, the service worker). knip 6, not 5: 5 depends on a `braces` with a high advisory and no fix, which the audit would fail.
+
 ## D-051 Road scooters go at road speed on roads
 
 **Decided.** 2026-10-05. Tester feedback: a road scooter (class 3) does 8 mph on the road but 4 mph on pavements, and the router used one pace for both.
-- A road-legal profile carries `roadSpeedMps`, its carriageway speed: 3.6 m/s (8 mph, the legal limit for class 3) by default. `speedMps` stays the pavement pace, capped by law at 4 mph.
+- A road-legal profile carries `roadSpeedMps`, its carriageway speed: 3.576 m/s (8 mph, the legal limit for class 3) by default. `speedMps` stays the pavement pace, capped by law at 4 mph.
 - Road speed applies on street proxies (`street_proxy`), the roads with no separately mapped pavement, which a road scooter drives along. Footways, pavements, pedestrian streets and crossings stay at the pavement pace. Gradient slows both the same way.
 - Pace learning learns only the pavement pace: stretches driven at road speed (`NavPlan.roads`) don't count. Time left while navigating uses both speeds.
 - **Effect.** Central Edinburgh journeys get 20 to 45% quicker, and routes move onto roads. Marchmont to Leith Walk went from 48% to 91% on roads, with only 7% of the route kept. That fits the law, but some riders keep to pavements or avoid busy roads. Ask them (RES-10) before adding a "prefer pavements" or "avoid busy roads" option.
-- Not built: a road speed setting in the device editor (FEAT-18). Until then every road scooter gets 8 mph on roads.
-## D-052 Time limits on live feeds
+- **In the editor** (FEAT-18, 2026-10-05): road scooters get "Speed on the road", 4 to 8 mph in half-mph steps. Below 4 mph the road isn't worth using (that's the pavement limit), and 8 mph is the legal top speed.
+- **Speed units** (FEAT-18): each device has "Show speeds in: mph or km/h" (`speedUnit`), used for pace and road speed. Scooters default to mph, the unit they're sold and regulated in; everyone else to km/h, as before. Distances stay metric; a full miles or kilometres setting is SMALL-02.
 
-**Decided.** 2026-10-05 (STAB-05). Every live feed (TfL lifts, line and station disruptions, street works and arrivals, Environment Agency floods, Open-Meteo, postcodes.io, Photon) goes through one helper, `getJson` in `packages/live`, which gives up after 10 seconds, body included, with an error that names the feed. A hung feed then fails like any other, and each caller's fallback takes over: the last live states until they expire, dry weather, local search results only. A newer request still cancels an older one.
+## D-052 Live feeds get a time limit
+
+**Decided.** 2026-10-05 (ROADMAP STAB-05). Every live feed already had a fallback for a failure: lifts say "Couldn't get live lift status from TfL", works and floods keep what they had, bus times say they're unavailable, the weather assumes dry and says so. But a feed that hangs never fails, so the fallback never came. "Checking lifts with TfL…" could stay for good, and each refresh added another request that never ended.
+
+- **What we do.** Every live call goes through `getJson` (`packages/live/src/http.ts`): TfL lifts, line and station disruptions, street works and bus arrivals, Environment Agency floods, Open-Meteo, Photon and postcodes.io. It aborts the request when time runs out, counts reading the body against the limit, and holds even for a fetch that ignores its signal.
+- **Limits.** 10 s for the feeds (`LIVE_TIMEOUT_MS`): they refresh every few minutes, so a slow answer is better than none, but 10 s is already longer than anyone will watch "Checking…". 6 s for live search, where someone is waiting on the list and the bundled results are already showing.
+- **A cancel isn't a failure.** The weather check restarts when the city or leaving time changes. The cancelled check used to land in the same handler as a failure, so "Couldn't check the weather" flashed on every app start in a remembered city. It now waits for a real failure or the limit.
+- **Tested.** `getJson` unit tests (`packages/live/test/http.test.ts`), and a `pnpm e2e` journey in London where TfL, Open-Meteo and the Environment Agency never answer: the route still comes, and the weather and lift lines fall back.
+- **Not covered.** The Supabase calls for sharing and review (STAB-14). Sharing is off today.
 
 ## D-053 Your data: a copy, and delete everything
 

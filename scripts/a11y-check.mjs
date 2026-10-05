@@ -2,7 +2,8 @@
  * WCAG 2.2 AA check of the built app with axe-core, light and dark, on the
  * screens people use most: start, search results, a route with buses and
  * toilets (every section open), first-visit setup, the device list and the
- * device settings, with a battery range, and the update prompt. Then the
+ * device settings, with a battery range and as a road scooter in mph and
+ * km/h (FEAT-18), and the update prompt. Then the
  * setup and device settings sheets on a 320 by 640 phone at 200% text: the
  * header takes at most a third of the screen, and nothing runs off the side (STAB-11).
  * And the other screens at the same size: start with "This trip", search,
@@ -84,6 +85,13 @@ for (const scheme of ["light", "dark"]) {
   await page.getByRole("switch", { name: "Warn me about battery range" }).click();
   await page.getByRole("slider", { name: "Range on one charge" }).waitFor();
   await check("device settings, battery range");
+  // A road scooter: speed on the road, in either unit (FEAT-18).
+  await page.getByRole("radio", { name: /Mobility scooter, road/ }).click();
+  for (const d of await page.locator("[role=dialog] details").all()) await d.evaluate((el) => (el.open = true));
+  await page.getByRole("slider", { name: "Speed on the road" }).waitFor();
+  await check("device settings, road scooter, mph");
+  await page.getByRole("radio", { name: "km/h" }).click();
+  await check("device settings, road scooter, km/h");
 
   // A new build takes over an open page: the update prompt (DEP-04). The first takeover is a first visit.
   await page.keyboard.press("Escape");
@@ -131,6 +139,10 @@ for (const scheme of ["light", "dark"]) {
   for (const d of await page.locator("[role=dialog] details").all()) await d.evaluate((el) => (el.open = true));
   await page.getByRole("switch", { name: "Warn me about battery range" }).click();
   await reflow("device settings, every section open");
+  await page.getByRole("radio", { name: /Mobility scooter, road/ }).click();
+  for (const d of await page.locator("[role=dialog] details").all()) await d.evaluate((el) => (el.open = true));
+  await page.getByRole("slider", { name: "Speed on the road" }).waitFor();
+  await reflow("device settings, road scooter");
 }
 // Reflow on the other screens at 320 by 640 with text at 200% (STAB-12). The map draws its own labels, so it's left out.
 {

@@ -1,6 +1,6 @@
 "use client";
 import { learnPace, type Profile } from "@causeway/profile";
-import { conditionsFromOpenMeteo, forecastConditions, getJson, openMeteoUrl } from "@causeway/live";
+import { conditionsFromOpenMeteo, forecastConditions, getJson, openMeteoUrl, type OpenMeteoResponse } from "@causeway/live";
 import { haversine } from "@causeway/graph";
 import { ChevronLeft } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -158,13 +158,15 @@ export default function Home() {
   // Live weather sets the ground; the user can override it from the chip.
   useEffect(() => {
     const ctl = new AbortController();
-    getJson<Parameters<typeof conditionsFromOpenMeteo>[0]>(openMeteoUrl(...city.weatherAt), "Open-Meteo", { signal: ctl.signal })
+    // Ten seconds, then the dry fallback below, rather than waiting on a feed that never answers (STAB-05).
+    getJson<OpenMeteoResponse>(openMeteoUrl(...city.weatherAt), "Open-Meteo", { signal: ctl.signal })
       .then((j) => {
         const later = leaveAt && leaveAt.getTime() > Date.now() + 45 * 60_000;
         const c = later ? forecastConditions(j, leaveAt) : conditionsFromOpenMeteo(j);
         setConditions({ wet: c.wet, ice: c.ice, summary: c.summary, source: later ? "From the Open-Meteo forecast" : `From Open-Meteo at ${c.observedAt.slice(11, 16)} UTC` });
       })
-      .catch(() => setConditions({ ...PRESET_CONDITIONS.dry, summary: "Couldn't check the weather, so we're assuming dry", source: "Change it if the ground is wet or icy" }));
+      // A cancelled check (the city or leaving time changed) isn't a failure: the next one is already on its way.
+      .catch(() => ctl.signal.aborted || setConditions({ ...PRESET_CONDITIONS.dry, summary: "Couldn't check the weather, so we're assuming dry", source: "Change it if the ground is wet or icy" }));
     return () => ctl.abort();
   }, [city, leaveAt]);
 

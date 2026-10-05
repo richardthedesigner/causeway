@@ -2,12 +2,29 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
-## 2026-10-05 (midday)
+## 2026-10-05 (evening)
 
-Stability, privacy and bank holidays, from the roadmap's Now list.
+Large text, tests, copying a route, no signal and dead code, from the roadmap's Now list.
 
-**Time limits on live feeds** (D-052, STAB-05)
-- Every live feed gives up after 10 seconds with an error naming it. The fallback each already had then takes over.
+**The city name at 200% text** (STAB-13)
+- The bar over the map is sized in pixels, so the city name no longer slides under the map buttons. `pnpm a11y` checks it.
+
+**Router fuzz test** (STAB-04)
+- 60 seeded random journeys per city, for four people in three kinds of weather. Every route must join up, avoid anything the person can't use, and come back the same twice.
+
+**Copy the route as text** (SMALL-04)
+- "Route in words" can be copied for a message: what it's like, what isn't known, and the steps. Never the device.
+- Keyboard focus moving into the half-open sheet now opens it fully, so focus is never under the screen's edge.
+
+**No signal** (SMALL-06, STAB-08)
+- Offline, the sheet and navigation say what still works and what's paused. `pnpm e2e` cuts the network and still routes.
+
+**Dead code** (BLOAT-02)
+- `pnpm knip` runs in CI. Removed an unused component, three packages and twelve stray exports, and declared the workspace dependencies we use.
+
+## 2026-10-05 (late afternoon)
+
+Privacy, a refresh guard and bank holidays, from the roadmap's Now list.
 
 **A guard on the weekly refresh** (D-033, STAB-06)
 - Each count has a limit on how far it may fall. Past one, the refresh pull request opens as a draft that lists the drops, and the run fails.
@@ -18,6 +35,21 @@ Stability, privacy and bank holidays, from the roadmap's Now list.
 **Your data** (D-053, SEC-06)
 - One sheet says what the phone keeps, downloads it as a file, and deletes everything, including what was shared. Migration 0006 lets people delete their own reports, flags and photos.
 - `pnpm e2e` downloads a copy and deletes it all; `pnpm a11y` checks the sheet, including at 200% text.
+
+## 2026-10-05 (afternoon)
+
+**Live feeds give up after 10 seconds** (D-052, STAB-05)
+- A hung feed never failed, so its fallback never showed: "Checking lifts with TfL…" could stay for good. Every live call now has a time limit: 10 s for TfL, the Environment Agency and Open-Meteo, 6 s for live search.
+- Fixed on the way: "Couldn't check the weather" flashed on every start in a remembered city, because a cancelled check was treated as a failed one.
+- `pnpm e2e` now runs a London journey with every live feed hanging. The route comes, and the weather and lift lines fall back in about 11 and 13 seconds.
+
+## 2026-10-05 (midday)
+
+**Road speed in the device editor** (D-051, FEAT-18)
+- Road scooters: "Speed on the road", 4 to 8 mph in half-mph steps. The "Your limits" row says "8 mph on roads".
+- Every device: "Show speeds in: mph or km/h", for pace and road speed. Scooters start in mph, everyone else in km/h.
+- `pnpm a11y` checks a road scooter's settings in both units, and at 200% text on a 320 px phone.
+
 ## 2026-10-05 (later)
 
 **Road speed for road scooters** (D-051, FEAT-02)

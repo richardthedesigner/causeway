@@ -13,7 +13,7 @@
  * closures, and a refresh replaces them all.
  */
 import type { LiveState } from "@causeway/graph";
-import { getJson } from "./timeout.js";
+import { getJson, type LiveOptions } from "./http.js";
 
 export const TFL_RAIL_LINES = ["jubilee", "dlr"];
 export const tflLineStatusUrl = (lines: string[] = TFL_RAIL_LINES) => `https://api.tfl.gov.uk/Line/${lines.join(",")}/Status?detail=true`;
@@ -80,9 +80,9 @@ export function parseStationDisruptions(json: unknown, fetchedAt: string): RailD
     );
 }
 
-export async function fetchRailDisruptions(fetchImpl: typeof fetch = fetch, now = new Date()): Promise<RailDisruption[]> {
+export async function fetchRailDisruptions(fetchImpl: typeof fetch = fetch, now = new Date(), opts: Omit<LiveOptions, "fetchImpl"> = {}): Promise<RailDisruption[]> {
   const at = now.toISOString();
-  const [lines, stations] = await Promise.all([getJson(tflLineStatusUrl(), "TfL line status", { fetchImpl }), getJson(tflStationDisruptionUrl(), "TfL station disruptions", { fetchImpl })]);
+  const [lines, stations] = await Promise.all([getJson(tflLineStatusUrl(), "TfL line status", { ...opts, fetchImpl }), getJson(tflStationDisruptionUrl(), "TfL station disruptions", { ...opts, fetchImpl })]);
   return [...parseLineStatus(lines, at), ...parseStationDisruptions(stations, at)];
 }
 

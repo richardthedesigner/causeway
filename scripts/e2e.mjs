@@ -7,8 +7,11 @@
  *   pnpm web:build && pnpm e2e
  * Then one journey through the rest of the trip (STAB-10): set up two devices
  * and switch between them, leave later, copy the route as text, add a note,
- * then download a copy of
- * your data and delete it all (SEC-06). Every request any
+ * then download a copy of your data and delete it all (SEC-06). One with no
+ * signal (SMALL-06): the route still comes, and the app says what still works.
+ * And one in London with every live feed hanging (STAB-05): the route still
+ * comes, and the weather and lift lines fall back within their time limit
+ * instead of waiting for ever. Every request any
  * journey makes is checked for the profile (SEC-05, D-009): the device's name,
  * its type and its limits must never leave the phone.
  * Exits 1 on any failed step, page error, profile leak, or anything the Content
@@ -301,10 +304,41 @@ for (const j of JOURNEYS) {
   await context.close();
 }
 
+// Every live feed hangs (STAB-05): TfL, Open-Meteo and the Environment Agency never answer.
+{
+  const name = "london: every live feed hangs";
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const page = await context.newPage();
+  const problems = [];
+  watchCsp(page, problems);
+  page.on("pageerror", (e) => problems.push(`page error: ${e.message}`));
+  await page.route(/api\.tfl\.gov\.uk|open-meteo\.com|environment\.data\.gov\.uk/, () => {});
+  await page.addInitScript(() => localStorage.setItem("causewayside.city.v1", "london"));
+  console.log(name);
+  try {
+    await page.goto(server.url);
+    await page.getByPlaceholder("Where to?").waitFor({ timeout: 60_000 });
+    // The limit is 10 s (LIVE_TIMEOUT_MS); allow for the build being slow to start. The start screen shows the weather line.
+    await page.getByText("Couldn't check the weather").first().waitFor({ timeout: 25_000 });
+    console.log("  ok   the weather falls back to dry, and says so");
+    await page.getByPlaceholder("Where to?").fill("Westminster Abbey");
+    await page.getByRole("option").first().click();
+    await page.getByText("Why this way?").waitFor({ timeout: 60_000 });
+    console.log("  ok   a route, with no live feed answering");
+    await page.getByText("Couldn't get live lift status from TfL").first().waitFor({ timeout: 25_000 });
+    console.log("  ok   the lift line says it couldn't check");
+  } catch (e) {
+    failures.push(`${name}: ${e.message.split("\n")[0]}`);
+    console.log(`  FAIL ${e.message.split("\n")[0]}`);
+  }
+  for (const p of problems) failures.push(`${name}: ${p}`), console.log(`  FAIL ${p}`);
+  await context.close();
+}
+
 await browser.close();
 server.close();
 if (failures.length) {
   console.error(`\n${failures.length} end-to-end failure(s).`);
   process.exit(1);
 }
-console.log("\nEvery journey ran from search to arrival, and no request carried the profile.");
+console.log("\nEvery journey ran from search to arrival, no request carried the profile, and hung feeds fell back.");
