@@ -6,8 +6,8 @@
   "scripts": {
     "prebuild": "node scripts/copy-graphs.mjs",
     "predev": "npm run prebuild",
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "next dev --webpack",
+    "build": "next build --webpack",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -24,7 +24,7 @@
     "cmdk": "^1.1.1",
     "lucide-react": "^1.52.0",
     "maplibre-gl": "6.12.0",
-    "next": "^15.5.27",
+    "next": "^16.3.8",
     "pmtiles": "^4.5.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",

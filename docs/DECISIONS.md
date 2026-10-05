@@ -869,3 +869,14 @@ A new Supabase project grants everything in `public` to `anon` and `authenticate
 **Conservative calls.**
 - The graph tables get no `select` for the public, though the data is open: the app doesn't need it, and a grant is easy to add later.
 - The trigger functions lose `execute` for everyone. Triggers still fire; nothing calls them directly.
+
+## D-071 Next.js 16 on webpack, Node 24 in CI
+
+**Decided.** 2026-10-05 (UPD-03, UPD-04). Code: `apps/web/package.json`, `apps/web/tsconfig.json`, `apps/web/next-env.d.ts`, `package.json`, `.github/workflows/ci.yml`.
+
+- **Next.js 15.5 to 16.3.** React 19.3 already meets Next 16's minimum, so it stays. `output: "export"`, the service worker, the MapLibre worker in `public/maplibre/` and the routing worker are unchanged.
+- **Webpack, not Turbopack.** Next 16 builds with Turbopack by default and refuses a `webpack` config without a flag. Turbopack can't resolve our workspace packages' `.js` import specifiers to their `.ts` files (148 "Module not found" errors), which `extensionAlias` does for webpack. So `next build --webpack` and `next dev --webpack`. Options considered: rewrite every package import without the extension (touches the node scripts that need NodeNext), or a Turbopack alias per file (fragile). Moving to Turbopack is UPD-05.
+- **tsconfig.** Next 16 sets `jsx` to `react-jsx` and adds `.next/dev/types`; `next-env.d.ts` now imports the route types. Both written by `next build`.
+- **The export.** Same three routes, all static. New files: Next 16's segment prefetch payloads (`__next.*.txt` beside each page) and `_not-found.html`. Webpack chunks renamed; client JavaScript grows from 2.38 MB to 2.46 MB (684 KB to 709 KB gzipped), from Next's own runtime. The service worker registration script is byte for byte the same. Next's own inline flight scripts change shape, as they do every build; the CSP already allows them (`'unsafe-inline'`, until SEC-13). No CSP change.
+- **Node 24.** The current Active LTS (Node 26 becomes LTS later in October 2026). CI runs 24 and `engines` says `>=24`. Not strict, so a Node 22 session still installs. The data refresh workflow stays on 22 for now (UPD-07).
+- **The speed budget under Node 24.** Routing is 15% to 25% slower against the fixed yardstick under Node 24 than under 22 on the same container, so the local 10% check in `scripts/perf-budget.test.ts` fails on Node 24 and passes on 22. CI only fails past 50%, so it passes. Nodes settled are identical on both. The app routes in the browser's engine, not Node's, so this doesn't touch users. Not re-baselined here: this container's rounds varied by a quarter, too noisy to set a bar. UPD-06.
