@@ -31,10 +31,12 @@ const CHANNEL = 24;
 const SHARE = 0.002;
 const FIXED_TIME = new Date("2026-10-05T10:00:00+01:00");
 const SIZES = [
-  { id: "phone", width: 390, height: 844, zoom: false },
-  { id: "w320", width: 320, height: 640, zoom: false },
-  { id: "w320-200", width: 320, height: 640, zoom: true },
+  { id: "phone", width: 390, height: 844, zoom: false, schemes: ["light"] },
+  { id: "w320", width: 320, height: 640, zoom: false, schemes: ["light"] },
+  { id: "w320-200", width: 320, height: 640, zoom: true, schemes: ["light", "dark"] },
 ];
+const WITH_MAP = new Set(["map", "route"]);
+const NO_MAP = ".maplibregl-canvas, .maplibregl-marker, .maplibregl-ctrl-attrib { visibility: hidden !important }";
 const STILL = "*, *::before, *::after { animation: none !important; transition: none !important; caret-color: transparent !important; scroll-behavior: auto !important }";
 
 const server = await serveOut();
@@ -86,7 +88,9 @@ async function shoot(page, name, scheme, size) {
   if (only && !id.includes(only)) return;
   seen.add(id);
   await page.waitForTimeout(800);
+  const hide = WITH_MAP.has(name) ? null : await page.addStyleTag({ content: NO_MAP });
   const png = await page.screenshot({ animations: "disabled", caret: "hide" });
+  await hide?.evaluate((el) => el.remove());
   const file = join(ROOT, `${id}.png`);
   if (update) {
     writeFileSync(file, png);
@@ -132,13 +136,9 @@ async function open(scheme, size) {
   return page;
 }
 
-const openSections = async (page, sel = "details") => {
-  for (const d of await page.locator(sel).all()) await d.evaluate((el) => (el.open = true));
-};
-
 checker = await (await browser.newContext()).newPage();
-for (const scheme of ["light", "dark"]) {
-  for (const size of SIZES) {
+for (const size of SIZES) {
+  for (const scheme of size.schemes) {
     console.log(`${scheme} / ${size.id}`);
     let page = await open(scheme, size);
     await page.waitForTimeout(1500);
@@ -158,8 +158,6 @@ for (const scheme of ["light", "dark"]) {
     await page.getByText("Why this way?").waitFor({ timeout: 60_000 });
     await page.waitForTimeout(1500);
     await shoot(page, "route", scheme, size);
-    await openSections(page);
-    await shoot(page, "route-open", scheme, size);
 
     await page.getByRole("button", { name: "Add a note about this route" }).click();
     await page.getByRole("radio", { name: "Bad" }).waitFor();
@@ -190,8 +188,6 @@ for (const scheme of ["light", "dark"]) {
     await page.getByRole("menuitem", { name: /^Edit/ }).click();
     await page.getByRole("dialog").filter({ hasText: "Your limits" }).waitFor();
     await shoot(page, "device-editor", scheme, size);
-    await openSections(page, "[role=dialog] details");
-    await shoot(page, "device-editor-open", scheme, size);
     await page.context().close();
   }
 }

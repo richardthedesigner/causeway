@@ -192,7 +192,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | ID | Task | Size | Priority | Status | Who | Notes |
 |---|---|---|---|---|---|---|
 | STAB-01 | End-to-end test in the built app: search, route, start, end | M | next | done (2026-10-04) | Claude | `pnpm e2e` in CI, one journey per city. Found STAB-09 on its first run |
-| STAB-02 | Screenshot tests for the main screens, light and dark, 320 px and 200% text | M | next | done (2026-10-05) | Claude | `pnpm screenshots` in CI: 12 screens, light and dark, phone, 320 px and 200% text (72 pictures, 7 MB in `tests/screenshots/`). `--update` rewrites them |
+| STAB-02 | Screenshot tests for the main screens, light and dark, 320 px and 200% text | M | next | done (2026-10-05) | Claude | `pnpm screenshots` in CI: 10 screens, 40 pictures, 2.7 MB in `tests/screenshots/`: phone and 320 px in light, 320 px at 200% text in light and dark. `--update` rewrites them |
 | STAB-03 | Version the on-device stores (devices, notes, recents) and migrate old data | S | next | done (2026-10-04) | Claude | D-044. `lib/stored.ts` for devices, notes and reports: version in the key, old keys never rewritten, anything unreadable backed up |
 | STAB-04 | Router fuzz test: many random start and end points per city, no crashes, no impossible routes | M | now | done (2026-10-05) | Claude | PR #42. `packages/router/test/fuzz.test.ts`: 60 seeded journeys per city, 4 people, dry, wet and icy. About 14 s |
 | STAB-05 | Timeouts and fallbacks for every live adapter | S | now | done (2026-10-05) | Claude | D-052. `getJson` in `packages/live/src/http.ts`: 10 s for feeds, 6 s for live search. `pnpm e2e` hangs every feed in London and checks the fallbacks |
@@ -289,7 +289,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 
 Newest first. One line per change: date, ID, what happened, link.
 
-- 2026-10-05: STAB-02 done: `pnpm screenshots` captures 12 screens in light and dark at 390 px, 320 px and 320 px with 200% text, against 72 baselines in `tests/screenshots/` (7 MB); CI runs it and uploads diffs on failure. Found STAB-18 to STAB-20.
+- 2026-10-05: STAB-02 done: `pnpm screenshots` captures 10 screens (40 pictures, 2.7 MB in `tests/screenshots/`): 390 px and 320 px in light, 320 px at 200% text in light and dark. CI runs it and uploads diffs on failure. Found STAB-18 to STAB-20.
 - 2026-10-05: SEC-07 done and REV-02 run: [security review](reviews/security-2026-10.md). One critical and one high, both before sharing goes live: Supabase's default grants let anyone delete notes through `note_public` and write the graph tables. Added SEC-16 to SEC-23. REV-02 next due January 2027.
 - 2026-10-05: DEP-08 (PORT-44) done: PR #44 merged with PR #42. No D-number or task ID collided: #42 holds D-059 and D-060, #44 D-053 to D-058 and D-061 to D-068. SPEED-02 was done in #44, so SPEED-01 joins Now in its place.
 - 2026-10-05: FEAT-19 done: "On this route" under the route card, grouped Blocked, Slower and Worth knowing, each fact labelled live, static data or reported by people with its source and date; the route card keeps only failed feeds, a count of closures gone round and a flood area on the route (D-067, ported from PR #36).

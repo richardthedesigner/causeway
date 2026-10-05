@@ -35,7 +35,7 @@ jobs:
       - run: pnpm a11y
       # End to end: search, route, start, arrive and end in each city, under the real security headers (scripts/e2e.mjs).
       - run: pnpm e2e
-      # Screenshots of the main screens, light and dark, 320 px and 200% text, against tests/screenshots/ (scripts/screenshots.mjs).
+      # Screenshots of the main screens, at phone size, 320 px and 200% text, against tests/screenshots/ (scripts/screenshots.mjs).
       # Run `pnpm screenshots --update` and commit the pictures when a screen is meant to change.
       - name: Screenshots
         run: pnpm screenshots
