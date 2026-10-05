@@ -78,13 +78,18 @@ export function toLiveStates(
 const titleCase = (s: string) =>
   s.toLowerCase().replace(/\b([a-z])/g, (m) => m.toUpperCase()).replace(/'S\b/g, "'s");
 
+/** A lift out that leaves step-free access to some of a line's platforms only. */
+export const PART_HEADLINE = "Lift out of service: step-free to some platforms only";
+
 /**
  * Place lift outages on the graph's station edges. A TfL outage names a
  * station or hub and, in its message, usually the line it affects ("to the
  * Jubilee line") or the level ("between the street and the ticket hall").
  * We close only what the message supports; if it names neither, every
  * platform at that station is closed for step-free users. Never guesses
- * wider than the message.
+ * wider than the message. Where TfL's layout shows a line keeps step-free
+ * access to some platforms but not all, its board edge is restricted, not
+ * closed, and costs a step-free user as much as a station we can't confirm.
  */
 export function liftOutageStates(
   outages: LiftOutage[],
@@ -118,7 +123,11 @@ export function liftOutageStates(
     const after = stepFreeLines(s.access, new Set(here.flatMap((o) => o.liftIds)));
     const state = stateOf(here);
     for (const [line, v] of Object.entries(after)) {
-      if (before[line] === "yes" && v !== "yes" && edgeRefs.has(`board:${line}:${s.id}`)) out.set(`board:${line}:${s.id}`, state);
+      const ref = `board:${line}:${s.id}`;
+      if (!edgeRefs.has(ref) || v === before[line]) continue;
+      // Every platform cut off: closed. Only some: restricted, since the board edge can't tell which way you're going (D-058).
+      if (v === "no" && before[line] !== "no") out.set(ref, state);
+      else if (v === "part" && before[line] === "yes") out.set(ref, { ...state, status: "restricted", headline: PART_HEADLINE });
     }
   }
 

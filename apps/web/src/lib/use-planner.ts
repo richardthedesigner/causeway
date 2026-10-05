@@ -23,7 +23,7 @@ type Ready = Extract<WorkerResponse, { type: "ready" }>;
 export type LiveLifts =
   | { state: "none" }
   | { state: "loading" }
-  | { state: "ok"; closed: number; lines: string[]; at: string }
+  | { state: "ok"; closed: number; limited: number; lines: string[]; at: string }
   | { state: "failed" };
 
 const LIFT_REFRESH_MS = 5 * 60_000;
@@ -95,7 +95,7 @@ export function usePlanner(city: City) {
         }
       } else if (m.type === "works") setWorks(m.summary);
       else if (m.type === "floods") setFloods({ here: m.here, at: m.fetchedAt });
-      else if (m.type === "live") setLifts({ state: "ok", closed: m.applied, lines: m.lines, at: m.fetchedAt });
+      else if (m.type === "live") setLifts({ state: "ok", closed: m.applied, limited: m.limited, lines: m.lines, at: m.fetchedAt });
       else if (m.type === "error") {
         setError(m.message);
         setPlanning(false);

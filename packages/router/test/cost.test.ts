@@ -91,6 +91,45 @@ describe("evaluateEdge", () => {
   });
 });
 
+describe("a lift out that may have cut off some of a line's platforms (D-058)", () => {
+  const at = { ...DRY, now: new Date("2026-10-04T12:05:00Z") };
+  const live = { status: "restricted" as const, affects: "step-free" as const, headline: "Lift out of service: step-free to some platforms only", reason: "Lift 1 out of service", source: "TfL Unified API lift disruptions", validFrom: "2026-10-04T12:00:00Z", validUntil: "2026-10-04T12:15:00Z" };
+  const stepFree = { stepCount: attr(0, "reported", "tfl", null, "TfL station data: step-free from street to every platform"), wheelchair: attr("yes" as const, "reported", "tfl", null) };
+  const open = edge({ kind: "board", ref: "board:jubilee:940GZZLUNGW", name: "North Greenwich, Jubilee line", lengthM: 0 }, stepFree);
+  const link = edge({ kind: "station_link", ref: "link:940GZZLUNGW", name: "North Greenwich", lengthM: 30 });
+
+  it("costs a cautious wheelchair user the unknown-station penalty on a board edge, and leaves it passable but unknown", () => {
+    const a = evaluateEdge(open, true, manual, at);
+    const b = evaluateEdge({ ...open, live }, true, manual, at);
+    expect(b.passable).toBe("unknown");
+    expect(b.cost - a.cost).toBeCloseTo(900 * (1 - manual.uncertaintyTolerance));
+    expect(b.reasons.find((r) => r.attr === "live")).toMatchObject({ kind: "unknown", detail: "Lift out of service: step-free to some platforms only: Lift 1 out of service" });
+  });
+
+  it("costs the same on a street link", () => {
+    const a = evaluateEdge(link, true, manual, at);
+    const b = evaluateEdge({ ...link, live }, true, manual, at);
+    expect(b.passable).toBe("unknown");
+    expect(b.cost - a.cost).toBeCloseTo(900 * (1 - manual.uncertaintyTolerance));
+  });
+
+  it("costs nothing extra for someone who doesn't need step-free access", () => {
+    expect(evaluateEdge({ ...open, live }, true, walking, at).cost).toBe(evaluateEdge(open, true, walking, at).cost);
+  });
+
+  it("doesn't charge twice where the station was unconfirmed already", () => {
+    const unconfirmed = edge({ kind: "board", lengthM: 0 }, { stepCount: unknownAttr() });
+    const a = evaluateEdge(unconfirmed, true, manual, at);
+    const b = evaluateEdge({ ...unconfirmed, live }, true, manual, at);
+    expect(b.cost).toBeCloseTo(a.cost);
+  });
+
+  it("a restricted pavement (works) still costs no station penalty", () => {
+    const works = { ...live, affects: undefined, headline: "Works on the pavement", reason: "Works on the pavement on Test Street" };
+    expect(evaluateEdge(edge({ live: works }), true, manual, at).cost).toBeCloseTo(evaluateEdge(edge(), true, manual, at).cost);
+  });
+});
+
 describe("evaluateNode", () => {
   const node = (kerb?: GraphNode["kerb"]): GraphNode => ({ id: 1, lon: 0, lat: 0, ele: unknownAttr(), level: 0, kind: kerb ? "kerb" : "junction", ...(kerb ? { kerb } : {}) });
 

@@ -399,7 +399,7 @@ export function RoutePanel(props: Props) {
                 </li>
                 {props.lifts.state === "ok" ? (
                   <li>
-                    Lift status from TfL at {props.lifts.at.slice(11, 16)} UTC: {props.lifts.closed === 0 ? "no outages on this network" : `${props.lifts.closed} platform${props.lifts.closed === 1 ? "" : "s"} closed to step-free travel, routed around`}.
+                    Lift status from TfL at {props.lifts.at.slice(11, 16)} UTC: {props.lifts.closed === 0 && !props.lifts.limited ? "no outages on this network" : [props.lifts.closed ? `${props.lifts.closed} platform${props.lifts.closed === 1 ? "" : "s"} closed to step-free travel, routed around` : null, props.lifts.limited ? `${props.lifts.limited} line${props.lifts.limited === 1 ? "" : "s"} step-free to some platforms only, counted as unknown` : null].filter(Boolean).join("; ")}.
                   </li>
                 ) : null}
                 {props.lifts.state === "ok" && props.lifts.lines.length ? (

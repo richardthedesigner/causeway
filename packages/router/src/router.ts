@@ -571,6 +571,8 @@ export function explain(router: Router, chosen: Route, from: GraphNode, to: Grap
   const avoidedByName = new Map<string, Avoided>();
   /** Where each avoided street's live closure came from, for the note. */
   const liveSource = new Map<string, string>();
+  /** Short words for a live state that doesn't close the way: its headline. */
+  const liveShort = new Map<string, string>();
   if (base) {
     for (const s of base.steps) {
       if (chosenIds.has(s.edge.id)) continue;
@@ -581,7 +583,10 @@ export function explain(router: Router, chosen: Route, from: GraphNode, to: Grap
         .sort((a, b) => b.seconds - a.seconds)[0];
       if (!worst) continue;
       const name = placeName(s.edge);
-      if (worst.attr === "live" && s.edge.live) liveSource.set(name, s.edge.live.source);
+      if (worst.attr === "live" && s.edge.live) {
+        liveSource.set(name, s.edge.live.source);
+        liveShort.set(name, s.edge.live.headline ?? "may be affected");
+      }
       const cur = avoidedByName.get(name);
       if (!cur || worst.seconds > cur.reason.seconds) avoidedByName.set(name, { name, reason: worst, lengthM: (cur?.lengthM ?? 0) + s.edge.lengthM });
       else cur.lengthM += s.edge.lengthM;
@@ -603,10 +608,16 @@ export function explain(router: Router, chosen: Route, from: GraphNode, to: Grap
     // Live feeds say so; a works file built from a register is named, not called live.
     const src = liveSource.get(a.name) ?? "TfL";
     notes.push(`${a.name}: ${full} (${/^TfL/.test(src) ? "TfL, live" : /^Environment Agency/.test(src) ? "Environment Agency, live" : src})`);
-    a.reason = { ...a.reason, detail: a.reason.detail.startsWith("lift") ? "lift out of service" : "closed" };
+    // Only an exclusion was closed; an unknown keeps its own short words ("Lift out of service: step-free to some platforms only").
+    const short = a.reason.kind !== "excluded" ? (liveShort.get(a.name) ?? "may be affected") : a.reason.detail.startsWith("lift") ? "lift out of service" : "closed";
+    a.reason = { ...a.reason, detail: short };
   }
   for (const s of chosen.steps) {
-    if (s.edge.kind === "board" && s.eval.passable === "unknown") notes.push(`TfL doesn't confirm step-free access at ${s.edge.name}. Check before you travel.`);
+    const live = s.eval.reasons.find((x) => x.attr === "live" && x.kind === "unknown");
+    if ((s.edge.kind === "board" || s.edge.kind === "station_link") && live && s.edge.live?.affects === "step-free") {
+      const note = `${s.edge.name}: ${live.detail} (TfL, live). Check before you travel.`;
+      if (!notes.includes(note)) notes.push(note);
+    } else if (s.edge.kind === "board" && s.eval.passable === "unknown") notes.push(`TfL doesn't confirm step-free access at ${s.edge.name}. Check before you travel.`);
   }
   if (sum.lifts) {
     const live = router.graph.meta.liveFeeds?.some((f) => f.endsWith("lifts"));

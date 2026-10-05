@@ -153,8 +153,8 @@ export type WorkerResponse =
   | { type: "works"; summary: WorksSummary }
   /** Flood warnings that touch this city's paths, worst first. */
   | { type: "floods"; here: FloodHere[]; fetchedAt: string }
-  /** `applied`: platforms closed to step-free travel by lifts. `lines`: line closures in force now, in TfL's words. */
-  | { type: "live"; applied: number; lines: string[]; fetchedAt: string }
+  /** `applied`: platforms closed to step-free travel by lifts. `limited`: lines left step-free to some platforms only (D-058). `lines`: line closures in force now, in TfL's words. */
+  | { type: "live"; applied: number; limited: number; lines: string[]; fetchedAt: string }
   | { type: "plan"; id: number; result: PlanResult }
   | { type: "check"; id: number; checks: Check[] }
   | { type: "fits"; id: number; fits: { key: string; minutes: number | null }[] };

@@ -236,6 +236,8 @@ function evaluateEdgeBase(e: GraphEdge, forward: boolean, p: Profile, c: Conditi
   const reasons: Reason[] = [];
   const a = e.attrs;
   let unknownCritical = false;
+  /** A live state that leaves station access unknown for this person: priced like a station we can't confirm. */
+  let livePenalty = 0;
 
   const exclude = (attr: string, detail: string): Evaluation => ({
     passable: "no",
@@ -252,7 +254,12 @@ function evaluateEdgeBase(e: GraphEdge, forward: boolean, p: Profile, c: Conditi
     if (applies && e.live.status === "closed") return exclude("live", e.live.affects === "step-free" ? `lift out of service: ${e.live.reason}` : `closed: ${e.live.reason}`);
     if (applies && (e.live.status === "restricted" || e.live.status === "degraded")) {
       // A works reason in our own words already says what it is ("Scaffolding on the pavement on ..."); others name the status.
-      reasons.push({ kind: "unknown", attr: "live", detail: e.live.headline ? e.live.reason : `${e.live.status}: ${e.live.reason}`, seconds: 0 });
+      const stepFree = e.live.affects === "step-free";
+      const detail = stepFree && e.live.headline ? `${e.live.headline}: ${e.live.reason}` : e.live.headline ? e.live.reason : `${e.live.status}: ${e.live.reason}`;
+      // Step-free access to a platform or the street that may be cut off (a lift out reaching only some platforms) costs
+      // what any station we can't confirm costs (D-058); otherwise a cautious user is sent through it as if nothing were wrong.
+      if (stepFree && e.live.status === "restricted" && (e.kind === "board" || e.kind === "station_link")) livePenalty = UNKNOWN_STATION_S * (1 - p.uncertaintyTolerance);
+      reasons.push({ kind: "unknown", attr: "live", detail, seconds: livePenalty });
       unknownCritical = true;
     }
   }
@@ -271,10 +278,11 @@ function evaluateEdgeBase(e: GraphEdge, forward: boolean, p: Profile, c: Conditi
       return exclude("steps", a.stepCount.method?.split(": ").slice(1).join(": ") || "no step-free route to the platform");
     }
     if (needsStepFree(p) && !isKnown(a.stepCount)) {
+      // One unknown is enough: a live doubt on top of an unconfirmed station doesn't count twice.
       const s = UNKNOWN_STATION_S * (1 - p.uncertaintyTolerance);
-      return { passable: "unknown", seconds, cost: seconds + s, reasons: [...reasons, { kind: "unknown", attr: "station", detail: "step-free access not confirmed", seconds: s }] };
+      return { passable: "unknown", seconds, cost: seconds + s, reasons: [...reasons.map((r) => (r.attr === "live" ? { ...r, seconds: 0 } : r)), { kind: "unknown", attr: "station", detail: "step-free access not confirmed", seconds: s }] };
     }
-    return { passable: unknownCritical ? "unknown" : "yes", seconds, cost: seconds, reasons };
+    return { passable: unknownCritical ? "unknown" : "yes", seconds, cost: seconds + livePenalty, reasons };
   }
 
   // Vertical connectors.
@@ -302,7 +310,7 @@ function evaluateEdgeBase(e: GraphEdge, forward: boolean, p: Profile, c: Conditi
   if (Math.abs(grade) > Math.abs(worst)) worst = grade;
   const speed = baseSpeed(e, p) * (e.kind === "steps" ? 0.4 : speedFactor(p, grade));
   const seconds = e.lengthM / speed;
-  let penalty = 0;
+  let penalty = livePenalty;
 
   if (isKnown(a.inclineMax) || isKnown(a.incline)) {
     const limit = worst >= 0 ? p.maxInclineUpPct : p.maxInclineDownPct;

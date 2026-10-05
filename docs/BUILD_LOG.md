@@ -6,6 +6,9 @@ A running record of what was built, newest first. Each entry links the decision 
 
 Richard chose main as the base; the overnight build's extras (PR #36) are ported by hand, smallest and safest first.
 
+**Platforms and lifts** (D-058, DATA-29)
+- A lift out that leaves some of a line's platforms step-free makes that line unknown, not closed, and costs a step-free user as much as a station we can't confirm. 46 of the 76 lifts whose loss changes a line are like this.
+
 **Honesty fixes** (D-053)
 - Edinburgh council widths and surfaces are inferred: a narrow council width costs time and no longer closes a pavement.
 - TfL street comments that deny a closure ("no footway closed") no longer close the pavement.

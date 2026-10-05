@@ -620,3 +620,23 @@ What is kept, each as works on the pavement (counted as unknown) unless the regi
 **Speed.** Matching works to edges now uses a grid of pavement edge middles, so each works looks only at edges near it. On the Edinburgh graph with this file it takes 77 ms instead of 1.5 s, with the same states (checked on all three cities). The file is 27 KB compressed; Edinburgh's data beside the graph comes to 155 KB of the 400 KB budget (D-056).
 
 **Still open.** The register is daily but the refresh is weekly, so new works can be up to a week late (OPEN_ITEMS).
+
+## D-058 A lift out that leaves some platforms step-free counts as unknown, not closed
+
+**Decided.** 2026-10-05 (DATA-29, ported from the overnight build, PR #36, by hand). Amends D-020 and D-053's lift grouping. Code: `liftOutageStates` in `packages/live/src/tfl.ts`, `evaluateEdgeBase` in `packages/router/src/cost.ts`, `explain` in `packages/router/src/router.ts`.
+
+TfL's station layout (DATA-03) tells us, for every lift out at a station, which of a line's platforms can still be reached without steps. Main closed a line's board edge for step-free users whenever any of its platforms was cut off. But a board edge stands for all of the line's platforms at that station, and it can't tell which way you're going: with one lift out, the westbound platform may be fine and the eastbound not.
+
+- **Every platform cut off: closed**, as before.
+- **Some platforms only: restricted.** The state says "Lift out of service: step-free to some platforms only" and quotes TfL's message.
+- **For someone who needs step-free access, a restricted board edge or street link costs what a station we can't confirm costs**: 15 minutes times (1 minus their uncertainty tolerance), and the route is unknown there, not a fit. Before, a restricted state on these edges cost nothing extra, so a cautious user was sent through it as freely as an open platform. The same now applies to TfL's station disruptions that main already marked restricted ("no step-free access" naming one platform or entrance).
+- People who can use stairs or escalators pay nothing.
+- An edge already unconfirmed (no step-free data) is charged once, not twice.
+- "Why this way?" says it: "North Greenwich, Jubilee line: Lift out of service: step-free to some platforms only: … (TfL, live). Check before you travel." The route card's sources line counts these lines separately from closed platforms. An avoided unknown is no longer called "closed" in the reasons list.
+
+**What it changes.** Of the 76 single lifts in TfL's layout for our 72 stations whose loss changes a line, 46 leave some of its platforms step-free (all the two-lift DLR stations, North Greenwich lifts 1 and 2, Wembley Park, Kingsbury) and now restrict instead of closing; 30 still close. The recorded outages of 2026-10-04 (Canary Wharf, Jubilee line) still close, and the acceptance routes don't change.
+
+**Conservative calls.**
+- Restricted, not open: we don't know the direction, so we don't say it fits.
+- A line that was already step-free to some platforms only and loses the rest is closed.
+- Outages we can't place from the layout still go by TfL's message and close what it names, as before.

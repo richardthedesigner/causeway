@@ -8,7 +8,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { applyStationAccess, loadSnapshot, refRides, type Graph, type TransitNetwork } from "@causeway/graph/node";
-import { applyLiveStates, fetchLiftOutages, liftOutageStates, parseLiftDisruptions, parseLineStatus, railDisruptionStates } from "@causeway/live";
+import { applyLiveStates, fetchLiftOutages, liftOutageStates, PART_HEADLINE, parseLiftDisruptions, parseLineStatus, railDisruptionStates } from "@causeway/live";
 import { PRESETS } from "@causeway/profile";
 import { describeSegments, explain, Router, summarise } from "@causeway/router";
 import { LONDON_JOURNEYS } from "../../../scripts/journeys.js";
@@ -62,6 +62,25 @@ describe("Parliament Square to Canary Wharf", () => {
     const both = liftOutageStates([out("HUBCAN-Lift-1"), out("HUBCAN-Lift-3")], net, refs(fresh()));
     expect(both.has("board:jubilee:940GZZLUCGT")).toBe(true);
     expect(both.get("board:jubilee:940GZZLUCGT")!.reason).toBe("Canning Town HUBCAN-Lift-1 out. Canning Town HUBCAN-Lift-3 out.");
+  });
+
+  it("a lift that cuts off some of a line's platforms restricts the line; one that cuts off all of them closes it (D-058)", () => {
+    const out = (id: string) => liftOutageStates([{ stationId: "940GZZLUNGW", stationName: "North Greenwich", liftIds: [id], message: `North Greenwich ${id} out.`, alternativeMentioned: false, fetchedAt: "2026-10-04T12:00:00Z" }], net, refs(fresh()));
+    // Without lift 1 one Jubilee line platform is still step-free; without lift 4 neither is.
+    expect(out("940GZZLUNGW-Lift-1").get("board:jubilee:940GZZLUNGW")).toMatchObject({ status: "restricted", affects: "step-free", headline: "Lift out of service: step-free to some platforms only" });
+    expect(out("940GZZLUNGW-Lift-4").get("board:jubilee:940GZZLUNGW")).toMatchObject({ status: "closed", affects: "step-free" });
+  });
+
+  it("says so when a platform the route uses may have lost step-free access (D-058)", () => {
+    const g = fresh();
+    const live = { status: "restricted" as const, affects: "step-free" as const, headline: PART_HEADLINE, reason: "Canary Wharf lift 1 out.", source: "TfL Unified API lift disruptions", validFrom: "2026-10-04T12:00:00Z", validUntil: "2026-10-04T12:15:00Z" };
+    applyLiveStates(g, new Map([["board:jubilee:940GZZLUCYF", live]]));
+    const { r, route, a, b, p, c } = plan(g, "manual-wheelchair");
+    const ex = explain(r, route, a, b, p, PRESETS.walking, c);
+    // Canary Wharf is where this journey ends, so the route still uses it, and says so.
+    expect(route.steps.some((s) => s.edge.ref === "board:jubilee:940GZZLUCYF")).toBe(true);
+    expect(ex.notes).toContain("Canary Wharf, Jubilee line: Lift out of service: step-free to some platforms only: Canary Wharf lift 1 out. (TfL, live). Check before you travel.");
+    expect(ex.headline).not.toMatch(/closed/);
   });
 
   it("a Jubilee line station TfL maps with no step-free route is closed to wheelchair users, open to walkers", () => {
@@ -126,6 +145,7 @@ describe("Parliament Square to Canary Wharf", () => {
     const states = liftOutageStates(live, net, refs(g));
     applyLiveStates(g, states);
     const { route } = plan(g, "manual-wheelchair", new Date(now.getTime() + 60_000));
-    for (const s of route.steps) if (s.edge.ref) expect(states.has(s.edge.ref), s.edge.ref).toBe(false);
+    // A restricted platform (some platforms only) may be used, at a cost; a closed one never.
+    for (const s of route.steps) if (s.edge.ref) expect(states.get(s.edge.ref)?.status, s.edge.ref).not.toBe("closed");
   });
 });

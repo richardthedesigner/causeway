@@ -468,7 +468,7 @@ self.onmessage = async (ev: MessageEvent<WorkerRequest>) => {
       applyLiveStates(graph, mergeLiveStates(lifts, rail));
       const now = Date.now();
       const lines = [...new Set([...rail.values()].filter((s) => s.source === "TfL line status" && s.status === "closed" && !s.affects && Date.parse(s.validFrom) <= now).map((s) => s.reason))];
-      post({ type: "live", applied: lifts.size, lines, fetchedAt: m.outages[0]?.fetchedAt ?? new Date().toISOString() });
+      post({ type: "live", applied: [...lifts.values()].filter((s) => s.status === "closed").length, limited: [...lifts.values()].filter((s) => s.status === "restricted").length, lines, fetchedAt: m.outages[0]?.fetchedAt ?? new Date().toISOString() });
     }
     else if (m.type === "plan") post({ type: "plan", id: m.id, result: plan(m) });
     else if (m.type === "check") post({ type: "check", id: m.id, checks: check(m) });
