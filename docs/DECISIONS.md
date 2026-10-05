@@ -841,3 +841,14 @@ Main read the step and gap from platform to train into words only (the largest a
 - A location of level access that TfL doesn't mark as designated isn't offered as a door.
 - No setting for the gap limit yet: the band holds for everyone until research says what people want to set (OPEN_ITEMS).
 - Door advice is in the spoken route only; the visual route card shows the ride, not the doors (OPEN_ITEMS).
+
+## D-069 The sheet lets keyboard focus go
+
+**Date:** 2026-10-05. **Roadmap:** STAB-17, found doing STAB-13.
+
+The bottom sheet is meant to be non-modal (`modal={false}`), so the map stays usable behind it. vaul 1.1.2 takes the prop but never passes it to Radix, so Radix treated the sheet as modal: it trapped focus and hid `<main>` from screen readers. A keyboard or switch user could never reach the city, layers or location buttons.
+
+- `patches/vaul@1.1.2.patch` passes `modal` on to Radix. It's applied by `pnpm install`. Drop it when vaul fixes this upstream.
+- Radix still loops Tab inside a non-modal dialog, so `DrawerContent` stops Tab reaching that loop. Tab now runs from the sheet to the map controls and back, in page order.
+- The city and layers menus are drawn at the end of the page, above the sheet. Inside the map they opened behind it. They take focus when they open; Escape, Tab or a choice gives it back to their button.
+- `pnpm a11y` checks that Tab reaches all three map controls, that `<main>` isn't hidden, and that both menus take and return focus.

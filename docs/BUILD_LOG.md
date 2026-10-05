@@ -2,6 +2,13 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
+## 2026-10-05 (late night)
+
+**The map controls by keyboard** (STAB-17, D-069)
+- The sheet trapped keyboard focus and hid the map from screen readers, so Tab never reached the city, layers or location buttons. vaul never passed `modal={false}` on to Radix; a pnpm patch fixes that, and the sheet no longer loops Tab inside itself.
+- The city and layers menus opened behind the sheet. They now open above it, take focus, and give it back to their button.
+- `pnpm a11y` checks the map controls by keyboard. Opening `<details>` in the script is now one call, which fixes a race.
+
 ## 2026-10-05 (security review)
 
 SEC-07 and REV-02: [security review](reviews/security-2026-10.md), with a threat model. Read-only: no code changed.
