@@ -54,6 +54,16 @@ describe("Parliament Square to Canary Wharf", () => {
     expect(at(["HUBWSM-Lift-3"]).size).toBe(0);
   });
 
+  it("counts every lift out at a station together, even on separate messages", () => {
+    const out = (id: string) => ({ stationId: "HUBCAN", stationName: "Canning Town", liftIds: [id], message: `Canning Town ${id} out.`, alternativeMentioned: false, fetchedAt: "2026-10-04T12:00:00Z" });
+    // Lift 1 or lift 3 alone leaves the other way from the street to the ticket hall. Both out cut off the Jubilee line.
+    expect(liftOutageStates([out("HUBCAN-Lift-1")], net, refs(fresh())).has("board:jubilee:940GZZLUCGT")).toBe(false);
+    expect(liftOutageStates([out("HUBCAN-Lift-3")], net, refs(fresh())).has("board:jubilee:940GZZLUCGT")).toBe(false);
+    const both = liftOutageStates([out("HUBCAN-Lift-1"), out("HUBCAN-Lift-3")], net, refs(fresh()));
+    expect(both.has("board:jubilee:940GZZLUCGT")).toBe(true);
+    expect(both.get("board:jubilee:940GZZLUCGT")!.reason).toBe("Canning Town HUBCAN-Lift-1 out. Canning Town HUBCAN-Lift-3 out.");
+  });
+
   it("a Jubilee line station TfL maps with no step-free route is closed to wheelchair users, open to walkers", () => {
     const g = fresh();
     const e = g.edges.find((x) => x.ref === "board:jubilee:940GZZLUSWC")!;

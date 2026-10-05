@@ -156,7 +156,7 @@ Update (DATA-10): rest distances now follow Inclusive Mobility (2021) section 3.
 
 Update (DATA-03): TfL's station data (`tfl-stationdata-detailed.zip`, TfL open data) maps each station's areas and the level paths, ramps and lifts between them. `scripts/transit-london.ts` adds it to `network.json` for all 72 stations, and the app puts it on the board edges when London loads (`applyStationAccess`), per line:
 - **Step-free** means every platform of that line can be reached from "Outside" by level paths, ramps and lifts. Some platforms only (one direction) stays unknown. None, where TfL has mapped the routes, now means not step-free: 10 Jubilee line stations north of Baker Street, which wheelchair users are routed around. Canada Water and Canning Town's Jubilee platforms are now confirmed step-free.
-- **Lift outages** are joined on `LiftUniqueId`: a line is closed only if the lifts out cut every step-free route to its platforms. A lift outage on the District line at Westminster no longer touches the Jubilee line. Stations without TfL station data fall back to reading the message, as before.
+- **Lift outages** are joined on `LiftUniqueId`: a line is closed only if the lifts out cut every step-free route to its platforms. A lift outage on the District line at Westminster no longer touches the Jubilee line. Stations without TfL station data fall back to reading the message, as before. Every lift out at a station counts together, even when TfL sends them as separate messages (D-051).
 - The platform-to-train step and gap (and level-boarding doors, and manual ramps) are kept with the fact and shown with it.
 
 Update (DATA-04): TfL line status and station disruptions now act on the rail graph too (`packages/live/src/tfl-disruptions.ts`), refreshed with the lifts.
@@ -214,6 +214,8 @@ Open: whether notes should carry the conditions ("when wet") as a field rather t
 First use: pavement works. Street Manager (England, OGL) permits that close the footway close those pavement edges for everyone until the works' end date; works on the footway that don't close it, including a temporary walkway in the road, are "degraded" and counted as unknown; carriageway-only works are left out. In London TfL street disruptions that mention the pavement top this up live every 5 minutes. The build reads Street Manager's monthly archive (`pnpm build:works`, 1 GB, about a minute); production should subscribe to Street Manager's live notifications (free, needs registering an endpoint) through the same adapter. Scotland's register (SRWR) has no open feed: Edinburgh says "No open roadworks feed here yet" rather than implying there are none.
 
 Update (DATA-05): the build also reads Street Manager's activity archive (`activity/YYYY/MM.zip`, about 12 MB a month, same bucket, OGL): skips, scaffolding, hoardings, cranes and mobile platforms, events and other non-works licences. Only those on the footway or a footpath are kept. The archive doesn't say whether the pavement is closed, so each one is "on the pavement" and counted as unknown, never closed. With no end time given, an activity runs to the end of its last day. September 2026 added 9 in Newcastle and 5 in London.
+
+Update (D-051): activities are described in our own words and the street name only ("Scaffolding on the pavement"). The record's free-text details can name addresses, businesses and people, so they are never shown. The committed London file had three "(Impact Area)" and "(Bridge maintenance works)" endings; they were removed. TfL's street comments close a pavement only when no word around the closure phrase denies it (`saysClosed`).
 
 Next adapters, in order of value: Overture places (more venues and addresses; release 2026-09-23.1 is on S3), National Rail Knowledgebase stations (step-free access and staffing; needs a free key), Met Office DataHub (warnings; key), Mapillary (kerb and surface detections; key), accessibility.cloud (venue accessibility; key, and its own sources' licences). Keys stay server-side once there is a backend; until then these run in the build.
 
@@ -449,6 +451,8 @@ When there is nothing to compare with, it builds. Once DEP-01 makes `main` the p
 - Widths outside 0.5 to 10 m are ignored; a few large polygons carry area-like figures.
 - Credit: "Pavement surfaces and widths: City of Edinburgh Council, Open Government Licence v3.0", in the city credit line.
 
+Update (D-051): the council's surface and width are now written as inferred, not reported. The council records the whole footway polygon, matched to our edge by shape, and its width is the full width, not the clear width past bins and posts. As reported values, narrow council widths closed pavements outright for wheelchair users (231 edges under 0.9 m, 700 under 1.2 m). As inferred values they cost time and say "about", and never close a pavement on their own.
+
 
 ## D-047 Ice, gritting and floods
 
@@ -492,3 +496,18 @@ When there is nothing to compare with, it builds. Once DEP-01 makes `main` the p
 - MapLibre 6 types its events, so the map's own "refresh" event became a ref holding the latest draw function.
 - **PostCSS**: a pnpm override (`next>postcss`) lifts Next's copy to 8.5.28. Next only uses it at build time. Drop the override when Next's own pin passes 8.5.23.
 - The local check server serves `.mjs` as JavaScript, as Vercel does; a module worker is refused otherwise.
+
+## D-051 Honesty fixes from the overnight build
+
+**Decided.** 2026-10-05. Ported by hand from the overnight build (PR #36) onto main. Each one stops the app saying more than its data supports. Code: `packages/graph/src/council.ts`, `packages/live/src/works.ts`, `packages/live/src/tfl.ts`, `apps/web/src/components/PlaceSearch.tsx`.
+
+- **Council widths and surfaces are inferred** (amends D-046). They cost time and never close a pavement on their own. OSM's own reported width still closes one.
+- **Denied closures don't close.** TfL's street disruption comments are free text. "No footway closed" or "footway closed: not required" used to match the closure words and close the pavement. Now a closure phrase counts only when the words just before and after it don't deny it (`saysClosed`). One plain closure anywhere in the text still closes.
+- **Street Manager activities without their free text** (amends D-027). The details field can name addresses, businesses and people. We show the activity type in our own words and the street.
+- **Lift outages grouped by station.** TfL can report two lifts at one station on two messages. Each message was checked alone, so two lifts that between them cut off a line closed nothing. At Canning Town, lifts 1 and 3 are the two ways from the street to the ticket hall: either alone leaves a way, both out cut off the Jubilee line. Now every lift out at a station goes into one search, and the reason quotes each message once.
+- **A search result's first fact may take two lines.** On a 390 px phone one line is about 40 characters, so the first fact was often cut off mid-word. It now wraps to two lines before it is cut. Every row, not only long ones, so the list is easy to scan; not three, so the list stays short on a phone.
+
+**Conservative calls.**
+- An inferred council surface still counts in full, as an inferred OSM surface does: council setts or flags in ice still close the pavement for wheeled users. Only the width is softened. No preset refuses outright any surface the council layer can name. Every other reader of surface and width (the route's surface mix, the setts warning in navigation, "relax a limit" suggestions) still needs checking against inferred council values; that's a follow-up.
+- The committed London works file was edited in place rather than rebuilt: rebuilding would also have moved every other date in it.
+

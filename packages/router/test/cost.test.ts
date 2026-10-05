@@ -37,6 +37,13 @@ const manual = PRESETS["manual-wheelchair"];
 const walking = PRESETS.walking;
 
 describe("evaluateEdge", () => {
+  it("a narrow council width costs time and never closes the pavement (D-046)", () => {
+    const council = evaluateEdge(edge({}, { width: attr(0.7, "inferred", "council", "2026-10-04") }), true, manual, DRY);
+    expect(council.cost).toBeLessThan(Infinity);
+    expect(council.reasons.some((r) => r.attr === "width" && r.kind === "penalty")).toBe(true);
+    expect(evaluateEdge(edge({}, { width: attr(0.7, "reported", "osm", "2024-01-01T00:00:00Z") }), true, manual, DRY).cost).toBe(Infinity);
+  });
+
   it("excludes steps for anyone who cannot use them, and only them", () => {
     const steps = edge({ kind: "steps" }, { stepCount: attr(12, "reported", "osm", null) });
     expect(evaluateEdge(steps, true, manual, DRY).passable).toBe("no");

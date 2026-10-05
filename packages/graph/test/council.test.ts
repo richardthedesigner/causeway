@@ -24,8 +24,9 @@ describe("council footways (DATA-06, D-008)", () => {
     const g = { edges: [edge(10, 1, 2), edge(11, 2, 3, osmSurface), edge(12, 3, 4)] } as unknown as Graph;
     expect(applyCouncilFootways(g, layer)).toBe(2);
     const [a, b, c] = g.edges;
-    expect(a!.attrs.surface).toMatchObject({ value: "sett", state: "reported", source: "council", observedAt: "2026-10-04" });
-    expect(a!.attrs.width.value).toBe(1.4);
+    expect(a!.attrs.surface).toMatchObject({ value: "sett", state: "inferred", source: "council", observedAt: "2026-10-04" });
+    // Inferred, so a narrow council width costs time and never closes the pavement (D-046).
+    expect(a!.attrs.width).toMatchObject({ value: 1.4, state: "inferred" });
     // OSM's surface stays; the council width fills the gap, marked as the footway alongside.
     expect(b!.attrs.surface).toBe(osmSurface);
     expect(b!.attrs.width).toMatchObject({ value: 2.2, source: "council" });

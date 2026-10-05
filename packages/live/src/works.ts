@@ -136,7 +136,9 @@ const at = (date: string | null, time: string | null, end: boolean): string | nu
  * Street Manager activities (DATA-05): skips, scaffolding, hoardings, cranes,
  * events and the like. Only those on the footway or a footpath are kept. The
  * archive doesn't say whether the pavement is closed, so each one is "on the
- * pavement" (counted as unknown, D-027), never "closed".
+ * pavement" (counted as unknown, D-027), never "closed". The description is
+ * in our own words and the street name: the record's free text can name
+ * addresses, businesses and people, so it is never shown.
  */
 export function streetManagerActivityObservations(acts: StreetManagerActivity[], fromOsgb: (e: number, n: number) => [number, number], now: Date): WorksObservation[] {
   const out: WorksObservation[] = [];
@@ -148,14 +150,14 @@ export function streetManagerActivityObservations(acts: StreetManagerActivity[],
     if (!start || !end || Date.parse(end) <= now.getTime()) continue;
     const pts = wktPoints(a.geom).map(([e, n]) => fromOsgb(e, n));
     if (!pts.length) continue;
+    // Our own words only: the free-text details name addresses, businesses and people (D-027).
     const what = ACTIVITY[a.activity ?? ""] ?? "An obstruction";
-    const detail = a.details && a.details.trim() && !new RegExp(`^${(a.activity ?? "").replace(/_/g, " ")}$`, "i").test(a.details.trim()) ? ` (${a.details.trim()})` : "";
     out.push({
       id: `sma:${a.ref}`,
       source: "Street Manager",
       geometry: pts.map(([x, y]) => [Math.round(x * 1e6) / 1e6, Math.round(y * 1e6) / 1e6]),
       footway: "affected",
-      description: `${what} on the pavement${detail}`,
+      description: `${what} on the pavement`,
       street: title(a.street),
       start,
       end,
@@ -195,7 +197,7 @@ export function tflStreetObservations(segs: TflStreetSegment[], now: Date, fetch
     } catch {
       continue;
     }
-    const closed = /(footway|pavement|footpath)s?\s+(will be\s+|is\s+|are\s+)?closed|pedestrians?\s+(will be\s+)?(diverted|closed)|closed to pedestrians/.test(text);
+    const closed = saysClosed(TFL_FOOTWAY_CLOSED, text);
     out.push({
       id: `tfl:${s.distruptedStreetId}`,
       source: "TfL road disruptions",
@@ -209,6 +211,30 @@ export function tflStreetObservations(segs: TflStreetSegment[], now: Date, fetch
     });
   }
   return out;
+}
+
+/** TfL's street disruption comments say the footway itself is shut. */
+export const TFL_FOOTWAY_CLOSED = /(footway|pavement|footpath)s?\s+(will be\s+|is\s+|are\s+)?closed|pedestrians?\s+(will be\s+)?(diverted|closed)|closed to pedestrians/gi;
+/** Words just before a closure phrase that deny it: "no footway closed", "without pedestrians diverted". */
+const NEGATED_BEFORE = /\b(no|not|without|nor|never|avoid(s|ing)?|excluding|except)\b[\s\w/-]{0,12}$/i;
+/** Words just after it: "pavement closed: not required", "footway closed: N/A". */
+const NEGATED_AFTER = /^[\s:.,-]*((is|are|will|shall|be)\s+)*(not|(is|are|was|wo|shan)n't|n\/a|none|nil)\b/i;
+
+/**
+ * Whether free text says the footway is closed. A closure phrase counts
+ * unless the words around it deny it, so "no pavement closed" or "footway
+ * closed: not required" don't close a pavement. One plain closure anywhere
+ * in the text is enough.
+ */
+export function saysClosed(pattern: RegExp, text: string): boolean {
+  for (const m of text.matchAll(pattern)) {
+    const i = m.index ?? 0;
+    const before = text.slice(Math.max(0, i - 24), i);
+    const after = text.slice(i + m[0].length, i + m[0].length + 24);
+    if (NEGATED_BEFORE.test(before) || NEGATED_AFTER.test(after)) continue;
+    return true;
+  }
+  return false;
 }
 
 const PAVEMENT_KINDS = new Set(["sidewalk", "footway", "pedestrian", "street_proxy", "ramp"]);

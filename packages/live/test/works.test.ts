@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { loadSnapshot } from "@causeway/graph/node";
 import { PRESETS } from "@causeway/profile";
 import { DRY, evaluateEdge } from "@causeway/router";
-import { applyEdgeStates, streetManagerObservations, tflStreetObservations, wktPoints, worksStates, type StreetManagerPermit, type WorksObservation } from "../src/index.js";
+import { TFL_FOOTWAY_CLOSED, applyEdgeStates, saysClosed, streetManagerActivityObservations, streetManagerObservations, tflStreetObservations, wktPoints, worksStates, type StreetManagerActivity, type StreetManagerPermit, type WorksObservation } from "../src/index.js";
 
 const NOW = new Date("2026-10-04T12:00:00Z");
 const permit = (over: Partial<StreetManagerPermit>): StreetManagerPermit => ({
@@ -66,6 +66,50 @@ describe("TfL street adapter", () => {
     expect(out).toHaveLength(1);
     expect(out[0]!.footway).toBe("closed");
     expect(out[0]!.street).toBe("Marsh Wall");
+  });
+
+  it("doesn't close a pavement when TfL's words deny the closure", () => {
+    const seg = { distruptedStreetId: "1", streetName: "MARSH WALL", lineString: "[[-0.02,51.5],[-0.021,51.5]]", closure: "Closed", category: "Works", startDateTime: "2026-10-01T00:00:00Z", endDateTime: "2026-10-09T00:00:00Z" };
+    const out = tflStreetObservations([{ ...seg, comments: "Lane closure. No footway closed, pedestrians kept on the north side" }], NOW);
+    expect(out).toHaveLength(1);
+    expect(out[0]!.footway).toBe("affected");
+  });
+});
+
+describe("saysClosed", () => {
+  it("reads plain closures as closed", () => {
+    for (const t of ["footway closed, pedestrians diverted", "pavement will be closed", "closed to pedestrians", "pedestrians diverted"]) expect(saysClosed(TFL_FOOTWAY_CLOSED, t), t).toBe(true);
+  });
+  it("does not close a pavement when the words around the phrase deny it", () => {
+    for (const t of ["no footway closed", "works without pavement closed", "footway closed: n/a", "pavement closed: not required", "pedestrians diverted: none"]) expect(saysClosed(TFL_FOOTWAY_CLOSED, t), t).toBe(false);
+  });
+  it("still closes when a plain closure sits beside a denied one", () => {
+    expect(saysClosed(TFL_FOOTWAY_CLOSED, "no footway closed on the north side. footway closed on the south side")).toBe(true);
+  });
+});
+
+describe("Street Manager activities", () => {
+  const act = (over: Partial<StreetManagerActivity>): StreetManagerActivity => ({
+    ref: "A-1",
+    event_time: "2026-09-20T10:00:00Z",
+    event_type: "ACTIVITY_CREATED",
+    geom: "POINT(425000 564000)",
+    street: "GREY STREET",
+    activity: "scaffolding",
+    details: "Scaffold outside 12 Grey Street for J Smith Builders",
+    location_type: "Footway",
+    cancelled: "No",
+    start_date: "2026-10-01",
+    start_time: null,
+    end_date: "2026-10-20",
+    end_time: null,
+    ...over,
+  });
+  it("describes them in our own words, never the record's free text", () => {
+    const out = streetManagerActivityObservations([act({}), act({ ref: "A-2", activity: "unknown_kind", details: "Impact Area" })], ident, NOW);
+    expect(out.map((o) => o.description)).toEqual(["Scaffolding on the pavement", "An obstruction on the pavement"]);
+    expect(JSON.stringify(out)).not.toMatch(/Smith|Impact/);
+    expect(out.every((o) => o.footway === "affected")).toBe(true);
   });
 });
 

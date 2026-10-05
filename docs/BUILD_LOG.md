@@ -2,6 +2,17 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
+## 2026-10-05 (porting the overnight build)
+
+Richard chose main as the base; the overnight build's extras (PR #36) are ported by hand, smallest and safest first.
+
+**Honesty fixes** (D-051)
+- Edinburgh council widths and surfaces are inferred: a narrow council width costs time and no longer closes a pavement.
+- TfL street comments that deny a closure ("no footway closed") no longer close the pavement.
+- Street Manager activities show our own words and the street, never the record's free text. Three London entries lost their "(Impact Area)"-style endings.
+- Lift outages at one station count together: Canning Town lifts 1 and 3 out now cut off the Jubilee line.
+- A search result's first fact may take two lines before it is cut off.
+
 ## 2026-10-05 (morning)
 
 Security and stability, from the roadmap's Now list.

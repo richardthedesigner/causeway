@@ -29,10 +29,15 @@ export function councilSurface(s: string | null | undefined): Surface | null {
   return null;
 }
 
-/** Fill unknown surfaces and widths from the council layer. Returns how many edges gained something. */
 /** Edges people walk or wheel along outside, where gritting applies. */
 const PAVEMENT = new Set(["footway", "sidewalk", "pedestrian", "street_proxy", "ramp"]);
 
+/**
+ * Fill unknown surfaces and widths from the council layer. Returns how many edges gained something.
+ * Both are written as inferred (D-046): the council records the whole footway, matched to our
+ * edge by shape, and its width is the full width, not the clear width past bins and posts. So a
+ * narrow council width costs time and never closes a pavement on its own.
+ */
 export function applyCouncilFootways(g: Graph, layer: CouncilFootways): number {
   let n = 0;
   for (const e of g.edges) {
@@ -45,11 +50,11 @@ export function applyCouncilFootways(g: Graph, layer: CouncilFootways): number {
     const how = `${layer.source}${alongside ? ", the footway alongside (narrowest and roughest if two)" : ""}`;
     let changed = false;
     if (surface && !isKnown(e.attrs.surface)) {
-      e.attrs.surface = attr(surface, "reported", "council", layer.fetchedAt, how);
+      e.attrs.surface = attr(surface, "inferred", "council", layer.fetchedAt, how);
       changed = true;
     }
     if (width !== null && !isKnown(e.attrs.width)) {
-      e.attrs.width = attr(width, "reported", "council", layer.fetchedAt, how);
+      e.attrs.width = attr(width, "inferred", "council", layer.fetchedAt, how);
       changed = true;
     }
     if (changed) n++;
