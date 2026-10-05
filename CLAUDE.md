@@ -7,9 +7,11 @@ Read this first in every session.
 [docs/ROADMAP.md](docs/ROADMAP.md) is the one list of work. Every session follows it:
 
 1. **Before starting:** read its **Now** section and the section your task belongs to. If the task isn't listed, add a row with a new ID first.
-2. **While working:** set the row to `doing` with the date and branch. Put the ID in commit messages and the PR title (`SEC-01: security headers`).
-3. **When finished:** set the row to `done (YYYY-MM-DD)` in the same pull request, add a line to the roadmap's **Log**, and add rows for anything you found but didn't do.
-4. **If Now drops below five open items,** promote the next most useful ones.
+2. **Check nobody else has it.** Several sessions work at once, and a row only shows `doing` on `main` once its PR merges. So also look at the open pull requests: their titles carry task IDs. If one already covers your task, pick another, or ask.
+3. **Claim it before you build it.** Set the row to `doing` with the date and branch, push that one change, and open a draft PR titled with the ID (`SEC-01: security headers`) straight away. Then do the work in that PR. A claim with no commits for a day can be taken over: say so on its PR.
+4. **While working:** put the ID in commit messages. Take new D-numbers and IDs from `main` as late as you can, and check them again before merging, since another PR may have taken them.
+5. **When finished:** set the row to `done (YYYY-MM-DD)` in the same pull request, add a line to the roadmap's **Log**, and add rows for anything you found but didn't do.
+6. **If Now drops below five open items,** promote the next most useful ones.
 
 A PR that changes code without touching `docs/ROADMAP.md` is incomplete.
 
