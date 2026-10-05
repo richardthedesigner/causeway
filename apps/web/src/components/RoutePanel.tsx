@@ -81,7 +81,7 @@ interface Props {
 const dist = (m: number) => (m >= 1000 ? `${(m / 1000).toFixed(1)} km` : `${Math.round(m / 10) * 10} m`);
 const groundWord = (c: Conditions) => (c.ice ? "icy ground" : c.wet ? "wet ground" : "dry ground");
 
-export const meta = (r: PlannedRoute) => {
+const meta = (r: PlannedRoute) => {
   const s = r.summary;
   // With a train in the middle, the distance that matters is the bit you push, wheel or walk.
   const d = s.rides.length ? s.walkM : s.distanceM;

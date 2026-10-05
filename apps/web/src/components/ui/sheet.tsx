@@ -6,8 +6,6 @@ import { cn } from "@/lib/utils";
 
 /** Full-height sheet for focused tasks (changing how you get around). Modal, focus-trapped, Escape closes. */
 export const Sheet = Dialog.Root;
-export const SheetTrigger = Dialog.Trigger;
-export const SheetClose = Dialog.Close;
 
 export function SheetContent({ title, description, children, className }: { title: string; description?: string; children: React.ReactNode; className?: string }) {
   return (

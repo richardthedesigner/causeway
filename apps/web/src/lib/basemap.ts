@@ -10,7 +10,7 @@ import type { LayerSpecification } from "maplibre-gl";
 import { PMTiles, Protocol, type RangeResponse, type Source } from "pmtiles";
 
 /** Recolour a Protomaps flavour to our tokens: warm-neutral ground, soft water, quiet roads, ink labels. */
-export function causewaysideFlavor(dark: boolean): Flavor {
+function causewaysideFlavor(dark: boolean): Flavor {
   const base = namedFlavor(dark ? "dark" : "light");
   const c = dark
     ? { ground: "#141816", earth: "#181c1a", park: "#1d2a22", water: "#16222c", building: "#222825", road: "#2b322e", roadCasing: "#141816", label: "#c9cfc8", labelHalo: "#141816", minor: "#262c29", rail: "#3a423d" }

@@ -18,7 +18,7 @@ const MARK_ICON = {
 } as const;
 
 /** Distance along the route (nav plan scale) to distance along the strip (rides shortened). */
-export function stripAt(s: Strip, t: number): number {
+function stripAt(s: Strip, t: number): number {
   for (const p of s.parts) {
     if (t <= p.t1) return p.d0 + (Math.max(0, t - p.t0) / Math.max(1e-6, p.t1 - p.t0)) * (p.d1 - p.d0);
   }

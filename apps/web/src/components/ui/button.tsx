@@ -4,7 +4,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 // Minimum target 48px, primary 56px (brief: reach and touch).
-export const buttonVariants = cva(
+const buttonVariants = cva(
   "inline-flex max-w-full items-center justify-center gap-[8px] rounded-full font-bold transition-colors disabled:opacity-50 disabled:pointer-events-none select-none",
   {
     variants: {
