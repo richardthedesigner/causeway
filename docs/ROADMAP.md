@@ -169,15 +169,23 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | SEC-04 | `pnpm audit` in CI, failing on high severity | S | now | done (2026-10-05) | Claude | PR #33, D-050. Found a critical MapLibre hole and two high PostCSS ones; fixed by MapLibre 6.12 and a PostCSS override |
 | SEC-05 | Check nothing leaks the profile (logs, URLs, error messages) | S | now | done (2026-10-05) | Claude | PR #33, D-009. No leak found. `pnpm e2e` now fails if any request carries the device's name, type or limits |
 | SEC-06 | Export and delete everything about me, in one place | M | now | done (2026-10-05) | Claude | PR #42, D-059. "Your data": what's kept, a copy as a file, and delete everything, shared notes, reports, flags and photos included. Migration 0006 |
-| SEC-07 | Review row-level security and storage bucket rules against a threat model | M | later | todo | Claude | `db/migrations`, `scripts/test-db.sh` |
+| SEC-07 | Review row-level security and storage bucket rules against a threat model | M | later | done (2026-10-05) | Claude | [Security review](reviews/security-2026-10.md). One critical, one high, four medium, five low. SEC-16 to SEC-23 |
 | SEC-08 | Harden `/review`: sign-in rate limits, session length | S | later | todo | Claude | |
-| SEC-09 | Cloudflare Turnstile on anonymous sign-up, before any publicity | S | later | blocked | Richard, Claude | D-030 |
+| SEC-09 | Cloudflare Turnstile on anonymous sign-up, before sharing goes live | S | later | blocked | Richard, Claude | D-030. Two scripted accounts can hide any note ([review](reviews/security-2026-10.md) M4) |
 | SEC-10 | Data protection impact assessment (DPIA), before wider launch | M | later | blocked | Richard | D-030 |
 | SEC-12 | Check the headers are live on production (`curl -I`) | S | next | done (2026-10-05) | Claude | D-041. Headers confirmed live on production (commit `023b781`, deployment `dpl_7wg8rrU5ZACcB7DYG7BuwDH8Aopp`). |
-| SEC-16 | Score the headers on securityheaders.com | S | next | blocked | Richard, Claude | SEC-12's headers are live; score blocked by Vercel login protection on `vercel.app` URLs. Needs custom domain (DEP-07) or relaxed login protection. |
 | SEC-13 | Drop `'unsafe-inline'` from the CSP's `script-src`: hashes for Next's inline scripts at build time | S | later | todo | Claude | D-041. They change every build |
 | SEC-14 | Turn on private vulnerability reporting (Settings, then Code security) | S | next | blocked | Richard | `SECURITY.md` points people to it |
 | SEC-15 | Remove a deleted note's approved photo from the public bucket | S | later | todo | Claude | D-059. Hidden once the note's gone, but the copy stays. A reviewer step or a server job, once sharing is on |
+| SEC-16 | Before the migrations run on Supabase: revoke Supabase's default grants, row-level security on every `public` table, and CI that tests with Supabase's grants | S | now | todo | Claude | [Review](reviews/security-2026-10.md) C1, H1. Signed out, anyone can delete any note through `note_public` and write the graph tables. Blocks turning sharing on |
+| SEC-17 | Server sets the fields the client shouldn't: note `created_at` and `photo_path`, report `status` and `verified_by` | S | next | todo | Claude | [Review](reviews/security-2026-10.md) M1, L1. A backdated `created_at` skips the 30-a-day limit |
+| SEC-18 | Stop shared notes linking one person: a per-target `author_key`, and approved photos stored by note id, not user id | S | next | todo | Claude | [Review](reviews/security-2026-10.md) M2, L2. D-009 |
+| SEC-19 | Data refresh: `persist-credentials: false` on checkout and pinned pip packages | S | now | todo | Claude | [Review](reviews/security-2026-10.md) M3. A bad package could push to `main`, and so to production |
+| SEC-20 | Size and file type limits on the photo buckets | S | later | todo | Claude | [Review](reviews/security-2026-10.md) L3. `0004_storage.sql` |
+| SEC-21 | Name the one Supabase host in the CSP instead of `*.supabase.co` | S | later | todo | Claude | [Review](reviews/security-2026-10.md) L4. Once the project exists. With SEC-13 |
+| SEC-22 | `BACKEND.md`: add `0006`, fix who can do what, add running Supabase's Security Advisor | S | next | todo | Claude | [Review](reviews/security-2026-10.md) L5 |
+| SEC-23 | Check branch protection on `main` and the production branch blocks direct pushes | S | next | blocked | Richard | [Review](reviews/security-2026-10.md) M3. Needs repo admin |
+| SEC-24 | Score the headers on securityheaders.com | S | next | blocked | Richard, Claude | SEC-12's headers are live; score blocked by Vercel login protection on `vercel.app` URLs. Needs custom domain (DEP-07) or relaxed login protection. |
 | SEC-11 | Name the weekly reviewer for flags, photos and reports | S | later | blocked | Richard | [BACKEND.md](BACKEND.md). Only once sharing is on |
 
 ## Stability and testing
@@ -254,7 +262,7 @@ Repeat on the cadence shown. When one is done, set it back to `todo` with the ne
 | ID | Task | Size | Priority | Status | Who | Notes |
 |---|---|---|---|---|---|---|
 | REV-01 | Docs freshness: README status line, UX_ASSESSMENT, OPEN_ITEMS, this file | S | next | todo | Claude | Monthly. Next: 2026-11-05 |
-| REV-02 | Security review of the whole repo | M | next | todo | Claude | Quarterly |
+| REV-02 | Security review of the whole repo | M | next | todo | Claude | Quarterly. Next: January 2027. Last: 2026-10-05, [report](reviews/security-2026-10.md) |
 | REV-03 | Code review of the largest and most-changed files | S | next | todo | Claude | Monthly |
 | REV-04 | Decisions review: anything marked as a guess or "reconsider" (D-010, D-013, D-037, D-038) | S | later | todo | Richard, Claude | Quarterly |
 | REV-05 | Data licence and attribution review | S | later | todo | Claude | Each new source, and yearly. [DATA_SOURCES.md](DATA_SOURCES.md) |
@@ -280,7 +288,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 
 Newest first. One line per change: date, ID, what happened, link.
 
-- 2026-10-05: REL-01 done: Release check and runbook. PRs #38, #42, #44 are on production (commit `023b781`, deployment `dpl_7wg8rrU5ZACcB7DYG7BuwDH8Aopp`, READY). Post-deploy checks pass; maplibre-gl-worker.mjs serves as JavaScript. MapLibre worker guess confirmed on production (move to OPEN_ITEMS Done). SEC-12 headers confirmed live; score blocked by login protection.
+- 2026-10-05: SEC-07 done and REV-02 run: [security review](reviews/security-2026-10.md). One critical and one high, both before sharing goes live: Supabase's default grants let anyone delete notes through `note_public` and write the graph tables. SEC-16 to SEC-23 added. REL-01 done: Release check and runbook. PRs #38, #42, #44 on production (commit `023b781`, deployment `dpl_7wg8rrU5ZACcB7DYG7BuwDH8Aopp`). MapLibre worker confirmed on production. SEC-12 headers live; scoring still blocked by login protection.
 - 2026-10-05: DEP-08 (PORT-44) done: PR #44 merged with PR #42. No D-number or task ID collided: #42 holds D-059 and D-060, #44 D-053 to D-058 and D-061 to D-068. SPEED-02 was done in #44, so SPEED-01 joins Now in its place.
 - 2026-10-05: FEAT-19 done: "On this route" under the route card, grouped Blocked, Slower and Worth knowing, each fact labelled live, static data or reported by people with its source and date; the route card keeps only failed feeds, a count of closures gone round and a flood area on the route (D-067, ported from PR #36).
 - 2026-10-05: DATA-32 done: UKHSA heat and cold alerts (only in season and before their end), gusts on exposed bridges, and air quality, pollen and UV when high; Open-Meteo times read as UTC (D-066). DATA-25 in part: SEPA's Water of Leith level on routes using the walkway.
