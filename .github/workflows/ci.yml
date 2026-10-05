@@ -50,8 +50,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      # Supabase's roles and default grants first, so the migrations meet what production has (SEC-16).
       - run: |
-          for f in db/migrations/*.sql; do
+          for f in db/test/supabase-stub.sql db/migrations/*.sql; do
             PGPASSWORD=postgres psql -h localhost -U postgres -v ON_ERROR_STOP=1 -q -f "$f"
           done
       - name: Sharing rules (row-level security)

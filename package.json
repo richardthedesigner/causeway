@@ -52,6 +52,9 @@
   "pnpm": {
     "overrides": {
       "next>postcss": "^8.5.28"
+    },
+    "patchedDependencies": {
+      "vaul@1.1.2": "patches/vaul@1.1.2.patch"
     }
   }
 }

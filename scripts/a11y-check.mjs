@@ -70,7 +70,7 @@ for (const scheme of ["light", "dark"]) {
   await page.getByRole("option").first().click();
   await page.getByText("Why this way?").waitFor({ timeout: 60_000 });
   await page.waitForTimeout(1500);
-  for (const d of await page.locator("details").all()) await d.evaluate((el) => (el.open = true));
+  await page.locator("details").evaluateAll((els) => els.forEach((el) => (el.open = true)));
   await check("route, all sections open");
 
   // A first visit: the device button reads "Set up" and opens setup (D-036 step 5).
@@ -99,7 +99,7 @@ for (const scheme of ["light", "dark"]) {
   await check("device settings, battery range");
   // A road scooter: speed on the road, in either unit (FEAT-18).
   await page.getByRole("radio", { name: /Mobility scooter, road/ }).click();
-  for (const d of await page.locator("[role=dialog] details").all()) await d.evaluate((el) => (el.open = true));
+  await page.locator("[role=dialog] details").evaluateAll((els) => els.forEach((el) => (el.open = true)));
   await page.getByRole("slider", { name: "Speed on the road" }).waitFor();
   await check("device settings, road scooter, mph");
   await page.getByRole("radio", { name: "km/h" }).click();
@@ -202,11 +202,11 @@ for (const scheme of ["light", "dark"]) {
   await page.getByRole("button", { name: /Routes are for/ }).first().click();
   await page.getByRole("menuitem", { name: /^Edit/ }).click();
   await page.getByRole("dialog").filter({ hasText: "Your limits" }).waitFor();
-  for (const d of await page.locator("[role=dialog] details").all()) await d.evaluate((el) => (el.open = true));
+  await page.locator("[role=dialog] details").evaluateAll((els) => els.forEach((el) => (el.open = true)));
   await page.getByRole("switch", { name: "Warn me about battery range" }).click();
   await reflow("device settings, every section open");
   await page.getByRole("radio", { name: /Mobility scooter, road/ }).click();
-  for (const d of await page.locator("[role=dialog] details").all()) await d.evaluate((el) => (el.open = true));
+  await page.locator("[role=dialog] details").evaluateAll((els) => els.forEach((el) => (el.open = true)));
   await page.getByRole("slider", { name: "Speed on the road" }).waitFor();
   await reflow("device settings, road scooter");
 }
@@ -251,7 +251,7 @@ for (const scheme of ["light", "dark"]) {
   await reflow("search");
   await page.getByRole("option").first().click();
   await page.getByText("Why this way?").waitFor({ timeout: 60_000 });
-  for (const d of await page.locator("details").all()) await d.evaluate((el) => (el.open = true));
+  await page.locator("details").evaluateAll((els) => els.forEach((el) => (el.open = true)));
   await reflow("route, all sections open");
   await page.getByRole("button", { name: "Add a note about this route" }).click();
   await page.getByRole("radio", { name: "Bad" }).waitFor();
@@ -264,6 +264,51 @@ for (const scheme of ["light", "dark"]) {
   await page.getByRole("button", { name: "Report a problem here" }).click();
   await page.getByRole("dialog", { name: "Report a problem" }).waitFor();
   await reflow("report sheet");
+}
+// The map controls (STAB-13): reachable by keyboard while the sheet is open, menus take and return focus,
+// and at 320 px with text at 200% no city name is cut off or runs under the buttons.
+{
+  const page = await (await browser.newContext({ viewport: { width: 320, height: 640 } })).newPage();
+  watchCsp(page, csp);
+  await page.goto(url);
+  await page.getByPlaceholder("Where to?").waitFor({ timeout: 60_000 });
+  await page.addStyleTag({ content: "html { font-size: 200% !important }" });
+  const problems = [];
+  if (await page.locator("main[aria-hidden=true]").count()) problems.push("the sheet hides the map from screen readers");
+  const focused = () => page.evaluate(() => document.activeElement?.getAttribute("data-menu") ?? document.activeElement?.getAttribute("aria-label") ?? "");
+  const reached = new Set();
+  await page.getByPlaceholder("Where to?").focus();
+  for (let i = 0; i < 80; i++) {
+    await page.keyboard.press("Tab");
+    reached.add(await focused());
+  }
+  for (const want of ["city", "layers", "Start from your location"]) if (!reached.has(want)) problems.push(`Tab never reaches ${want}`);
+  for (const [name, item] of [["city", "menuitemradio"], ["layers", "menuitemcheckbox"]]) {
+    await page.locator(`[data-menu="${name}"]`).focus();
+    await page.keyboard.press("Enter");
+    await page.waitForTimeout(300);
+    if ((await page.evaluate(() => document.activeElement?.getAttribute("role"))) !== item) problems.push(`the ${name} menu doesn't take focus`);
+    await page.keyboard.press("Escape");
+    if ((await focused()) !== name) problems.push(`Escape from the ${name} menu doesn't return focus`);
+  }
+  // Focusing the search raised the sheet to full height; start again with it low.
+  await page.reload();
+  await page.getByPlaceholder("Where to?").waitFor({ timeout: 60_000 });
+  await page.addStyleTag({ content: "html { font-size: 200% !important }" });
+  for (const city of ["Edinburgh", "Newcastle and Gateshead", "London"]) {
+    await page.locator('[data-menu="city"]').click();
+    await page.getByRole("menuitemradio", { name: city }).click();
+    await page.waitForTimeout(500);
+    const r = await page.evaluate(() => {
+      const c = document.querySelector('[data-menu="city"]');
+      const l = document.querySelector('[data-menu="layers"]');
+      return { clipped: c.scrollWidth > c.clientWidth + 1, right: c.getBoundingClientRect().right, next: l.getBoundingClientRect().left };
+    });
+    if (r.clipped) problems.push(`"${city}" is cut off`);
+    if (r.right > r.next) problems.push(`"${city}" runs under the layers button`);
+  }
+  console.log(`map controls: ${problems.length ? problems.join("; ") : "reachable, and every city name fits"}`);
+  for (const p of problems) failures.push(`map controls / ${p}`);
 }
 await browser.close();
 server.close();
