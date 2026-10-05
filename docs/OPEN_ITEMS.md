@@ -17,6 +17,7 @@ Last updated: 2026-10-05.
 | Ask Nexus for Tyne and Wear Metro lift status | Without it, Metro stations reached by lift are always "unknown" for step-free users | An email | [#13](https://github.com/richardthedesigner/causeway/issues/13) |
 | Decide whether chain-store websites scraped by AllThePlaces count as scraping under our rule | 348 places in search come only from AllThePlaces: mostly chain stores, parcel lockers and scout halls. Its Changing Places and NHS records are already out | A decision | ROADMAP DATA-27, [D-028](DECISIONS.md#d-028-overture-fills-search-gaps-osm-stays-the-source-of-access-facts) |
 | Turn on private vulnerability reporting: Settings, then Code security | `SECURITY.md` sends people there; until it's on they have nowhere private to report | 1 minute | [ROADMAP](ROADMAP.md) SEC-14 |
+| Decide whether to change DEF-09 from "Glasgow, then Wales" to "Glasgow, then Leeds", and whether Glasgow starts before its licence is confirmed | RES-09 ranks Cardiff and Swansea last of 14 (no open roadworks, new terrain source, little council data). Glasgow's best layers are unlicensed, so DATA-13 is the one thing that can slow it | A decision | [where-next.md](research/where-next.md) |
 
 ## Blocked outside the project
 
