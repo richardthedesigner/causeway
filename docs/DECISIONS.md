@@ -883,6 +883,20 @@ A new Supabase project grants everything in `public` to `anon` and `authenticate
 
 ## D-072 Which city next
 
-**Decided.** 2026-10-05 (DEF-09 update). Richard chose Glasgow, then Leeds. After those, cities are chosen by population without asking Richard again: built-up area population from ONS (England and Wales) or NRS (Scotland), largest first, skipping cities already covered (Edinburgh, Newcastle, Gateshead, London).
+**Decided.** 2026-10-05 (DEF-09, DEF-10). Richard chose Glasgow, then Leeds. After those, cities are chosen by size without asking him again: built-up area population, ONS (Census 2021) for England and Wales and NRS for Scotland, largest first, skipping cities already covered (Edinburgh, Newcastle and Gateshead, London).
 
-**The order.** Glasgow and Leeds settled. The following cities by ONS/NRS built-up area population, largest first: [to be filled in with figures and sources].
+**The order after Leeds.** ONS built-up area populations, Census 2021:
+
+| Next | City | Built-up area population | Source |
+|---|---|---|---|
+| 1 | Birmingham | 1,121,375 | [ONS, Towns and cities: characteristics of built-up areas](https://www.ons.gov.uk/peoplepopulationandcommunity/housing/articles/townsandcitiescharacteristicsofbuiltupareasenglandandwales/census2021) |
+| 2 | Liverpool | 506,565 | [ONS dataset](https://www.ons.gov.uk/peoplepopulationandcommunity/housing/datasets/townsandcitiescharacteristicsofbuiltupareasenglandandwalescensus2021), as listed in [Wikipedia's table of ONS built-up areas](https://en.wikipedia.org/wiki/List_of_ONS_built-up_areas_in_England_by_population) |
+| 3 | Sheffield | 500,535 | Same |
+| 4 | Manchester | 470,405 | Same |
+| 5 | Bristol | 425,215 | Same |
+
+For comparison, Leeds is 536,280 and Newcastle upon Tyne 286,445. Scotland has nothing in this range: the largest Scottish settlements after Glasgow and Edinburgh are Aberdeen (220,690) and Dundee (158,820), NRS mid-2020 estimates ([NRS](https://nrscotland.gov.uk/publications/population-estimates-for-settlements-and-localities-in-scotland-mid-2020)), both below Bristol.
+
+**What is checked and what isn't.** Birmingham's figure is stated on the ONS page. The others come from Wikipedia's transcription of the ONS dataset, which is a 28 MB spreadsheet this session could not open. Check them against it before work starts on a city. The order has a wide gap after Birmingham and a tight one from Liverpool to Sheffield (6,000 people), so a small correction could swap those two.
+
+**Size, not score.** RES-09's weighted score ([where-next.md](research/where-next.md)) put Sheffield third, but Richard's rule is size, so size decides.
