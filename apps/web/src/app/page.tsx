@@ -25,7 +25,7 @@ import type { Place, PlannedRoute } from "@/lib/plan-types";
 import { activeDevice, deviceLabel, FIRST_VISIT, loadDeviceState, saveDeviceState, setTip, tipPending, withActive, withActiveName, withActiveProfile, withDeviceProfile, withFavourite, withoutDevice, withSetup, type DeviceState } from "@/lib/devices";
 import { addRecent, loadRecents } from "@/lib/recents";
 import { useNotes } from "@/lib/use-notes";
-import { hoursText } from "@/lib/opening-hours";
+import { hoursText, setBankHolidays } from "@/lib/opening-hours";
 import { toiletsAlong } from "@/lib/toilets";
 import { usePlaces } from "@/lib/use-places";
 import { departure, usePlanner, type Conditions } from "@/lib/use-planner";
@@ -57,6 +57,8 @@ const SNAP = { peek: 0.24, half: 0.52, full: 0.94 };
  */
 export default function Home() {
   const [city, setCity] = useState<City>(CITIES[0]!);
+  // Opening hours everywhere follow this city's bank holidays; set before anything below reads them (idempotent).
+  setBankHolidays(city.holidays);
   useEffect(() => {
     try {
       const saved = localStorage.getItem(CITY_KEY);

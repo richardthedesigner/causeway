@@ -69,11 +69,12 @@ jobs:
           pnpm build:footways || echo "::warning::council footways failed"
           pnpm build:floods || echo "::warning::flood areas failed"
         continue-on-error: true
-      - name: Park gates, OSM notes and the Toilet Map
+      - name: Park gates, OSM notes, the Toilet Map and bank holidays
         run: |
           pnpm build:greenspace || echo "::warning::park gates failed"
           pnpm build:osm-notes || echo "::warning::OSM notes failed"
           pnpm build:toilets || echo "::warning::Toilet Map failed"
+          pnpm build:holidays || echo "::warning::bank holidays failed"
         continue-on-error: true
 
       - name: Check the app still works with the new data
@@ -134,6 +135,7 @@ jobs:
             data/snapshots/newcastle-gateshead.graph.json.gz
             data/snapshots/london-jubilee.graph.json.gz
             data/council/*.json
+            apps/web/src/lib/bank-holidays.json
           delete-branch: true
 
       - name: Fail on sudden drops

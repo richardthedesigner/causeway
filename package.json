@@ -25,7 +25,8 @@
     "build:osm-notes": "tsx scripts/build-osm-notes.ts",
     "build:toilets": "tsx scripts/build-toiletmap.ts",
     "a11y": "node scripts/a11y-check.mjs",
-    "e2e": "node scripts/e2e.mjs"
+    "e2e": "node scripts/e2e.mjs",
+    "build:holidays": "tsx scripts/build-bank-holidays.ts"
   },
   "devDependencies": {
     "@types/node": "^26.6.4",
