@@ -17,7 +17,8 @@ Last updated: 2026-10-05.
 1. Read **Now** and the section your task belongs to.
 2. If your task is here, use its ID in commit messages and the PR title (for example `SEC-01: security headers`).
 3. If it isn't, add a row in the right section first, with the next free ID.
-4. Set its status to `doing` and put the date and your branch in Notes.
+4. Check the open pull requests too. A task can be taken without showing here yet, because a row only changes on `main` when its PR merges.
+5. Claim it: set its status to `doing`, put the date and your branch in Notes, push that, and open a draft PR titled with the ID before doing the work.
 
 **When you finish**
 1. Set the status to `done (YYYY-MM-DD)` in the same pull request. Leave the row where it is, so IDs stay findable.
@@ -263,6 +264,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 
 Newest first. One line per change: date, ID, what happened, link.
 
+- 2026-10-05: Rule added to CLAUDE.md and this file: check open PRs before taking a task, and claim it with a draft PR first. STAB-05 was done twice in parallel (#42 and #43), as DATA-01 was (#33 and #37).
 - 2026-10-05: FEAT-18 done: "Speed on the road" for road scooters (4 to 8 mph), and "Show speeds in: mph or km/h" per device (D-051).
 - 2026-10-05: STAB-05 done (D-052). Added STAB-14. Promoted STAB-07. Now: STAB-06, SEC-06, SMALL-01, STAB-13, STAB-07.
 - 2026-10-05: FEAT-02 done: road scooters go at road speed on roads, and pace learning skips road stretches (D-051). Added FEAT-18 (road speed setting) and RES-10 (ask riders about road routes).
