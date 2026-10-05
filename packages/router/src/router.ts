@@ -621,7 +621,7 @@ export function explain(router: Router, chosen: Route, from: GraphNode, to: Grap
       continue;
     }
     if (s.edge.kind !== "board") continue;
-    // Platform to train (D-059): an unknown says which platform and why; the staff ramp says to ask.
+    // Platform to train (D-060): an unknown says which platform and why; the staff ramp says to ask.
     const why = s.eval.reasons.find((x) => x.attr === "boarding" || x.attr === "ramp");
     const note =
       why?.kind === "unknown"
@@ -699,7 +699,7 @@ export function placeName(e: GraphEdge): string {
  * The route as an ordered spoken list, for the non-visual route mode.
  * Consecutive steps on the same named way and kind merge into one segment.
  * With a profile that needs step-free access, a train leg says where TfL's
- * level-access doors are, when it says (D-059).
+ * level-access doors are, when it says (D-060).
  */
 export function describeSegments(r: Route, p?: Profile): string[] {
   // Rail legs read as one instruction each; walking parts as before.

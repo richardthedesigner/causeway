@@ -641,7 +641,7 @@ TfL's station layout (DATA-03) tells us, for every lift out at a station, which 
 - A line that was already step-free to some platforms only and loses the rest is closed.
 - Outages we can't place from the layout still go by TfL's message and close what it names, as before.
 
-## D-059 Boarding the train against each person's limits
+## D-060 Boarding the train against each person's limits
 
 **Decided.** 2026-10-05 (DATA-29, ported from the overnight build, PR #36, by hand). Builds on DATA-03. Code: `boardingOf` in `scripts/tfl-station-access.ts`, `PlatformBoarding` in `packages/graph/src/schema.ts`, `applyStationAccess` in `packages/graph/src/transit.ts`, `platformFit` and `boardingReason` in `packages/router/src/cost.ts`, `levelAccessAdvice` in `packages/router/src/boarding.ts`, `describeSegments` and `explain` in `packages/router/src/router.ts`.
 
