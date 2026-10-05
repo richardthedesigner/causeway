@@ -7,6 +7,11 @@ settings:
 overrides:
   next>postcss: ^8.5.28
 
+patchedDependencies:
+  vaul@1.1.2:
+    hash: 161068fd77e96d9faa1254dda4ccf00dd0152c2f8b2e95d1be7f3c8644d060e8
+    path: patches/vaul@1.1.2.patch
+
 importers:
 
   .:
@@ -107,7 +112,7 @@ importers:
         version: 3.7.0
       vaul:
         specifier: ^1.1.2
-        version: 1.1.2(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+        version: 1.1.2(patch_hash=161068fd77e96d9faa1254dda4ccf00dd0152c2f8b2e95d1be7f3c8644d060e8)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4.3.3
@@ -2935,7 +2940,7 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.3.0
 
-  vaul@1.1.2(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0):
+  vaul@1.1.2(patch_hash=161068fd77e96d9faa1254dda4ccf00dd0152c2f8b2e95d1be7f3c8644d060e8)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0):
     dependencies:
       '@radix-ui/react-dialog': 1.1.23(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       react: 19.3.0

@@ -6,6 +6,9 @@ import { cn } from "@/lib/utils";
 /**
  * Apple Maps style bottom sheet on vaul. Non-modal, so the map stays usable
  * behind it, with snap points so primary controls sit in the bottom third.
+ * Tab leaves the sheet for the map controls: vaul needs a patch to pass
+ * `modal` on to Radix (patches/vaul@1.1.2.patch), and Radix loops Tab inside
+ * even a non-modal dialog, so the wrapper below stops Tab reaching its loop.
  */
 export const Drawer = Vaul.Root;
 export const DrawerTitle = Vaul.Title;
@@ -24,7 +27,9 @@ export const DrawerContent = React.forwardRef<HTMLDivElement, React.ComponentPro
         {...props}
       >
         <div aria-hidden className="mx-auto mt-2.5 mb-1 h-1.5 w-12 shrink-0 rounded-full bg-line" />
-        {children}
+        <div className="contents" onKeyDown={(e) => e.key === "Tab" && e.stopPropagation()}>
+          {children}
+        </div>
       </Vaul.Content>
     </Vaul.Portal>
   ),

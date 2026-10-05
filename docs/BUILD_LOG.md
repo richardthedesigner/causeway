@@ -2,6 +2,14 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
+## 2026-10-05 (evening)
+
+**Map controls at 200% text, and by keyboard** (STAB-13, STAB-17, D-069)
+- At 320 px with text at 200%, "Edinburgh" was cut to "Edinbur" under the layers button. Padding and icons on the map controls are now in pixels, long city names wrap, and the city menu fits the screen.
+- The city and layers menus opened behind the sheet. They now open above it.
+- Found on the way: the sheet trapped keyboard focus and hid the map from screen readers, so Tab never reached the city, layers or location buttons. vaul never passed `modal={false}` on to Radix; a pnpm patch fixes that. Menus now take focus and give it back.
+- `pnpm a11y` checks the map controls by keyboard, and all three city names at 200% text.
+
 ## 2026-10-05 (afternoon)
 
 **Live feeds give up after 10 seconds** (D-052, STAB-05)

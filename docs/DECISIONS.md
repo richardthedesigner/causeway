@@ -512,3 +512,14 @@ When there is nothing to compare with, it builds. Once DEP-01 makes `main` the p
 - **A cancel isn't a failure.** The weather check restarts when the city or leaving time changes. The cancelled check used to land in the same handler as a failure, so "Couldn't check the weather" flashed on every app start in a remembered city. It now waits for a real failure or the limit.
 - **Tested.** `getJson` unit tests (`packages/live/test/http.test.ts`), and a `pnpm e2e` journey in London where TfL, Open-Meteo and the Environment Agency never answer: the route still comes, and the weather and lift lines fall back.
 - **Not covered.** The Supabase calls for sharing and review (STAB-14). Sharing is off today.
+
+## D-069 The sheet lets keyboard focus go
+
+**Date:** 2026-10-05. **Roadmap:** STAB-17, found doing STAB-13.
+
+The bottom sheet is meant to be non-modal (`modal={false}`), so the map stays usable behind it. vaul 1.1.2 takes the prop but never passes it to Radix, so Radix treated the sheet as modal: it trapped focus and hid `<main>` from screen readers. A keyboard or switch user could never reach the city, layers or location buttons.
+
+- `patches/vaul@1.1.2.patch` passes `modal` on to Radix. It's applied by `pnpm install`. Drop it when vaul fixes this upstream.
+- Radix still loops Tab inside a non-modal dialog, so `DrawerContent` stops Tab reaching that loop. Tab now runs from the sheet to the map controls and back, in page order.
+- The city and layers menus are portalled above the sheet. They take focus when they open; Escape, Tab or a choice gives it back to their button.
+- `pnpm a11y` checks that Tab reaches all three map controls, that `<main>` isn't hidden, and that both menus take and return focus.

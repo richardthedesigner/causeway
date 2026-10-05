@@ -54,7 +54,7 @@ The next five things to pick up, in order.
 1. **STAB-06**: fail the weekly data refresh if counts drop too far.
 2. **SEC-06**: export and delete everything about me, in one place.
 3. **SMALL-01**: opening hours that know bank holidays.
-4. **STAB-13**: the city name at the top of the map at 200% text.
+4. **STAB-18**: Edinburgh's end-to-end journey never arrives, so `pnpm e2e` fails on main.
 5. **STAB-07**: the routing worker recovers if it crashes, and says so.
 
 The rest of the pilot-city data (DATA-02, DATA-12 to DATA-20) is blocked on access, licences or keys. Research (RES) needs Richard and testers.
@@ -184,7 +184,9 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | STAB-10 | End-to-end journeys for the device switcher, notes and Leaving later | S | now | done (2026-10-05) | Claude | PR #33. Two devices and a switch, leaving in an hour, a route and a note. Found and fixed the drawer's last 6% being unreachable |
 | STAB-11 | The device editor's header fills a 320 by 640 screen at 200% text | S | now | done (2026-10-05) | Claude | PR #33. Description scrolls with the content; bars, icon buttons and switches in pixels. `pnpm a11y` checks it |
 | STAB-12 | 200% text at 320 px on the other screens: route panel, navigation, search, note and report sheets | S | now | done (2026-10-05) | Claude | `pnpm a11y` checks six more screens. Grids hold their width, chip rows and section headings wrap, navigation's two panels take half the screen each and scroll |
-| STAB-13 | The city name at the top of the map is cut off at 200% text on a 320 px phone ("Edinbur", under the layers button) | S | now | doing (2026-10-05, `claude/loving-dirac-gl54ge`) | Claude | Found doing STAB-12. `MapChrome.tsx`. Not caught by `pnpm a11y`: it's clipped, not off the side |
+| STAB-13 | The city name at the top of the map is cut off at 200% text on a 320 px phone ("Edinbur", under the layers button) | S | now | done (2026-10-05) | Claude | `MapChrome.tsx`: padding and icons in pixels, long names wrap, the city and layers menus open above the sheet and fit the screen. `pnpm a11y` checks all three cities. Found STAB-17 |
+| STAB-17 | The sheet trapped keyboard focus and hid the map from screen readers: Tab never reached the city, layers or location buttons | S | now | done (2026-10-05) | Claude | D-069. Found doing STAB-13. vaul 1.1.2 never passed `modal={false}` on, so a `pnpm patch` does; Radix also looped Tab inside the sheet. Menus now take focus and give it back. `pnpm a11y` checks it |
+| STAB-18 | Edinburgh's end-to-end journey never arrives ("never arrived: 120 m"), so `pnpm e2e` fails | S | now | todo | Claude | Found doing STAB-13. Fails the same on main at 3822fd8; Newcastle and London arrive. `scripts/e2e.mjs` |
 | STAB-14 | Time limits for the sharing and review calls to Supabase | S | later | todo | Claude | Found doing STAB-05. `lib/sync.ts`, `lib/review.ts`. Sharing is off today (D-030), so nothing waits on them yet |
 | STAB-08 | Offline test: load a city, cut the network, route | S | later | todo | Claude | D-023 |
 
@@ -264,6 +266,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 
 Newest first. One line per change: date, ID, what happened, link.
 
+- 2026-10-05: STAB-13 done: city names fit at 200% text. STAB-17 done: Tab leaves the sheet for the map controls (D-069). Added STAB-18. Now: STAB-06, SEC-06, SMALL-01, STAB-18, STAB-07.
 - 2026-10-05: Rule added to CLAUDE.md and this file: check open PRs before taking a task, and claim it with a draft PR first. STAB-05 was done twice in parallel (#42 and #43), as DATA-01 was (#33 and #37).
 - 2026-10-05: FEAT-18 done: "Speed on the road" for road scooters (4 to 8 mph), and "Show speeds in: mph or km/h" per device (D-051).
 - 2026-10-05: STAB-05 done (D-052). Added STAB-14. Promoted STAB-07. Now: STAB-06, SEC-06, SMALL-01, STAB-13, STAB-07.
