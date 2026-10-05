@@ -153,6 +153,8 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | SMALL-10 | Recent journeys, not just recent places | S | later | todo | Claude | `recents.ts` |
 | SMALL-11 | Weather for trips more than 48 hours ahead | S | later | todo | Claude | D-040 falls back to today's |
 | SMALL-12 | A favicon and app icons (every page load asks for `/favicon.ico` and gets a 404) | S | later | todo | Claude | Found doing SEC-04 |
+| SMALL-13 | Parks and OpenStreetMap notes: a park found by name ends at its gate, not a nearby building's door; old notes and business questions left out; "N more places a mapper flagged" | S | now | doing | Claude | D-048. Ported from PR #36. 2026-10-05, `claude/vibrant-heisenberg-3j1kl2` (PR #44) |
+| SMALL-14 | Toilet Map: say when OSM and the Toilet Map disagree, keep disputed toilets off routes, and say when a record is over 2 years old | S | now | doing | Claude | D-049. Ported from PR #36. 2026-10-05, `claude/vibrant-heisenberg-3j1kl2` (PR #44) |
 
 ## Security and privacy
 
