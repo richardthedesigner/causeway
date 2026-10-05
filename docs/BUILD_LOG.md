@@ -28,6 +28,11 @@ Richard chose main as the base; the overnight build's extras (PR #36) are ported
 - Matching works to the graph uses a grid: 77 ms instead of 1.5 s on Edinburgh. Works on several parts count once in the works line.
 - A live closure avoided in "Why this way?" names its source; it said "TfL, live" for every source.
 
+**Skips, scaffolding and cranes from six months** (D-027, DATA-05)
+- `pnpm build:works` reads the last six monthly activity archives and skips a month it can't read, naming it in the file's source line. The June 2026 archive is published truncated and is skipped.
+- Activities starting more than five weeks ahead are left out; shapes in several parts are split; an activity closes the pavement only when its own words say so (none did). A footpath on its own is "the path".
+- Rebuilt: Newcastle 51 works and 9 activities, the London zones 17 works and 6 activities.
+
 ## 2026-10-05 (afternoon)
 
 **Live feeds give up after 10 seconds** (D-052, STAB-05)

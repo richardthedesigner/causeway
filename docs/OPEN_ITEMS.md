@@ -48,6 +48,7 @@ These numbers shape routes but are our estimates, not evidence.
 - The speed budget's timing checks hold 10% off CI. On a busy machine they can fail when nothing changed; run the test again before looking for a cause. A data refresh that rebuilds a graph can trip the settled-node check: re-baseline on purpose ([D-056](DECISIONS.md#d-056-a-speed-budget-the-tests-enforce), ROADMAP SPEED-07).
 - A guess to check on the next production deploy: Vercel serves MapLibre's worker (`/maplibre/6.12.0/maplibre-gl-worker.mjs`) as JavaScript, so the map draws. The local checks confirm it with our own server ([D-050](DECISIONS.md#d-050-dependency-audit-in-ci-and-maplibre-6)).
 - The Scottish Road Works Register is daily, but the data refresh is weekly, so new Edinburgh works can be up to a week late ([D-057](DECISIONS.md#d-057-edinburghs-works-from-the-scottish-road-works-register)).
+- Street Manager's June 2026 activity archive is published truncated, so the build skips it; activities created or last changed only in June are missing until a later event brings them back ([D-027](DECISIONS.md#d-027-live-and-third-party-data-come-in-through-adapters)).
 - Whether a register entry closes the pavement is read from its free text. Check a sample of Edinburgh road closures on the ground or with testers (D-057).
 
 ## Deferred by Richard

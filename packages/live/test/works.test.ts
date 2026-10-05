@@ -128,6 +128,23 @@ describe("Street Manager activities", () => {
     expect(JSON.stringify(out)).not.toMatch(/Smith|Impact/);
     expect(out.every((o) => o.footway === "affected")).toBe(true);
   });
+  it("closes the pavement only when its own words say so, and still shows none of them (D-027)", () => {
+    const [o] = streetManagerActivityObservations([act({ activity: "crane_mobile_platform", location_description: "Footway closed, pedestrians diverted opposite No 12" })], ident, NOW);
+    expect(o).toMatchObject({ footway: "closed", description: "Pavement closed", headline: "A crane or mobile platform on the pavement" });
+    expect(JSON.stringify(o)).not.toMatch(/No 12|diverted/);
+    for (const t of [{ name: "No footway closure required" }, { details: "Footway closure: N/A" }, { location_description: "Diversion route: Grey Street" }]) {
+      expect(streetManagerActivityObservations([act(t)], ident, NOW)[0]!.footway, JSON.stringify(t)).toBe("affected");
+    }
+  });
+  it("says path for a footpath on its own", () => {
+    expect(streetManagerActivityObservations([act({ location_type: "Footpath" })], ident, NOW)[0]!.description).toBe("Scaffolding on the path");
+    expect(streetManagerActivityObservations([act({ location_type: "Footway, Carriageway" })], ident, NOW)[0]!.description).toBe("Scaffolding on the pavement");
+  });
+  it("leaves out activities starting more than five weeks away, and splits a multi-part shape", () => {
+    expect(streetManagerActivityObservations([act({ start_date: "2026-12-01", end_date: "2026-12-05" })], ident, NOW)).toEqual([]);
+    const out = streetManagerActivityObservations([act({ geom: "MULTIPOINT((425000 564000),(425100 564100))" })], ident, NOW);
+    expect(out.map((o) => o.id)).toEqual(["sma:A-1#0", "sma:A-1#1"]);
+  });
 });
 
 describe("works on the Newcastle graph", () => {

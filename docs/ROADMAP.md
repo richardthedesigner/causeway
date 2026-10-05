@@ -68,7 +68,7 @@ Fix and fill the pilot cities. DATA-01 to DATA-10 are in order of value per day 
 | DATA-02 | Scottish Road Works Register adapter for Edinburgh: footway works, café tables, scaffolding, hoardings, events | M | now | done (2026-10-05) | Claude | §2 #1. D-057. `pnpm build:srwr`, weekly in the data refresh: 456 entries from the export of 2026-10-05, in our own words. Advance notices left out. [#10](https://github.com/richardthedesigner/causeway/issues/10) |
 | DATA-03 | TfL station data: platform step and gap, which areas each lift connects, toilets. Join lift outages on `LiftUniqueId` | M | now | done (2026-10-04) | Claude | D-020. `scripts/tfl-station-access.ts`; `applyStationAccess` and `stepFreeLines`. 10 northern Jubilee stations now known not step-free |
 | DATA-04 | TfL station and line disruptions on transit edges | M | now | done (2026-10-04) | Claude | D-020. `packages/live/src/tfl-disruptions.ts`, refreshed with the lifts. Rides get refs at load (`refRides`) |
-| DATA-05 | Street Manager activity archive: skips, scaffolding, hoardings | S | now | done (2026-10-04) | Claude | D-027. Activity archive in `pnpm build:works`: 9 in Newcastle, 5 in London, all "on the pavement" |
+| DATA-05 | Street Manager activity archive: skips, scaffolding, hoardings | S | now | done (2026-10-04) | Claude | D-027. Activity archive in `pnpm build:works`: 9 in Newcastle, 5 in London, all "on the pavement". 2026-10-05: six monthly archives (a bad month skipped), a five-week horizon, multi-part shapes split, closed only on the activity's own words (D-027 update, from PR #36) |
 | DATA-06 | Edinburgh Adopted Roads: footway surface and width as a separate layer | M | next | done (2026-10-04) | Claude | D-046. `pnpm build:footways`, `data/council/`. Widths on pavement edges 1,731 to 8,707 |
 | DATA-07 | Weather warnings, floods and gritted footways: prefer gritted pavements in ice, flag riverside paths in floods | M | now | done (2026-10-04) | Claude | D-047. Edinburgh gritting routes in the council layer (1,130 edges); EA flood warnings live (`pnpm build:floods`). Met Office warnings still wait on a key (DATA-17); Scotland floods are DATA-25 |
 | DATA-08 | Park entrances (OS Open Greenspace) and OSM Notes | M | now | done (2026-10-04) | Claude | D-048. `pnpm build:greenspace` (648 gates in Edinburgh); `pnpm build:osm-notes` (28 in Edinburgh, 23 in London), shown only |
@@ -265,6 +265,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 
 Newest first. One line per change: date, ID, what happened, link.
 
+- 2026-10-05: DATA-05 extended: six monthly activity archives, closure words and a five-week horizon (D-027 update, ported from PR #36).
 - 2026-10-05: DATA-02 done: Edinburgh's works from the Scottish Road Works Register (D-057, ported from PR #36).
 - 2026-10-05: SPEED-02 done (speed budget, ported from PR #36). Added SPEED-07.
 - 2026-10-05: Added DATA-28 (presets on Inclusive Mobility values, ported from PR #36) and marked it done.

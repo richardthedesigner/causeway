@@ -105,7 +105,10 @@ export interface StreetManagerActivity {
   geom: string;
   street: string | null;
   activity: string | null;
+  /** Free text: read for closure words only, never shown (D-053). */
   details: string | null;
+  name?: string | null;
+  location_description?: string | null;
   location_type: string | null;
   cancelled: string | null;
   start_date: string | null;
@@ -139,34 +142,43 @@ const at = (date: string | null, time: string | null, end: boolean): string | nu
 /**
  * Street Manager activities (DATA-05): skips, scaffolding, hoardings, cranes,
  * events and the like. Only those on the footway or a footpath are kept. The
- * archive doesn't say whether the pavement is closed, so each one is "on the
- * pavement" (counted as unknown, D-027), never "closed". The description is
- * in our own words and the street name: the record's free text can name
- * addresses, businesses and people, so it is never shown.
+ * archive has no footway-closed field, so each one is "on the pavement"
+ * (counted as unknown, D-027) unless its own words say the footway is closed,
+ * read with the same plain-words rule as the Scottish register (D-057). The
+ * description is in our own words and the street name: the record's free text
+ * can name addresses, businesses and people, so it is never shown. Cancelled
+ * and ended activities, and ones starting more than `horizonDays` after `now`,
+ * are left out. A shape in several parts becomes one observation per part.
  */
-export function streetManagerActivityObservations(acts: StreetManagerActivity[], fromOsgb: (e: number, n: number) => [number, number], now: Date): WorksObservation[] {
+export function streetManagerActivityObservations(acts: StreetManagerActivity[], fromOsgb: (e: number, n: number) => [number, number], now: Date, horizonDays = 35): WorksObservation[] {
   const out: WorksObservation[] = [];
+  const t = now.getTime();
   for (const a of acts) {
     if (a.event_type === "ACTIVITY_CANCELLED" || /^yes$/i.test(a.cancelled ?? "")) continue;
     if (!a.location_type || !/foot/i.test(a.location_type)) continue;
     const start = at(a.start_date, a.start_time, false);
     const end = at(a.end_date, a.end_time, true);
-    if (!start || !end || Date.parse(end) <= now.getTime()) continue;
-    const pts = wktPoints(a.geom).map(([e, n]) => fromOsgb(e, n));
-    if (!pts.length) continue;
-    // Our own words only: the free-text details name addresses, businesses and people (D-027).
-    const what = ACTIVITY[a.activity ?? ""] ?? "An obstruction";
-    out.push({
-      id: `sma:${a.ref}`,
-      source: "Street Manager",
-      geometry: pts.map(([x, y]) => [Math.round(x * 1e6) / 1e6, Math.round(y * 1e6) / 1e6]),
-      footway: "affected",
-      description: `${what} on the pavement`,
-      street: title(a.street),
-      start,
-      end,
-      observedAt: a.event_time,
-    });
+    if (!start || !end || Date.parse(end) <= t || Date.parse(start) > t + horizonDays * 86_400_000) continue;
+    // Footway is the pavement beside a road; a footpath alone is a path of its own.
+    const where = /footway/i.test(a.location_type) ? "pavement" : "path";
+    const closed = saysClosed(FOOTWAY_CLOSED, `${a.name ?? ""} ${a.details ?? ""} ${a.location_description ?? ""}`);
+    // Our own words only: the free text names addresses, businesses and people (D-053).
+    const headline = `${ACTIVITY[a.activity ?? ""] ?? "An obstruction"} on the ${where}`;
+    const parts = partsLonLat(a.geom, fromOsgb);
+    parts.forEach((geometry, i) =>
+      out.push({
+        id: `sma:${a.ref}${parts.length > 1 ? `#${i}` : ""}`,
+        source: "Street Manager",
+        headline,
+        geometry,
+        footway: closed ? "closed" : "affected",
+        description: closed ? `${where === "pavement" ? "Pavement" : "Path"} closed` : headline,
+        street: title(a.street),
+        start,
+        end,
+        observedAt: a.event_time,
+      }),
+    );
   }
   return out;
 }
