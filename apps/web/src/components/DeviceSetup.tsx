@@ -1,5 +1,5 @@
 "use client";
-import { PRESETS, type MobilityPreset, type Profile } from "@causeway/profile";
+import { PRESETS, kerbLimitText, type MobilityPreset, type Profile } from "@causeway/profile";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
@@ -34,7 +34,7 @@ function keyLimits(p: Profile): [string, string][] {
   return [
     ["Steepest uphill", pct(p.maxInclineUpPct)],
     ["Steepest downhill", pct(p.maxInclineDownPct)],
-    ["Highest kerb", p.maxKerbCm === 0 ? "Flush only" : `${p.maxKerbCm} cm`],
+    ["Highest kerb", kerbLimitText(p.maxKerbCm)],
     ["Steps", steps],
     ["Setts and cobbles", setts],
   ];

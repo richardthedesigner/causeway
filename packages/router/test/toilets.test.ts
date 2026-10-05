@@ -49,4 +49,15 @@ describe("toilet-aware routing", () => {
     const r = router.routeWithRests(from, to, p, DRY, 1500, "toilet");
     if (r) expect(restStats(router.graph, r).longestWithoutToiletM).toBeLessThanOrEqual(1500 + 100);
   });
+
+  it("stops counting a mapped toilet whose sources disagree on access (D-065)", () => {
+    const g = loadSnapshot(join(import.meta.dirname, "../../../data/snapshots/edinburgh-central.graph.json.gz"));
+    const r = new Router(g);
+    const t = g.amenities!.find((a) => a.kind === "toilets" && a.wheelchair.value === "yes")!;
+    expect(t).toBeDefined();
+    r.addToilets([], [{ lon: t.lon + 0.0001, lat: t.lat }]);
+    expect(t.wheelchair).toMatchObject({ value: null, state: "unknown" });
+    // Nothing else changes.
+    expect(g.amenities!.filter((a) => a !== t && a.kind === "toilets" && a.wheelchair.value === "yes").length).toBeGreaterThan(0);
+  });
 });

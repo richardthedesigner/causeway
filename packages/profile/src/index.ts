@@ -50,6 +50,11 @@ export interface Profile {
   maxCrossSlopePct: number;
   /** Highest kerb upstand the user can mount or descend, centimetres. 0 = needs dropped/flush. */
   maxKerbCm: number;
+  /**
+   * Widest gap between platform and train the user can cross, millimetres (D-068).
+   * Absent: TfL's level-access band, 85 mm. No setting in the app yet.
+   */
+  maxGapMm?: number;
   /** Minimum usable width, metres. */
   minWidthM: number;
   /** Steps: never, or a maximum count the user can manage. */
@@ -157,10 +162,14 @@ const ANY: SurfaceTolerance = {
 
 /**
  * Starting points only. The numbers come from UK guidance where it exists
- * (Inclusive Mobility 2021: preferred max gradient 5%, absolute 8% over
- * short distances; cross-fall 2.5%; dropped kerb flush to 6 mm) and are
- * deliberately more permissive than guidance where real users routinely
- * exceed it. Phase 2 user testing replaces these with research.
+ * (DfT Inclusive Mobility, December 2021, OGL: preferred max gradient 5%,
+ * absolute 8% over short distances; cross-fall 2.5%; dropped kerb flush,
+ * 0 to 6 mm; distance without a rest 50 m for walking stick and cane users,
+ * 100 m for people with a mobility impairment and no stick). Gradients stay
+ * more permissive than guidance where real users routinely exceed it. The
+ * manual wheelchair's kerb and the rest distances follow it (D-013, D-054);
+ * the rollator keeps 300 m, as it has a seat. Phase 2 user testing replaces
+ * these with research.
  */
 export const PRESETS: Record<MobilityPreset, Profile> = {
   walking: {
@@ -190,7 +199,8 @@ export const PRESETS: Record<MobilityPreset, Profile> = {
     maxInclineDownPct: 8,
     comfortInclinePct: 4,
     maxCrossSlopePct: 4,
-    maxKerbCm: 2,
+    // Inclusive Mobility 2021 (DfT, OGL): dropped kerbs flush with the road, 6 mm at most (D-054).
+    maxKerbCm: 0.6,
     minWidthM: 0.9,
     maxSteps: 0,
     escalators: false,
@@ -467,4 +477,17 @@ export interface SavedDevice {
 
 export function savedDevice(id: string, name: string, preset: MobilityPreset, overrides: Partial<Profile> = {}, favourite = false): SavedDevice {
   return { id, name, favourite, profile: profileFrom(preset, name ? { ...overrides, label: name } : overrides) };
+}
+
+/** A kerb limit in words: "Flush only", "6 mm", "2 cm". Under a centimetre reads in millimetres, as Inclusive Mobility gives it. */
+export function kerbLimitText(cm: number): string {
+  if (cm <= 0) return "Flush only";
+  if (cm < 1) return `${Math.round(cm * 10)} mm`;
+  return `${Math.round(cm * 10) / 10} cm`;
+}
+
+/** One click of the kerb limit's plus or minus: to the next whole centimetre, never below flush. */
+export function stepKerbCm(cm: number, d: 1 | -1, max = 20): number {
+  const v = Math.min(cm, max);
+  return Math.min(max, Math.max(0, d > 0 ? Math.floor(v) + 1 : Math.ceil(v) - 1));
 }

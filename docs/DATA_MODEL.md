@@ -83,7 +83,7 @@ All numbers are placeholders until Phase 1 calibration against ground-truth samp
 
 ## 4. Live state
 
-`LiveState { status: open | closed | restricted | degraded, reason, source, validFrom, validUntil }` on edges (and on lift edges and nodes). It is applied as an overlay at request time, with no graph rebuild. Carriageway works from Street Manager, SRWR and TfL are projected onto the adjacent footway edges as `degraded` unless the source says the footway is closed (Phase 3).
+`LiveState { status: open | closed | restricted | degraded, affects?, headline?, reason, source, validFrom, validUntil }` on edges (and on lift edges and nodes). It is applied as an overlay at request time, with no graph rebuild. Carriageway works from Street Manager, SRWR and TfL are projected onto the adjacent footway edges as `degraded` unless the source says the footway is closed (Phase 3).
 
 ## 5. User profile
 

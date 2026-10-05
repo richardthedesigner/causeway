@@ -149,9 +149,9 @@ export function PlaceSearch({ label, index, suggestions, near, bbox, cityName, e
                 {h.place.kind} / {metres(h.metres)}
               </span>
               {h.place.facts ? (
-                <span className="flex items-center gap-1 truncate text-sm text-muted">
-                  <Accessibility aria-hidden className="size-4 shrink-0" />
-                  <span className="truncate">{h.place.facts[0]}</span>
+                <span className="flex items-start gap-1 text-sm text-muted">
+                  <Accessibility aria-hidden className="mt-0.5 size-4 shrink-0" />
+                  <span className="line-clamp-2">{h.place.facts[0]}</span>
                 </span>
               ) : null}
             </span>

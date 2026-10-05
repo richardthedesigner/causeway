@@ -5,7 +5,8 @@
  */
 import { confidence, haversine, isKnown, type Graph, type GraphEdge, type GraphNode, type NoteSignal } from "@causeway/graph";
 import type { Profile } from "@causeway/profile";
-import { baseSpeed, darkCost, DRY, entranceVerdict, evaluateEdge, evaluateNode, surfaceLabel, type Conditions, type EdgeContext, type EntranceVerdict, type Evaluation, type Reason } from "./cost.js";
+import { levelAccessAdvice } from "./boarding.js";
+import { baseSpeed, darkCost, DRY, entranceVerdict, evaluateEdge, evaluateNode, needsStepFree, surfaceLabel, type Conditions, type EdgeContext, type EntranceVerdict, type Evaluation, type Reason } from "./cost.js";
 
 interface Arc {
   edge: GraphEdge;
@@ -41,6 +42,8 @@ export class Router {
   readonly toiletM = new Map<number, number>();
   /** Edge id to what people's notes say about it. Held beside the graph, never written into it (D-008). */
   noteSignals = new Map<number, NoteSignal>();
+  /** Nodes settled by searches so far: a machine-independent measure of routing work, for the speed budget (D-056). */
+  settled = 0;
 
   /** Everything around an edge the cost model needs that isn't the edge itself. */
   edgeContext(id: number): EdgeContext {
@@ -58,8 +61,20 @@ export class Router {
     this.indexToilets();
   }
 
-  /** Accessible toilets the graph didn't carry (venues, from the app's search index). Re-indexes. */
-  addToilets(points: { lon: number; lat: number; name: string }[]) {
+  /**
+   * Accessible toilets the graph didn't carry (venues, from the app's search index). Re-indexes.
+   * `disputed`: toilets whose sources disagree on access (OSM and the Toilet Map, D-065). The
+   * graph's toilet within 30 m of each stops counting as accessible on routes.
+   */
+  addToilets(points: { lon: number; lat: number; name: string }[], disputed: { lon: number; lat: number }[] = []) {
+    for (const d of disputed) {
+      const t = (this.graph.amenities ?? [])
+        .filter((a) => a.kind === "toilets" && a.osmId !== 0)
+        .map((a) => ({ a, m: haversine([a.lon, a.lat], [d.lon, d.lat]) }))
+        .filter((x) => x.m <= 30)
+        .sort((x, y) => x.m - y.m)[0]?.a;
+      if (t) t.wheelchair = { value: null, state: "unknown", source: "none", observedAt: null, method: "OpenStreetMap and the Toilet Map disagree" };
+    }
     let id = -1;
     for (const pt of points)
       (this.graph.amenities ??= []).push({
@@ -180,6 +195,7 @@ export class Router {
       const u = heap.pop()!;
       if (closed.has(u)) continue;
       closed.add(u);
+      this.settled++;
       if (u === to.id) break;
       const gu = g.get(u)!;
       for (const a of this.out.get(u) ?? []) {
@@ -219,9 +235,10 @@ export class Router {
    * (within 30 m of the edge), or with `stop: "toilet"` an accessible toilet
    * (within 80 m). Resource-constrained A*: the state is the node plus
    * distance since the last stop, in eight buckets. Null when no such route
-   * exists in the mapped data.
+   * exists in the mapped data, or none costs `maxCost` or less (the search
+   * stops there instead of exhausting the graph).
    */
-  routeWithRests(from: GraphNode, to: GraphNode, p: Profile, c: Conditions = DRY, maxGapM = p.maxRestIntervalM ?? 400, stop: "bench" | "toilet" = "bench"): Route | null {
+  routeWithRests(from: GraphNode, to: GraphNode, p: Profile, c: Conditions = DRY, maxGapM = p.maxRestIntervalM ?? 400, stop: "bench" | "toilet" = "bench", maxCost = Infinity): Route | null {
     // A bench counts within 30 m of the path; a toilet within 80 m (worth a short detour off it).
     const near = stop === "bench" ? this.benchM : this.toiletM;
     const reach = stop === "bench" ? 30 : 80;
@@ -230,16 +247,22 @@ export class Router {
     const vmax = this.fastest(p);
     const h = (n: GraphNode) => haversine([n.lon, n.lat], [to.lon, to.lat]) / vmax;
     type Lab = { node: number; gap: number; cost: number; prev: Lab | null; step: Step | null };
-    const best = new Map<string, number>();
+    // State keys are numbers (node times buckets plus bucket), not strings, and each edge and node is costed once
+    // per search rather than once per bucket that reaches it: the same results, faster (D-055).
+    const K = B + 1;
+    const best = new Map<number, number>();
     const heap = new MinHeap();
     const labels: Lab[] = [{ node: from.id, gap: 0, cost: 0, prev: null, step: null }];
     heap.push(0, h(from));
-    const closed = new Set<string>();
+    const closed = new Set<number>();
+    const edgeEval = new Map<number, Evaluation>();
+    const nodeEval = new Map<number, Evaluation>();
+    const hOf = new Map<number, number>();
     let goal: Lab | null = null;
     while (heap.size) {
       const li = heap.pop()!;
       const L = labels[li]!;
-      const key = `${L.node}:${Math.floor(L.gap / bucketM)}`;
+      const key = L.node * K + Math.floor(L.gap / bucketM);
       if (closed.has(key)) continue;
       closed.add(key);
       if (L.node === to.id) {
@@ -250,17 +273,34 @@ export class Router {
         const benchHere = (near.get(a.edge.id) ?? Infinity) <= reach;
         const gap = RAIL.has(a.edge.kind) ? 0 : benchHere ? 0 : L.gap + a.edge.lengthM;
         if (gap > maxGapM) continue;
-        const ev = evaluateEdge(a.edge, a.forward, p, c, { note: this.noteSignals.get(a.edge.id) });
+        const ek = a.edge.id * 2 + (a.forward ? 1 : 0);
+        let ev = edgeEval.get(ek);
+        if (!ev) {
+          ev = evaluateEdge(a.edge, a.forward, p, c, { note: this.noteSignals.get(a.edge.id) });
+          edgeEval.set(ek, ev);
+        }
         if (ev.cost === Infinity) continue;
         const v = this.nodes.get(a.to)!;
-        const nv = evaluateNode(v, a.edge.kind === "crossing", p, c);
+        const crossing = a.edge.kind === "crossing";
+        const nk = a.to * 2 + (crossing ? 1 : 0);
+        let nv = nodeEval.get(nk);
+        if (!nv) {
+          nv = evaluateNode(v, crossing, p, c);
+          nodeEval.set(nk, nv);
+        }
         if (nv.cost === Infinity) continue;
         const cost = L.cost + ev.cost + nv.cost;
-        const k = `${a.to}:${Math.floor(gap / bucketM)}`;
+        const k = a.to * K + Math.floor(gap / bucketM);
         if (cost >= (best.get(k) ?? Infinity)) continue;
+        let hv = hOf.get(a.to);
+        if (hv === undefined) {
+          hv = h(v);
+          hOf.set(a.to, hv);
+        }
+        if (cost + hv > maxCost) continue;
         best.set(k, cost);
         labels.push({ node: a.to, gap, cost, prev: L, step: { edge: a.edge, forward: a.forward, eval: ev, node: v, nodeEval: nv } });
-        heap.push(labels.length - 1, cost + h(v));
+        heap.push(labels.length - 1, cost + hv);
       }
     }
     if (!goal) return null;
@@ -522,6 +562,8 @@ export interface Avoided {
   name: string;
   reason: Reason;
   lengthM: number;
+  /** For a live state: the edge that carried it, so "On this route" can say what it was and where it came from (D-067). */
+  edgeId?: number;
 }
 
 export interface Explanation {
@@ -533,6 +575,10 @@ export interface Explanation {
   notes: string[];
 }
 
+const UTC_SHORT = new Intl.DateTimeFormat("en-GB", { timeZone: "UTC", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
+/** "20 Jul, 09:00 UTC": the times live feeds give, as the route panel shows them. */
+export const utcShort = (iso: string) => (Number.isNaN(Date.parse(iso)) ? iso : `${UTC_SHORT.format(new Date(iso))} UTC`);
+
 /**
  * "Why this way?" Compare the user's route with the route a profile with no
  * limits would take, and name what was avoided and why. Unnamed footways
@@ -542,6 +588,8 @@ export function explain(router: Router, chosen: Route, from: GraphNode, to: Grap
   const base = router.route(from, to, unconstrained, c);
   const chosenIds = new Set(chosen.steps.map((s) => s.edge.id));
   const avoidedByName = new Map<string, Avoided>();
+  /** Short words for a live state that doesn't close the way: its headline. */
+  const liveShort = new Map<string, string>();
   if (base) {
     for (const s of base.steps) {
       if (chosenIds.has(s.edge.id)) continue;
@@ -552,8 +600,9 @@ export function explain(router: Router, chosen: Route, from: GraphNode, to: Grap
         .sort((a, b) => b.seconds - a.seconds)[0];
       if (!worst) continue;
       const name = placeName(s.edge);
+      if (worst.attr === "live" && s.edge.live) liveShort.set(name, s.edge.live.headline ?? "may be affected");
       const cur = avoidedByName.get(name);
-      if (!cur || worst.seconds > cur.reason.seconds) avoidedByName.set(name, { name, reason: worst, lengthM: (cur?.lengthM ?? 0) + s.edge.lengthM });
+      if (!cur || worst.seconds > cur.reason.seconds) avoidedByName.set(name, { name, reason: worst, lengthM: (cur?.lengthM ?? 0) + s.edge.lengthM, ...(worst.attr === "live" ? { edgeId: s.edge.id } : {}) });
       else cur.lengthM += s.edge.lengthM;
     }
   }
@@ -567,14 +616,28 @@ export function explain(router: Router, chosen: Route, from: GraphNode, to: Grap
 
   const notes: string[] = [];
   const sum = summarise(chosen, c.now);
+  // Live states (closures gone round, stations we can't confirm), health alerts and gusts are listed under "On this route" with their source and time (D-067), not here.
   for (const a of avoided) {
     if (a.reason.attr !== "live") continue;
-    const full = a.reason.detail.replace(/^(lift out of service|closed): /, "");
-    notes.push(`${a.name}: ${full} (TfL, live)`);
-    a.reason = { ...a.reason, detail: a.reason.detail.startsWith("lift") ? "lift out of service" : "closed" };
+    // Only an exclusion was closed; an unknown keeps its own short words ("Lift out of service: step-free to some platforms only").
+    const short = a.reason.kind !== "excluded" ? (liveShort.get(a.name) ?? "may be affected") : a.reason.detail.startsWith("lift") ? "lift out of service" : a.reason.detail.startsWith("no step-free") ? "no step-free access" : "closed";
+    a.reason = { ...a.reason, detail: short };
   }
   for (const s of chosen.steps) {
-    if (s.edge.kind === "board" && s.eval.passable === "unknown") notes.push(`TfL doesn't confirm step-free access at ${s.edge.name}. Check before you travel.`);
+    if (s.edge.kind !== "board") continue;
+    // A live doubt about the station is listed under "On this route"; this says what's known about boarding.
+    if (s.eval.reasons.some((x) => x.attr === "live" && x.kind === "unknown")) continue;
+    // Platform to train (D-068): an unknown says which platform and why; the staff ramp says to ask.
+    const why = s.eval.reasons.find((x) => x.attr === "boarding" || x.attr === "ramp");
+    const note =
+      why?.kind === "unknown"
+        ? `${s.edge.name}: ${why.detail} (TfL station data). Check before you travel.`
+        : s.eval.passable === "unknown"
+          ? `TfL doesn't confirm step-free access at ${s.edge.name}. Check before you travel.`
+          : why?.attr === "ramp"
+            ? `${s.edge.name}: board with the staff ramp, so ask staff (TfL station data).`
+            : null;
+    if (note && !notes.includes(note)) notes.push(note);
   }
   if (sum.lifts) {
     const live = router.graph.meta.liveFeeds?.some((f) => f.endsWith("lifts"));
@@ -641,8 +704,10 @@ export function placeName(e: GraphEdge): string {
 /**
  * The route as an ordered spoken list, for the non-visual route mode.
  * Consecutive steps on the same named way and kind merge into one segment.
+ * With a profile that needs step-free access, a train leg says where TfL's
+ * level-access doors are, when it says (D-068).
  */
-export function describeSegments(r: Route): string[] {
+export function describeSegments(r: Route, p?: Profile): string[] {
   // Rail legs read as one instruction each; walking parts as before.
   const out: string[] = [];
   let walk: Step[] = [];
@@ -652,7 +717,7 @@ export function describeSegments(r: Route): string[] {
   };
   const rides = ridesOf(r);
   let ri = 0;
-  for (const s of r.steps) {
+  for (const [i, s] of r.steps.entries()) {
     const k = s.edge.kind;
     if (k === "station_link" && s.edge.ref?.startsWith("link:bus:")) {
       // The few metres to the stop flag: the boarding instruction names the stop.
@@ -663,7 +728,8 @@ export function describeSegments(r: Route): string[] {
     } else if (k === "board" && s.forward) {
       flush();
       const ride = rides[ri++];
-      if (ride) out.push(`Take the ${ride.line} from ${ride.from} to ${ride.to}, ${ride.stops} stop${ride.stops === 1 ? "" : "s"}.`);
+      const doors = p && needsStepFree(p) ? levelAccessAdvice(r.steps, i) : null;
+      if (ride) out.push(`Take the ${ride.line} from ${ride.from} to ${ride.to}, ${ride.stops} stop${ride.stops === 1 ? "" : "s"}.${doors ? ` ${doors}` : ""}`);
     } else if (k === "interchange") {
       flush();
       out.push(`${s.edge.name}.`);
@@ -763,17 +829,21 @@ export function tradeoffs(router: Router, chosen: Route, from: GraphNode, to: Gr
   if (p.maxRestIntervalM) {
     const gap = restStats(router.graph, chosen).longestWithoutBenchM;
     if (gap > p.maxRestIntervalM) {
-      // Try the user's interval first, then relax: shorter worst gaps are still worth offering.
-      // Short intervals (Inclusive Mobility's 50 m) rarely fit mapped benches, so also try halfway to this route's gap.
+      // Inclusive Mobility's 50 m (D-013) is shorter than most mapped benches are apart, so a search at the user's
+      // own interval rarely finds anything. Start from the loosest interval worth offering (up to 8 times theirs,
+      // or seven-tenths or half of this route's worst gap, and clearly shorter than that gap), then tighten once
+      // and keep the better. At most two searches, each given up once it costs more than double the chosen route
+      // (or 15 minutes more). When the looser search finds nothing, the tighter one won't either: stop (D-054, D-055).
+      const maxCost = Math.max(chosen.cost * 2, chosen.cost + 900);
       let best: { r: Route; gap: number } | null = null;
-      const tries = [...new Set([p.maxRestIntervalM, p.maxRestIntervalM * 2, gap * 0.5, gap * 0.7].map(Math.round))].filter((m) => m < gap * 0.85).sort((x, y) => x - y);
-      for (const m of tries) {
-        const r = router.routeWithRests(from, to, p, c, m);
-        if (r) {
-          const g2 = restStats(router.graph, r).longestWithoutBenchM;
-          if (g2 < gap * 0.85) best = { r, gap: g2 };
-          break;
-        }
+      const ladder = [...new Set([...[8, 6, 4, 3, 2, 1.5, 1].map((f) => p.maxRestIntervalM! * f), gap * 0.7, gap * 0.5].map(Math.round))]
+        .filter((g) => g < gap * 0.85)
+        .sort((x, y) => y - x);
+      for (const g of ladder.slice(0, 2)) {
+        const r = router.routeWithRests(from, to, p, c, g, "bench", maxCost);
+        if (!r) break;
+        const g2 = restStats(router.graph, r).longestWithoutBenchM;
+        if (g2 < (best?.gap ?? gap * 0.85)) best = { r, gap: g2 };
       }
       out.push({
         id: "more-benches",
@@ -940,7 +1010,8 @@ const RELAXABLE = new Set(["steps", "escalator", "incline", "kerb", "surface", "
  * last point this person can reach: earlier obstacles already have a way round.
  */
 export function diagnose(router: Router, from: GraphNode, to: GraphNode, p: Profile, unconstrained: Profile, c: Conditions = DRY): Diagnosis {
-  const base = router.route(from, to, unconstrained, c);
+  // A closure (a line part-closed, a station shut) can cut the only way: then the way it cuts is the one to explain (D-061).
+  const base = router.route(from, to, unconstrained, c) ?? router.route(from, to, unconstrained, { ...c, ignoreClosures: true });
   if (!base) return { blockers: [], closest: null, relax: null };
 
   // How close: the last node along that way you can reach.
@@ -967,7 +1038,9 @@ export function diagnose(router: Router, from: GraphNode, to: GraphNode, p: Prof
       [ev.reasons.find((x) => x.kind === "excluded"), mid],
       [nv.reasons.find((x) => x.kind === "excluded"), [s.node.lon, s.node.lat]],
     ] as [Reason | undefined, [number, number]][]) {
-      if (r) found.push({ b: { name: placeName(s.edge), attr: r.attr, detail: r.detail, lon: at[0], lat: at[1] }, r, s });
+      // A live closure in its own short words ("no service"), not the feed's whole message.
+      const detail = r?.attr === "live" && s.edge.live?.headline ? s.edge.live.headline.replace(/^(No|Trains|Station|Part|Lift|Pavement|Road|Path)\b/, (w) => w.toLowerCase()) : r?.detail;
+      if (r) found.push({ b: { name: placeName(s.edge), attr: r.attr, detail: detail ?? r.detail, lon: at[0], lat: at[1] }, r, s });
     }
   });
   // One entry per street and kind of obstacle.

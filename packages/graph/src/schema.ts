@@ -171,11 +171,32 @@ export interface LiveState {
    * can't use stairs or escalators; absent means everyone.
    */
   affects?: "step-free";
+  /** Short plain words for lists, in our own words: "Café tables on the pavement". */
+  headline?: string;
   reason: string;
   source: string;
   /** ISO 8601. Live states always expire; nothing stays closed forever by accident. */
   validFrom: string;
   validUntil: string;
+}
+
+/**
+ * One platform's step and gap to the train, from TfL's station data (D-068).
+ * Figures TfL doesn't publish are null: unknown, never level.
+ */
+export interface PlatformBoarding {
+  /** TfL's name for it: "Eastbound Platform 2". */
+  platform: string;
+  /** Where trains from it go, as TfL names them ("Stratford"). */
+  towards: string[];
+  /** Step from platform to train, millimetres, smallest and largest along the platform. */
+  stepMm: [number, number] | null;
+  /** Gap from platform to train, millimetres, smallest and largest. */
+  gapMm: [number, number] | null;
+  /** Staff can put a manual ramp down (TfL LevelAccessByManualRamp). */
+  ramp: boolean;
+  /** Where the designated level access is: "2 centre doors on cars 5 and 6". */
+  levelAccessAt: string | null;
 }
 
 export interface GraphEdge {
@@ -206,6 +227,8 @@ export interface GraphEdge {
   sharedWithCycles?: Attr<boolean>;
   /** Scheduled service on board and ride edges (buses): route, how often, how long. */
   service?: BusService;
+  /** Rail board edges: the step and gap to the train from each platform of the line (D-068). Set when the city loads. */
+  boarding?: { platforms: PlatformBoarding[]; source: string };
 }
 
 export interface Graph {

@@ -19,6 +19,8 @@ export interface RouteToilet {
   facts: string[];
   /** Open when you'd pass it, from the mapped hours; null when no hours are mapped or we can't read them. */
   open: boolean | null;
+  /** OSM and the Toilet Map disagree on access (D-065): listed, but it doesn't close a gap. */
+  disputed?: boolean;
 }
 
 const RADAR = /^(yes|radar)$/i;
@@ -77,11 +79,14 @@ export function toiletsAlong(index: Index, coords: [number, number][], withinM =
     if (!best) continue;
     const when = passing(best.at);
     const a = e.access ?? {};
-    out.push({ name: e.place.name, lon, lat, at: Math.round(best.at), offM: Math.round(best.d), public: isPublic, facts: factsOf(a, isPublic, when), open: hoursText(a.opening_hours, when)?.open ?? null });
+    // OSM and the Toilet Map disagree on access: listed, but saying so first (D-065).
+    const facts = factsOf(a, isPublic, when);
+    if (e.disputed) facts.unshift("Sources differ on access");
+    out.push({ name: e.place.name, lon, lat, at: Math.round(best.at), offM: Math.round(best.d), public: isPublic, facts, open: hoursText(a.opening_hours, when)?.open ?? null, ...(e.disputed ? { disputed: true } : {}) });
   }
   out.sort((a, b) => a.at - b.at);
-  // A toilet that's shut when you pass doesn't close the gap.
-  const stops = [0, ...out.filter((t) => t.open !== false).map((t) => t.at), cum[cum.length - 1]!];
+  // A toilet that's shut when you pass, or whose sources disagree on access, doesn't close the gap.
+  const stops = [0, ...out.filter((t) => t.open !== false && !t.disputed).map((t) => t.at), cum[cum.length - 1]!];
   let gap = 0;
   for (let i = 1; i < stops.length; i++) gap = Math.max(gap, stops[i]! - stops[i - 1]!);
   return { toilets: out, longestGapM: Math.round(gap) };

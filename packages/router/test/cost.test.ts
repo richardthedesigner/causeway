@@ -37,6 +37,13 @@ const manual = PRESETS["manual-wheelchair"];
 const walking = PRESETS.walking;
 
 describe("evaluateEdge", () => {
+  it("a narrow council width costs time and never closes the pavement (D-046)", () => {
+    const council = evaluateEdge(edge({}, { width: attr(0.7, "inferred", "council", "2026-10-04") }), true, manual, DRY);
+    expect(council.cost).toBeLessThan(Infinity);
+    expect(council.reasons.some((r) => r.attr === "width" && r.kind === "penalty")).toBe(true);
+    expect(evaluateEdge(edge({}, { width: attr(0.7, "reported", "osm", "2024-01-01T00:00:00Z") }), true, manual, DRY).cost).toBe(Infinity);
+  });
+
   it("excludes steps for anyone who cannot use them, and only them", () => {
     const steps = edge({ kind: "steps" }, { stepCount: attr(12, "reported", "osm", null) });
     expect(evaluateEdge(steps, true, manual, DRY).passable).toBe("no");
@@ -84,6 +91,45 @@ describe("evaluateEdge", () => {
   });
 });
 
+describe("a lift out that may have cut off some of a line's platforms (D-058)", () => {
+  const at = { ...DRY, now: new Date("2026-10-04T12:05:00Z") };
+  const live = { status: "restricted" as const, affects: "step-free" as const, headline: "Lift out of service: step-free to some platforms only", reason: "Lift 1 out of service", source: "TfL Unified API lift disruptions", validFrom: "2026-10-04T12:00:00Z", validUntil: "2026-10-04T12:15:00Z" };
+  const stepFree = { stepCount: attr(0, "reported", "tfl", null, "TfL station data: step-free from street to every platform"), wheelchair: attr("yes" as const, "reported", "tfl", null) };
+  const open = edge({ kind: "board", ref: "board:jubilee:940GZZLUNGW", name: "North Greenwich, Jubilee line", lengthM: 0 }, stepFree);
+  const link = edge({ kind: "station_link", ref: "link:940GZZLUNGW", name: "North Greenwich", lengthM: 30 });
+
+  it("costs a cautious wheelchair user the unknown-station penalty on a board edge, and leaves it passable but unknown", () => {
+    const a = evaluateEdge(open, true, manual, at);
+    const b = evaluateEdge({ ...open, live }, true, manual, at);
+    expect(b.passable).toBe("unknown");
+    expect(b.cost - a.cost).toBeCloseTo(900 * (1 - manual.uncertaintyTolerance));
+    expect(b.reasons.find((r) => r.attr === "live")).toMatchObject({ kind: "unknown", detail: "Lift out of service: step-free to some platforms only: Lift 1 out of service" });
+  });
+
+  it("costs the same on a street link", () => {
+    const a = evaluateEdge(link, true, manual, at);
+    const b = evaluateEdge({ ...link, live }, true, manual, at);
+    expect(b.passable).toBe("unknown");
+    expect(b.cost - a.cost).toBeCloseTo(900 * (1 - manual.uncertaintyTolerance));
+  });
+
+  it("costs nothing extra for someone who doesn't need step-free access", () => {
+    expect(evaluateEdge({ ...open, live }, true, walking, at).cost).toBe(evaluateEdge(open, true, walking, at).cost);
+  });
+
+  it("doesn't charge twice where the station was unconfirmed already", () => {
+    const unconfirmed = edge({ kind: "board", lengthM: 0 }, { stepCount: unknownAttr() });
+    const a = evaluateEdge(unconfirmed, true, manual, at);
+    const b = evaluateEdge({ ...unconfirmed, live }, true, manual, at);
+    expect(b.cost).toBeCloseTo(a.cost);
+  });
+
+  it("a restricted pavement (works) still costs no station penalty", () => {
+    const works = { ...live, affects: undefined, headline: "Works on the pavement", reason: "Works on the pavement on Test Street" };
+    expect(evaluateEdge(edge({ live: works }), true, manual, at).cost).toBeCloseTo(evaluateEdge(edge(), true, manual, at).cost);
+  });
+});
+
 describe("evaluateNode", () => {
   const node = (kerb?: GraphNode["kerb"]): GraphNode => ({ id: 1, lon: 0, lat: 0, ele: unknownAttr(), level: 0, kind: kerb ? "kerb" : "junction", ...(kerb ? { kerb } : {}) });
 
@@ -95,6 +141,17 @@ describe("evaluateNode", () => {
 
   it("flags an unmapped kerb at a crossing as unknown, not fine", () => {
     expect(evaluateNode(node(), true, manual, DRY).passable).toBe("unknown");
+  });
+
+  it("holds a manual chair to Inclusive Mobility's flush band, 0 to 6 mm (D-054)", () => {
+    expect(PRESETS["manual-wheelchair"].maxKerbCm).toBe(0.6);
+    const lowered = (h: number | null) => node({ type: attr("lowered", "reported", "osm", null), heightCm: h === null ? unknownAttr() : attr(h, "reported", "osm", null), tactilePaving: unknownAttr() });
+    // A dropped kerb with no height is taken at 6 mm: fine for a manual chair, not for "flush only".
+    expect(evaluateNode(lowered(null), true, manual, DRY).passable).toBe("yes");
+    expect(evaluateNode(lowered(null), true, { ...manual, maxKerbCm: 0 }, DRY).passable).toBe("no");
+    // A measured 2 cm upstand is over the band.
+    expect(evaluateNode(lowered(2), true, manual, DRY).passable).toBe("no");
+    expect(evaluateNode(lowered(0.5), true, manual, DRY).passable).toBe("yes");
   });
 });
 
@@ -197,14 +254,15 @@ describe("powerchair and scooter classes", () => {
 
 describe("ice and gritting (DATA-07)", () => {
   const ice = { ...DRY, wet: true, ice: true };
-  const gritted = (v: boolean) => ({ gritted: attr(v, "reported", "council", "2026-10-04") });
+  const gritted = (v: boolean) => ({ gritted: attr(v, "reported", "council", "2021-05-27") });
 
   it("in ice, a pavement off the gritting routes costs more than one on them, most for wheels", () => {
     const on = evaluateEdge(edge({}, gritted(true)), true, manual, ice);
     const off = evaluateEdge(edge({}, gritted(false)), true, manual, ice);
     expect(off.cost).toBeGreaterThan(on.cost);
     expect(off.reasons.some((r) => r.attr === "gritted" && /not on a gritting route/.test(r.detail))).toBe(true);
-    expect(on.reasons.some((r) => r.attr === "gritted" && r.detail === "on a gritting route")).toBe(true);
+    // The routes' own year, never the build date (D-064).
+    expect(on.reasons.some((r) => r.attr === "gritted" && r.detail === "on a gritting route (council routes from 2021)")).toBe(true);
     const walkOff = evaluateEdge(edge({}, gritted(false)), true, walking, ice);
     const walkOn = evaluateEdge(edge({}, gritted(true)), true, walking, ice);
     expect(walkOff.cost - walkOn.cost).toBeLessThan(off.cost - on.cost);

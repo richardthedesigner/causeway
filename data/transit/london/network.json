@@ -305,7 +305,57 @@
        "HUBSRA-Plat15-WB-jubilee"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Westbound Platform 13",
+        "towards": [
+         "Stanmore"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Westbound Platform 14",
+        "towards": [
+         "Stanmore"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Westbound Platform 15",
+        "towards": [
+         "Stanmore"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [
@@ -489,7 +539,41 @@
        "HUBWEH-Plat06-EB-jubilee"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Westbound Platform 5",
+        "towards": [
+         "Stanmore"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Eastbound Platform 6",
+        "towards": [
+         "Stratford"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -643,7 +727,41 @@
        "HUBCAN-Plat06-EB-jubilee"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Westbound Platform 5",
+        "towards": [
+         "Stanmore"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Eastbound Platform 6",
+        "towards": [
+         "Stratford"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -728,7 +846,57 @@
        "940GZZLUNGW-Plat03-EB-jubilee"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Westbound Platform 1",
+        "towards": [
+         "Stanmore"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Westbound Platform 2",
+        "towards": [
+         "Stanmore"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Eastbound Platform 3",
+        "towards": [
+         "Stratford"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [
@@ -1056,7 +1224,41 @@
        "HUBCAW-Plat02-EB-jubilee"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Westbound Platform 1",
+        "towards": [
+         "Stanmore"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Eastbound Platform 2",
+        "towards": [
+         "Stratford"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [
@@ -1179,7 +1381,41 @@
        "HUBZCW-Plat02-EB-jubilee"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Westbound Platform 1",
+        "towards": [
+         "Stanmore"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Eastbound Platform 2",
+        "towards": [
+         "Stratford"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -1248,7 +1484,41 @@
        "940GZZLUBMY-Plat02-EB-jubilee"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Westbound Platform 1",
+        "towards": [
+         "Stanmore"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Eastbound Platform 2",
+        "towards": [
+         "Stratford"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -1502,7 +1772,41 @@
        "HUBLBG-Plat04-EB-jubilee"
       ],
       "mapped": true,
-      "train": "Level boarding at 2 centre doors on car 5; 2 centre doors on car 2. Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Level boarding at 2 centre doors on car 5; 2 centre doors on car 2. Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Westbound Platform 3",
+        "towards": [
+         "Stanmore"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": "2 centre doors on car 5"
+       },
+       {
+        "platform": "Eastbound Platform 4",
+        "towards": [
+         "Stratford"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": "2 centre doors on car 2"
+       }
+      ]
      }
     },
     "toilets": [
@@ -1605,7 +1909,41 @@
        "940GZZLUSWK-Plat02-EB-jubilee"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Westbound Platform 1",
+        "towards": [
+         "Stanmore"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Eastbound Platform 2",
+        "towards": [
+         "Stratford"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -1814,7 +2152,41 @@
        "HUBWAT-Plat06-EB-jubilee"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Westbound Platform 5",
+        "towards": [
+         "Stanmore"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Eastbound Platform 6",
+        "towards": [
+         "Stratford"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [
@@ -1937,7 +2309,41 @@
        "HUBWSM-Plat04-WB-jubilee"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Eastbound Platform 3",
+        "towards": [
+         "Stratford"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Westbound Platform 4",
+        "towards": [
+         "Stanmore"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [
@@ -2124,7 +2530,41 @@
        "940GZZLUGPK-Plat06-SB-jubilee"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Northbound Platform 5",
+        "towards": [
+         "Stanmore"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Southbound Platform 6",
+        "towards": [
+         "Stratford"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [
@@ -2431,7 +2871,35 @@
        "HUBBDS-Plat04-SB-jubilee"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train. Staff can put out a manual ramp."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train. Staff can put out a manual ramp.",
+      "boarding": [
+       {
+        "platform": "Northbound Platform 3",
+        "towards": [
+         "Stanmore"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Southbound Platform 4",
+        "towards": [
+         "Stratford"
+        ],
+        "stepMm": null,
+        "gapMm": null,
+        "ramp": true,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -2570,7 +3038,41 @@
        "940GZZLUBST-Plat10-NB-jubilee"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Southbound Platform 7",
+        "towards": [
+         "Westminster"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Northbound Platform 10",
+        "towards": [
+         "Stanmore"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [
@@ -2627,7 +3129,25 @@
        "940GZZLUSJW-Plat02-SB-jubilee"
       ],
       "mapped": true,
-      "train": null
+      "train": null,
+      "boarding": [
+       {
+        "platform": "Northbound Platform 1",
+        "towards": [],
+        "stepMm": null,
+        "gapMm": null,
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Southbound Platform 2",
+        "towards": [],
+        "stepMm": null,
+        "gapMm": null,
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [
@@ -2700,7 +3220,25 @@
        "940GZZLUSWC-Plat02-SB-jubilee"
       ],
       "mapped": true,
-      "train": null
+      "train": null,
+      "boarding": [
+       {
+        "platform": "Northbound Platform 1",
+        "towards": [],
+        "stepMm": null,
+        "gapMm": null,
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Southbound Platform 2",
+        "towards": [],
+        "stepMm": null,
+        "gapMm": null,
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -2824,7 +3362,41 @@
        "940GZZLUFYR-Plat03-SB-jubilee"
       ],
       "mapped": true,
-      "train": "Step up to 16.3 cm and gap up to 12 cm between platform and train. Staff can put out a manual ramp."
+      "train": "Step up to 16.3 cm and gap up to 12 cm between platform and train. Staff can put out a manual ramp.",
+      "boarding": [
+       {
+        "platform": "Northbound Platform 2",
+        "towards": [
+         "Stanmore"
+        ],
+        "stepMm": [
+         0,
+         140
+        ],
+        "gapMm": [
+         0,
+         100
+        ],
+        "ramp": true,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Southbound Platform 3",
+        "towards": [
+         "Stratford"
+        ],
+        "stepMm": [
+         0,
+         163
+        ],
+        "gapMm": [
+         0,
+         120
+        ],
+        "ramp": true,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [
@@ -2881,7 +3453,25 @@
        "940GZZLUWHP-Plat02-SB-jubilee"
       ],
       "mapped": true,
-      "train": null
+      "train": null,
+      "boarding": [
+       {
+        "platform": "Northbound Platform 1",
+        "towards": [],
+        "stepMm": null,
+        "gapMm": null,
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Southbound Platform 2",
+        "towards": [],
+        "stepMm": null,
+        "gapMm": null,
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -2965,7 +3555,41 @@
        "940GZZLUKBN-Plat02-SB-jubilee"
       ],
       "mapped": true,
-      "train": "Step up to 14 cm and gap up to 8 cm between platform and train. Staff can put out a manual ramp."
+      "train": "Step up to 14 cm and gap up to 8 cm between platform and train. Staff can put out a manual ramp.",
+      "boarding": [
+       {
+        "platform": "Northbound Platform 1",
+        "towards": [
+         "Stanmore"
+        ],
+        "stepMm": [
+         0,
+         140
+        ],
+        "gapMm": [
+         0,
+         77
+        ],
+        "ramp": true,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Southbound Platform 2",
+        "towards": [
+         "Stratford"
+        ],
+        "stepMm": [
+         0,
+         127
+        ],
+        "gapMm": [
+         0,
+         80
+        ],
+        "ramp": true,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [
@@ -3038,7 +3662,25 @@
        "940GZZLUWIG-Plat03-SB-jubilee"
       ],
       "mapped": true,
-      "train": null
+      "train": null,
+      "boarding": [
+       {
+        "platform": "Northbound Platform 2",
+        "towards": [],
+        "stepMm": null,
+        "gapMm": null,
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Southbound Platform 3",
+        "towards": [],
+        "stepMm": null,
+        "gapMm": null,
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [
@@ -3095,7 +3737,25 @@
        "940GZZLUDOH-Plat02-SB-jubilee"
       ],
       "mapped": true,
-      "train": null
+      "train": null,
+      "boarding": [
+       {
+        "platform": "Northbound Platform 1",
+        "towards": [],
+        "stepMm": null,
+        "gapMm": null,
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Southbound Platform 2",
+        "towards": [],
+        "stepMm": null,
+        "gapMm": null,
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [
@@ -3158,7 +3818,25 @@
        "940GZZLUNDN-Plat03-SB-jubilee"
       ],
       "mapped": true,
-      "train": null
+      "train": null,
+      "boarding": [
+       {
+        "platform": "Northbound Platform 2",
+        "towards": [],
+        "stepMm": null,
+        "gapMm": null,
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Southbound Platform 3",
+        "towards": [],
+        "stepMm": null,
+        "gapMm": null,
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -3327,7 +4005,41 @@
        "940GZZLUWYP-Plat04-SB-jubilee"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Northbound Platform 3",
+        "towards": [
+         "Stanmore"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Southbound Platform 4",
+        "towards": [
+         "Stratford"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [
@@ -3410,7 +4122,41 @@
        "940GZZLUKBY-Plat02-SB-jubilee"
       ],
       "mapped": true,
-      "train": "Level boarding at 2 centre doors on cars 5 and 6; 2 centre doors on cars 2 and 3. Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Level boarding at 2 centre doors on cars 5 and 6; 2 centre doors on cars 2 and 3. Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Northbound Platform 1",
+        "towards": [
+         "Stanmore"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": "2 centre doors on cars 5 and 6"
+       },
+       {
+        "platform": "Southbound Platform 2",
+        "towards": [
+         "Stratford"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": "2 centre doors on cars 2 and 3"
+       }
+      ]
      }
     },
     "toilets": [
@@ -3468,7 +4214,25 @@
        "940GZZLUQBY-Plat02-SB-jubilee"
       ],
       "mapped": true,
-      "train": null
+      "train": null,
+      "boarding": [
+       {
+        "platform": "Northbound Platform 1",
+        "towards": [],
+        "stepMm": null,
+        "gapMm": null,
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Southbound Platform 2",
+        "towards": [],
+        "stepMm": null,
+        "gapMm": null,
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [
@@ -3536,7 +4300,25 @@
        "940GZZLUCPK-Plat02-SB-jubilee"
       ],
       "mapped": true,
-      "train": null
+      "train": null,
+      "boarding": [
+       {
+        "platform": "Northbound Platform 1",
+        "towards": [],
+        "stepMm": null,
+        "gapMm": null,
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Southbound Platform 2",
+        "towards": [],
+        "stepMm": null,
+        "gapMm": null,
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [
@@ -3660,7 +4442,57 @@
        "940GZZLUSTM-Plat03-SB-jubilee"
       ],
       "mapped": true,
-      "train": "Step up to 17.3 cm and gap up to 10 cm between platform and train. Staff can put out a manual ramp."
+      "train": "Step up to 17.3 cm and gap up to 10 cm between platform and train. Staff can put out a manual ramp.",
+      "boarding": [
+       {
+        "platform": "Southbound Platform 1",
+        "towards": [
+         "Stratford"
+        ],
+        "stepMm": [
+         147,
+         173
+        ],
+        "gapMm": [
+         90,
+         100
+        ],
+        "ramp": true,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Southbound Platform 2",
+        "towards": [
+         "Stratford"
+        ],
+        "stepMm": [
+         147,
+         173
+        ],
+        "gapMm": [
+         90,
+         100
+        ],
+        "ramp": true,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Southbound Platform 3",
+        "towards": [
+         "Stratford"
+        ],
+        "stepMm": [
+         147,
+         173
+        ],
+        "gapMm": [
+         90,
+         100
+        ],
+        "ramp": true,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [
@@ -3758,7 +4590,41 @@
        "HUBLEW-Plat06-NB-dlr"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Northbound Platform 5",
+        "towards": [
+         "Canary Wharf"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Northbound Platform 6",
+        "towards": [
+         "Canary Wharf"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [
@@ -3831,7 +4697,41 @@
        "940GZZDLELV-Plat02-NB-dlr"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Southbound Platform 1",
+        "towards": [
+         "Lewisham"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Northbound Platform 2",
+        "towards": [
+         "Canary Wharf"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -3920,7 +4820,41 @@
        "940GZZDLDEP-Plat02-NB-dlr"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Southbound Platform 1",
+        "towards": [
+         "Lewisham"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Northbound Platform 2",
+        "towards": [
+         "Canary Wharf"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -4039,7 +4973,41 @@
        "HUBGNW-Plat04-SB-dlr"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Northbound Platform 3",
+        "towards": [
+         "Canary Wharf"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Southbound Platform 4",
+        "towards": [
+         "Lewisham"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -4123,7 +5091,41 @@
        "HUBCUT-Plat02-NB-dlr"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Southbound Platform 1",
+        "towards": [
+         "Lewisham"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Northbound Platform 2",
+        "towards": [
+         "Canary Wharf"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -4192,7 +5194,41 @@
        "940GZZDLISL-Plat02-NB-dlr"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Southbound Platform 1",
+        "towards": [
+         "Lewisham"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Northbound Platform 2",
+        "towards": [
+         "Canary Wharf"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -4271,7 +5307,41 @@
        "940GZZDLMUD-Plat02-NB-dlr"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Southbound Platform 1",
+        "towards": [
+         "Lewisham"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Northbound Platform 2",
+        "towards": [
+         "Canary Wharf"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -4335,7 +5405,41 @@
        "940GZZDLCLA-Plat02-NB-dlr"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Southbound Platform 1",
+        "towards": [
+         "Lewisham"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Northbound Platform 2",
+        "towards": [
+         "Canary Wharf"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -4399,7 +5503,41 @@
        "940GZZDLSOQ-Plat02-NB-dlr"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Southbound Platform 1",
+        "towards": [
+         "Lewisham"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Northbound Platform 2",
+        "towards": [
+         "Canary Wharf"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -4463,7 +5601,41 @@
        "940GZZDLHEQ-Plat02-NB-dlr"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Southbound Platform 1",
+        "towards": [
+         "Lewisham"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Northbound Platform 2",
+        "towards": [
+         "Canary Wharf"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -4776,7 +5948,93 @@
        "HUBCAW-Plat06-NB-dlr"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Southbound Platform 1",
+        "towards": [],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Southbound Platform 2",
+        "towards": [],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Platform 3",
+        "towards": [],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Platform 4",
+        "towards": [],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Northbound Platform 5",
+        "towards": [],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Northbound Platform 6",
+        "towards": [],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [
@@ -4865,7 +6123,57 @@
        "940GZZDLWIQ-Plat04-WB-dlr"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Southbound Platform 2",
+        "towards": [
+         "Canary Wharf"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Northbound Platform 3",
+        "towards": [
+         "Stratford"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Westbound Platform 4",
+        "towards": [
+         "Westferry"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -4976,7 +6284,73 @@
        "940GZZDLPOP-Plat04-WB-dlr"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Eastbound Platform 1",
+        "towards": [
+         "Woolwich Arsenal"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Northbound Platform 2",
+        "towards": [
+         "Stratford"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Southbound Platform 3",
+        "towards": [
+         "Canary Wharf"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Westbound Platform 4",
+        "towards": [
+         "Westferry"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -5040,7 +6414,41 @@
        "940GZZDLALL-Plat02-SB-dlr"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Northbound Platform 1",
+        "towards": [
+         "Stratford"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Southbound Platform 2",
+        "towards": [
+         "Poplar"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -5114,7 +6522,41 @@
        "940GZZDLLDP-Plat02-SB-dlr"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Northbound Platform 1",
+        "towards": [
+         "Stratford"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Southbound Platform 2",
+        "towards": [
+         "Poplar"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -5183,7 +6625,41 @@
        "940GZZDLDEV-Plat02-SB-dlr"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Northbound Platform 1",
+        "towards": [
+         "Stratford"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Southbound Platform 2",
+        "towards": [
+         "Poplar"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -5242,7 +6718,41 @@
        "940GZZDLBOW-Plat02-SB-dlr"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Northbound Platform 1",
+        "towards": [
+         "Stratford"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Southbound Platform 2",
+        "towards": [
+         "Poplar"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -5301,7 +6811,41 @@
        "940GZZDLPUD-Plat02-WB-dlr"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Eastbound Platform 1",
+        "towards": [
+         "Stratford"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Westbound Platform 2",
+        "towards": [
+         "Poplar"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -5612,7 +7156,73 @@
        "HUBSRA-Plat4B-WB-dlr"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Northbound Platform 16",
+        "towards": [
+         "Stratford International"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Southbound Platform 17",
+        "towards": [
+         "Woolwich Arsenal"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Westbound Platform 4A",
+        "towards": [
+         "Canary Wharf"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Westbound Platform 4B",
+        "towards": [
+         "Canary Wharf"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [
@@ -5731,7 +7341,41 @@
        "940GZZDLWFE-Plat02-WB-dlr"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Eastbound Platform 1",
+        "towards": [
+         "Canary Wharf and Poplar"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Westbound Platform 2",
+        "towards": [
+         "Shadwell"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -5825,7 +7469,41 @@
        "HUBLHS-Plat04-WB-dlr"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Eastbound Platform 3",
+        "towards": [
+         "Westferry"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Westbound Platform 4",
+        "towards": [
+         "Shadwell"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -5919,7 +7597,41 @@
        "HUBSDE-Plat02-WB-dlr"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Eastbound Platform 1",
+        "towards": [
+         "Beckton and Lewisham"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Westbound Platform 2",
+        "towards": [
+         "Bank and Tower Gateway"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -6123,7 +7835,37 @@
        "HUBBAN-Plat10-WB-dlr"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Eastbound Platform 9",
+        "towards": [],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Westbound Platform 10",
+        "towards": [],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [
@@ -6209,7 +7951,37 @@
        "HUBTOG-Plat02-EB-dlr"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Eastbound Platform 1",
+        "towards": [],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Eastbound Platform 2",
+        "towards": [],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -6278,7 +8050,37 @@
        "940GZZDLBEC-Plat02-WB-dlr"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Westbound Platform 1",
+        "towards": [],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Westbound Platform 2",
+        "towards": [],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -6342,7 +8144,41 @@
        "940GZZDLGAL-Plat02-WB-dlr"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Eastbound Platform 1",
+        "towards": [
+         "Beckton"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Westbound Platform 2",
+        "towards": [
+         "Canning Town"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -6411,7 +8247,41 @@
        "940GZZDLCYP-Plat02-WB-dlr"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Eastbound Platform 1",
+        "towards": [
+         "Beckton"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Westbound Platform 2",
+        "towards": [
+         "Canning Town"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -6480,7 +8350,37 @@
        "940GZZDLBPK-Plat02-WB-dlr"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Eastbound Platform 1",
+        "towards": [],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Westbound Platform 2",
+        "towards": [],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -6544,7 +8444,41 @@
        "940GZZDLRAL-Plat02-WB-dlr"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Eastbound Platform 1",
+        "towards": [
+         "Beckton"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Westbound Platform 2",
+        "towards": [
+         "Canning Town"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -6618,7 +8552,41 @@
        "940GZZDLPRE-Plat02-WB-dlr"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Eastbound Platform 1",
+        "towards": [
+         "Beckton"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Westbound Platform 2",
+        "towards": [
+         "Canning Town"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -6772,7 +8740,41 @@
        "HUBCUS-Plat04-WB-dlr"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Eastbound Platform 3",
+        "towards": [
+         "Beckton"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Westbound Platform 4",
+        "towards": [
+         "Canning Town"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [
@@ -6858,7 +8860,41 @@
        "940GZZDLRVC-Plat02-WB-dlr"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Eastbound Platform 1",
+        "towards": [
+         "Beckton"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Westbound Platform 2",
+        "towards": [
+         "Canning Town"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -7014,7 +9050,73 @@
        "HUBCAN-Plat04-WB-dlr"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Southbound Platform 1",
+        "towards": [
+         "Woolwich Arsenal"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Northbound Platform 2",
+        "towards": [
+         "Stratford International"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Eastbound Platform 3",
+        "towards": [
+         "Beckton and Woolwich Arsenal"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Westbound Platform 4",
+        "towards": [
+         "Poplar"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -7098,7 +9200,41 @@
        "940GZZDLEIN-Plat02-WB-dlr"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Eastbound Platform 1",
+        "towards": [
+         "Canning Town"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Westbound Platform 2",
+        "towards": [
+         "Poplar"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -7157,7 +9293,41 @@
        "940GZZDLBLA-Plat02-WB-dlr"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Eastbound Platform 1",
+        "towards": [
+         "Canning Town"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Westbound Platform 2",
+        "towards": [
+         "Poplar"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -7291,7 +9461,41 @@
        "HUBWWA-Plat04-NB-dlr"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Northbound Platform 3",
+        "towards": [
+         "Canning Town"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Northbound Platform 4",
+        "towards": [
+         "Canning Town"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -7360,7 +9564,41 @@
        "940GZZDLKGV-Plat02-NB-dlr"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Southbound Platform 1",
+        "towards": [
+         "Woolwich Arsenal"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Northbound Platform 2",
+        "towards": [
+         "Bank and Stratford"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -7459,7 +9697,41 @@
        "HUBLCY-Plat02-NB-dlr"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Southbound Platform 1",
+        "towards": [
+         "Woolwich Arsenal"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Northbound Platform 2",
+        "towards": [
+         "Bank and Stratford"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -7513,7 +9785,41 @@
        "940GZZDLPDK-Plat02-NB-dlr"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Southbound Platform 1",
+        "towards": [
+         "Woolwich Arsenal"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Northbound Platform 2",
+        "towards": [
+         "Bank and Stratford"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -7572,7 +9878,41 @@
        "940GZZDLWSV-Plat02-NB-dlr"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Southbound Platform 1",
+        "towards": [
+         "Woolwich Arsenal"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Northbound Platform 2",
+        "towards": [
+         "Bank and Stratford"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -7656,7 +9996,41 @@
        "940GZZDLSTL-Plat02-NB-dlr"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Southbound Platform 1",
+        "towards": [
+         "Canning Town"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Northbound Platform 2",
+        "towards": [
+         "Stratford"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -7815,7 +10189,41 @@
        "HUBWEH-Plat04-NB-dlr"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Southbound Platform 3",
+        "towards": [
+         "Canning Town"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Northbound Platform 4",
+        "towards": [
+         "Stratford"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -7894,7 +10302,41 @@
        "940GZZDLABR-Plat02-NB-dlr"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Southbound Platform 1",
+        "towards": [
+         "Canning Town"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Northbound Platform 2",
+        "towards": [
+         "Stratford"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -7978,7 +10420,41 @@
        "940GZZDLSHS-Plat02-NB-dlr"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Southbound Platform 1",
+        "towards": [
+         "Canning Town"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Northbound Platform 2",
+        "towards": [
+         "Stratford"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [],
@@ -8092,7 +10568,41 @@
        "940GZZDLSIT-Plat02-SB-dlr"
       ],
       "mapped": true,
-      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train."
+      "train": "Step up to 5 cm and gap up to 8.5 cm between platform and train.",
+      "boarding": [
+       {
+        "platform": "Southbound Platform 1",
+        "towards": [
+         "Woolwich"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       },
+       {
+        "platform": "Southbound Platform 2",
+        "towards": [
+         "Woolwich"
+        ],
+        "stepMm": [
+         0,
+         50
+        ],
+        "gapMm": [
+         0,
+         85
+        ],
+        "ramp": false,
+        "levelAccessAt": null
+       }
+      ]
      }
     },
     "toilets": [

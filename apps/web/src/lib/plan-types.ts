@@ -1,5 +1,5 @@
-import type { FloodWarning } from "@causeway/live";
-import type { Conditions, EntranceOption, NavPlan, RouteSummary } from "@causeway/router";
+import type { FloodWarning, RiverLevel } from "@causeway/live";
+import type { Conditions, EntranceOption, NavPlan, OnRouteItem, RouteSummary } from "@causeway/router";
 import type { Profile } from "@causeway/profile";
 import type { WorksObservation } from "@causeway/live";
 import type { Stretch, UserNote } from "@causeway/graph";
@@ -35,6 +35,8 @@ export interface PlannedRoute {
   nav: NavPlan;
   /** Rides (bus, tram, Metro, train), drawn apart from the walking and labelled where you board. */
   rides: { coords: [number, number][]; label: string }[];
+  /** Rides a train (Underground, DLR): the TfL disruption feeds matter to this route (D-061). */
+  train: boolean;
   /** Bus legs, for the departures line: stop, route, buses an hour now (timetable). */
   busLegs: { stopId: string; stopName: string; route: string; headsign: string | null; perHour: number }[];
   /** Where the data is missing, by street, so the user can judge it. */
@@ -45,6 +47,8 @@ export interface PlannedRoute {
   strip: RouteStrip;
   /** The route line in pieces by slope band, so the map matches the strip. */
   bands: { bin: number; coords: [number, number][] }[];
+  /** "On this route" (D-067): blocked, slower and worth knowing, each with its label, source and date. */
+  onRoute: OnRouteItem[];
 }
 
 /**
@@ -130,9 +134,10 @@ export type WorkerRequest =
   | { type: "floods"; warnings: FloodWarning[]; fetchedAt: string }
   | { type: "works-live"; works: WorksObservation[]; fetchedAt: string }
   /** Venues with an accessible toilet, from the search index, so routing can pass them. */
-  | { type: "toilets"; points: { lon: number; lat: number; name: string }[] }
+  | { type: "toilets"; points: { lon: number; lat: number; name: string }[]; disputed?: { lon: number; lat: number }[] }
   /** Lift outages, and TfL line and station disruptions where they could be fetched (DATA-04). */
-  | { type: "live"; outages: LiftOutageMsg[]; disruptions?: RailDisruptionMsg[] }
+  /** `outages` null: the lift feed failed, so the last ones stand until they expire. A disruption feed that failed is null (D-061). */
+  | { type: "live"; outages: LiftOutageMsg[] | null; disruptions: { lines: RailDisruptionMsg[] | null; stations: RailDisruptionMsg[] | null; fetchedAt: string } }
   | {
       type: "plan";
       id: number;
@@ -142,6 +147,8 @@ export type WorkerRequest =
       conditions: Omit<Conditions, "now"> & { now: string };
       /** Notes on this device, without photos. Soft signals for the cost model only. */
       notes: UserNote[];
+      /** SEPA's latest Water of Leith reading (Edinburgh, D-066): a line on routes using the walkway when it's high. */
+      river?: RiverLevel | null;
     }
   | { type: "check"; id: number; from: Place; to: Place[]; profile: Profile; conditions: Omit<Conditions, "now"> & { now: string } }
   /** Can each of these saved devices make this journey? For "Lulu can do this one" (D-036). */
@@ -153,8 +160,11 @@ export type WorkerResponse =
   | { type: "works"; summary: WorksSummary }
   /** Flood warnings that touch this city's paths, worst first. */
   | { type: "floods"; here: FloodHere[]; fetchedAt: string }
-  /** `applied`: platforms closed to step-free travel by lifts. `lines`: line closures in force now, in TfL's words. */
-  | { type: "live"; applied: number; lines: string[]; fetchedAt: string }
+  /**
+   * `applied`: platforms closed to step-free travel by lifts. `limited`: lines left step-free to some platforms only (D-058).
+   * `lines`: line closures in force now, in TfL's words. `liftsFailed`, `missing`: which feeds didn't answer this time (D-061).
+   */
+  | { type: "live"; applied: number; limited: number; lines: string[]; fetchedAt: string; liftsFailed: boolean; missing: "both" | "stations" | "lines" | null }
   | { type: "plan"; id: number; result: PlanResult }
   | { type: "check"; id: number; checks: Check[] }
   | { type: "fits"; id: number; fits: { key: string; minutes: number | null }[] };

@@ -4,11 +4,12 @@
  * leaves the phone: it arrives here with each request and is not stored.
  */
 import { addBus, applyCouncilFootways, applyStationAccess, isKnown, refRides, mobilityLabelFor, noteSignals, type Graph, type GraphEdge, type Stretch, type TransitNetwork, type BusNetwork, type CouncilFootways } from "@causeway/graph";
-import { applyEdgeStates, applyKeyedStates, applyLiveStates, floodsHere, floodStates, liftOutageStates, mergeLiveStates, railDisruptionStates, worksStates, type FloodAreas, type WorksObservation } from "@causeway/live";
+import { applyEdgeStates, applyKeyedStates, applyLiveStates, disruptionsMissing, floodsHere, floodStates, heldDisruptions, holdDisruptions, liftOutageStates, mergeLiveStates, NO_DISRUPTIONS_HELD, railDisruptionStates, riverHigh, riverText, stationInfoNotes, usesWalkway, worksStates, type FloodAreas, type HeldDisruptions, type LiftOutage, type WorksObservation } from "@causeway/live";
 import { PRESETS, type Profile } from "@causeway/profile";
 import {
   buildNavPlan,
   busWait,
+  closureBlind,
   describeSegments,
   diagnose,
   elevationProfile,
@@ -16,6 +17,7 @@ import {
   isDark,
   entrancesNear,
   explain,
+  onRoute,
   placeName,
   Router,
   summarise,
@@ -23,11 +25,14 @@ import {
   tradeoffs,
   type Conditions,
   type NavPlan,
+  type OnRouteItem,
   type Route,
+  type StationNote,
 } from "@causeway/router";
 import type { Check, Place, PlannedRoute, PlanResult, RouteStrip, WorkerRequest, WorkerResponse } from "./plan-types";
 import { parkGates, type GreenspaceFile } from "./greenspace";
-import { osmNotesNear, type OsmNotesFile } from "./osm-notes";
+import { doorFirst } from "./destination";
+import { osmNoteItems, type OsmNotesFile } from "./osm-notes";
 
 declare const self: DedicatedWorkerGlobalScope;
 let router: Router | null = null;
@@ -42,22 +47,33 @@ let osmNotes: OsmNotesFile | null = null;
 /** Works from the area's built file and from live feeds, kept apart so a refresh replaces only its own. */
 let fileWorks: { works: WorksObservation[]; source: string; builtAt: string } | null = null;
 let liveWorks: { works: WorksObservation[]; fetchedAt: string } | null = null;
-const WORKS_SOURCES = ["Street Manager", "TfL road disruptions"];
+/** The last lift outages, and each disruption feed's last good answer (D-061): a feed that fails doesn't clear what it said. */
+let lastOutages: LiftOutage[] = [];
+let heldRail: HeldDisruptions = NO_DISRUPTIONS_HELD;
+/** When each live source was last read (a works file's build, a feed's fetch), for "On this route" (D-067). */
+const readAt: Record<string, string> = {};
+/** TfL's informational station messages, by station id: listed on routes through the station, never routed on (D-067). */
+let stationNotes = new Map<string, StationNote[]>();
+const WORKS_SOURCES = ["Street Manager", "TfL road disruptions", "Scottish Road Works Register"];
 
 function applyWorks() {
   if (!graph) return;
   const all = [...(fileWorks?.works ?? []), ...(liveWorks?.works ?? [])];
   const now = new Date();
+  for (const w of fileWorks?.works ?? []) readAt[w.source] = fileWorks!.builtAt;
+  for (const w of liveWorks?.works ?? []) readAt[w.source] = liveWorks!.fetchedAt;
   applyEdgeStates(graph, worksStates(all, graph.edges, now), WORKS_SOURCES);
   const t = now.getTime();
+  // One works in several parts ("ref#0", "ref#1") counts once.
+  const once = (ws: WorksObservation[]) => new Set(ws.map((w) => w.id.split("#")[0])).size;
   const current = all.filter((w) => Date.parse(w.start) <= t && Date.parse(w.end) > t);
   const sources = [fileWorks ? fileWorks.source : null, liveWorks ? "TfL road disruptions (live)" : null].filter((s): s is string => !!s);
   post({
     type: "works",
     summary: {
-      closedNow: current.filter((w) => w.footway === "closed").length,
-      affectedNow: current.filter((w) => w.footway === "affected").length,
-      upcoming: all.filter((w) => Date.parse(w.start) > t).length,
+      closedNow: once(current.filter((w) => w.footway === "closed")),
+      affectedNow: once(current.filter((w) => w.footway === "affected")),
+      upcoming: once(all.filter((w) => Date.parse(w.start) > t)),
       sources,
       asOf: liveWorks?.fetchedAt ?? fileWorks?.builtAt ?? now.toISOString(),
     },
@@ -213,7 +229,9 @@ function toPlanned(r: Route, start: Parameters<typeof elevationProfile>[1], id: 
   }
   const nav = buildNavPlan(r, p);
   return {
+    onRoute: [],
     rides,
+    train: r.steps.some((s) => s.edge.kind === "transit" && !s.edge.service),
     nav,
     ...stripOf(r, nav),
     unknowns,
@@ -225,7 +243,7 @@ function toPlanned(r: Route, start: Parameters<typeof elevationProfile>[1], id: 
     unknownCoords,
     summary: summarise(r, now),
     elevation: elevationProfile(r, start),
-    segments: describeSegments(r),
+    segments: describeSegments(r, p),
     minutesExtra: Math.max(0, Math.round((r.seconds - baseSeconds) / 60)),
   };
 }
@@ -304,10 +322,11 @@ function stretchesOf(r: Route): (Stretch & { m: number })[] {
 }
 
 /** Darkness comes from the clock and the city's position, worked out here: the page doesn't need to know. */
-function conditionsOf(r: { wet: boolean; ice: boolean; now: string }): Conditions {
+function conditionsOf(r: Omit<Conditions, "now"> & { now: string }): Conditions {
   const now = new Date(r.now);
   const [x0, y0, x1, y1] = graph!.meta.bbox;
-  return { wet: r.wet, ice: r.ice, now, dark: isDark(now, (x0 + x1) / 2, (y0 + y1) / 2) };
+  // Gusts and a health alert in force come from the page (D-066).
+  return { wet: r.wet, ice: r.ice, now, dark: isDark(now, (x0 + x1) / 2, (y0 + y1) / 2), ...(r.gust ? { gust: r.gust } : {}), ...(r.healthAlert ? { healthAlert: r.healthAlert } : {}) };
 }
 
 function plan(req: Extract<WorkerRequest, { type: "plan" }>): PlanResult {
@@ -318,8 +337,9 @@ function plan(req: Extract<WorkerRequest, { type: "plan" }>): PlanResult {
   router.noteSignals = noteSignals(req.notes, graph, c.now, mobilityLabelFor(p.preset), c.wet);
   const a = router.snap(req.from.lon, req.from.lat, p, c);
   // A building: aim for the door that fits this person (D-018), not its middle. Fall back to the middle if no door fits or none is reachable.
-  const isVenue = !!req.to.venue || req.to.id.startsWith("pin:");
-  const entrances = isVenue ? entrancesNear(graph, req.to.lon, req.to.lat, p, 50).slice(0, 4) : [];
+  // A park found by name skips the door step: its gate wins over a neighbouring building's door (D-048).
+  const gates = parkGates(greenspace, req.to, req.from);
+  const entrances = doorFirst(req.to, gates) ? entrancesNear(graph, req.to.lon, req.to.lat, p, 50).slice(0, 4) : [];
   const fits = entrances.find((e) => e.verdict.passable === "yes");
   let door: { name: string | null; osmId: number; detail: string } | null = null;
   let b = router.snap(req.to.lon, req.to.lat, p, c);
@@ -335,7 +355,7 @@ function plan(req: Extract<WorkerRequest, { type: "plan" }>): PlanResult {
   // A park: end at the gate nearest the way you're coming (DATA-08), if one can be reached.
   let gate: { park: string } | null = null;
   if (!alts.length) {
-    for (const g of parkGates(greenspace, req.to, req.from)) {
+    for (const g of gates) {
       const bg = router.snap(g.lon, g.lat, p, c);
       alts = router.alternatives(a, bg, p, c, 3);
       if (alts.length) {
@@ -353,7 +373,8 @@ function plan(req: Extract<WorkerRequest, { type: "plan" }>): PlanResult {
     const planned = cl ? toPlanned(cl.route, a, "closest", "As close as you can get", cl.route.seconds, c.now, p) : null;
     return {
       status: "none",
-      message: d.blockers.length ? "No way there fits your limits" : "We couldn't find a way there",
+      // Only closures in the way: it's today, not the person's limits (D-061).
+      message: d.blockers.length ? (d.blockers.every((x) => x.attr === "live") ? "No way there right now" : "No way there fits your limits") : "We couldn't find a way there",
       blockers: d.blockers,
       closest: cl && planned ? { ...planned, name: cl.name, leftM: cl.leftM, end: planned.coords[planned.coords.length - 1]! } : null,
       relax: d.relax ? { patch: d.relax.patch, what: d.relax.what, minutes: Math.round(d.relax.route.seconds / 60) } : null,
@@ -361,7 +382,21 @@ function plan(req: Extract<WorkerRequest, { type: "plan" }>): PlanResult {
   }
   const best = alts[0]!;
   const ex = explain(router, best, a, b, p, PRESETS.walking, c);
-  const all = alts.map((r, i) => toPlanned(r, a, `r${i}`, i === 0 ? "Best for you" : "", best.seconds, c.now, p));
+  // "On this route" (D-067). The route as if nothing were closed: one search per plan, made only when something is closed
+  // somewhere, and every route on show is compared with it. Then the river and mappers' notes, which the graph doesn't hold.
+  const blind = closureBlind(router, a, b, p, c);
+  const listFor = (r: Route, coords: [number, number][]): OnRouteItem[] => [
+    ...onRoute(router!, r, p, c, { avoided: ex.avoided, blind, readAt, stationNotes }),
+    // The Water of Leith when it's high, only on a route that uses the walkway: worth knowing, never a reason to route (D-066).
+    ...(riverHigh(req.river) && usesWalkway(r.steps.map((s) => s.edge.name)) ? [{ group: "info" as const, text: riverText(req.river), where: ["Water of Leith Walkway"], label: "live" as const, source: "SEPA", date: req.river.at, until: null }] : []),
+    // OpenStreetMap notes near the route: shown, never used to route (DATA-08).
+    ...osmNoteItems(osmNotes, coords),
+  ];
+  const all = alts.map((r, i) => {
+    const pl = toPlanned(r, a, `r${i}`, i === 0 ? "Best for you" : "", best.seconds, c.now, p);
+    pl.onRoute = listFor(r, pl.coords);
+    return pl;
+  });
   // Different paths can still be the same choice to a person: drop alternatives that match an earlier one on time, distance and steepness.
   const same = (x: PlannedRoute, y: PlannedRoute) =>
     Math.abs(x.summary.minutes - y.summary.minutes) < 1.5 &&
@@ -389,18 +424,17 @@ function plan(req: Extract<WorkerRequest, { type: "plan" }>): PlanResult {
     if (seen.has(r.label)) r.label = "Another way";
     seen.add(r.label);
   }
-  const tos = tradeoffs(router, best, a, b, p, c).map((t) => ({
-    id: t.id,
-    label: t.label,
-    message: t.message,
-    route: t.route ? toPlanned(t.route, a, `t-${t.id}`, t.label, best.seconds, c.now, p) : null,
-  }));
+  const tos = tradeoffs(router, best, a, b, p, c).map((t) => {
+    const route = t.route ? toPlanned(t.route, a, `t-${t.id}`, t.label, best.seconds, c.now, p) : null;
+    if (route && t.route) route.onRoute = listFor(t.route, route.coords);
+    return { id: t.id, label: t.label, message: t.message, route };
+  });
   return {
     status: "ok",
     routes,
     headline: ex.headline,
-    // OpenStreetMap notes near the best route: shown, never used to route (DATA-08).
-    notes: [...ex.notes, ...osmNotesNear(osmNotes, routes[0]?.coords ?? [])],
+    // Live states, the river, alerts, gusts and mappers' notes are in each route's "On this route" list now (D-067).
+    notes: ex.notes,
     avoided: ex.avoided.slice(0, 4).map((x) => ({ name: x.name, detail: x.reason.detail })),
     tradeoffs: tos,
     entrances,
@@ -448,10 +482,11 @@ self.onmessage = async (ev: MessageEvent<WorkerRequest>) => {
       if (!graph || !floodAreas) return;
       // Each refresh replaces the last: a lifted warning lifts here too.
       for (const e of graph.edges) if (e.live?.source === "Environment Agency flood warnings") delete e.live;
+      readAt["Environment Agency flood warnings"] = m.fetchedAt;
       applyKeyedStates(graph, floodStates(m.warnings, floodAreas, m.fetchedAt));
       post({ type: "floods", here: floodsHere(m.warnings, floodAreas), fetchedAt: m.fetchedAt });
     }
-    else if (m.type === "toilets") router?.addToilets(m.points);
+    else if (m.type === "toilets") router?.addToilets(m.points, m.disputed);
     else if (m.type === "works-live") {
       liveWorks = { works: m.works, fetchedAt: m.fetchedAt };
       applyWorks();
@@ -461,12 +496,26 @@ self.onmessage = async (ev: MessageEvent<WorkerRequest>) => {
       // Each refresh replaces every TfL rail state: lifts, line closures, station disruptions.
       for (const e of graph.edges) if (e.live && (e.live.affects === "step-free" || e.live.source.startsWith("TfL line") || e.live.source.startsWith("TfL station"))) delete e.live;
       const refs = new Set(graph.edges.map((e) => e.ref).filter((r): r is string => !!r));
-      const lifts = liftOutageStates(m.outages, network, refs);
-      const rail = railDisruptionStates(m.disruptions ?? [], network, refs);
+      // A lift feed that failed leaves the last outages; their states expire 15 minutes after that fetch anyway.
+      if (m.outages) lastOutages = m.outages;
+      heldRail = holdDisruptions(heldRail, m.disruptions, new Date());
+      const lifts = liftOutageStates(lastOutages, network, refs);
+      const rail = railDisruptionStates(heldDisruptions(heldRail), network, refs);
+      if (heldRail.lines) readAt["TfL line status"] = heldRail.lines.fetchedAt;
+      if (heldRail.stations) readAt["TfL station disruptions"] = heldRail.stations.fetchedAt;
+      stationNotes = heldRail.stations ? stationInfoNotes(heldRail.stations.data, network, refs, heldRail.stations.fetchedAt) : new Map();
       applyLiveStates(graph, mergeLiveStates(lifts, rail));
       const now = Date.now();
       const lines = [...new Set([...rail.values()].filter((s) => s.source === "TfL line status" && s.status === "closed" && !s.affects && Date.parse(s.validFrom) <= now).map((s) => s.reason))];
-      post({ type: "live", applied: lifts.size, lines, fetchedAt: m.outages[0]?.fetchedAt ?? new Date().toISOString() });
+      post({
+        type: "live",
+        applied: [...lifts.values()].filter((s) => s.status === "closed").length,
+        limited: [...lifts.values()].filter((s) => s.status === "restricted").length,
+        lines,
+        fetchedAt: m.outages?.[0]?.fetchedAt ?? m.disruptions.fetchedAt,
+        liftsFailed: !m.outages,
+        missing: disruptionsMissing(m.disruptions),
+      });
     }
     else if (m.type === "plan") post({ type: "plan", id: m.id, result: plan(m) });
     else if (m.type === "check") post({ type: "check", id: m.id, checks: check(m) });
