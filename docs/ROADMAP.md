@@ -237,10 +237,10 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 |---|---|---|---|---|---|---|
 | UPD-01 | Dependabot for npm and GitHub Actions, grouped weekly | S | now | done (2026-10-04) | Claude | `.github/dependabot.yml`. MapLibre and Next.js majors left to UPD-02 and UPD-03 |
 | UPD-02 | MapLibre GL 4.7 to 5 | M | next | done (2026-10-05) | Claude | PR #33, with SEC-04: straight to 6.12 for a critical fix. The worker is now a module file in `public/maplibre/` |
-| UPD-03 | Next.js to the current major | M | later | done (2026-10-05) | Claude | PR #54: Next 16.3 on webpack (`--webpack`). Static export unchanged (D-069) |
-| UPD-04 | Keep Node in CI on the current LTS | S | later | done (2026-10-05) | Claude | PR #54: CI and `engines` on Node 24 (D-069). Node 26 becomes LTS late October 2026 |
-| UPD-05 | Build with Turbopack | M | later | todo | Claude | Next 16's default. Needs the workspace packages' `.js` import specifiers to resolve to `.ts` (D-069) |
-| UPD-06 | Re-baseline the speed budget under Node 24 | S | next | todo | Claude | Routing is 15% to 25% slower against the yardstick on Node 24, so the local check fails there. Re-baseline on a quiet machine (D-069) |
+| UPD-03 | Next.js to the current major | M | later | done (2026-10-05) | Claude | PR #54: Next 16.3 on webpack (`--webpack`). Static export unchanged (D-071) |
+| UPD-04 | Keep Node in CI on the current LTS | S | later | done (2026-10-05) | Claude | PR #54: CI and `engines` on Node 24 (D-071). Node 26 becomes LTS late October 2026 |
+| UPD-05 | Build with Turbopack | M | later | todo | Claude | Next 16's default. Needs the workspace packages' `.js` import specifiers to resolve to `.ts` (D-071) |
+| UPD-06 | Re-baseline the speed budget under Node 24 | S | next | todo | Claude | Routing is 15% to 25% slower against the yardstick on Node 24, so the local check fails there. Re-baseline on a quiet machine (D-071) |
 | UPD-07 | Data refresh workflow on Node 24 | S | later | todo | Claude | `.github/workflows/data-refresh.yml` still pins 22 |
 
 ## Deployment and release
@@ -289,7 +289,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 
 Newest first. One line per change: date, ID, what happened, link.
 
-- 2026-10-05: UPD-03 and UPD-04 done in PR #54: Next.js 16.3 on webpack, Node 24 in CI and `engines`, static export unchanged (D-069). Added UPD-05 to UPD-07.
+- 2026-10-05: UPD-03 and UPD-04 done in PR #54: Next.js 16.3 on webpack, Node 24 in CI and `engines`, static export unchanged (D-071). Added UPD-05 to UPD-07.
 - 2026-10-05: SEC-07 done and REV-02 run: [security review](reviews/security-2026-10.md). One critical and one high, both before sharing goes live: Supabase's default grants let anyone delete notes through `note_public` and write the graph tables. Added SEC-16 to SEC-23. REV-02 next due January 2027.
 - 2026-10-05: DEP-08 (PORT-44) done: PR #44 merged with PR #42. No D-number or task ID collided: #42 holds D-059 and D-060, #44 D-053 to D-058 and D-061 to D-068. SPEED-02 was done in #44, so SPEED-01 joins Now in its place.
 - 2026-10-05: FEAT-19 done: "On this route" under the route card, grouped Blocked, Slower and Worth knowing, each fact labelled live, static data or reported by people with its source and date; the route card keeps only failed feeds, a count of closures gone round and a flood area on the route (D-067, ported from PR #36).

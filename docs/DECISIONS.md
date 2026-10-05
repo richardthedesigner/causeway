@@ -842,7 +842,7 @@ Main read the step and gap from platform to train into words only (the largest a
 - No setting for the gap limit yet: the band holds for everyone until research says what people want to set (OPEN_ITEMS).
 - Door advice is in the spoken route only; the visual route card shows the ride, not the doors (OPEN_ITEMS).
 
-## D-069 Next.js 16 on webpack, Node 24 in CI
+## D-071 Next.js 16 on webpack, Node 24 in CI
 
 **Decided.** 2026-10-05 (UPD-03, UPD-04). Code: `apps/web/package.json`, `apps/web/tsconfig.json`, `apps/web/next-env.d.ts`, `package.json`, `.github/workflows/ci.yml`.
 

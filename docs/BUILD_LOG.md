@@ -4,7 +4,7 @@ A running record of what was built, newest first. Each entry links the decision 
 
 ## 2026-10-05 (Next.js 16 and Node 24)
 
-UPD-03 and UPD-04 (D-069), PR #54.
+UPD-03 and UPD-04 (D-071), PR #54.
 - Next.js 15.5.27 to 16.3.8. React stays on 19.3. Built with webpack (`--webpack`), since Turbopack can't resolve the workspace packages' `.js` specifiers. Turbopack is UPD-05.
 - The export keeps its three static routes. Next 16 adds segment prefetch files (`__next.*.txt`) and `_not-found.html`. Client JavaScript is 709 KB gzipped, up from 684 KB. The CSP needs no change.
 - CI and `engines` on Node 24, the current LTS. The data refresh stays on 22 (UPD-07).
