@@ -1,7 +1,7 @@
 /**
  * TfL's station data (DATA-03, survey §2 #2): how each station's areas join up
  * by level paths, ramps and lifts, the step and gap from platform to train
- * (in words, and in figures per platform: D-060),
+ * (in words, and in figures per platform: D-068),
  * and toilets. Read from the detailed zip (TfL open data, no key).
  *   Used by scripts/transit-london.ts; the zip is cached in .data-cache.
  */
@@ -63,7 +63,7 @@ const range = (lo: string | undefined, hi: string | undefined): [number, number]
 };
 
 /**
- * The step and gap to the train from each platform of a line, in figures (D-060).
+ * The step and gap to the train from each platform of a line, in figures (D-068).
  * One row per platform and direction; a platform can list several "towards".
  * A figure TfL leaves blank stays null: unknown, never level. Where the level
  * access is counts only on a designated level access point, as in `trainNote`.

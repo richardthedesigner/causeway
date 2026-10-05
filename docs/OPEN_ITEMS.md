@@ -40,13 +40,13 @@ These numbers shape routes but are our estimates, not evidence.
 | Road scooters: 8 mph on every road without a mapped pavement, and whether riders want those road routes at all (RES-10) | [D-051](DECISIONS.md#d-051-road-scooters-go-at-road-speed-on-roads) |
 | "On this route": the council's setts or narrow pavement listed as Slower from a fifth more time on a stretch; three mappers' notes before counting the rest | [D-067](DECISIONS.md#d-067-more-data-same-calm) |
 | Weather and health nudges: gusts from 50 km/h double an exposed bridge for scooters and light chairs; in an amber or red alert, a quarter more of the rest cost and 5% more in the sun; the Water of Leith worth a line from 1.05 m at Murrayfield | [D-066](DECISIONS.md#d-066-heat-and-cold-alerts-gusts-air-quality-and-the-water-of-leith) |
-| Boarding with the staff ramp: 3 minutes to find staff and get the ramp | [D-060](DECISIONS.md#d-060-boarding-the-train-against-each-persons-limits) |
+| Boarding with the staff ramp: 3 minutes to find staff and get the ramp | [D-068](DECISIONS.md#d-068-boarding-the-train-against-each-persons-limits) |
 | Screen reader and switch-access testing: axe only catches about a third of WCAG issues | [BUILD_LOG](BUILD_LOG.md) |
 
 ## Known gaps
 
-- The profile has a gap limit for boarding trains (`maxGapMm`), but no setting in the app: everyone gets TfL's 85 mm level band. Add a setting once research says people want one ([D-060](DECISIONS.md#d-060-boarding-the-train-against-each-persons-limits)).
-- TfL's level-access doors are in the spoken route only, not on the visual route card ([D-060](DECISIONS.md#d-060-boarding-the-train-against-each-persons-limits)).
+- The profile has a gap limit for boarding trains (`maxGapMm`), but no setting in the app: everyone gets TfL's 85 mm level band. Add a setting once research says people want one ([D-068](DECISIONS.md#d-068-boarding-the-train-against-each-persons-limits)).
+- TfL's level-access doors are in the spoken route only, not on the visual route card ([D-068](DECISIONS.md#d-068-boarding-the-train-against-each-persons-limits)).
 - Opening hours don't know bank holidays; the app says "may differ on bank holidays" ([D-039](DECISIONS.md#d-039-open-when-you-get-there)).
 - Weather beyond 48 hours ahead falls back to today's ([D-040](DECISIONS.md#d-040-leaving-later)).
 - The speed budget's timing checks hold 10% off CI. On a busy machine they can fail when nothing changed; run the test again before looking for a cause. A data refresh that rebuilds a graph can trip the settled-node check: re-baseline on purpose ([D-056](DECISIONS.md#d-056-a-speed-budget-the-tests-enforce), ROADMAP SPEED-07).

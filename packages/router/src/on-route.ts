@@ -168,7 +168,7 @@ export function onRoute(router: Router, r: Route, p: Profile, c: Conditions, opt
     }
     const st = stationOf(e);
     if (st) stations.add(st);
-    // Platform to train (TfL station data, D-060): a staff ramp to ask for, or a step and gap TfL doesn't publish.
+    // Platform to train (TfL station data, D-068): a staff ramp to ask for, or a step and gap TfL doesn't publish.
     if (e.kind === "board" && e.boarding && s.forward) {
       const b = s.eval.reasons.find((x) => x.attr === "boarding" || x.attr === "ramp");
       if (b) add({ group: "info", text: b.attr === "ramp" ? "Board with the staff ramp: ask staff" : b.detail.charAt(0).toUpperCase() + b.detail.slice(1), label: "static", source: "TfL station data", date: /\((\d{4}-\d\d-\d\d)\)/.exec(e.boarding.source)?.[1] ?? null, until: null }, e.name ?? where);

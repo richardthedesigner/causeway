@@ -51,7 +51,7 @@ export interface Profile {
   /** Highest kerb upstand the user can mount or descend, centimetres. 0 = needs dropped/flush. */
   maxKerbCm: number;
   /**
-   * Widest gap between platform and train the user can cross, millimetres (D-060).
+   * Widest gap between platform and train the user can cross, millimetres (D-068).
    * Absent: TfL's level-access band, 85 mm. No setting in the app yet.
    */
   maxGapMm?: number;

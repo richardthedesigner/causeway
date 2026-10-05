@@ -18,7 +18,7 @@ describe("TfL station data (DATA-03)", () => {
     expect(trainNote([{ MaxStep: "", MaxGap: "" }])).toBeNull();
   });
 
-  it("keeps each platform's step and gap in figures, missing figures as unknown (D-060)", () => {
+  it("keeps each platform's step and gap in figures, missing figures as unknown (D-068)", () => {
     const platforms = new Map([
       ["P1", { FriendlyName: "Northbound Platform 1", PlatformNumber: "1" }],
       ["P2", { FriendlyName: "", PlatformNumber: "2" }],

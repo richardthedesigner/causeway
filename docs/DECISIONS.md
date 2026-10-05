@@ -484,7 +484,7 @@ Update (D-066): four more feeds sit beside these, none of which closes anything:
 
 **OpenStreetMap notes.** Open notes are people saying a path is blocked or steps have appeared, but also shop closures and StreetComplete's questions. `pnpm build:osm-notes` keeps those about the ground (paths, steps, kerbs, gates, bridges and so on: 28 in Edinburgh, 23 in London), at build time, so no route's area is sent to a third party (D-009). Up to three within 20 m of the best route are shown with it, dated and marked "Not checked by us". They never change the route: anyone can write a note, and many are stale.
 
-Update (2026-10-05, SMALL-13, ported from the overnight build, PR #36):
+Update (2026-10-05, SMALL-15, ported from the overnight build, PR #36):
 - **A park's gate beats a neighbour's door.** The worker tried a building door that fits first for every venue, and every search result except a bus stop is a venue, so a park found by name could end at the door of a building across the road. Of 119 named Edinburgh parks with OS gates, 26 had a door within 50 m that fits a walker, a manual wheelchair or a powerchair (London 7 of 16, Newcastle 0 of 5). Now a park or garden we have gates for skips the door step and ends at its gate (`doorFirst` in `apps/web/src/lib/destination.ts`). Pins and other venues, a café in a park among them, keep door-first. `pnpm a11y` checks the route to a park.
 - **Fewer, fresher notes.** A note opened over 3 years ago with no comment since is left out, and so are StreetComplete's questions about a business ("What are the opening hours?", "Is this place still here?") (`scripts/osm-notes-lib.ts`). Rebuilt 2026-10-05: Edinburgh 27 kept, London 21, Newcastle none: one note in each city dropped for its age, and in London a business's own submission (onosm.org) too.
 - **The rest counted.** Past the three notes listed with a route, one line counts the others: "2 more places a mapper flagged on this route in OpenStreetMap. Not checked by us."
@@ -654,7 +654,7 @@ TfL's station layout (DATA-03) tells us, for every lift out at a station, which 
 - A line that was already step-free to some platforms only and loses the rest is closed.
 - Outages we can't place from the layout still go by TfL's message and close what it names, as before.
 
-## D-060 Boarding the train against each person's limits
+## D-068 Boarding the train against each person's limits
 
 **Decided.** 2026-10-05 (DATA-29, ported from the overnight build, PR #36, by hand). Builds on DATA-03. Code: `boardingOf` in `scripts/tfl-station-access.ts`, `PlatformBoarding` in `packages/graph/src/schema.ts`, `applyStationAccess` in `packages/graph/src/transit.ts`, `platformFit` and `boardingReason` in `packages/router/src/cost.ts`, `levelAccessAdvice` in `packages/router/src/boarding.ts`, `describeSegments` and `explain` in `packages/router/src/router.ts`.
 

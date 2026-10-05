@@ -202,14 +202,14 @@ const UNKNOWN_STATION_S = 900;
 /** Someone who needs lifts or ramps rather than stairs and escalators. */
 export const needsStepFree = (p: Profile) => p.maxSteps < 10 || !p.escalators;
 
-/** TfL's level-access band between platform and train: a step of up to 50 mm and a gap of up to 85 mm (D-060). */
+/** TfL's level-access band between platform and train: a step of up to 50 mm and a gap of up to 85 mm (D-068). */
 export const LEVEL_STEP_MM = 50;
 export const LEVEL_GAP_MM = 85;
 /** Getting the staff ramp: finding someone and them bringing it. A working guess. */
 export const STAFF_RAMP_S = 180;
 
 /**
- * One platform against this person's limits (D-060). Within TfL's level-access
+ * One platform against this person's limits (D-068). Within TfL's level-access
  * band it fits everyone. Beyond it, the measured step is held to the kerb they
  * can manage (never less than the band) and the gap to their gap limit (the
  * band unless they set one). Where the figures run past their limits: the
@@ -388,7 +388,7 @@ function evaluateEdgeBase(e: GraphEdge, forward: boolean, p: Profile, c: Conditi
       const s = UNKNOWN_STATION_S * (1 - p.uncertaintyTolerance);
       return { passable: "unknown", seconds, cost: seconds + s, reasons: [...reasons.map((r) => (r.attr === "live" ? { ...r, seconds: 0 } : r)), { kind: "unknown", attr: "station", detail: "step-free access not confirmed", seconds: s }] };
     }
-    // Platform to train: TfL's measured step and gap against this person's limits (D-060).
+    // Platform to train: TfL's measured step and gap against this person's limits (D-068).
     const boarding = e.kind === "board" && e.boarding && needsStepFree(p) ? boardingReason(e.boarding.platforms, p) : null;
     if (boarding?.kind === "excluded") return exclude(boarding.attr, boarding.detail);
     if (boarding?.kind === "unknown") {

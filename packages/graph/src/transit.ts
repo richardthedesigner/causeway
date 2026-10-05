@@ -54,7 +54,7 @@ export interface StationLineAccess {
   mapped: boolean;
   /** Platform to train, in words: the step and gap, or where level boarding is. */
   train: string | null;
-  /** Platform to train, in figures, one entry per platform (D-060). Absent in data built before it. */
+  /** Platform to train, in figures, one entry per platform (D-068). Absent in data built before it. */
   boarding?: PlatformBoarding[];
 }
 

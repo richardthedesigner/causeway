@@ -181,7 +181,7 @@ export interface LiveState {
 }
 
 /**
- * One platform's step and gap to the train, from TfL's station data (D-060).
+ * One platform's step and gap to the train, from TfL's station data (D-068).
  * Figures TfL doesn't publish are null: unknown, never level.
  */
 export interface PlatformBoarding {
@@ -227,7 +227,7 @@ export interface GraphEdge {
   sharedWithCycles?: Attr<boolean>;
   /** Scheduled service on board and ride edges (buses): route, how often, how long. */
   service?: BusService;
-  /** Rail board edges: the step and gap to the train from each platform of the line (D-060). Set when the city loads. */
+  /** Rail board edges: the step and gap to the train from each platform of the line (D-068). Set when the city loads. */
   boarding?: { platforms: PlatformBoarding[]; source: string };
 }
 

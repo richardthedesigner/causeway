@@ -21,7 +21,7 @@ Richard chose main as the base; the overnight build's extras (PR #36) are ported
 - The Water of Leith at Murrayfield from SEPA: a line on routes using the walkway from 1.05 m. Not a flood warning.
 - All fetched in parallel with the live-feed time limit; a failure is said quietly under "Where this comes from". The CSP allows the three new hosts.
 
-**Parks and notes** (D-048 update, SMALL-13)
+**Parks and notes** (D-048 update, SMALL-15)
 - A park found by name ends at its gate, not at the door of a building nearby: 26 of 119 named Edinburgh parks with gates had a fitting door within 50 m. `pnpm a11y` checks a route to The Meadows.
 - OpenStreetMap notes over 3 years old with no comment, and StreetComplete's business questions, are left out (Edinburgh 27 kept, London 21). Past three, a route counts the rest: "2 more places a mapper flagged on this route".
 
@@ -43,7 +43,7 @@ Richard chose main as the base; the overnight build's extras (PR #36) are ported
 - When a closure cuts the only way, "nothing fits" names it: "No way there right now. In the way: no service on Jubilee line." It used to say the start and destination weren't joined up.
 - A station message naming another step-free way in now makes the platforms unknown rather than closing them.
 
-**Platforms and lifts** (D-058, D-060, DATA-29)
+**Platforms and lifts** (D-058, D-068, DATA-29)
 - A lift out that leaves some of a line's platforms step-free makes that line unknown, not closed, and costs a step-free user as much as a station we can't confirm. 46 of the 76 lifts whose loss changes a line are like this.
 - TfL's step and gap from platform to train, per platform and in figures, are held to each person's limits: within TfL's level band (50 mm step, 85 mm gap) for everyone, beyond it against their kerb limit and a gap limit (no setting yet). Missing figures are unknown. The staff ramp costs 3 minutes and says to ask. Kilburn, Stanmore and Bond Street need the ramp for wheeled presets; nothing else changes on today's data.
 - The spoken route says where TfL's level-access doors are, for step-free users ("For level access, board at the 2 centre doors on cars 5 and 6").
