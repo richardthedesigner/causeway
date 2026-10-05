@@ -202,7 +202,7 @@ for (const j of JOURNEYS) {
   await context.close();
 }
 
-// Every live feed hangs (STAB-05): TfL, Open-Meteo and the Environment Agency never answer.
+// Every live feed hangs (STAB-05): TfL, Open-Meteo (weather and air), the Environment Agency, UKHSA and SEPA never answer.
 {
   const name = "london: every live feed hangs";
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
@@ -210,7 +210,7 @@ for (const j of JOURNEYS) {
   const problems = [];
   watchCsp(page, problems);
   page.on("pageerror", (e) => problems.push(`page error: ${e.message}`));
-  await page.route(/api\.tfl\.gov\.uk|open-meteo\.com|environment\.data\.gov\.uk/, () => {});
+  await page.route(/api\.tfl\.gov\.uk|open-meteo\.com|environment\.data\.gov\.uk|ukhsa-dashboard\.data\.gov\.uk|timeseries\.sepa\.org\.uk/, () => {});
   await page.addInitScript(() => localStorage.setItem("causewayside.city.v1", "london"));
   console.log(name);
   try {

@@ -4,7 +4,7 @@
  * leaves the phone: it arrives here with each request and is not stored.
  */
 import { addBus, applyCouncilFootways, applyStationAccess, isKnown, refRides, mobilityLabelFor, noteSignals, type Graph, type GraphEdge, type Stretch, type TransitNetwork, type BusNetwork, type CouncilFootways } from "@causeway/graph";
-import { applyEdgeStates, applyKeyedStates, applyLiveStates, disruptionsMissing, floodsHere, floodStates, heldDisruptions, holdDisruptions, liftOutageStates, mergeLiveStates, NO_DISRUPTIONS_HELD, railDisruptionStates, worksStates, type FloodAreas, type HeldDisruptions, type LiftOutage, type WorksObservation } from "@causeway/live";
+import { applyEdgeStates, applyKeyedStates, applyLiveStates, disruptionsMissing, floodsHere, floodStates, heldDisruptions, holdDisruptions, liftOutageStates, mergeLiveStates, NO_DISRUPTIONS_HELD, railDisruptionStates, riverHigh, riverLine, usesWalkway, worksStates, type FloodAreas, type HeldDisruptions, type LiftOutage, type WorksObservation } from "@causeway/live";
 import { PRESETS, type Profile } from "@causeway/profile";
 import {
   buildNavPlan,
@@ -21,6 +21,7 @@ import {
   summarise,
   toGeoJSON,
   tradeoffs,
+  utcShort,
   type Conditions,
   type NavPlan,
   type Route,
@@ -311,10 +312,11 @@ function stretchesOf(r: Route): (Stretch & { m: number })[] {
 }
 
 /** Darkness comes from the clock and the city's position, worked out here: the page doesn't need to know. */
-function conditionsOf(r: { wet: boolean; ice: boolean; now: string }): Conditions {
+function conditionsOf(r: Omit<Conditions, "now"> & { now: string }): Conditions {
   const now = new Date(r.now);
   const [x0, y0, x1, y1] = graph!.meta.bbox;
-  return { wet: r.wet, ice: r.ice, now, dark: isDark(now, (x0 + x1) / 2, (y0 + y1) / 2) };
+  // Gusts and a health alert in force come from the page (D-066).
+  return { wet: r.wet, ice: r.ice, now, dark: isDark(now, (x0 + x1) / 2, (y0 + y1) / 2), ...(r.gust ? { gust: r.gust } : {}), ...(r.healthAlert ? { healthAlert: r.healthAlert } : {}) };
 }
 
 function plan(req: Extract<WorkerRequest, { type: "plan" }>): PlanResult {
@@ -409,7 +411,8 @@ function plan(req: Extract<WorkerRequest, { type: "plan" }>): PlanResult {
     routes,
     headline: ex.headline,
     // OpenStreetMap notes near the best route: shown, never used to route (DATA-08).
-    notes: [...ex.notes, ...osmNotesNear(osmNotes, routes[0]?.coords ?? [])],
+    // The Water of Leith when it's high, only on a route that uses the walkway: worth knowing, never a reason to route (D-066).
+    notes: [...ex.notes, ...(riverHigh(req.river) && usesWalkway(best.steps.map((s) => s.edge.name)) ? [riverLine(req.river, utcShort)] : []), ...osmNotesNear(osmNotes, routes[0]?.coords ?? [])],
     avoided: ex.avoided.slice(0, 4).map((x) => ({ name: x.name, detail: x.reason.detail })),
     tradeoffs: tos,
     entrances,

@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { fetchFloodWarnings, fetchLiftOutages, fetchTflDisruptions, fetchTflStreetWorks, type DisruptionsMissing } from "@causeway/live";
+import { alertInForce, fetchAirNotes, fetchFloodWarnings, fetchHealthAlert, fetchLiftOutages, fetchRiverLevel, fetchTflDisruptions, fetchTflStreetWorks, type AreaNote, type DisruptionsMissing, type RiverLevel } from "@causeway/live";
+import type { HealthAlert } from "@causeway/router";
 import type { UserNote } from "@causeway/graph";
 import type { Profile } from "@causeway/profile";
 import type { City } from "./cities";
@@ -13,6 +14,21 @@ export interface Conditions {
   source: string;
   /** Leaving later: the router's clock (bus waits, after dark, works). Absent or past: now. */
   leaveAt?: Date | null;
+  /** The strongest gust now, or at the hour you leave (Open-Meteo, D-066). Stays when you set the ground yourself. */
+  gust?: { kmh: number; at: string; source: string };
+}
+
+/** UKHSA heat and cold alerts for the city's region (England, D-066): none checked here, checking, an answer, or the feed failed. */
+export type LiveHealthAlert = { state: "none" } | { state: "loading" } | { state: "ok"; alert: HealthAlert | null; at: string; region: string } | { state: "failed"; region: string; at: string };
+
+/** Area-wide lines that never change a route (D-066): air quality, pollen and UV when high, and the Water of Leith level. */
+export interface LiveArea {
+  /** null: not checked yet or the feed failed (`airFailed`). */
+  air: AreaNote[] | null;
+  airFailed: boolean;
+  /** SEPA's latest reading at Murrayfield (Edinburgh). */
+  river: RiverLevel | null;
+  riverFailed: boolean;
 }
 
 /** The time this trip starts: the chosen time if it's still ahead, else now. */
@@ -29,6 +45,17 @@ export type LiveLifts =
 
 const LIFT_REFRESH_MS = 5 * 60_000;
 const FLOOD_REFRESH_MS = 10 * 60_000;
+/** UKHSA alerts change a few times a day at most; the air quality forecast and the river by the hour and quarter hour. */
+const ALERT_REFRESH_MS = 30 * 60_000;
+const AIR_REFRESH_MS = 60 * 60_000;
+const RIVER_REFRESH_MS = 15 * 60_000;
+const NO_AREA: LiveArea = { air: null, airFailed: false, river: null, riverFailed: false };
+
+/** What the router is told about the ground, the clock, gusts and an alert in force when you leave. */
+const routing = (c: Conditions, alert: HealthAlert | null) => {
+  const now = departure(c);
+  return { wet: c.wet, ice: c.ice, now: now.toISOString(), ...(c.gust ? { gust: c.gust } : {}), ...(alert && alertInForce(alert, now) ? { healthAlert: alert } : {}) };
+};
 
 /**
  * Owns the routing worker for one city: loads its graph, keeps live lift
@@ -50,6 +77,11 @@ export function usePlanner(city: City) {
   const fitsSeq = useRef(0);
   /** Other saved devices' minutes for the current journey, keyed by device id; null where it can't get there. */
   const [fitsResult, setFits] = useState<Record<string, number | null> | null>(null);
+  const [healthAlert, setHealthAlert] = useState<LiveHealthAlert>({ state: "none" });
+  const [area, setArea] = useState<LiveArea>(NO_AREA);
+  // The latest of each, for plan requests made between renders.
+  const alertNow = useRef<HealthAlert | null>(null);
+  const riverNow = useRef<RiverLevel | null>(null);
 
   useEffect(() => {
     setReady(null);
@@ -59,6 +91,10 @@ export function usePlanner(city: City) {
     setWorks(null);
     setFloods(null);
     setChecks({});
+    setHealthAlert({ state: city.ukhsaRegion ? "loading" : "none" });
+    setArea(NO_AREA);
+    alertNow.current = null;
+    riverNow.current = null;
     const w = new Worker(new URL("./router.worker.ts", import.meta.url), { type: "module" });
     worker.current = w;
     let timer: ReturnType<typeof setInterval> | undefined;
@@ -79,6 +115,44 @@ export function usePlanner(city: City) {
       fetchFloodWarnings()
         .then((warnings) => w.postMessage({ type: "floods", warnings, fetchedAt: new Date().toISOString() } satisfies WorkerRequest))
         .catch(() => undefined);
+    // UKHSA, the air and the river (D-066): each on its own time limit (D-052), in parallel, never holding up a route.
+    // A failure is said quietly in "Where this comes from" and changes nothing else.
+    let live = true;
+    const region = city.ukhsaRegion;
+    const refreshAlert = () =>
+      region &&
+      fetchHealthAlert(region.code)
+        .then((alert) => {
+          if (!live) return;
+          alertNow.current = alert;
+          setHealthAlert({ state: "ok", alert, at: new Date().toISOString(), region: region.name });
+        })
+        .catch(() => {
+          if (!live) return;
+          alertNow.current = null;
+          setHealthAlert({ state: "failed", region: region.name, at: new Date().toISOString() });
+        });
+    const refreshAir = () =>
+      fetchAirNotes(...city.weatherAt)
+        .then((air) => live && setArea((a) => ({ ...a, air, airFailed: false })))
+        .catch(() => live && setArea((a) => ({ ...a, air: null, airFailed: true })));
+    const refreshRiver = () =>
+      city.riverLevel &&
+      fetchRiverLevel()
+        .then((river) => {
+          if (!live) return;
+          riverNow.current = river;
+          setArea((a) => ({ ...a, river, riverFailed: false }));
+        })
+        .catch(() => {
+          if (!live) return;
+          riverNow.current = null;
+          setArea((a) => ({ ...a, river: null, riverFailed: true }));
+        });
+    refreshAlert();
+    refreshAir();
+    refreshRiver();
+    const areaTimers = [setInterval(refreshAir, AIR_REFRESH_MS), ...(region ? [setInterval(refreshAlert, ALERT_REFRESH_MS)] : []), ...(city.riverLevel ? [setInterval(refreshRiver, RIVER_REFRESH_MS)] : [])];
     w.onmessage = (ev: MessageEvent<WorkerResponse>) => {
       const m = ev.data;
       if (m.type === "ready") {
@@ -115,6 +189,8 @@ export function usePlanner(city: City) {
     return () => {
       clearInterval(timer);
       clearInterval(floodTimer);
+      areaTimers.forEach(clearInterval);
+      live = false;
       w.terminate();
     };
   }, [city]);
@@ -129,14 +205,14 @@ export function usePlanner(city: City) {
     setPlanning(true);
     setError(null);
     const id = ++seq.current;
-    worker.current.postMessage({ type: "plan", id, from, to, profile, conditions: { wet: c.wet, ice: c.ice, now: departure(c).toISOString() }, notes: notes.map((n) => ({ ...n, photo: null })) } satisfies WorkerRequest);
+    worker.current.postMessage({ type: "plan", id, from, to, profile, conditions: routing(c, alertNow.current), notes: notes.map((n) => ({ ...n, photo: null })), river: riverNow.current } satisfies WorkerRequest);
   }, []);
 
   /** Verdicts for a short list of places (recents), from one start. */
   const check = useCallback((from: Place, to: Place[], profile: Profile, c: Conditions) => {
     if (!worker.current || !to.length) return;
     const id = ++checkSeq.current;
-    worker.current.postMessage({ type: "check", id, from, to, profile, conditions: { wet: c.wet, ice: c.ice, now: departure(c).toISOString() } } satisfies WorkerRequest);
+    worker.current.postMessage({ type: "check", id, from, to, profile, conditions: routing(c, alertNow.current) } satisfies WorkerRequest);
   }, []);
 
   /** Ask whether each of these devices could make the journey (latest request wins). */
@@ -144,8 +220,8 @@ export function usePlanner(city: City) {
     const id = ++fitsSeq.current;
     setFits(null);
     if (!worker.current || !profiles.length) return;
-    worker.current.postMessage({ type: "fits", id, from, to, profiles, conditions: { wet: c.wet, ice: c.ice, now: departure(c).toISOString() } } satisfies WorkerRequest);
+    worker.current.postMessage({ type: "fits", id, from, to, profiles, conditions: routing(c, alertNow.current) } satisfies WorkerRequest);
   }, []);
 
-  return { ready, error, result, planning, plan, lifts, works, floods, checks, check, fits, fitsResult, sendToilets, clear: () => setResult(null) };
+  return { ready, error, result, planning, plan, lifts, works, floods, healthAlert, area, checks, check, fits, fitsResult, sendToilets, clear: () => setResult(null) };
 }

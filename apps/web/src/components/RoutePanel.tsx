@@ -18,7 +18,8 @@ import type { NoteAbout } from "@/components/NoteSheet";
 import { RouteStrip, VerdictPill } from "@/components/RouteStrip";
 import { Button } from "@/components/ui/button";
 import type { FloodHere, Place, PlannedRoute, PlanResult, WorksSummary } from "@/lib/plan-types";
-import { departure, type Conditions, type LiveLifts } from "@/lib/use-planner";
+import { departure, type Conditions, type LiveArea, type LiveHealthAlert, type LiveLifts } from "@/lib/use-planner";
+import { airLines, areaStatus, gustStatus, healthAlertStatus } from "@/lib/area-status";
 import { liveFailedLine } from "@/lib/live-status";
 import type { FlagReason } from "@/lib/sync";
 import { cn } from "@/lib/utils";
@@ -52,6 +53,12 @@ interface Props {
   works: WorksSummary | null;
   /** Environment Agency flood warnings over this city's paths; null where we don't check (DATA-07). */
   floods?: { here: FloodHere[]; at: string } | null;
+  /** The city has SEPA's Water of Leith level (Edinburgh). */
+  riverCovered?: boolean;
+  /** UKHSA heat and cold alerts for the region (England, D-066). */
+  healthAlert?: LiveHealthAlert;
+  /** Air quality, pollen and UV, and the Water of Leith level (D-066). Area-wide; they never change a route. */
+  area?: LiveArea;
   /** The city has a works feed at all. */
   worksCovered: boolean;
   /** Accessible toilets along the chosen route, from the search index. */
@@ -143,6 +150,8 @@ export function RoutePanel(props: Props) {
   ];
 
   const worksClosed = props.works && props.works.closedNow > 0;
+  // Air quality, pollen and UV when high: area-wide, after the route's own lines (D-066).
+  const air = airLines(props.area?.air ?? null);
   const flood = props.floods?.here.find((f) => f.severity <= 2);
   // A TfL feed that didn't answer: lifts for every route, line status and station disruptions only when the route rides a train (D-061).
   const liveFailed =
@@ -356,9 +365,9 @@ export function RoutePanel(props: Props) {
             ) : null}
 
             <More title="Why this way?" aside={peopleCount ? `${peopleCount} note${peopleCount === 1 ? "" : "s"} from people` : undefined}>
-              {result.notes.length ? (
+              {result.notes.length || air.length ? (
                 <ul className="m-0 grid list-none grid-cols-1 gap-1 p-0">
-                  {result.notes.map((n) => (
+                  {[...result.notes, ...air].map((n) => (
                     <li key={n}>{n}</li>
                   ))}
                 </ul>
@@ -415,6 +424,11 @@ export function RoutePanel(props: Props) {
                 ) : props.lifts.state === "loading" ? (
                   <li>Checking lifts with TfL…</li>
                 ) : null}
+                {props.healthAlert && healthAlertStatus(props.healthAlert) ? <li>{healthAlertStatus(props.healthAlert)}</li> : null}
+                {gustStatus(conditions.gust) ? <li>{gustStatus(conditions.gust)}</li> : null}
+                {props.area
+                  ? areaStatus(props.area, !!props.riverCovered).map((t) => <li key={t}>{t}</li>)
+                  : null}
                 {props.floods ? (
                   <li>
                     Flood warnings from the Environment Agency at {props.floods.at.slice(11, 16)} UTC: {props.floods.here.length ? props.floods.here.map((f) => `${f.name}, ${f.label}`).join("; ") : "none over these paths"}.

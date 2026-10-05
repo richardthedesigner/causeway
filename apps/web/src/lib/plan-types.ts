@@ -1,4 +1,4 @@
-import type { FloodWarning } from "@causeway/live";
+import type { FloodWarning, RiverLevel } from "@causeway/live";
 import type { Conditions, EntranceOption, NavPlan, RouteSummary } from "@causeway/router";
 import type { Profile } from "@causeway/profile";
 import type { WorksObservation } from "@causeway/live";
@@ -145,6 +145,8 @@ export type WorkerRequest =
       conditions: Omit<Conditions, "now"> & { now: string };
       /** Notes on this device, without photos. Soft signals for the cost model only. */
       notes: UserNote[];
+      /** SEPA's latest Water of Leith reading (Edinburgh, D-066): a line on routes using the walkway when it's high. */
+      river?: RiverLevel | null;
     }
   | { type: "check"; id: number; from: Place; to: Place[]; profile: Profile; conditions: Omit<Conditions, "now"> & { now: string } }
   /** Can each of these saved devices make this journey? For "Lulu can do this one" (D-036). */

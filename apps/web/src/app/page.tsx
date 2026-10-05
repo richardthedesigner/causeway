@@ -1,6 +1,6 @@
 "use client";
 import { learnPace, type Profile } from "@causeway/profile";
-import { conditionsFromOpenMeteo, forecastConditions, getJson, openMeteoUrl, type OpenMeteoResponse } from "@causeway/live";
+import { conditionsFromOpenMeteo, forecastConditions, getJson, openMeteoUrl, riverHigh, type OpenMeteoResponse } from "@causeway/live";
 import { haversine } from "@causeway/graph";
 import { ChevronLeft } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -97,7 +97,9 @@ export default function Home() {
   const [ground0, setConditions] = useState<Conditions>({ ...PRESET_CONDITIONS.dry, summary: "Checking the weather", source: "Open-Meteo" });
   // Leaving later: everything time-dependent follows it (D-040).
   const [leaveAt, setLeaveAt] = useState<Date | null>(null);
-  const conditions = useMemo(() => ({ ...ground0, leaveAt }), [ground0, leaveAt]);
+  // Gusts come with the weather but stay when you set the ground yourself (D-066).
+  const [gust, setGust] = useState<Conditions["gust"]>(undefined);
+  const conditions = useMemo(() => ({ ...ground0, leaveAt, ...(gust ? { gust } : {}) }), [ground0, leaveAt, gust]);
   const [showSlopes, setShowSlopes] = useState(false);
   const [snap, setSnap] = useState<number | string | null>(SNAP.half);
   const [geoError, setGeoError] = useState<string | null>(null);
@@ -161,9 +163,14 @@ export default function Home() {
         const later = leaveAt && leaveAt.getTime() > Date.now() + 45 * 60_000;
         const c = later ? forecastConditions(j, leaveAt) : conditionsFromOpenMeteo(j);
         setConditions({ wet: c.wet, ice: c.ice, summary: c.summary, source: later ? "From the Open-Meteo forecast" : `From Open-Meteo at ${c.observedAt.slice(11, 16)} UTC` });
+        setGust(c.gust);
       })
       // A cancelled check (the city or leaving time changed) isn't a failure: the next one is already on its way.
-      .catch(() => ctl.signal.aborted || setConditions({ ...PRESET_CONDITIONS.dry, summary: "Couldn't check the weather, so we're assuming dry", source: "Change it if the ground is wet or icy" }));
+      .catch(() => {
+        if (ctl.signal.aborted) return;
+        setConditions({ ...PRESET_CONDITIONS.dry, summary: "Couldn't check the weather, so we're assuming dry", source: "Change it if the ground is wet or icy" });
+        setGust(undefined);
+      });
     return () => ctl.abort();
   }, [city, leaveAt]);
 
@@ -177,12 +184,15 @@ export default function Home() {
   }, []);
   const updateProfile = useCallback((p: Profile) => changeDevices((s) => withActiveProfile(s, p)), [changeDevices]);
 
+  // A refresh that changes nothing for the route doesn't re-plan: only a different alert, or the river crossing its line (D-066).
+  const alertKey = JSON.stringify(planner.healthAlert.state === "ok" ? planner.healthAlert.alert : null);
+  const riverKey = riverHigh(planner.area.river);
   // Re-plan whenever the journey, the person or the ground changes.
   useEffect(() => {
     if (!planner.ready || !to) return;
     planner.plan(from, to, routeProfile, conditions, cityNotes);
     setSelected(null);
-  }, [planner.ready, from, to, routeProfile, conditions, planner.lifts, cityNotes]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [planner.ready, from, to, routeProfile, conditions, planner.lifts, alertKey, riverKey, cityNotes]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Nothing fits for this device: would another saved device get there?
   const others = devices.devices.filter((d) => d.id !== routeDevice.id);
@@ -474,6 +484,9 @@ export default function Home() {
           lifts={planner.lifts}
           works={planner.works}
           floods={planner.floods}
+          healthAlert={planner.healthAlert}
+          area={planner.area}
+          riverCovered={!!city.riverLevel}
           worksCovered={!!city.works}
           liveBuses={city.liveLifts}
           onStart={() => setNavigating(true)}
