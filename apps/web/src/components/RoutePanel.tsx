@@ -1,5 +1,5 @@
 "use client";
-import { ArrowUpDown, ChevronDown, CircleAlert, CircleCheck, CircleHelp, CircleX, DoorOpen, MapPin, MessageSquarePlus, Share2, Trees, Undo2 } from "lucide-react";
+import { ArrowUpDown, ChevronDown, CircleAlert, CircleCheck, CircleHelp, CircleX, Copy, DoorOpen, MapPin, MessageSquarePlus, Share2, Trees, Undo2 } from "lucide-react";
 import { entranceRef, notesForEntrance, notesForPlace, notesForStretch, type UserNote } from "@causeway/graph";
 import type { Profile } from "@causeway/profile";
 import { useState } from "react";
@@ -7,6 +7,7 @@ import { createPortal } from "react-dom";
 import { BusDepartures } from "@/components/BusDepartures";
 import { leaveLabel, ukTime } from "@/lib/leave";
 import { hoursText } from "@/lib/opening-hours";
+import { routeText } from "@/lib/route-text";
 import type { toiletsAlong } from "@/lib/toilets";
 import { ElevationChart } from "@/components/ElevationChart";
 import { NoteList } from "@/components/NoteList";
@@ -390,6 +391,7 @@ export function RoutePanel(props: Props) {
                   <li key={i}>{s}</li>
                 ))}
               </ol>
+              <CopyRouteButton text={() => routeText(from, to, sel)} />
             </More>
 
             <More title="Where this comes from">
@@ -544,6 +546,37 @@ function PeopleSay({
       {title ? <h3 className="m-0 text-base font-bold">{title}</h3> : null}
       <p className="m-0 text-sm text-muted">{hint ?? "Their own experience, not checked by us."}</p>
       <NoteList notes={notes} all={all} author={author} onDelete={onDelete} onFlag={onFlag} />
+    </div>
+  );
+}
+
+/** The route in words, copied to paste into a message (SMALL-04). Says so, and offers the text to select if copying is blocked. */
+function CopyRouteButton({ text }: { text: () => string }) {
+  const [state, setState] = useState<"idle" | "copied" | string>("idle");
+  const copy = async () => {
+    const t = text();
+    try {
+      await navigator.clipboard.writeText(t);
+      setState("copied");
+      setTimeout(() => setState("idle"), 2500);
+    } catch {
+      setState(t);
+    }
+  };
+  return (
+    <div className="grid gap-2">
+      <Button variant="secondary" onClick={copy} className="justify-self-start">
+        <Copy aria-hidden className="size-5 shrink-0" /> Copy the route as text
+      </Button>
+      <p role="status" className="m-0 text-sm text-muted">
+        {state === "copied" ? "Copied. Paste it into a message." : ""}
+      </p>
+      {state !== "idle" && state !== "copied" ? (
+        <label className="grid gap-1 text-sm">
+          <span>Copying isn&apos;t allowed here. Select the text instead:</span>
+          <textarea readOnly value={state} rows={6} className="rounded-xl border border-line bg-surface-2 p-2 text-sm" onFocus={(e) => e.currentTarget.select()} />
+        </label>
+      ) : null}
     </div>
   );
 }

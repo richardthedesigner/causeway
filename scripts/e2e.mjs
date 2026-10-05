@@ -6,7 +6,8 @@
  * preview's half-second tick so the walk takes seconds, not minutes.
  *   pnpm web:build && pnpm e2e
  * Then one journey through the rest of the trip (STAB-10): set up two devices
- * and switch between them, leave later, add a note, then download a copy of
+ * and switch between them, leave later, copy the route as text, add a note,
+ * then download a copy of
  * your data and delete it all (SEC-06). Every request any
  * journey makes is checked for the profile (SEC-05, D-009): the device's name,
  * its type and its limits must never leave the phone.
@@ -105,7 +106,7 @@ for (const j of JOURNEYS) {
 // The rest of the trip (STAB-10), in Edinburgh.
 {
   const name = "edinburgh: devices, leaving later, a note, and your data";
-  const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, permissions: ["clipboard-read", "clipboard-write"] });
   const page = await context.newPage();
   const problems = [];
   watchCsp(page, problems);
@@ -178,6 +179,24 @@ for (const j of JOURNEYS) {
       await page.getByRole("option").first().waitFor({ timeout: 30_000 });
       await page.getByRole("option").first().click();
       await page.getByText("Why this way?").waitFor({ timeout: 60_000 });
+    });
+    await step("copy the route as text", async () => {
+      // Drag the sheet up, as a person would, so the route's sections are in view.
+      const sheet = await page.locator("[data-vaul-drawer]").boundingBox();
+      await page.mouse.move(sheet.x + sheet.width / 2, sheet.y + 8);
+      await page.mouse.down();
+      await page.mouse.move(sheet.x + sheet.width / 2, 40, { steps: 10 });
+      await page.mouse.up();
+      const words = page.getByText("Route in words", { exact: true });
+      await words.scrollIntoViewIfNeeded();
+      await words.click();
+      await page.getByRole("button", { name: "Copy the route as text" }).click();
+      // Copied, or (where the clipboard is blocked) the text offered to select. Either way, the route in words.
+      const copied = await page.getByText("Copied. Paste it into a message.").isVisible().catch(() => false);
+      const text = copied ? await page.evaluate(() => navigator.clipboard.readText()) : await page.getByLabel(/Select the text instead/).inputValue();
+      if (!/^From .+ to Hamilton Place/.test(text) || !/\n1\. /.test(text)) throw new Error(`unexpected text: ${text.slice(0, 80)}`);
+      if (text.includes(DEVICE)) throw new Error("the text names the device");
+      await page.getByText("Route in words", { exact: true }).click();
     });
     await step("add a note about the route", async () => {
       await page.getByRole("button", { name: "Add a note about this route" }).click();

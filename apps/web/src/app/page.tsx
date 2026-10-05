@@ -344,8 +344,14 @@ export default function Home() {
   // Fully open, the drawer still sits (1 - SNAP.full) of the screen below the bottom edge. Pad by that much, or the last
   // things in the list (the trip settings, the end of a route) can never scroll into view (STAB-10). Scroll padding does the
   // same for anything scrolled to by keyboard focus.
+  // Keyboard focus moving into the list opens the drawer fully, so what's focused is never under the screen's edge
+  // (WCAG 2.4.11). A tap doesn't: it would jump the sheet under the finger.
   const body = (
-    <div className="min-h-0 flex-1 overflow-y-auto px-4 pt-1 pb-[calc(1.5rem+6dvh+env(safe-area-inset-bottom,0px))] [scroll-padding-bottom:calc(1rem+6dvh)] md:pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] md:[scroll-padding-bottom:1rem]">
+    <div
+      onFocusCapture={(e) => {
+        if (snap !== SNAP.full && (e.target as HTMLElement).matches?.(":focus-visible")) setSnap(SNAP.full);
+      }}
+      className="min-h-0 flex-1 overflow-y-auto px-4 pt-1 pb-[calc(1.5rem+6dvh+env(safe-area-inset-bottom,0px))] [scroll-padding-bottom:calc(1rem+6dvh)] md:pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] md:[scroll-padding-bottom:1rem]">
       {pin ? (
         <section aria-live="polite" aria-label="Dropped pin" className="mb-3 flex flex-wrap items-center gap-3 rounded-2xl border-2 border-accent p-3">
           <p className="m-0 min-w-0 flex-1">
