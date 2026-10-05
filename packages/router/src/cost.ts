@@ -20,7 +20,38 @@ export interface Conditions {
   dark?: boolean;
   /** Treat live closures as open: only to find what a closure cuts off, for "In the way" (D-061). Never for a route we offer. */
   ignoreClosures?: boolean;
+  /** The strongest gust now, or at the hour you leave, with its source and time (D-066). */
+  gust?: { kmh: number; at: string; source: string };
+  /** A UKHSA heat or cold health alert at amber or red, in force where the route is (England only, D-066). */
+  healthAlert?: HealthAlert;
 }
+
+/** A UKHSA weather-health alert in force for the area (D-066). */
+export interface HealthAlert {
+  kind: "heat" | "cold";
+  level: "amber" | "red";
+  /** The UKHSA region: "London", "North East". */
+  region: string;
+  /** ISO 8601: when UKHSA last updated it. */
+  at: string;
+  /** ISO 8601: when the alert period ends, if UKHSA said. */
+  until?: string;
+}
+
+/** Gusts at or above this make exposed bridges cost more for scooters and light chairs (D-066). About 31 mph. */
+export const GUST_BRIDGE_KMH = 50;
+/** Bridges shorter than this are culverts and short spans, not exposed crossings. */
+export const GUST_BRIDGE_MIN_M = 15;
+/** In an amber or red health alert, people who need rests pay this share more of the rest cost on stretches with no bench (D-066). */
+const ALERT_REST_SHARE = 0.25;
+/** And, in heat, this share of the time on uncovered ground. */
+const ALERT_SUN_SHARE = 0.05;
+
+/** Scooters, manual wheelchairs and lightweight powerchairs: the ones a gust can push sideways on an open bridge. */
+export const windSensitive = (p: Profile) => isScooter(p) || p.preset === "manual-wheelchair" || p.preset === "manual-wheelchair-companion" || p.preset === "powerchair-light";
+
+/** Outdoor ground you walk or wheel along: not crossings (the road), stations or rides. */
+const OUTDOOR_GROUND = new Set<GraphEdge["kind"]>(["sidewalk", "footway", "pedestrian", "steps", "ramp", "street_proxy"]);
 
 export const DRY: Conditions = { now: new Date("2026-10-04T12:00:00Z"), wet: false, ice: false };
 
@@ -264,8 +295,31 @@ export function evaluateEdge(e: GraphEdge, forward: boolean, p: Profile, c: Cond
   }
   const dark = darkCost(e, p, c);
   if (dark) extra.push(dark);
+  if ((c.gust && c.gust.kmh >= GUST_BRIDGE_KMH) || c.healthAlert) extra.push(...weatherCosts(e, base, p, c));
   if (!extra.length) return base;
   return { ...base, cost: base.cost + extra.reduce((t, r) => t + r.seconds, 0), reasons: [...base.reasons, ...extra] };
+}
+
+/**
+ * Gusts and health alerts as small costs (D-066). Neither closes anything:
+ * - gusts of 50 km/h or more: an exposed bridge (15 m or longer, not covered) costs as much again
+ *   for scooters, manual wheelchairs and lightweight powerchairs;
+ * - an amber or red heat or cold alert: for presets with a rest limit, stretches with no bench cost a
+ *   quarter more of their rest cost, and in heat, uncovered ground 5% more.
+ */
+export function weatherCosts(e: GraphEdge, base: Evaluation, p: Profile, c: Conditions): Reason[] {
+  if (e.service || !OUTDOOR_GROUND.has(e.kind) || e.attrs.covered.value === true) return [];
+  const out: Reason[] = [];
+  if (c.gust && c.gust.kmh >= GUST_BRIDGE_KMH && e.bridge && e.lengthM >= GUST_BRIDGE_MIN_M && windSensitive(p)) {
+    out.push({ kind: "penalty", attr: "gust", detail: `exposed bridge in gusts up to ${Math.round(c.gust.kmh)} km/h`, seconds: Math.round(base.seconds) });
+  }
+  if (c.healthAlert && p.maxRestIntervalM) {
+    const rest = base.reasons.find((r) => r.attr === "rest");
+    const sun = c.healthAlert.kind === "heat" ? base.seconds * ALERT_SUN_SHARE : 0;
+    const s = Math.round((rest?.seconds ?? 0) * ALERT_REST_SHARE + sun);
+    if (s > 0) out.push({ kind: "penalty", attr: "alert", detail: `${c.healthAlert.level} ${c.healthAlert.kind} health alert: ${rest ? "no bench nearby" : "in the sun"}`, seconds: s });
+  }
+  return out;
 }
 
 const INDOORS = new Set<GraphEdge["kind"]>(["transit", "board", "corridor", "elevator", "escalator"]);

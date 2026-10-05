@@ -573,6 +573,10 @@ export interface Explanation {
   notes: string[];
 }
 
+const UTC_SHORT = new Intl.DateTimeFormat("en-GB", { timeZone: "UTC", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
+/** "20 Jul, 09:00 UTC": the times live feeds give, as the route panel shows them. */
+export const utcShort = (iso: string) => (Number.isNaN(Date.parse(iso)) ? iso : `${UTC_SHORT.format(new Date(iso))} UTC`);
+
 /**
  * "Why this way?" Compare the user's route with the route a profile with no
  * limits would take, and name what was avoided and why. Unnamed footways
@@ -644,6 +648,16 @@ export function explain(router: Router, chosen: Route, from: GraphNode, to: Grap
             ? `${s.edge.name}: board with the staff ramp, so ask staff (TfL station data).`
             : null;
     if (note && !notes.includes(note)) notes.push(note);
+  }
+  // Amber and red health alerts, for everyone, with UKHSA's end date (D-066).
+  if (c.healthAlert) {
+    const h = c.healthAlert;
+    const until = h.until ? ` until ${utcShort(h.until)}` : "";
+    notes.push(`${h.level === "red" ? "Red" : "Amber"} ${h.kind} health alert for ${h.region}${until}${p.maxRestIntervalM ? ". We've favoured places to rest" : ""} (UKHSA, updated ${utcShort(h.at)}).`);
+  }
+  // Gusts on an exposed bridge this route crosses, for scooters and light chairs (D-066).
+  if (c.gust && chosen.steps.some((s) => s.eval.reasons.some((r) => r.attr === "gust"))) {
+    notes.push(`Strong gusts on exposed bridges: up to ${Math.round(c.gust.kmh)} km/h (${c.gust.source}, ${utcShort(c.gust.at)}).`);
   }
   if (sum.lifts) {
     const live = router.graph.meta.liveFeeds?.some((f) => f.endsWith("lifts"));
