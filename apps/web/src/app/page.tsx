@@ -1,6 +1,6 @@
 "use client";
 import { learnPace, type Profile } from "@causeway/profile";
-import { conditionsFromOpenMeteo, forecastConditions, openMeteoUrl } from "@causeway/live";
+import { conditionsFromOpenMeteo, forecastConditions, getJson, openMeteoUrl } from "@causeway/live";
 import { haversine } from "@causeway/graph";
 import { ChevronLeft } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -151,8 +151,7 @@ export default function Home() {
   // Live weather sets the ground; the user can override it from the chip.
   useEffect(() => {
     const ctl = new AbortController();
-    fetch(openMeteoUrl(...city.weatherAt), { signal: ctl.signal })
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+    getJson<Parameters<typeof conditionsFromOpenMeteo>[0]>(openMeteoUrl(...city.weatherAt), "Open-Meteo", { signal: ctl.signal })
       .then((j) => {
         const later = leaveAt && leaveAt.getTime() > Date.now() + 45 * 60_000;
         const c = later ? forecastConditions(j, leaveAt) : conditionsFromOpenMeteo(j);

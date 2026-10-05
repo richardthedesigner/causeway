@@ -10,6 +10,7 @@
  * carriageway are left out: they rarely change a pavement route.
  */
 import type { LiveState } from "@causeway/graph";
+import { getJson } from "./timeout.js";
 
 export interface WorksObservation {
   id: string;
@@ -297,7 +298,5 @@ export function applyEdgeStates(g: { edges: { id: number; live?: LiveState }[] }
 export async function fetchTflStreetWorks(now = new Date(), signal?: AbortSignal): Promise<WorksObservation[]> {
   const day = (d: Date) => d.toISOString().slice(0, 10);
   const url = `https://api.tfl.gov.uk/Road/all/Street/Disruption?startDate=${day(now)}&endDate=${day(new Date(now.getTime() + 86_400_000))}`;
-  const res = await fetch(url, { signal });
-  if (!res.ok) throw new Error(`TfL street disruptions: HTTP ${res.status}`);
-  return tflStreetObservations((await res.json()) as TflStreetSegment[], now);
+  return tflStreetObservations(await getJson<TflStreetSegment[]>(url, "TfL street disruptions", { signal }), now);
 }
