@@ -2,6 +2,23 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
+## 2026-10-05 (midday)
+
+Stability, privacy and bank holidays, from the roadmap's Now list.
+
+**Time limits on live feeds** (D-051, STAB-05)
+- Every live feed gives up after 10 seconds with an error naming it. The fallback each already had then takes over.
+
+**A guard on the weekly refresh** (D-033, STAB-06)
+- Each count has a limit on how far it may fall. Past one, the refresh pull request opens as a draft that lists the drops, and the run fails.
+
+**Bank holidays** (D-039, SMALL-01)
+- GOV.UK's dates for England and Wales and for Scotland, bundled and refreshed weekly. On a bank holiday a place's holiday hours apply; without any, it says the hours may differ that day only.
+
+**Your data** (D-052, SEC-06)
+- One sheet says what the phone keeps, downloads it as a file, and deletes everything, including what was shared. Migration 0006 lets people delete their own reports, flags and photos.
+- `pnpm e2e` downloads a copy and deletes it all; `pnpm a11y` checks the sheet, including at 200% text.
+
 ## 2026-10-05 (late morning)
 
 **200% text on a small phone, everywhere else** (STAB-12)
