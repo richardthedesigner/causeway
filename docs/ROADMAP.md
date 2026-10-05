@@ -131,7 +131,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | FEAT-15 | Street-level imagery for complex junctions (Mapillary) | L | later | blocked | Richard, Claude | Licence (D-008) and a key ([#9](https://github.com/richardthedesigner/causeway/issues/9)) |
 | FEAT-16 | Welsh and Scottish Gaelic, with one place for all copy | L | later | todo | Claude | |
 | FEAT-17 | Indoor and station routing (lifts, platforms, step-free interchanges) | XL | later | todo | Claude | Start with one big station |
-| FEAT-18 | Road speed setting for road scooters in the device editor | S | later | todo | Claude | D-051. Everyone gets 8 mph on roads until then |
+| FEAT-18 | Road speed setting for road scooters in the device editor | S | later | done (2026-10-05) | Claude | D-051. 4 to 8 mph, and a per-device mph or km/h choice for speeds |
 
 ## Small features
 
@@ -269,6 +269,7 @@ Newest first. One line per change: date, ID, what happened, link.
 - 2026-10-05: DATA-02 done: Edinburgh's works from the Scottish Road Works Register (D-057, ported from PR #36).
 - 2026-10-05: SPEED-02 done (speed budget, ported from PR #36). Added SPEED-07.
 - 2026-10-05: Added DATA-28 (presets on Inclusive Mobility values, ported from PR #36) and marked it done.
+- 2026-10-05: FEAT-18 done: "Speed on the road" for road scooters (4 to 8 mph), and "Show speeds in: mph or km/h" per device (D-051).
 - 2026-10-05: STAB-05 done (D-052). Added STAB-14. Promoted STAB-07. Now: STAB-06, SEC-06, SMALL-01, STAB-13, STAB-07.
 - 2026-10-05: FEAT-02 done: road scooters go at road speed on roads, and pace learning skips road stretches (D-051). Added FEAT-18 (road speed setting) and RES-10 (ask riders about road routes).
 - 2026-10-05: STAB-12 done. Added STAB-13. Now: STAB-05, STAB-06, SEC-06, SMALL-01, STAB-13.

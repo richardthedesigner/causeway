@@ -96,11 +96,27 @@ export interface Profile {
   maxRangeKm?: number | null;
   /**
    * Speed on the carriageway for a road-legal scooter, metres per second (8 mph
-   * is 3.6). `speedMps` stays the pavement pace, which is what pace learning
+   * is 3.576). `speedMps` stays the pavement pace, which is what pace learning
    * learns. Ignored unless `roadLegal`.
    */
   roadSpeedMps?: number;
+  /** How this person reads speeds: pace and road speed. Absent means the default for the type (see `speedUnit`). */
+  speedUnit?: SpeedUnit;
 }
+
+export type SpeedUnit = "mph" | "kmh";
+/** Scooters are sold and regulated in mph ("class 3: 8 mph"); everyone else defaults to km/h, as before. */
+export const speedUnit = (p: Pick<Profile, "preset" | "speedUnit">): SpeedUnit => (p.speedUnit === "mph" || p.speedUnit === "kmh" ? p.speedUnit : isScooter(p) ? "mph" : "kmh");
+export const MPS_PER_MPH = 0.44704;
+/** "8 mph", "12.9 km/h". `long` is for screen readers: "8 miles per hour". */
+export function formatSpeed(mps: number, unit: SpeedUnit, long = false): string {
+  const v = unit === "mph" ? mps / MPS_PER_MPH : mps * 3.6;
+  const n = Number.isInteger(Math.round(v * 10) / 10) ? String(Math.round(v)) : (Math.round(v * 10) / 10).toFixed(1);
+  return `${n} ${unit === "mph" ? (long ? "miles per hour" : "mph") : long ? "kilometres per hour" : "km/h"}`;
+}
+/** Road speed choices for a road-legal scooter, in mph: below the 4 mph pavement limit the road isn't worth it; 8 mph is the class 3 legal top speed. */
+export const ROAD_MPH_MIN = 4;
+export const ROAD_MPH_MAX = 8;
 
 /** Any powered wheelchair, light or heavy duty. Uses the bus wheelchair space. */
 export const isPowerchair = (p: Pick<Profile, "preset">) => p.preset === "powerchair" || p.preset === "powerchair-light";
@@ -298,7 +314,7 @@ export const PRESETS: Record<MobilityPreset, Profile> = {
     companion: false,
     buses: false,
     roadLegal: true,
-    roadSpeedMps: 3.6,
+    roadSpeedMps: 3.576, // 8 mph
   },
   rollator: {
     preset: "rollator",

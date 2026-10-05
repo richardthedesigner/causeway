@@ -1,5 +1,5 @@
 "use client";
-import { hasBattery, kerbLimitText, PRESETS, stepKerbCm, type MobilityPreset, type Profile, type SavedDevice } from "@causeway/profile";
+import { formatSpeed, hasBattery, kerbLimitText, MPS_PER_MPH, PRESETS, ROAD_MPH_MAX, ROAD_MPH_MIN, speedUnit, stepKerbCm, type MobilityPreset, type Profile, type SavedDevice, type SpeedUnit } from "@causeway/profile";
 import { useState } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Slider } from "@/components/ui/slider";
@@ -30,6 +30,8 @@ const TYPE_HINT: Partial<Record<MobilityPreset, string>> = {
 };
 
 const STEP_LIMIT = 30;
+/** Road speed to the nearest half mph, the steps the control moves in (a device saved at 3.6 m/s reads 8, not 8.1). */
+const halfMph = (mps: number) => Math.round((mps / MPS_PER_MPH) * 2) / 2;
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
 
 /** Thirteen types in three short sets, so nobody reads a list of thirteen. */
@@ -39,12 +41,13 @@ const PRESET_GROUPS: { id: string; label: string; presets: MobilityPreset[] }[] 
   { id: "other", label: "Other needs", presets: ["fatigue", "visual-impairment"] },
 ];
 
-/** The closed "Your limits" row still says what matters: "Uphill 6% / Kerb 2 cm / No steps / 12 km battery". */
+/** The closed "Your limits" row still says what matters: "Uphill 6% / Kerb 2 cm / No steps / 12 km battery / 8 mph on roads". */
 function limitsSummary(p: Profile, steps: number): string {
   const up = p.maxInclineUpPct >= 50 ? "Any slope" : `Uphill ${p.maxInclineUpPct}%`;
   const kerb = p.maxKerbCm === 0 ? "Flush kerbs" : `Kerb ${kerbLimitText(p.maxKerbCm)}`;
   const st = steps === 0 ? "No steps" : steps >= STEP_LIMIT ? "Any steps" : `Up to ${steps} steps`;
-  return [up, kerb, st, p.maxRangeKm ? `${p.maxRangeKm} km battery` : null].filter(Boolean).join(" / ");
+  const road = p.roadLegal && p.roadSpeedMps ? `${formatSpeed(halfMph(p.roadSpeedMps) * MPS_PER_MPH, speedUnit(p))} on roads` : null;
+  return [up, kerb, st, p.maxRangeKm ? `${p.maxRangeKm} km battery` : null, road].filter(Boolean).join(" / ");
 }
 
 
@@ -60,7 +63,12 @@ export function DeviceEditor({ open, onOpenChange, device, onChange, onRename, o
   const set = (patch: Partial<Profile>) => onChange({ ...profile, ...patch });
   const pick = (preset: MobilityPreset) => onChange(presetProfile(profile, preset));
   // The battery range is the person's own figure, not a change to the type's limits.
-  const custom = JSON.stringify({ ...profile, label: "", maxRangeKm: undefined }) !== JSON.stringify({ ...PRESETS[profile.preset], label: "", maxRangeKm: undefined });
+  // The speed unit is how they read speeds, not a limit either.
+  const custom = JSON.stringify({ ...profile, label: "", maxRangeKm: undefined, speedUnit: undefined }) !== JSON.stringify({ ...PRESETS[profile.preset], label: "", maxRangeKm: undefined, speedUnit: undefined });
+  const unit = speedUnit(profile);
+  // Road speed in mph, to the nearest half: the steps the control moves in whatever the unit shown.
+  const roadMph = profile.roadSpeedMps ? halfMph(profile.roadSpeedMps) : ROAD_MPH_MAX;
+  const setRoadMph = (mph: number) => set({ roadSpeedMps: clamp(mph, ROAD_MPH_MIN, ROAD_MPH_MAX) * MPS_PER_MPH });
   const range = profile.maxRangeKm ?? null;
   const stepsAllowed = Number.isFinite(profile.maxSteps) ? Math.min(profile.maxSteps, STEP_LIMIT) : STEP_LIMIT;
 
@@ -241,8 +249,48 @@ export function DeviceEditor({ open, onOpenChange, device, onChange, onRename, o
             />
           </div>
 
+          <fieldset className="m-0 grid gap-2 border-0 p-0">
+            <legend className="text-base">Show speeds in</legend>
+            <div role="radiogroup" aria-label="Show speeds in" className="flex flex-wrap gap-2">
+              {(["mph", "kmh"] as SpeedUnit[]).map((u) => {
+                const on = unit === u;
+                return (
+                  <button
+                    key={u}
+                    type="button"
+                    role="radio"
+                    aria-checked={on}
+                    onClick={() => set({ speedUnit: u })}
+                    className={cn("min-h-12 rounded-full border px-4 text-base", on ? "border-ink bg-ink text-surface" : "border-line bg-surface text-ink hover:border-ink")}
+                  >
+                    {u === "mph" ? "mph" : "km/h"}
+                  </button>
+                );
+              })}
+            </div>
+          </fieldset>
+
+          {profile.roadLegal ? (
+            <Limit
+              label="Speed on the road"
+              value={formatSpeed(roadMph * MPS_PER_MPH, unit)}
+              help="On roads without a separate pavement. 8 mph is the top speed allowed for a class 3 scooter."
+              onStep={(d) => setRoadMph(roadMph + d * 0.5)}
+            >
+              <Slider
+                thumbLabel="Speed on the road"
+                valueText={formatSpeed(roadMph * MPS_PER_MPH, unit, true)}
+                min={ROAD_MPH_MIN}
+                max={ROAD_MPH_MAX}
+                step={0.5}
+                value={[roadMph]}
+                onValueChange={([v]) => setRoadMph(v!)}
+              />
+            </Limit>
+          ) : null}
+
           <p className="m-0 text-sm text-muted">
-            Your pace: {(profile.speedMps * 3.6).toFixed(1)} km/h on the flat
+            Your {profile.roadLegal ? "pavement " : ""}pace: {formatSpeed(profile.speedMps, unit)} on the flat
             {profile.paceSamples ? `, learned from ${profile.paceSamples} journey${profile.paceSamples === 1 ? "" : "s"}` : ", a starting figure. It adjusts as you use navigation"}.
           </p>
 

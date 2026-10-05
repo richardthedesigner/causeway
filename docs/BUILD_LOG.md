@@ -40,6 +40,13 @@ Richard chose main as the base; the overnight build's extras (PR #36) are ported
 - Fixed on the way: "Couldn't check the weather" flashed on every start in a remembered city, because a cancelled check was treated as a failed one.
 - `pnpm e2e` now runs a London journey with every live feed hanging. The route comes, and the weather and lift lines fall back in about 11 and 13 seconds.
 
+## 2026-10-05 (midday)
+
+**Road speed in the device editor** (D-051, FEAT-18)
+- Road scooters: "Speed on the road", 4 to 8 mph in half-mph steps. The "Your limits" row says "8 mph on roads".
+- Every device: "Show speeds in: mph or km/h", for pace and road speed. Scooters start in mph, everyone else in km/h.
+- `pnpm a11y` checks a road scooter's settings in both units, and at 200% text on a 320 px phone.
+
 ## 2026-10-05 (later)
 
 **Road speed for road scooters** (D-051, FEAT-02)
