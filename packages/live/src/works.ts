@@ -13,9 +13,12 @@ import type { LiveState } from "@causeway/graph";
 import { getJson, type LiveOptions } from "./http.js";
 
 export interface WorksObservation {
+  /** Unique per observation. One works in several parts shares the id before "#". */
   id: string;
-  /** "Street Manager", "TfL road disruptions". */
+  /** "Street Manager", "TfL road disruptions", "Scottish Road Works Register". */
   source: string;
+  /** Short plain words for lists, in our own words: "Café tables on the pavement". */
+  headline?: string;
   /** [lon, lat] points: a line along the works, or a single point. */
   geometry: [number, number][];
   footway: "closed" | "affected";
@@ -238,6 +241,157 @@ export function saysClosed(pattern: RegExp, text: string): boolean {
   return false;
 }
 
+/**
+ * A row of the Scottish Road Works Register disruptions export
+ * (CurrentActivities.csv), reduced by scripts/srwr-extract.py.
+ */
+export interface SrwrActivity {
+  /** ActivityReference and phase. */
+  ref: string;
+  category: string;
+  licence: string;
+  traffic: string;
+  status: string;
+  /** The register's free text: read for closure words, never shown. */
+  location: string;
+  description: string;
+  street: string | null;
+  start: string;
+  end: string;
+  updated: string | null;
+  /** GeometryFull: British National Grid WKT. */
+  geom: string;
+}
+
+/**
+ * WKT to its parts: each ring, line or point on its own, so a multi-part
+ * works is never joined up across the gap between its parts.
+ */
+export function wktParts(wkt: string): [number, number][][] {
+  if (/POINT/i.test(wkt)) return wktPoints(wkt).map((p) => [p]);
+  const groups = wkt.match(/\(([^()]+)\)/g) ?? [];
+  return groups.map(wktPoints).filter((g) => g.length > 0);
+}
+
+/** Drop points closer than `tolM` to the line between their neighbours (Douglas-Peucker, [lon, lat] in). */
+export function simplifyLine(line: [number, number][], tolM = 1): [number, number][] {
+  if (line.length < 3) return line;
+  const keep = new Uint8Array(line.length);
+  keep[0] = keep[line.length - 1] = 1;
+  const stack: [number, number][] = [[0, line.length - 1]];
+  while (stack.length) {
+    const [i, j] = stack.pop()!;
+    let best = -1,
+      at = -1;
+    for (let k = i + 1; k < j; k++) {
+      const d = distToLine(line[k]!, [line[i]!, line[j]!]);
+      if (d > best) [best, at] = [d, k];
+    }
+    if (best > tolM) {
+      keep[at] = 1;
+      stack.push([i, at], [at, j]);
+    }
+  }
+  return line.filter((_, k) => keep[k]);
+}
+
+/** Every part of a BNG WKT shape as [lon, lat] lines, rounded to about 10 cm and simplified. */
+const partsLonLat = (wkt: string, fromOsgb: (e: number, n: number) => [number, number]) =>
+  wktParts(wkt)
+    .map((p) => simplifyLine(p.map(([e, n]) => fromOsgb(e, n)).map(([x, y]) => [Math.round(x * 1e6) / 1e6, Math.round(y * 1e6) / 1e6] as [number, number])))
+    .filter((p) => p.length);
+
+const FOOTWAY_WORDS = /\b(foot ?ways?|foot ?paths?|f\/ ?w(ay)?|pavements?|pedestrians?)\b/i;
+/** The register (or a Street Manager activity) says the footway itself is shut, not just that works are on it. */
+export const FOOTWAY_CLOSED =
+  /\b(foot ?ways?|foot ?paths?|f\/ ?w(ay)?|pavements?)\s+(will\s+(remain|be)\s+|is\s+|are\s+)?clos(ed|ure)\b|including foot ?(ways?|paths?)|\b(foot ?path|foot ?way) diversion|closed to pedestrians|pedestrians?\s+(will be\s+)?diverted/gi;
+
+/** Site licences on the footway, in our own words. */
+const SITE_LICENCES: Record<string, string> = {
+  Scaffolding: "Scaffolding on the pavement",
+  Hoarding: "Hoarding on the pavement",
+  "Containers/Cabins/Storage": "Site cabins or containers on the pavement",
+  Skip: "Skip on the pavement",
+  Materials: "Building materials on the pavement",
+  "General Road Occupation": "Building site on the pavement",
+};
+/**
+ * Statuses that are only an early notice, without firm dates: "Potential", and
+ * "Advance Planning", the months-ahead notice of major works. Edinburgh's
+ * "Find and Fix" pavement repairs are one Advance Planning entry per street,
+ * each covering the whole street from 15 October 2026 to June 2027, though each
+ * street's repair takes days. Counted, they made every acceptance journey
+ * unsure from 15 October (D-057). The works come back with firm dates as
+ * "Proposed" before they start.
+ */
+const NOT_YET = new Set(["Potential", "Advance Planning"]);
+
+/**
+ * SRWR activities to observations, for the rows that matter on foot (D-057):
+ * - works entirely on the footway (closed only when the text says the footway is closed);
+ * - road closures whose text mentions the footway;
+ * - street café permits: tables narrow the pavement, they never close it;
+ * - scaffolding, hoardings, cabins, skips and materials on the footway;
+ * - public events on the footway.
+ * Early notices, works that have ended, and anything starting more than
+ * `horizonDays` after `now`, are left out. Descriptions are our
+ * own words and the street name: the register's free text and promoter are
+ * read for closure words only, never shown.
+ */
+export function srwrObservations(
+  rows: SrwrActivity[],
+  fromOsgb: (e: number, n: number) => [number, number],
+  now: Date,
+  horizonDays = 35,
+): WorksObservation[] {
+  const out: WorksObservation[] = [];
+  const t = now.getTime();
+  for (const r of rows) {
+    if (NOT_YET.has(r.status)) continue;
+    if (!r.start || !r.end || Date.parse(r.end) <= t || Date.parse(r.start) > t + horizonDays * 86_400_000) continue;
+    const text = `${r.location} ${r.description}`;
+    const onFootway = r.traffic === "Works Entirely On The Footway" || /\b(on|o\/s)?\s*f\/ ?w(ay)?\b/i.test(r.location);
+    const shut = saysClosed(FOOTWAY_CLOSED, text);
+    let headline: string;
+    let footway: WorksObservation["footway"] = "affected";
+    if (r.licence === "Street Café") {
+      headline = "Café tables on the pavement";
+    } else if (r.licence in SITE_LICENCES) {
+      if (!onFootway) continue;
+      headline = SITE_LICENCES[r.licence]!;
+      footway = shut ? "closed" : "affected";
+    } else if (r.licence === "Public Event" || r.category === "Event") {
+      if (!(onFootway || FOOTWAY_WORDS.test(text)) || r.licence === "Seasonal Embargo") continue;
+      headline = "Event on the pavement";
+      footway = shut ? "closed" : "affected";
+    } else if (r.traffic === "Works Entirely On The Footway") {
+      footway = shut ? "closed" : "affected";
+      headline = footway === "closed" ? "Pavement closed" : "Works on the pavement";
+    } else if (r.traffic === "Road Closure") {
+      if (!FOOTWAY_WORDS.test(text)) continue;
+      footway = shut ? "closed" : "affected";
+      headline = footway === "closed" ? "Road and pavement closed" : "Road closed, works on the pavement";
+    } else continue;
+    const description = footway === "closed" && !/closed/.test(headline) ? "Pavement closed" : headline;
+    const parts = partsLonLat(r.geom, fromOsgb);
+    parts.forEach((geometry, i) =>
+      out.push({
+        id: `srwr:${r.ref}${parts.length > 1 ? `#${i}` : ""}`,
+        source: "Scottish Road Works Register",
+        headline,
+        geometry,
+        footway,
+        description,
+        street: r.street ? r.street.replace(/\s*\(plus \d+ more\)$/, "") : null,
+        start: r.start,
+        end: r.end,
+        observedAt: r.updated ?? r.start,
+      }),
+    );
+  }
+  return out;
+}
+
 const PAVEMENT_KINDS = new Set(["sidewalk", "footway", "pedestrian", "street_proxy", "ramp"]);
 
 const metresBetween = (a: [number, number], b: [number, number]) => {
@@ -279,28 +433,42 @@ export function worksStates(
 ): Map<number, LiveState> {
   const out = new Map<number, LiveState>();
   const t = now.getTime();
-  for (const o of obs) {
-    if (Date.parse(o.end) <= t) continue;
+  const live = obs.filter((o) => Date.parse(o.end) > t && o.geometry.length);
+  if (!live.length) return out;
+  // Pavement edge middles in a grid of ~100 m cells, so each works only looks at edges near it.
+  const CELL = 0.001;
+  const grid = new Map<string, { id: number; mid: [number, number] }[]>();
+  const key = (cx: number, cy: number) => `${cx},${cy}`;
+  for (const e of edges) {
+    if (!PAVEMENT_KINDS.has(e.kind)) continue;
+    const mid = e.geometry[Math.floor(e.geometry.length / 2)]!;
+    const k = key(Math.floor(mid[0] / CELL), Math.floor(mid[1] / CELL));
+    (grid.get(k) ?? grid.set(k, []).get(k)!).push({ id: e.id, mid });
+  }
+  for (const o of live) {
     const r = o.geometry.length === 1 ? radiusM * 1.5 : radiusM;
-    const lons = o.geometry.map((p) => p[0]),
-      lats = o.geometry.map((p) => p[1]);
-    const pad = r / 111_320 / Math.cos((lats[0]! * Math.PI) / 180);
-    const [x0, x1, y0, y1] = [Math.min(...lons) - pad, Math.max(...lons) + pad, Math.min(...lats) - r / 111_320, Math.max(...lats) + r / 111_320];
+    let [x0, x1, y0, y1] = [Infinity, -Infinity, Infinity, -Infinity];
+    for (const [x, y] of o.geometry) [x0, x1, y0, y1] = [Math.min(x0, x), Math.max(x1, x), Math.min(y0, y), Math.max(y1, y)];
+    const pad = r / 111_320 / Math.cos((y0 * Math.PI) / 180);
+    [x0, x1, y0, y1] = [x0 - pad, x1 + pad, y0 - r / 111_320, y1 + r / 111_320];
     const state: LiveState = {
       status: o.footway === "closed" ? "closed" : "degraded",
+      ...(o.headline ? { headline: o.headline } : {}),
       reason: `${o.description}${o.street ? ` on ${o.street}` : ""} until ${o.end.slice(0, 10)}`,
       source: o.source,
       validFrom: o.start,
       validUntil: o.end,
     };
-    for (const e of edges) {
-      if (!PAVEMENT_KINDS.has(e.kind)) continue;
-      const mid = e.geometry[Math.floor(e.geometry.length / 2)]!;
-      if (mid[0] < x0 || mid[0] > x1 || mid[1] < y0 || mid[1] > y1) continue;
-      if (distToLine(mid, o.geometry) > r) continue;
-      const prev = out.get(e.id);
-      if (prev?.status === "closed" && state.status !== "closed") continue;
-      out.set(e.id, state);
+    for (let cx = Math.floor(x0 / CELL); cx <= Math.floor(x1 / CELL); cx++) {
+      for (let cy = Math.floor(y0 / CELL); cy <= Math.floor(y1 / CELL); cy++) {
+        for (const { id, mid } of grid.get(key(cx, cy)) ?? []) {
+          if (mid[0] < x0 || mid[0] > x1 || mid[1] < y0 || mid[1] > y1) continue;
+          if (distToLine(mid, o.geometry) > r) continue;
+          const prev = out.get(id);
+          if (prev?.status === "closed" && state.status !== "closed") continue;
+          out.set(id, state);
+        }
+      }
     }
   }
   return out;

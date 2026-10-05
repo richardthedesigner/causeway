@@ -569,6 +569,8 @@ export function explain(router: Router, chosen: Route, from: GraphNode, to: Grap
   const base = router.route(from, to, unconstrained, c);
   const chosenIds = new Set(chosen.steps.map((s) => s.edge.id));
   const avoidedByName = new Map<string, Avoided>();
+  /** Where each avoided street's live closure came from, for the note. */
+  const liveSource = new Map<string, string>();
   if (base) {
     for (const s of base.steps) {
       if (chosenIds.has(s.edge.id)) continue;
@@ -579,6 +581,7 @@ export function explain(router: Router, chosen: Route, from: GraphNode, to: Grap
         .sort((a, b) => b.seconds - a.seconds)[0];
       if (!worst) continue;
       const name = placeName(s.edge);
+      if (worst.attr === "live" && s.edge.live) liveSource.set(name, s.edge.live.source);
       const cur = avoidedByName.get(name);
       if (!cur || worst.seconds > cur.reason.seconds) avoidedByName.set(name, { name, reason: worst, lengthM: (cur?.lengthM ?? 0) + s.edge.lengthM });
       else cur.lengthM += s.edge.lengthM;
@@ -597,7 +600,9 @@ export function explain(router: Router, chosen: Route, from: GraphNode, to: Grap
   for (const a of avoided) {
     if (a.reason.attr !== "live") continue;
     const full = a.reason.detail.replace(/^(lift out of service|closed): /, "");
-    notes.push(`${a.name}: ${full} (TfL, live)`);
+    // Live feeds say so; a works file built from a register is named, not called live.
+    const src = liveSource.get(a.name) ?? "TfL";
+    notes.push(`${a.name}: ${full} (${/^TfL/.test(src) ? "TfL, live" : /^Environment Agency/.test(src) ? "Environment Agency, live" : src})`);
     a.reason = { ...a.reason, detail: a.reason.detail.startsWith("lift") ? "lift out of service" : "closed" };
   }
   for (const s of chosen.steps) {

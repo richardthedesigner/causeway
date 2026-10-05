@@ -1,6 +1,7 @@
 name: data-refresh
 # Rebuild the open data the app ships with and open a pull request when it changes (issue #14).
-# Weekly: bus, tram and Metro timetables (BODS GTFS), pavement works (Street Manager), the
+# Weekly: bus, tram and Metro timetables (BODS GTFS), pavement works (Street Manager in England,
+# the Scottish Road Works Register in Edinburgh), the
 # search index (OSM, plus the pinned Overture release), the street graphs (fresh OSM, the same
 # LiDAR; DATA-11) and the layers keyed to them, park gates, OSM notes and the Toilet Map.
 # Base maps stay manual: they need a reviewed Protomaps build, and they change slowly.
@@ -55,6 +56,10 @@ jobs:
         run: |
           rm -f .data-cache/sm-permit-*.json .data-cache/sm-activity-*.json
           pnpm build:works
+        continue-on-error: true
+      # Edinburgh: the register's daily disruptions export (OGL v3, no key). One request; the script waits and retries if rate-limited.
+      - name: Pavement works, Scotland
+        run: pnpm build:srwr
         continue-on-error: true
 
       # Street graphs (DATA-11): about a minute each. They reuse the OSM the search index fetched.

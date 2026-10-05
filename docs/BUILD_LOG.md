@@ -22,6 +22,12 @@ Richard chose main as the base; the overnight build's extras (PR #36) are ported
 - `pnpm test` fails if routing the acceptance journeys settles 10% more nodes, or gets 10% slower over a fixed yardstick (on CI, printed and failing only past 50%). Rest presets' "More benches" searches are timed too.
 - Each city's data beside the graph stays under 400 KB compressed. Baseline and sizes: [PERF_BASELINE](plans/PERF_BASELINE.md). Re-measure with `pnpm perf:baseline`.
 
+**Edinburgh's roadworks** (D-057, DATA-02)
+- `pnpm build:srwr` reads the Scottish Road Works Register's daily export (OGL v3) and writes Edinburgh's works file; the weekly data refresh runs it. Export of 2026-10-05: 456 entries, most of them café tables (307), all in our own words and the street, never the register's text or the promoter.
+- Advance notices are left out: the council's "Find and Fix" pavement repairs cover the full length of 259 streets from 15 October to June, and counted they made every acceptance journey unsure.
+- Matching works to the graph uses a grid: 77 ms instead of 1.5 s on Edinburgh. Works on several parts count once in the works line.
+- A live closure avoided in "Why this way?" names its source; it said "TfL, live" for every source.
+
 ## 2026-10-05 (afternoon)
 
 **Live feeds give up after 10 seconds** (D-052, STAB-05)

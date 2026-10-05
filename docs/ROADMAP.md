@@ -56,7 +56,7 @@ The next five things to pick up, in order.
 4. **STAB-13**: the city name at the top of the map at 200% text.
 5. **STAB-07**: the routing worker recovers if it crashes, and says so.
 
-The rest of the pilot-city data (DATA-02, DATA-12 to DATA-20) is blocked on access, licences or keys. Research (RES) needs Richard and testers.
+The rest of the pilot-city data (DATA-12 to DATA-20) is blocked on access, licences or keys. Research (RES) needs Richard and testers.
 
 ## Data and coverage
 
@@ -65,7 +65,7 @@ Fix and fill the pilot cities. DATA-01 to DATA-10 are in order of value per day 
 | ID | Task | Size | Priority | Status | Who | Notes |
 |---|---|---|---|---|---|---|
 | DATA-01 | Remove scraped Changing Places records (29) from the search indexes, and filter them in the Overture build | S | now | done (2026-10-04) | Claude | D-028. `scrapedOnly()` in the Overture merge; 53 records stripped from the indexes (29 Changing Places, 24 GP, dentist, hospital and pharmacy) |
-| DATA-02 | Scottish Road Works Register adapter for Edinburgh: footway works, café tables, scaffolding, hoardings, events | M | now | blocked | Claude | §2 #1. SRWR is open (OGL), but `downloads.srwr.scot` resets every TLS connection from the cloud build container (2026-10-04). Build it from a laptop or a runner the site answers. [#10](https://github.com/richardthedesigner/causeway/issues/10) |
+| DATA-02 | Scottish Road Works Register adapter for Edinburgh: footway works, café tables, scaffolding, hoardings, events | M | now | done (2026-10-05) | Claude | §2 #1. D-057. `pnpm build:srwr`, weekly in the data refresh: 456 entries from the export of 2026-10-05, in our own words. Advance notices left out. [#10](https://github.com/richardthedesigner/causeway/issues/10) |
 | DATA-03 | TfL station data: platform step and gap, which areas each lift connects, toilets. Join lift outages on `LiftUniqueId` | M | now | done (2026-10-04) | Claude | D-020. `scripts/tfl-station-access.ts`; `applyStationAccess` and `stepFreeLines`. 10 northern Jubilee stations now known not step-free |
 | DATA-04 | TfL station and line disruptions on transit edges | M | now | done (2026-10-04) | Claude | D-020. `packages/live/src/tfl-disruptions.ts`, refreshed with the lifts. Rides get refs at load (`refRides`) |
 | DATA-05 | Street Manager activity archive: skips, scaffolding, hoardings | S | now | done (2026-10-04) | Claude | D-027. Activity archive in `pnpm build:works`: 9 in Newcastle, 5 in London, all "on the pavement" |
@@ -265,6 +265,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 
 Newest first. One line per change: date, ID, what happened, link.
 
+- 2026-10-05: DATA-02 done: Edinburgh's works from the Scottish Road Works Register (D-057, ported from PR #36).
 - 2026-10-05: SPEED-02 done (speed budget, ported from PR #36). Added SPEED-07.
 - 2026-10-05: Added DATA-28 (presets on Inclusive Mobility values, ported from PR #36) and marked it done.
 - 2026-10-05: STAB-05 done (D-052). Added STAB-14. Promoted STAB-07. Now: STAB-06, SEC-06, SMALL-01, STAB-13, STAB-07.

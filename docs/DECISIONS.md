@@ -211,7 +211,7 @@ Open: whether notes should carry the conditions ("when wet") as a field rather t
 
 **Decided.** 2026-10-04. Every outside feed gets a small adapter in `packages/live` that turns its records into one of our shapes (`LiftOutage`, `WorksObservation`, weather `Conditions`), and one function that puts those shapes on the graph as dated `LiveState`s (`liftOutageStates`, `worksStates`). The router never knows which feed a state came from, so adding a city or a source is an adapter plus a test, not a router change.
 
-First use: pavement works. Street Manager (England, OGL) permits that close the footway close those pavement edges for everyone until the works' end date; works on the footway that don't close it, including a temporary walkway in the road, are "degraded" and counted as unknown; carriageway-only works are left out. In London TfL street disruptions that mention the pavement top this up live every 5 minutes. The build reads Street Manager's monthly archive (`pnpm build:works`, 1 GB, about a minute); production should subscribe to Street Manager's live notifications (free, needs registering an endpoint) through the same adapter. Scotland's register (SRWR) has no open feed: Edinburgh says "No open roadworks feed here yet" rather than implying there are none.
+First use: pavement works. Street Manager (England, OGL) permits that close the footway close those pavement edges for everyone until the works' end date; works on the footway that don't close it, including a temporary walkway in the road, are "degraded" and counted as unknown; carriageway-only works are left out. In London TfL street disruptions that mention the pavement top this up live every 5 minutes. The build reads Street Manager's monthly archive (`pnpm build:works`, 1 GB, about a minute); production should subscribe to Street Manager's live notifications (free, needs registering an endpoint) through the same adapter. Scotland's register (SRWR) has no open feed: Edinburgh says "No open roadworks feed here yet" rather than implying there are none. *Superseded for Scotland by D-057: the register is open data, and Edinburgh's works now come from it.*
 
 Update (DATA-05): the build also reads Street Manager's activity archive (`activity/YYYY/MM.zip`, about 12 MB a month, same bucket, OGL): skips, scaffolding, hoardings, cranes and mobile platforms, events and other non-works licences. Only those on the footway or a footpath are kept. The archive doesn't say whether the pavement is closed, so each one is "on the pavement" and counted as unknown, never closed. With no end time given, an activity runs to the end of its last day. September 2026 added 9 in Newcastle and 5 in London.
 
@@ -587,3 +587,33 @@ Update (D-053): the council's surface and width are now written as inferred, not
 - Live data (works, floods, lifts, disruptions) is left out of the timed graph, so the figures don't depend on the day the test runs.
 - Settled nodes depend on the graph, so a weekly data refresh that rebuilds a graph can trip the 10% check. Then re-baseline on purpose in that pull request, and say so (SPEED-07).
 
+
+## D-057 Edinburgh's works from the Scottish Road Works Register
+
+**Decided.** 2026-10-05 (DATA-02, ported from the overnight build, PR #36, by hand). Source: [DATA_SURVEY_UK §2 #1](DATA_SURVEY_UK.md). Supersedes the Scotland part of D-027 ("Scotland's register has no open feed"; the overnight build numbered it D-026). Code: `srwrObservations` and `worksStates` in `packages/live/src/works.ts`, `scripts/build-srwr.ts`, `scripts/srwr-extract.py`.
+
+The register's daily disruptions export (OGL v3, no key) is Edinburgh's works source. `pnpm build:srwr` downloads it once (it redirects to a dated zip), keeps City of Edinburgh rows in the area, and writes `data/live/edinburgh-central.works.json` in the same shape as Street Manager's file. The router and the worker use it with no new code path. The weekly data refresh runs it.
+
+What is kept, each as works on the pavement (counted as unknown) unless the register says the footway is closed:
+- works entirely on the footway;
+- road closures whose words mention the footway, pavement or pedestrians;
+- street café permits, picked by licence type, because they are coded "No Obstruction On C/W Or F/W";
+- scaffolding, hoardings, cabins, skips, materials and building sites on the footway;
+- public events on the footway.
+
+**Our own words only.** Each entry says what it is in our words and the street ("Café tables on the pavement on Grassmarket until 2026-12-30", "Road closed, works on the pavement on North Bridge"). The register's description, its location text and the promoter are read for the closure words and never shown or stored: they name businesses (every café permit is the café's name), addresses and permit numbers. The same rule as Street Manager activities (D-053).
+
+**Conservative calls.**
+- Café tables narrow the pavement; they never close it.
+- A closure is read only from plain words, with the same denial check as TfL's comments (`saysClosed`): "footway closed", "footway closure", "including footpaths", "footpath diversion", "closed to pedestrians". "Full width" and "C/Way & F/Way" say where the works are, not that people are shut out, so they count as works on the pavement. North Bridge, a road closure since 2018 with "full width, footways and carriageway", is the case in point: Richard confirmed on 2026-10-05 that North Bridge is passable on foot. It stays as works on the pavement (unknown), not closed.
+- Early notices are left out: "Potential", and "Advance Planning", the months-ahead notice of major works without firm dates. In the export of 2026-10-05 the area has 360 Advance Planning rows; 259 are the council's "Find and Fix" pavement repairs, one entry per street, each covering the full length of the street from 15 October 2026 to June 2027, though each street's repair takes days. Counted, they made every one of the 65 acceptance journey and preset pairs unsure from 15 October (17 fit today without works). The works come back with firm dates as "Proposed" before they start, and the weekly build picks them up.
+- Short jobs stay in. 69 of the 456 entries last a day or less. Leaving them out changed no verdict on the acceptance journeys on 10, 20 October or 1 November, so there is nothing to gain from dropping real works.
+- Anything starting more than five weeks after the build is left out; the next weekly build picks it up.
+- Multi-part shapes are split into their parts, so works in two places never join up across the streets between them. The app counts each works once.
+- The export date comes from the redirect's file name. No date, no build: never the build day in its place.
+
+**What it found** (export of 2026-10-05). 999 rows of the kinds above in the area; 456 entries kept: 307 café footprints, 63 events, 41 road closures with works on the pavement, 31 works on the pavement, 7 building sites, 3 scaffolds, a hoarding, a site cabin, and 2 closing the pavement (both one cycle track, Warriston to Powderhall). On the 65 acceptance pairs (`EDINBURGH_CENTRAL_JOURNEYS`, all 13 presets, dry, midday), 17 fit with no works and 11 with them: the 6 that change are walking (4) and visual impairment (2), past café tables on Grassmarket, West Bow, Cockburn Street, the High Street and Hope Park Terrace, or over North Bridge. In the built app (Playwright at phone size, walking and visual impairment, Waverley to the Grassmarket, St Giles' to Victoria Street, the Grassmarket and Causewayside to the museum), every route already says Unsure without works, from unmapped stretches and entrances. With the file, unknown metres rise by up to 160 m, mostly café tables; with the advance notices counted, as on 16 October, by a further 110 to 260 m.
+
+**Speed.** Matching works to edges now uses a grid of pavement edge middles, so each works looks only at edges near it. On the Edinburgh graph with this file it takes 77 ms instead of 1.5 s, with the same states (checked on all three cities). The file is 27 KB compressed; Edinburgh's data beside the graph comes to 155 KB of the 400 KB budget (D-056).
+
+**Still open.** The register is daily but the refresh is weekly, so new works can be up to a week late (OPEN_ITEMS).

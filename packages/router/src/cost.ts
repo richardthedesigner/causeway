@@ -251,7 +251,8 @@ function evaluateEdgeBase(e: GraphEdge, forward: boolean, p: Profile, c: Conditi
     const applies = e.live.affects !== "step-free" || needsStepFree(p);
     if (applies && e.live.status === "closed") return exclude("live", e.live.affects === "step-free" ? `lift out of service: ${e.live.reason}` : `closed: ${e.live.reason}`);
     if (applies && (e.live.status === "restricted" || e.live.status === "degraded")) {
-      reasons.push({ kind: "unknown", attr: "live", detail: `${e.live.status}: ${e.live.reason}`, seconds: 0 });
+      // A works reason in our own words already says what it is ("Scaffolding on the pavement on ..."); others name the status.
+      reasons.push({ kind: "unknown", attr: "live", detail: e.live.headline ? e.live.reason : `${e.live.status}: ${e.live.reason}`, seconds: 0 });
       unknownCritical = true;
     }
   }

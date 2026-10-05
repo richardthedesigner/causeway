@@ -42,7 +42,7 @@ let osmNotes: OsmNotesFile | null = null;
 /** Works from the area's built file and from live feeds, kept apart so a refresh replaces only its own. */
 let fileWorks: { works: WorksObservation[]; source: string; builtAt: string } | null = null;
 let liveWorks: { works: WorksObservation[]; fetchedAt: string } | null = null;
-const WORKS_SOURCES = ["Street Manager", "TfL road disruptions"];
+const WORKS_SOURCES = ["Street Manager", "TfL road disruptions", "Scottish Road Works Register"];
 
 function applyWorks() {
   if (!graph) return;
@@ -50,14 +50,16 @@ function applyWorks() {
   const now = new Date();
   applyEdgeStates(graph, worksStates(all, graph.edges, now), WORKS_SOURCES);
   const t = now.getTime();
+  // One works in several parts ("ref#0", "ref#1") counts once.
+  const once = (ws: WorksObservation[]) => new Set(ws.map((w) => w.id.split("#")[0])).size;
   const current = all.filter((w) => Date.parse(w.start) <= t && Date.parse(w.end) > t);
   const sources = [fileWorks ? fileWorks.source : null, liveWorks ? "TfL road disruptions (live)" : null].filter((s): s is string => !!s);
   post({
     type: "works",
     summary: {
-      closedNow: current.filter((w) => w.footway === "closed").length,
-      affectedNow: current.filter((w) => w.footway === "affected").length,
-      upcoming: all.filter((w) => Date.parse(w.start) > t).length,
+      closedNow: once(current.filter((w) => w.footway === "closed")),
+      affectedNow: once(current.filter((w) => w.footway === "affected")),
+      upcoming: once(all.filter((w) => Date.parse(w.start) > t)),
       sources,
       asOf: liveWorks?.fetchedAt ?? fileWorks?.builtAt ?? now.toISOString(),
     },

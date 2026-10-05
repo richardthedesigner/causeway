@@ -171,6 +171,8 @@ export interface LiveState {
    * can't use stairs or escalators; absent means everyone.
    */
   affects?: "step-free";
+  /** Short plain words for lists, in our own words: "Café tables on the pavement". */
+  headline?: string;
   reason: string;
   source: string;
   /** ISO 8601. Live states always expire; nothing stays closed forever by accident. */
