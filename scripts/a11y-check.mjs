@@ -8,7 +8,7 @@
  * And the other screens at the same size: start with "This trip", search,
  * a route with every section open, the note sheet, navigation and the report
  * sheet. Nothing runs off the side, and in navigation the next instruction and
- * the journey panel don't cover each other (STAB-12).
+ * the journey panel don't cover each other (STAB-12). Your data is checked too (SEC-06).
  *   pnpm web:build && pnpm a11y
  * Exits 1 on any violation, or anything the Content Security Policy blocks. Runs in CI (.github/workflows/ci.yml).
  */
@@ -39,6 +39,15 @@ for (const scheme of ["light", "dark"]) {
   await page.getByPlaceholder("Where to?").waitFor({ timeout: 60_000 });
   await page.waitForTimeout(1500);
   await check("start");
+
+  // Your data (SEC-06), at the point of deleting.
+  await page.getByPlaceholder("Where to?").focus();
+  await page.getByRole("button", { name: "Your data", exact: true }).click();
+  await page.getByRole("dialog", { name: "Your data" }).waitFor();
+  await page.getByRole("button", { name: "Delete everything" }).click();
+  await check("your data, deleting");
+  await page.keyboard.press("Escape");
+  await page.getByPlaceholder("Where to?").blur();
 
   await page.getByRole("button", { name: "Accessible toilets" }).click();
   await page.getByRole("option").first().waitFor();
@@ -146,6 +155,11 @@ for (const scheme of ["light", "dark"]) {
     for (const p of problems) failures.push(`200% text / ${name} / ${p}`);
   };
   await reflow("start, with This trip");
+  await page.getByRole("button", { name: "Your data", exact: true }).click();
+  await page.getByRole("dialog", { name: "Your data" }).waitFor();
+  await page.getByRole("button", { name: "Delete everything" }).click();
+  await reflow("your data, deleting");
+  await page.keyboard.press("Escape");
   await page.getByPlaceholder("Where to?").fill("Hamilton Place");
   await page.getByRole("option").first().waitFor({ timeout: 30_000 });
   await reflow("search");

@@ -290,6 +290,8 @@ Update (DATA-11): the street graphs join the weekly refresh. They read the same 
 
 **Known limit:** pull requests opened with the workflow token don't trigger CI themselves; the workflow runs the tests before opening one.
 
+Update (STAB-06, 2026-10-05): each row of the count table has a limit on how far it may fall (graph edges 5%, places 10%, stops and park gates 20%, flood paths and Toilet Map toilets 30%; works and OSM notes none, as they come and go). Past a limit, or a file that had counts and vanished, the pull request opens as a draft that lists the drops and says not to merge, and the run fails. The refresh also fetches UK bank holidays (D-039).
+
 ## D-034 Powered devices in four classes, and saved named devices
 
 **Decided.** 2026-10-04, from tester feedback. Plan and UI spec: [plans/DEVICES.md](plans/DEVICES.md).
@@ -384,6 +386,8 @@ The visual-impairment preset sets 60 s per 100 m; anyone can turn it on with "Af
 **Honesty.** Anything we can't read fully (months, sunrise, comments, "open end") shows the hours as mapped, never a guess. We don't know bank holidays, so a rule for them adds "(may differ on bank holidays)". Hours are volunteer-mapped and can be stale; the line says they're from OpenStreetMap.
 
 **Later.** With a departure time (not built yet), "when you arrive" should use it.
+
+Update (SMALL-01, 2026-10-05): bank holidays. GOV.UK's dates (OGL) for England and Wales and for Scotland are bundled with the app and refreshed weekly; each city names its nation. On a bank holiday a place's `PH` rule applies ("Open until 16:00 (Christmas Day)", or closed until the next working day). A place without one says "may differ today: Christmas Day" on that day only, not every day. Past GOV.UK's published dates the old general warning returns.
 
 ## D-040 Leaving later
 
@@ -492,3 +496,15 @@ When there is nothing to compare with, it builds. Once DEP-01 makes `main` the p
 - MapLibre 6 types its events, so the map's own "refresh" event became a ref holding the latest draw function.
 - **PostCSS**: a pnpm override (`next>postcss`) lifts Next's copy to 8.5.28. Next only uses it at build time. Drop the override when Next's own pin passes 8.5.23.
 - The local check server serves `.mjs` as JavaScript, as Vercel does; a module worker is refused otherwise.
+
+## D-051 Time limits on live feeds
+
+**Decided.** 2026-10-05 (STAB-05). Every live feed (TfL lifts, line and station disruptions, street works and arrivals, Environment Agency floods, Open-Meteo, postcodes.io, Photon) goes through one helper, `getJson` in `packages/live`, which gives up after 10 seconds, body included, with an error that names the feed. A hung feed then fails like any other, and each caller's fallback takes over: the last live states until they expire, dry weather, local search results only. A newer request still cancels an older one.
+
+## D-052 Your data: a copy, and delete everything
+
+**Decided.** 2026-10-05 (SEC-06, UK GDPR). "Your data", under the trip settings, says what's kept on the phone, gives a copy as one JSON file, and deletes everything in one step.
+- **The copy** holds every `causewayside.` key on the phone, backups included. The sign-in tokens are left out: they're credentials, not information about the person.
+- **Delete everything** first removes what was shared, by the anonymous id the server knows (photos in the private bucket, flags, reports, notes), then every `causewayside.` key on the phone, then starts the app afresh. If the server can't be reached, nothing is deleted on the phone either, because the sign-in there is the only key to the shared data. It says so and offers to try again.
+- **Database:** migration `0006_my_data.sql` lets people read back and delete their own reports and flags, and read and delete their own photos. `db/test/my-data.test.sql` checks someone can delete all of theirs and nobody else's.
+- **Not covered:** a photo a reviewer approved is copied to the public bucket. Deleting the note hides it, but the copy stays until a reviewer removes it (OPEN_ITEMS).

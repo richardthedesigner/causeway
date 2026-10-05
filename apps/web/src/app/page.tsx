@@ -16,6 +16,7 @@ import { PlaceIcon, PlaceSearch } from "@/components/PlaceSearch";
 import { ReportSheet } from "@/components/ReportSheet";
 import { RoutePanel } from "@/components/RoutePanel";
 import { TripSettings } from "@/components/TripSettings";
+import { MyDataSheet } from "@/components/MyDataSheet";
 import { VerdictPill } from "@/components/RouteStrip";
 import { Button } from "@/components/ui/button";
 import { CommandGroup, CommandItem } from "@/components/ui/command";
@@ -57,6 +58,7 @@ const SNAP = { peek: 0.24, half: 0.52, full: 0.94 };
  */
 export default function Home() {
   const [city, setCity] = useState<City>(CITIES[0]!);
+  const [dataOpen, setDataOpen] = useState(false);
   // Opening hours everywhere follow this city's bank holidays; set before anything below reads them (idempotent).
   setBankHolidays(city.holidays);
   useEffect(() => {
@@ -414,6 +416,9 @@ export default function Home() {
             leaveAt={leaveAt}
             onLeave={setLeaveAt}
           />
+          <button type="button" onClick={() => setDataOpen(true)} className="min-h-11 justify-self-start px-1 text-sm font-bold text-accent underline underline-offset-4">
+            Your data
+          </button>
         </div>
       ) : view === "from" ? (
         <div className="grid gap-3 [&>*]:min-w-0">
@@ -619,6 +624,7 @@ export default function Home() {
         }
       />
       <NoteSheet choices={noteChoices} onOpenChange={(v) => !v && setNoteChoices(null)} city={city.id} preset={profile.preset} sharing={shared.sharing !== "off"} onSaved={shared.saved} />
+      <MyDataSheet open={dataOpen} onOpenChange={setDataOpen} />
       <ReportSheet open={reportAt !== null} onOpenChange={(v) => !v && setReportAt(null)} where={reportAt} city={city.id} sharing={shared.sharing !== "off"} onSaved={shared.saved} />
     </main>
   );

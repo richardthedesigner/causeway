@@ -9,7 +9,7 @@ psql -q -v ON_ERROR_STOP=1 -c "drop database if exists $DB" -c "create database 
 for f in db/test/supabase-stub.sql db/migrations/*.sql; do
   psql -q -v ON_ERROR_STOP=1 -d "$DB" -f "$f"
 done
-for t in db/test/sharing.test.sql db/test/review.test.sql; do
+for t in db/test/sharing.test.sql db/test/review.test.sql db/test/my-data.test.sql; do
   psql -q -v ON_ERROR_STOP=1 -d "$DB" -f "$t" 2>&1 | grep -E "ok:|FAILED|ERROR"
 done
 echo "Database rules: all checks passed."

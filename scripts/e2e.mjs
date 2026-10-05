@@ -6,7 +6,8 @@
  * preview's half-second tick so the walk takes seconds, not minutes.
  *   pnpm web:build && pnpm e2e
  * Then one journey through the rest of the trip (STAB-10): set up two devices
- * and switch between them, leave later, and add a note. Every request any
+ * and switch between them, leave later, add a note, then download a copy of
+ * your data and delete it all (SEC-06). Every request any
  * journey makes is checked for the profile (SEC-05, D-009): the device's name,
  * its type and its limits must never leave the phone.
  * Exits 1 on any failed step, page error, profile leak, or anything the Content
@@ -85,7 +86,7 @@ for (const j of JOURNEYS) {
     });
     await step("arrive", async () => {
       const arrived = page.getByRole("region", { name: "Next instruction" }).getByText(/arrived/);
-      await arrived.waitFor({ timeout: 120_000 }).catch(async () => {
+      await arrived.waitFor({ timeout: Number(process.env.E2E_ARRIVE_MS ?? 120_000) }).catch(async () => {
         throw new Error(`never arrived: ${await page.getByRole("region", { name: "Next instruction" }).innerText()}`);
       });
     });
@@ -103,7 +104,7 @@ for (const j of JOURNEYS) {
 
 // The rest of the trip (STAB-10), in Edinburgh.
 {
-  const name = "edinburgh: devices, leaving later and a note";
+  const name = "edinburgh: devices, leaving later, a note, and your data";
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const page = await context.newPage();
   const problems = [];
@@ -190,6 +191,37 @@ for (const j of JOURNEYS) {
       const stored = await page.evaluate(() => Object.entries(localStorage).filter(([k]) => k.includes("note")).map(([, v]) => v).join(" "));
       if (!stored.includes("Kerb dropped on one side only.")) throw new Error("note not stored");
       for (const m of PROFILE_MARKERS.slice(2)) if (stored.includes(m)) throw new Error(`note holds "${m}"`);
+    });
+    // SEC-06: one place for everything about you.
+    const yourData = async () => {
+      await page.goto(server.url);
+      await page.getByPlaceholder("Where to?").waitFor({ timeout: 60_000 });
+      await page.getByPlaceholder("Where to?").focus();
+      const link = page.getByRole("button", { name: "Your data", exact: true });
+      await link.scrollIntoViewIfNeeded();
+      await link.click();
+      await page.getByRole("dialog", { name: "Your data" }).waitFor();
+    };
+    await step("download a copy of your data", async () => {
+      await yourData();
+      const download = page.waitForEvent("download");
+      await page.getByRole("button", { name: "Download a copy" }).click();
+      const text = await (await download).createReadStream().then(async (s) => {
+        let out = "";
+        for await (const chunk of s) out += chunk;
+        return out;
+      });
+      for (const want of [DEVICE, "Kerb dropped on one side only."]) if (!text.includes(want)) throw new Error(`the copy lacks "${want}"`);
+      if (/access_token/.test(text)) throw new Error("the copy holds a sign-in token");
+    });
+    await step("delete everything, and start afresh", async () => {
+      await page.getByRole("button", { name: "Delete everything" }).click();
+      await page.getByRole("button", { name: "Yes, delete everything" }).click();
+      await page.getByText("Deleted.").waitFor();
+      await page.getByRole("button", { name: "Close and start afresh" }).click();
+      await page.getByRole("button", { name: "Set up how you get around" }).first().waitFor({ timeout: 60_000 });
+      const left = await page.evaluate(() => Object.keys(localStorage).filter((k) => /devices|notes|reports|recents/.test(k)));
+      if (left.length) throw new Error(`still stored: ${left.join(", ")}`);
     });
   } catch (e) {
     if (process.env.E2E_SHOT) await page.screenshot({ path: process.env.E2E_SHOT });

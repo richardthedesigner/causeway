@@ -129,6 +129,36 @@ export async function fetchSharedNotes(city: string, deviceAuthor: string): Prom
   return rows.map((row) => fromPublicRow(row, deviceAuthor, photo)).filter((n): n is UserNote => n !== null);
 }
 
+/**
+ * Delete everything this phone has shared (SEC-06): photos, flags, reports and notes, by
+ * the anonymous id the server knows it by. "none" when nothing was ever shared from here.
+ * "failed" leaves the session in place so it can be tried again; the id is the only key.
+ */
+export async function deleteEverythingShared(): Promise<"none" | "done" | "failed"> {
+  const stored = loadSession();
+  if (!sharing || !stored) return "none";
+  try {
+    const s = await session();
+    // A refresh that failed starts a new id, which owns nothing: the old one can't be reached.
+    if (s.user.id !== stored.user.id) return "failed";
+    const id = s.user.id;
+    const headers = { apikey: KEY, authorization: `Bearer ${s.access_token}`, "content-type": "application/json" };
+    const list = await fetch(`${URL_}/storage/v1/object/list/${PHOTO_BUCKET}`, { method: "POST", headers, body: JSON.stringify({ prefix: id, limit: 1000 }) });
+    if (!list.ok) return "failed";
+    const files = (await list.json()) as { name: string }[];
+    if (files.length) {
+      const del = await fetch(`${URL_}/storage/v1/object/${PHOTO_BUCKET}`, { method: "DELETE", headers, body: JSON.stringify({ prefixes: files.map((f) => `${id}/${f.name}`) }) });
+      if (!del.ok) return "failed";
+    }
+    for (const q of [`note_flag?flagger_id=eq.${id}`, `report?author_id=eq.${id}`, `note?author_id=eq.${id}`]) {
+      if (!(await rest(`/rest/v1/${q}`, { method: "DELETE" })).ok) return "failed";
+    }
+    return "done";
+  } catch {
+    return "failed";
+  }
+}
+
 /** Send a problem report for triage. Reports are never shown publicly. */
 export async function pushReport(rep: Report): Promise<boolean> {
   if (!sharing) return false;
