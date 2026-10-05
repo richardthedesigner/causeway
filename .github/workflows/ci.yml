@@ -25,6 +25,8 @@ jobs:
       # Known high or critical holes in any dependency fail the build (SEC-04).
       - run: pnpm audit --audit-level high
       - run: pnpm typecheck
+      # Unused files, exports and dependencies (BLOAT-02). knip.json says what the entry points are.
+      - run: pnpm knip
       - run: pnpm test
       - run: pnpm --filter @causeway/web typecheck
       - run: pnpm web:build

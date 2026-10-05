@@ -27,12 +27,18 @@
     "perf:baseline": "tsx scripts/perf-baseline.ts",
     "a11y": "node scripts/a11y-check.mjs",
     "e2e": "node scripts/e2e.mjs",
-    "build:srwr": "tsx scripts/build-srwr.ts"
+    "build:srwr": "tsx scripts/build-srwr.ts",
+    "build:holidays": "tsx scripts/build-bank-holidays.ts",
+    "knip": "knip"
   },
   "devDependencies": {
+    "@causeway/graph": "workspace:*",
+    "@causeway/live": "workspace:*",
+    "@causeway/profile": "workspace:*",
+    "@causeway/router": "workspace:*",
     "@types/node": "^26.6.4",
-    "@types/proj4": "^2.19.0",
     "axe-core": "^4.13.0",
+    "knip": "^6.39.0",
     "playwright": "^1.63.0",
     "tsx": "^4.23.15",
     "typescript": "^5.9.3",

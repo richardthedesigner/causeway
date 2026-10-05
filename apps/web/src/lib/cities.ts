@@ -1,4 +1,5 @@
 import type { Place } from "./plan-types";
+import type { HolidayDivision } from "./opening-hours";
 
 export interface City {
   id: string;
@@ -30,6 +31,8 @@ export interface City {
   ukhsaRegion?: { code: string; name: string };
   /** SEPA's Water of Leith level at Murrayfield (Edinburgh, D-066). */
   riverLevel?: boolean;
+  /** Whose bank holidays apply to opening hours (SMALL-01). */
+  holidays: HolidayDivision;
   liveLifts: boolean;
   weatherAt: [number, number];
   start: Place;
@@ -55,6 +58,7 @@ export const CITIES: City[] = [
     osmNotes: "places/edinburgh-central.osm-notes.json",
     toiletMap: "places/edinburgh-central.toiletmap.json",
     riverLevel: true,
+    holidays: "scotland",
     liveLifts: false,
     weatherAt: [55.9486, -3.1999],
     start: { id: "causewayside", name: "Causewayside", kind: "Southside / demo address", lon: -3.1812, lat: 55.9385 },
@@ -82,6 +86,7 @@ export const CITIES: City[] = [
     osmNotes: "places/newcastle-gateshead.osm-notes.json",
     toiletMap: "places/newcastle-gateshead.toiletmap.json",
     ukhsaRegion: { code: "E12000001", name: "North East" },
+    holidays: "england-and-wales",
     liveLifts: false,
     weatherAt: [54.97, -1.607],
     start: { id: "grey-street", name: "Grey Street", kind: "City centre", lon: -1.6123, lat: 54.9722 },
@@ -106,6 +111,7 @@ export const CITIES: City[] = [
     greenspace: "places/london-jubilee.greenspace.json",
     osmNotes: "places/london-jubilee.osm-notes.json",
     toiletMap: "places/london-jubilee.toiletmap.json",
+    holidays: "england-and-wales",
     network: "graph/london-network.json",
     ukhsaRegion: { code: "E12000007", name: "London" },
     liveLifts: true,

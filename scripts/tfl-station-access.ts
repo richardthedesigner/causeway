@@ -10,7 +10,7 @@ import { join } from "node:path";
 import type { PlatformBoarding, StationAccess, StationLineAccess } from "@causeway/graph";
 import { cached, CACHE } from "./sources.js";
 
-export const TFL_STATION_DATA_URL = "https://api.tfl.gov.uk/stationdata/tfl-stationdata-detailed.zip";
+const TFL_STATION_DATA_URL = "https://api.tfl.gov.uk/stationdata/tfl-stationdata-detailed.zip";
 const ZIP = "tfl-stationdata-detailed.zip";
 
 /** RFC 4180 CSV: quoted fields, doubled quotes, commas and newlines inside quotes. */

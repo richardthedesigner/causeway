@@ -74,11 +74,12 @@ jobs:
           pnpm build:footways || echo "::warning::council footways failed"
           pnpm build:floods || echo "::warning::flood areas failed"
         continue-on-error: true
-      - name: Park gates, OSM notes and the Toilet Map
+      - name: Park gates, OSM notes, the Toilet Map and bank holidays
         run: |
           pnpm build:greenspace || echo "::warning::park gates failed"
           pnpm build:osm-notes || echo "::warning::OSM notes failed"
           pnpm build:toilets || echo "::warning::Toilet Map failed"
+          pnpm build:holidays || echo "::warning::bank holidays failed"
         continue-on-error: true
 
       - name: Check the app still works with the new data
@@ -86,11 +87,31 @@ jobs:
           pnpm typecheck
           pnpm test
 
+      # Counts that fell further than their limit (STAB-06): the PR still opens, as a draft that says why, and the run fails.
+      - name: Guard against sudden drops
+        id: guard
+        run: |
+          set +e
+          drops=$(pnpm -s tsx scripts/data-summary.ts --compare origin/main --guard)
+          code=$?
+          { echo 'drops<<EOF'; echo "$drops"; echo 'EOF'; } >> "$GITHUB_OUTPUT"
+          echo "failed=$([ $code -ne 0 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
       - name: Summary
         id: summary
+        # Through the environment, not pasted into the script.
+        env:
+          GUARD_FAILED: ${{ steps.guard.outputs.failed }}
+          GUARD_DROPS: ${{ steps.guard.outputs.drops }}
         run: |
           {
             echo 'body<<EOF'
+            if [ "$GUARD_FAILED" = "true" ]; then
+              echo '**Do not merge yet.** These counts fell further than their limit in `scripts/data-summary.ts`. A feed was probably down or a build failed:'
+              echo
+              echo "$GUARD_DROPS"
+              echo
+            fi
             echo 'Weekly data refresh. Counts now, with the change since `main`:'
             echo
             pnpm -s tsx scripts/data-summary.ts --compare origin/main
@@ -103,6 +124,7 @@ jobs:
         with:
           branch: data-refresh
           base: main
+          draft: ${{ steps.guard.outputs.failed == 'true' }}
           title: "Data refresh: graphs, timetables, works, places and layers"
           commit-message: "Refresh street graphs, timetables, pavement works, the search index and the layers on them"
           body: ${{ steps.summary.outputs.body }}
@@ -118,4 +140,11 @@ jobs:
             data/snapshots/newcastle-gateshead.graph.json.gz
             data/snapshots/london-jubilee.graph.json.gz
             data/council/*.json
+            apps/web/src/lib/bank-holidays.json
           delete-branch: true
+
+      - name: Fail on sudden drops
+        if: steps.guard.outputs.failed == 'true'
+        run: |
+          echo "::error::Counts fell further than their limit. See the data-refresh pull request."
+          exit 1

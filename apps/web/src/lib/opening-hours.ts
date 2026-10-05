@@ -3,15 +3,29 @@
  * Sa 10:00-16:00; Su off", "24/7", "Mo-Su 11:00-01:00") and say whether a place
  * is open at a given time, in UK local time. Anything we can't read fully
  * (months, sunrise, comments, "open end") gives null: we say the hours as
- * mapped rather than guess. Public holidays are unknown to us, so rules for
- * them are skipped and the result says the hours may differ.
+ * mapped rather than guess. Bank holidays come from GOV.UK for the city's
+ * nation (SMALL-01): on one, a "PH" rule's hours apply, and a place with no
+ * such rule says its hours may differ that day. Past the dates we have, or
+ * before a city is set, any "PH" rule just adds "may differ on bank holidays".
  */
+import BANK_HOLIDAYS from "./bank-holidays.json";
 
 /** Minutes from midnight, per weekday (0 = Monday). An end past 1440 runs into the next day. */
 export interface Hours {
   days: [number, number][][];
-  /** A rule for public holidays was skipped. */
+  /** The place has a rule for public holidays. */
   holidays: boolean;
+  /** Its hours on a public holiday, from that rule; null without one. */
+  ph: [number, number][] | null;
+}
+
+export type HolidayDivision = keyof typeof BANK_HOLIDAYS.divisions;
+let bankHolidays: Record<string, string> | null = null;
+let lastKnown = "";
+/** Which nation's bank holidays apply: the city's. Call when the city changes. */
+export function setBankHolidays(division: HolidayDivision | null) {
+  bankHolidays = division ? BANK_HOLIDAYS.divisions[division] : null;
+  lastKnown = bankHolidays ? Object.keys(bankHolidays).sort().pop()! : "";
 }
 
 const DAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
@@ -56,9 +70,10 @@ export function parseHours(raw: string | undefined): Hours | null {
   if (!raw) return null;
   const s = raw.trim();
   const all = (): [number, number][][] => DAYS.map(() => [[0, 24 * 60]]);
-  if (s === "24/7") return { days: all(), holidays: false };
+  if (s === "24/7") return { days: all(), holidays: false, ph: null };
   const days: [number, number][][] = DAYS.map(() => []);
   let holidays = false;
+  let ph: [number, number][] | null = null;
   // ";" starts a rule that replaces earlier ones for its days; "," after a time or "off" adds one.
   for (const rule of s.split(/\s*;\s*/)) {
     for (const [n, part] of rule.split(/(?<=\d|off|closed)\s*,\s*(?=[A-Z])/).entries()) {
@@ -71,20 +86,26 @@ export function parseHours(raw: string | undefined): Hours | null {
       const closed = rest === "off" || rest === "closed";
       const times = closed ? [] : rest === "" && m[1] ? [[0, 24 * 60] as [number, number]] : spans(rest);
       if (!times) return null;
-      if (sel.ph) holidays = true;
+      if (sel.ph) {
+        holidays = true;
+        ph = n === 0 || !ph ? [...times] : [...ph, ...times];
+      }
       for (const d of sel.days) days[d] = n === 0 ? [...times] : [...days[d]!, ...times];
     }
   }
-  return { days, holidays };
+  return { days, holidays, ph };
 }
 
-const UK = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", weekday: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
+const UK = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", weekday: "short", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
 const WEEKDAY: Record<string, number> = { Mon: 0, Tue: 1, Wed: 2, Thu: 3, Fri: 4, Sat: 5, Sun: 6 };
 
-function ukNow(d: Date): { day: number; min: number } {
+function ukNow(d: Date): { day: number; min: number; date: string } {
   const p = Object.fromEntries(UK.formatToParts(d).map((x) => [x.type, x.value]));
-  return { day: WEEKDAY[p.weekday!]!, min: (Number(p.hour) % 24) * 60 + Number(p.minute) };
+  return { day: WEEKDAY[p.weekday!]!, min: (Number(p.hour) % 24) * 60 + Number(p.minute), date: `${p.year}-${p.month}-${p.day}` };
 }
+
+/** The calendar date k days after a UK date, as YYYY-MM-DD. */
+const addDays = (date: string, k: number) => new Date(Date.parse(`${date}T12:00:00Z`) + k * 86_400_000).toISOString().slice(0, 10);
 
 const hhmm = (m: number) => `${String(Math.floor((m % 1440) / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
 
@@ -96,10 +117,13 @@ export interface HoursStatus {
 
 /** Open or closed at this time, and the next change. */
 export function hoursAt(h: Hours, when: Date): HoursStatus {
-  const { day, min } = ukNow(when);
+  const { day, min, date } = ukNow(when);
+  const known = !!bankHolidays && addDays(date, 7) <= lastKnown;
+  const holiday = (k: number) => (known ? bankHolidays![addDays(date, k)] : undefined);
   // Spans from yesterday to a week ahead on one timeline (minutes from today's midnight), merged where they touch.
+  // On a bank holiday the place's holiday rule applies, if it has one.
   const line: [number, number][] = [];
-  for (let k = -1; k <= 7; k++) for (const [a, b] of h.days[(day + k + 7) % 7]!) line.push([k * 1440 + a, k * 1440 + b]);
+  for (let k = -1; k <= 7; k++) for (const [a, b] of (holiday(k) && h.ph) || h.days[(day + k + 7) % 7]!) line.push([k * 1440 + a, k * 1440 + b]);
   line.sort((x, y) => x[0] - y[0]);
   const merged: [number, number][] = [];
   for (const [a, b] of line) {
@@ -107,7 +131,9 @@ export function hoursAt(h: Hours, when: Date): HoursStatus {
     if (last && a <= last[1]) last[1] = Math.max(last[1], b);
     else merged.push([a, b]);
   }
-  const note = h.holidays ? " (may differ on bank holidays)" : "";
+  // Without dates, a holiday rule might apply any day. With them, say so only on the day.
+  const today = holiday(0);
+  const note = !known ? (h.holidays ? " (may differ on bank holidays)" : "") : today ? (h.ph ? ` (${today})` : ` (may differ today: ${today})`) : "";
   const now = merged.find(([a, b]) => a <= min && min < b);
   if (now) {
     const left = now[1] - min;

@@ -5,6 +5,9 @@ import { useEffect, useRef, useState } from "react";
 import { RouteStrip } from "@/components/RouteStrip";
 import { Button } from "@/components/ui/button";
 import type { PlannedRoute } from "@/lib/plan-types";
+import { NoSignal } from "@/components/NoSignal";
+import { useOnline } from "@/lib/use-online";
+import { loadSpeak, saveSpeak, shouldSpeak, SPEAK_LABEL, SPEAK_NEXT, type SpeakMode } from "@/lib/speak";
 
 
 export interface Me {
@@ -41,14 +44,20 @@ const AHEAD_M = 300;
  * (before you reach it, not at it), and the route strip with you on it at
  * the bottom. Live location where the device allows it; otherwise a preview
  * that moves along the route. Instructions are also in a live region for
- * screen readers; speech is opt-in so it never talks over one.
+ * screen readers; speech is opt-in so it never talks over one, and can be
+ * hazards only (SMALL-03).
  */
 export function NavView({ route, speedMps, roadSpeedMps, onEnd, onOffRoute, onPosition, onReport, onNote, onPace, device }: Props) {
+  const online = useOnline();
   const [asking, setAsking] = useState(false);
   const nav = useRef(new Navigator(route.nav));
   const [p, setP] = useState<Progress | null>(null);
   const [mode, setMode] = useState<"locating" | "live" | "preview">("locating");
-  const [speak, setSpeak] = useState(false);
+  const [speak, setSpeakState] = useState<SpeakMode>(loadSpeak);
+  const setSpeak = (m: SpeakMode) => {
+    setSpeakState(m);
+    saveSpeak(m);
+  };
   const [said, setSaid] = useState<string>("");
   const me = useRef<Me | null>(null);
   const offSent = useRef(false);
@@ -80,7 +89,7 @@ export function NavView({ route, speedMps, roadSpeedMps, onEnd, onOffRoute, onPo
     }
     if (pr.announce) {
       setSaid(pr.announce);
-      if (speak && "speechSynthesis" in window) {
+      if (shouldSpeak(speak, pr.announceKind) && "speechSynthesis" in window) {
         const u = new SpeechSynthesisUtterance(pr.announce);
         u.lang = "en-GB";
         speechSynthesis.cancel();
@@ -187,6 +196,7 @@ export function NavView({ route, speedMps, roadSpeedMps, onEnd, onOffRoute, onPo
 
       <section aria-label="Journey progress" className="absolute inset-x-0 bottom-0 z-30 grid max-h-[50dvh] grid-cols-1 gap-3 overflow-y-auto rounded-t-[var(--radius)] border-t border-line bg-surface px-4 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] shadow-[0_-8px_40px_rgb(0_0_0/0.18)] md:bottom-4 md:left-4 md:w-[440px] md:rounded-[var(--radius)] md:border">
         <RouteStrip strip={route.strip} along={along} />
+        {!online ? <NoSignal compact /> : null}
         {mode !== "live" ? (
           <p className="m-0 text-sm text-muted">{mode === "locating" ? "Finding your location…" : "Preview: moving along the route for you. Live location isn't available here."}</p>
         ) : null}
@@ -248,8 +258,8 @@ export function NavView({ route, speedMps, roadSpeedMps, onEnd, onOffRoute, onPo
         </div>
         {/* Three across, or fewer when large text needs the room (STAB-12). */}
         <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,7.5rem),1fr))] gap-2">
-          <Button aria-pressed={speak} onClick={() => setSpeak((v) => !v)} className={speak ? "rounded-2xl border-ink bg-ink px-2 text-surface" : "rounded-2xl px-2"}>
-            {speak ? <Volume2 aria-hidden className="size-5 shrink-0" /> : <VolumeX aria-hidden className="size-5 shrink-0" />} Speak
+          <Button onClick={() => setSpeak(SPEAK_NEXT[speak])} aria-label={`Speaking: ${SPEAK_LABEL[speak]}. Change`} className={speak !== "off" ? "rounded-2xl border-ink bg-ink px-2 text-surface" : "rounded-2xl px-2"}>
+            {speak !== "off" ? <Volume2 aria-hidden className="size-5 shrink-0" /> : <VolumeX aria-hidden className="size-5 shrink-0" />} {SPEAK_LABEL[speak]}
           </Button>
           <Button onClick={() => onNote(me.current)} aria-label="Add a note about where you are" className="rounded-2xl px-2">
             <MessageSquarePlus aria-hidden className="size-5 shrink-0" /> Note

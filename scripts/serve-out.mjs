@@ -14,7 +14,7 @@ const OUT = join(WEB, "out");
 const TYPES = { ".html": "text/html", ".js": "text/javascript", ".mjs": "text/javascript", ".css": "text/css", ".json": "application/json", ".gz": "application/gzip", ".pmtiles": "application/octet-stream", ".webmanifest": "application/manifest+json" };
 
 /** Headers from vercel.json rules that apply to every path ("/(.*)"). */
-export function vercelHeaders() {
+function vercelHeaders() {
   const config = JSON.parse(readFileSync(join(WEB, "vercel.json"), "utf8"));
   const out = {};
   for (const rule of config.headers ?? []) if (rule.source === "/(.*)") for (const h of rule.headers) out[h.key] = h.value;

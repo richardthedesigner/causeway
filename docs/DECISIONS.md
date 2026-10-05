@@ -294,6 +294,8 @@ Update (DATA-11): the street graphs join the weekly refresh. They read the same 
 
 **Known limit:** pull requests opened with the workflow token don't trigger CI themselves; the workflow runs the tests before opening one.
 
+Update (STAB-06, 2026-10-05): each row of the count table has a limit on how far it may fall (graph edges 5%, places 10%, stops and park gates 20%, flood paths and Toilet Map toilets 30%; works and OSM notes none, as they come and go). Past a limit, or a file that had counts and vanished, the pull request opens as a draft that lists the drops and says not to merge, and the run fails. The refresh also fetches UK bank holidays (D-039).
+
 ## D-034 Powered devices in four classes, and saved named devices
 
 **Decided.** 2026-10-04, from tester feedback. Plan and UI spec: [plans/DEVICES.md](plans/DEVICES.md).
@@ -388,6 +390,8 @@ The visual-impairment preset sets 60 s per 100 m; anyone can turn it on with "Af
 **Honesty.** Anything we can't read fully (months, sunrise, comments, "open end") shows the hours as mapped, never a guess. We don't know bank holidays, so a rule for them adds "(may differ on bank holidays)". Hours are volunteer-mapped and can be stale; the line says they're from OpenStreetMap.
 
 **Later.** With a departure time (not built yet), "when you arrive" should use it.
+
+Update (SMALL-01, 2026-10-05): bank holidays. GOV.UK's dates (OGL) for England and Wales and for Scotland are bundled with the app and refreshed weekly; each city names its nation. On a bank holiday a place's `PH` rule applies ("Open until 16:00 (Christmas Day)", or closed until the next working day). A place without one says "may differ today: Christmas Day" on that day only, not every day. Past GOV.UK's published dates the old general warning returns.
 
 ## D-040 Leaving later
 
@@ -512,6 +516,8 @@ Update (D-065): where OSM and the Toilet Map disagree on access, the first fact 
 - **PostCSS**: a pnpm override (`next>postcss`) lifts Next's copy to 8.5.28. Next only uses it at build time. Drop the override when Next's own pin passes 8.5.23.
 - The local check server serves `.mjs` as JavaScript, as Vercel does; a module worker is refused otherwise.
 
+Update (BLOAT-02, 2026-10-05): CI also runs `pnpm knip` for unused files, exports and dependencies. `knip.json` names the entry points it can't see (build scripts, the service worker). knip 6, not 5: 5 depends on a `braces` with a high advisory and no fix, which the audit would fail.
+
 ## D-051 Road scooters go at road speed on roads
 
 **Decided.** 2026-10-05. Tester feedback: a road scooter (class 3) does 8 mph on the road but 4 mph on pavements, and the router used one pace for both.
@@ -603,7 +609,6 @@ Update (D-065): where OSM and the Toilet Map disagree on access, the first fact 
 - Live data (works, floods, lifts, disruptions) is left out of the timed graph, so the figures don't depend on the day the test runs.
 - Settled nodes depend on the graph, so a weekly data refresh that rebuilds a graph can trip the 10% check. Then re-baseline on purpose in that pull request, and say so (SPEED-07).
 
-
 ## D-057 Edinburgh's works from the Scottish Road Works Register
 
 **Decided.** 2026-10-05 (DATA-02, ported from the overnight build, PR #36, by hand). Source: [DATA_SURVEY_UK §2 #1](DATA_SURVEY_UK.md). Supersedes the Scotland part of D-027 ("Scotland's register has no open feed"; the overnight build numbered it D-026). Code: `srwrObservations` and `worksStates` in `packages/live/src/works.ts`, `scripts/build-srwr.ts`, `scripts/srwr-extract.py`.
@@ -654,26 +659,19 @@ TfL's station layout (DATA-03) tells us, for every lift out at a station, which 
 - A line that was already step-free to some platforms only and loses the rest is closed.
 - Outages we can't place from the layout still go by TfL's message and close what it names, as before.
 
-## D-068 Boarding the train against each person's limits
+## D-059 Your data: a copy, and delete everything
 
-**Decided.** 2026-10-05 (DATA-29, ported from the overnight build, PR #36, by hand). Builds on DATA-03. Code: `boardingOf` in `scripts/tfl-station-access.ts`, `PlatformBoarding` in `packages/graph/src/schema.ts`, `applyStationAccess` in `packages/graph/src/transit.ts`, `platformFit` and `boardingReason` in `packages/router/src/cost.ts`, `levelAccessAdvice` in `packages/router/src/boarding.ts`, `describeSegments` and `explain` in `packages/router/src/router.ts`.
+**Decided.** 2026-10-05 (SEC-06, UK GDPR). "Your data", under the trip settings, says what's kept on the phone, gives a copy as one JSON file, and deletes everything in one step.
+- **The copy** holds every `causewayside.` key on the phone, backups included. The sign-in tokens are left out: they're credentials, not information about the person.
+- **Delete everything** first removes what was shared, by the anonymous id the server knows (photos in the private bucket, flags, reports, notes), then every `causewayside.` key on the phone, then starts the app afresh. If the server can't be reached, nothing is deleted on the phone either, because the sign-in there is the only key to the shared data. It says so and offers to try again.
+- **Database:** migration `0006_my_data.sql` lets people read back and delete their own reports and flags, and read and delete their own photos. `db/test/my-data.test.sql` checks someone can delete all of theirs and nobody else's.
+- **Not covered:** a photo a reviewer approved is copied to the public bucket. Deleting the note hides it, but the copy stays until a reviewer removes it (OPEN_ITEMS).
 
-Main read the step and gap from platform to train into words only (the largest across a line's platforms), shown in a board edge's source. TfL publishes them per platform in figures, so we can hold them to each person's limits.
+## D-060 Saved places stay on the phone
 
-- **The data.** For each platform of each line at our 72 stations: the step and the gap in millimetres, smallest and largest along the platform (`MinStep`, `MaxStep`, `MinGap`, `MaxGap`), whether staff put a manual ramp down (`LevelAccessByManualRamp`), where the designated level access is (`LocationOfLevelAccess`, only where `DesignatedLevelAccessPoint` is true), and the direction (`DirectionTowards`, the platform's `FriendlyName`). They sit beside the words in `network.json` (`lines[line].boarding`) and go onto the board edges when the city loads, so a refreshed `network.json` needs no graph rebuild. A figure TfL leaves blank stays blank: **unknown, never level.**
-- **The level band.** TfL counts a step of up to 50 mm and a gap of up to 85 mm as level access (`LEVEL_STEP_MM`, `LEVEL_GAP_MM`). Within it a platform fits everyone.
-- **Beyond it, against the person.** The largest step is held to the kerb they can manage (never less than the band); the largest gap to their gap limit (`maxGapMm` on the profile, the band when unset). A platform that fits somewhere along its length counts when TfL names its level-access doors. Otherwise the staff ramp is the way on, if TfL lists one, at a cost of 3 minutes (`STAFF_RAMP_S`, a guess) and a note: "Kilburn, Jubilee line: board with the staff ramp, so ask staff (TfL station data)." No figures and no ramp: unknown.
-- **All the line's platforms together.** A board edge stands for every platform of its line, and can't tell which way you're going. If every platform is out of reach, the edge closes for that person ("step up to 173 mm, gap up to 100 mm between platform and train"). If some are, or any has no figures, it is unknown and costs what a station we can't confirm costs (15 minutes times (1 minus uncertainty tolerance)), with a note naming the platform.
-- **Only for step-free users.** People who can use stairs or escalators aren't judged on the step to the train.
-- **Doors in the spoken route.** For someone who needs step-free access, a train leg in the non-visual route says where TfL's level-access doors are, picking the platform by the ride's direction: "Take the Jubilee line from Kingsbury to Canons Park, 2 stops. For level access, board at the 2 centre doors on cars 5 and 6." It also says where to be on the train to get off level, when TfL says.
+**Decided.** 2026-10-05 (FEAT-04). Home, work or a friend's address says where someone lives and who they visit. Saved places are kept in this phone's storage only, one list per city, like devices (D-009). They are never shared, synced or sent with a note or report. They show in Your data, go in its copy, and go with "Delete everything". Home comes first, then work, then the rest. Saving a place or a name again replaces the old one.
 
-**What it changes** (feed of 2026-08-03, on the 62 board edges where TfL's layout says the line is step-free to every platform). Westminster, Canary Wharf, Canning Town and North Greenwich's Jubilee platforms are within the band: no change. Three need the staff ramp for every wheeled preset: Kilburn (step up to 140 mm), Stanmore (147 to 173 mm) and Bond Street, whose southbound platform has no figures but a ramp listed. Finchley Road (step up to 163 mm, ramp listed) has no step-free route from the street, so it stays closed to step-free users before the train comes into it. No edge closes or turns unknown on today's data. The acceptance routes and the speed budget's settled nodes don't change. `network.json` grows from 15 KB to 17 KB compressed.
-
-**Conservative calls.**
-- Blank figures are unknown even though most such platforms sit where trains are level: TfL didn't measure, so we don't say.
-- A location of level access that TfL doesn't mark as designated isn't offered as a door.
-- No setting for the gap limit yet: the band holds for everyone until research says what people want to set (OPEN_ITEMS).
-- Door advice is in the spoken route only; the visual route card shows the ride, not the doors (OPEN_ITEMS).
+**To revisit** if accounts come back (deferred by Richard): syncing them would need consent, like the profile.
 
 ## D-061 When TfL's disruption feeds fail, and when a closure is what's in the way
 
@@ -822,3 +820,24 @@ The app now knows about works, lift outages, line and station disruptions, flood
 - Toilet Map disagreements (D-065) stay in "Accessible toilets", not in the list: they're about stops, not the way.
 - An informational TfL message is listed for routes boarding, leaving or passing through that station's entrances, even when it names a platform the route doesn't use: we don't read which platform. Messages naming only lines we don't route are left out.
 - Station messages are listed for everyone, with no step-free filter: an escalator note matters to people who don't count as step-free.
+
+## D-068 Boarding the train against each person's limits
+
+**Decided.** 2026-10-05 (DATA-29, ported from the overnight build, PR #36, by hand). Builds on DATA-03. Code: `boardingOf` in `scripts/tfl-station-access.ts`, `PlatformBoarding` in `packages/graph/src/schema.ts`, `applyStationAccess` in `packages/graph/src/transit.ts`, `platformFit` and `boardingReason` in `packages/router/src/cost.ts`, `levelAccessAdvice` in `packages/router/src/boarding.ts`, `describeSegments` and `explain` in `packages/router/src/router.ts`.
+
+Main read the step and gap from platform to train into words only (the largest across a line's platforms), shown in a board edge's source. TfL publishes them per platform in figures, so we can hold them to each person's limits.
+
+- **The data.** For each platform of each line at our 72 stations: the step and the gap in millimetres, smallest and largest along the platform (`MinStep`, `MaxStep`, `MinGap`, `MaxGap`), whether staff put a manual ramp down (`LevelAccessByManualRamp`), where the designated level access is (`LocationOfLevelAccess`, only where `DesignatedLevelAccessPoint` is true), and the direction (`DirectionTowards`, the platform's `FriendlyName`). They sit beside the words in `network.json` (`lines[line].boarding`) and go onto the board edges when the city loads, so a refreshed `network.json` needs no graph rebuild. A figure TfL leaves blank stays blank: **unknown, never level.**
+- **The level band.** TfL counts a step of up to 50 mm and a gap of up to 85 mm as level access (`LEVEL_STEP_MM`, `LEVEL_GAP_MM`). Within it a platform fits everyone.
+- **Beyond it, against the person.** The largest step is held to the kerb they can manage (never less than the band); the largest gap to their gap limit (`maxGapMm` on the profile, the band when unset). A platform that fits somewhere along its length counts when TfL names its level-access doors. Otherwise the staff ramp is the way on, if TfL lists one, at a cost of 3 minutes (`STAFF_RAMP_S`, a guess) and a note: "Kilburn, Jubilee line: board with the staff ramp, so ask staff (TfL station data)." No figures and no ramp: unknown.
+- **All the line's platforms together.** A board edge stands for every platform of its line, and can't tell which way you're going. If every platform is out of reach, the edge closes for that person ("step up to 173 mm, gap up to 100 mm between platform and train"). If some are, or any has no figures, it is unknown and costs what a station we can't confirm costs (15 minutes times (1 minus uncertainty tolerance)), with a note naming the platform.
+- **Only for step-free users.** People who can use stairs or escalators aren't judged on the step to the train.
+- **Doors in the spoken route.** For someone who needs step-free access, a train leg in the non-visual route says where TfL's level-access doors are, picking the platform by the ride's direction: "Take the Jubilee line from Kingsbury to Canons Park, 2 stops. For level access, board at the 2 centre doors on cars 5 and 6." It also says where to be on the train to get off level, when TfL says.
+
+**What it changes** (feed of 2026-08-03, on the 62 board edges where TfL's layout says the line is step-free to every platform). Westminster, Canary Wharf, Canning Town and North Greenwich's Jubilee platforms are within the band: no change. Three need the staff ramp for every wheeled preset: Kilburn (step up to 140 mm), Stanmore (147 to 173 mm) and Bond Street, whose southbound platform has no figures but a ramp listed. Finchley Road (step up to 163 mm, ramp listed) has no step-free route from the street, so it stays closed to step-free users before the train comes into it. No edge closes or turns unknown on today's data. The acceptance routes and the speed budget's settled nodes don't change. `network.json` grows from 15 KB to 17 KB compressed.
+
+**Conservative calls.**
+- Blank figures are unknown even though most such platforms sit where trains are level: TfL didn't measure, so we don't say.
+- A location of level access that TfL doesn't mark as designated isn't offered as a door.
+- No setting for the gap limit yet: the band holds for everyone until research says what people want to set (OPEN_ITEMS).
+- Door advice is in the spoken route only; the visual route card shows the ride, not the doors (OPEN_ITEMS).

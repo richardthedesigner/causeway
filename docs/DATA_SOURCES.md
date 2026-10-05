@@ -362,3 +362,8 @@ Partnership items for Richard:
 | **OpenStreetMap notes** (`api.openstreetmap.org/api/0.6/notes.json`, open, by bbox) | Notes about the ground near a route, shown only | ODbL | V (2026-10-05: Edinburgh 315 open, 27 kept; London 108, 21) | **keep** (DATA-08, D-048). Fetched at build time only. Notes over 3 years old with no comment since, and StreetComplete's questions about a business and businesses' own submissions, are left out |
 | **Great British Public Toilet Map** daily export (`toiletmap.org.uk/dataset`, JSON) | Accessible, RADAR, fee, baby changing, weekly hours, verified date, per toilet | CC BY 4.0 (Public Convenience Ltd), credit in the app | V (export of 2026-10-04: 16,119 UK toilets; Edinburgh 62, Newcastle 22, London 73) | **keep** (DATA-09, D-049) |
 
+## Bank holidays (2026-10-05)
+
+| Source | What | Licence | Checked | Verdict |
+|---|---|---|---|---|
+| **GOV.UK bank holidays** (`www.gov.uk/bank-holidays.json`) | Bank holiday dates for England and Wales, Scotland and Northern Ireland, about two years ahead | Open Government Licence v3.0 | V (fetched 2026-10-05, to 2028-12-26) | **keep** (SMALL-01, D-039). `pnpm build:holidays`, weekly |

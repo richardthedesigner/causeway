@@ -2,6 +2,13 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
+## 2026-10-05 (merging PR #42 into PR #44)
+
+DEP-08: PR #44 merged with PR #42 so it lands cleanly after it. No D-number or task ID collided.
+- The planner keeps both sides: #42's worker that restarts after a crash (STAB-07), and #44's UKHSA, air and river feeds (D-066) and per-feed TfL status (D-061). The area feeds run once per city, outside the worker, so a restart doesn't refetch them.
+- The "Routing hit a problem and was started again" notice stayed under a second: re-planning the same journey when the new worker was ready, or when the weather came in, cleared it. Now only a different journey (from, to or device) clears it. `pnpm e2e` caught it on this branch only because the window was shorter.
+- Four constants in `on-route.ts`, `osm-notes.ts` and `toiletmap.ts` are no longer exported, for #42's knip check.
+
 ## 2026-10-05 (porting the overnight build)
 
 Richard chose main as the base; the overnight build's extras (PR #36) are ported by hand, smallest and safest first.
@@ -75,6 +82,59 @@ Richard chose main as the base; the overnight build's extras (PR #36) are ported
 - `pnpm build:works` reads the last six monthly activity archives and skips a month it can't read, naming it in the file's source line. The June 2026 archive is published truncated and is skipped.
 - Activities starting more than five weeks ahead are left out; shapes in several parts are split; an activity closes the pavement only when its own words say so (none did). A footpath on its own is "the path".
 - Rebuilt: Newcastle 51 works and 9 activities, the London zones 17 works and 6 activities.
+
+## 2026-10-05 (night)
+
+Recovery, time limits, speech, contrast and saved places, from the roadmap's Now list.
+
+**The routing worker recovers** (STAB-07)
+- If routing crashes or goes silent for 60 s, a fresh worker starts with the last plan, and the sheet says so. After three crashes in two minutes it offers a reload. `pnpm e2e` crashes it on purpose.
+
+**Time limits for sharing and review** (STAB-14)
+- Calls to Supabase give up after 15 s (30 s for a photo upload), with the same error as the live feeds.
+
+**How often navigation speaks** (SMALL-03)
+- Off, hazards only, or every turn. Hazards only still says when you arrive, get off or leave the route. Kept on the phone.
+
+**A high-contrast map** (SMALL-05)
+- Plain ground, roads edged in ink, black or white labels and a wider route. On by itself for the low-vision device or when the phone asks for more contrast. A switch in the layers menu.
+
+**Saved places** (FEAT-04, D-060)
+- "Save this place" on a route: home, work, or a name of your own. Saved places come first in search with a verdict, and in "Starting from?". On the phone only, and in Your data.
+
+## 2026-10-05 (evening)
+
+Large text, tests, copying a route, no signal and dead code, from the roadmap's Now list.
+
+**The city name at 200% text** (STAB-13)
+- The bar over the map is sized in pixels, so the city name no longer slides under the map buttons. `pnpm a11y` checks it.
+
+**Router fuzz test** (STAB-04)
+- 60 seeded random journeys per city, for four people in three kinds of weather. Every route must join up, avoid anything the person can't use, and come back the same twice.
+
+**Copy the route as text** (SMALL-04)
+- "Route in words" can be copied for a message: what it's like, what isn't known, and the steps. Never the device.
+- Keyboard focus moving into the half-open sheet now opens it fully, so focus is never under the screen's edge.
+
+**No signal** (SMALL-06, STAB-08)
+- Offline, the sheet and navigation say what still works and what's paused. `pnpm e2e` cuts the network and still routes.
+
+**Dead code** (BLOAT-02)
+- `pnpm knip` runs in CI. Removed an unused component, three packages and twelve stray exports, and declared the workspace dependencies we use.
+
+## 2026-10-05 (late afternoon)
+
+Privacy, a refresh guard and bank holidays, from the roadmap's Now list.
+
+**A guard on the weekly refresh** (D-033, STAB-06)
+- Each count has a limit on how far it may fall. Past one, the refresh pull request opens as a draft that lists the drops, and the run fails.
+
+**Bank holidays** (D-039, SMALL-01)
+- GOV.UK's dates for England and Wales and for Scotland, bundled and refreshed weekly. On a bank holiday a place's holiday hours apply; without any, it says the hours may differ that day only.
+
+**Your data** (D-059, SEC-06)
+- One sheet says what the phone keeps, downloads it as a file, and deletes everything, including what was shared. Migration 0006 lets people delete their own reports, flags and photos.
+- `pnpm e2e` downloads a copy and deletes it all; `pnpm a11y` checks the sheet, including at 200% text.
 
 ## 2026-10-05 (afternoon)
 

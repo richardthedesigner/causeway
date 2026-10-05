@@ -39,7 +39,7 @@ export interface ToiletMapFile {
 /** An OSM toilet this close is taken to be the same toilet. */
 const SAME_M = 30;
 /** Older than this, a Toilet Map record may be out of date (D-065). */
-export const TOILET_MAP_STALE_MS = 2 * 365.25 * 86_400_000;
+const TOILET_MAP_STALE_MS = 2 * 365.25 * 86_400_000;
 /** Search rank of a toilet OSM hasn't mapped (lower first), and of one whose record is old. */
 const RANK = 2.6,
   RANK_OLD = 3.1;

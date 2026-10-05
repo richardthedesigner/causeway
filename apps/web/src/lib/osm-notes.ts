@@ -15,9 +15,9 @@ export interface OsmNotesFile {
 }
 
 /** Where the list says they're from (D-067). */
-export const NOTES_SOURCE = "OpenStreetMap Notes";
+const NOTES_SOURCE = "OpenStreetMap Notes";
 /** At most this many are listed; one line counts the rest (D-048). */
-export const NOTES_LISTED = 3;
+const NOTES_LISTED = 3;
 
 /**
  * Notes within `withinM` of the route's line, in order along it, as "On this

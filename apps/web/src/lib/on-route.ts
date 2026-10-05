@@ -4,7 +4,7 @@
 import type { AreaNote } from "@causeway/live";
 import type { OnRouteGroup, OnRouteItem, OnRouteLabel } from "@causeway/router";
 
-export const LABEL_WORDS: Record<OnRouteLabel, string> = {
+const LABEL_WORDS: Record<OnRouteLabel, string> = {
   live: "Live",
   static: "Static data",
   reported: "Reported by people",

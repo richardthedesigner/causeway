@@ -47,7 +47,7 @@ These numbers shape routes but are our estimates, not evidence.
 
 - The profile has a gap limit for boarding trains (`maxGapMm`), but no setting in the app: everyone gets TfL's 85 mm level band. Add a setting once research says people want one ([D-068](DECISIONS.md#d-068-boarding-the-train-against-each-persons-limits)).
 - TfL's level-access doors are in the spoken route only, not on the visual route card ([D-068](DECISIONS.md#d-068-boarding-the-train-against-each-persons-limits)).
-- Opening hours don't know bank holidays; the app says "may differ on bank holidays" ([D-039](DECISIONS.md#d-039-open-when-you-get-there)).
+- When someone deletes everything, a photo a reviewer had approved stays in the public bucket (hidden, as its note is gone) until a reviewer removes it. Worth a weekly clean-up step for the reviewer, or a server job, once sharing is on ([D-059](DECISIONS.md#d-059-your-data-a-copy-and-delete-everything)).
 - Weather beyond 48 hours ahead falls back to today's ([D-040](DECISIONS.md#d-040-leaving-later)).
 - The speed budget's timing checks hold 10% off CI. On a busy machine they can fail when nothing changed; run the test again before looking for a cause. A data refresh that rebuilds a graph can trip the settled-node check: re-baseline on purpose ([D-056](DECISIONS.md#d-056-a-speed-budget-the-tests-enforce), ROADMAP SPEED-07).
 - A guess to check on the next production deploy: Vercel serves MapLibre's worker (`/maplibre/6.12.0/maplibre-gl-worker.mjs`) as JavaScript, so the map draws. The local checks confirm it with our own server ([D-050](DECISIONS.md#d-050-dependency-audit-in-ci-and-maplibre-6)).
@@ -73,5 +73,6 @@ Not now, on purpose: a phone app, whole cities, a reports backend, app accounts.
 - 2026-10-05: North Bridge is passable on foot (Richard). The register records it as a road closure since 2018; D-057 keeps it open to people on foot, as works on the pavement.
 - 2026-10-05: the rollator keeps 300 m between rests, not Inclusive Mobility's 50 m for stick users: it has a seat. Richard's call ([D-054](DECISIONS.md#d-054-presets-on-inclusive-mobility-values-kerbs-credit-and-more-benches), ROADMAP DATA-28).
 - 2026-10-05: presets follow Inclusive Mobility's kerbs, as Richard decided: manual wheelchair 6 mm ([D-054](DECISIONS.md#d-054-presets-on-inclusive-mobility-values-kerbs-credit-and-more-benches)).
+- 2026-10-05: opening hours now know bank holidays (SMALL-01, [D-039](DECISIONS.md#d-039-open-when-you-get-there)).
 - 2026-10-04: the scraped Changing Places toilets and NHS records are out of the search indexes and filtered from future builds (ROADMAP DATA-01, PR #33).
 - 2026-10-04: the stray `step2-*.png` screenshots moved to `docs/ux/devices/` (ROADMAP BLOAT-01).
