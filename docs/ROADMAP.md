@@ -50,11 +50,11 @@ The current direction: **fix and fill the pilot cities** with open data that nee
 
 The next five things to pick up, in order.
 
-1. **STAB-05**: timeouts and fallbacks for every live adapter.
-2. **STAB-06**: fail the weekly data refresh if counts drop too far.
-3. **SEC-06**: export and delete everything about me, in one place.
-4. **SMALL-01**: opening hours that know bank holidays.
-5. **STAB-13**: the city name at the top of the map at 200% text.
+1. **STAB-06**: fail the weekly data refresh if counts drop too far.
+2. **SEC-06**: export and delete everything about me, in one place.
+3. **SMALL-01**: opening hours that know bank holidays.
+4. **STAB-13**: the city name at the top of the map at 200% text.
+5. **STAB-07**: the routing worker recovers if it crashes, and says so.
 
 The rest of the pilot-city data (DATA-02, DATA-12 to DATA-20) is blocked on access, licences or keys. Research (RES) needs Richard and testers.
 
@@ -90,7 +90,7 @@ Fix and fill the pilot cities. DATA-01 to DATA-10 are in order of value per day 
 | DATA-25 | Scotland's flood warnings (SEPA) for the Water of Leith walkway | M | later | todo | Claude | D-047. No open feed matching the EA's found yet; look again |
 | DATA-26 | Pavement gritting routes for Newcastle and London | S | later | todo | Claude | D-047. None open found; City of London has priority pavements (survey §2 #10) |
 | DATA-27 | Do the 348 places that come only from AllThePlaces break the no-scraping rule (DATA_SOURCES rule 5)? | S | next | blocked | Richard, Claude | D-028. Mostly chain stores, parcel lockers and scout halls. Overture doesn't say which spider a record came from. Richard decides; then filter in `scrapedOnly` or leave as is |
-| DATA-28 | Presets on Inclusive Mobility values: manual wheelchair kerb 6 mm, unmeasured dropped kerbs at 6 mm, kerb text in mm, "More benches" ladder and speed | S | now | done (2026-10-05) | Claude | D-053, D-054. Ported from PR #36. Rollator keeps 300 m (Richard). Outcomes for all 91 journey and preset pairs in D-053 |
+| DATA-28 | Presets on Inclusive Mobility values: manual wheelchair kerb 6 mm, unmeasured dropped kerbs at 6 mm, kerb text in mm, "More benches" ladder and speed | S | now | done (2026-10-05) | Claude | D-054, D-055. Ported from PR #36. Rollator keeps 300 m (Richard). Outcomes for all 91 journey and preset pairs in D-054 |
 | DATA-21 | Map York Place and the western way into the Grassmarket in OSM (about 1.1 km) | M | later | todo | Richard | [DEVICES.md](plans/DEVICES.md). Turns unknowns into known ground |
 
 ## Research: check our guesses with real people
@@ -177,14 +177,15 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | STAB-02 | Screenshot tests for the main screens, light and dark, 320 px and 200% text | M | next | todo | Claude | Replaces hand-checked screenshots |
 | STAB-03 | Version the on-device stores (devices, notes, recents) and migrate old data | S | next | done (2026-10-04) | Claude | D-044. `lib/stored.ts` for devices, notes and reports: version in the key, old keys never rewritten, anything unreadable backed up |
 | STAB-04 | Router fuzz test: many random start and end points per city, no crashes, no impossible routes | M | next | todo | Claude | |
-| STAB-05 | Timeouts and fallbacks for every live adapter | S | now | todo | Claude | `packages/live` |
+| STAB-05 | Timeouts and fallbacks for every live adapter | S | now | done (2026-10-05) | Claude | D-052. `getJson` in `packages/live/src/http.ts`: 10 s for feeds, 6 s for live search. `pnpm e2e` hangs every feed in London and checks the fallbacks |
 | STAB-06 | Data refresh guard: fail the weekly PR if counts drop by more than a set amount | S | now | todo | Claude | D-033 |
-| STAB-07 | The routing worker recovers if it crashes, and says so | S | later | todo | Claude | `router.worker.ts` |
+| STAB-07 | The routing worker recovers if it crashes, and says so | S | now | todo | Claude | `router.worker.ts` |
 | STAB-09 | A city opened from last time started from Edinburgh's Causewayside, 537 km from London | S | next | done (2026-10-04) | Claude | Found by STAB-01. `page.tsx` sets the saved city's start |
 | STAB-10 | End-to-end journeys for the device switcher, notes and Leaving later | S | now | done (2026-10-05) | Claude | PR #33. Two devices and a switch, leaving in an hour, a route and a note. Found and fixed the drawer's last 6% being unreachable |
 | STAB-11 | The device editor's header fills a 320 by 640 screen at 200% text | S | now | done (2026-10-05) | Claude | PR #33. Description scrolls with the content; bars, icon buttons and switches in pixels. `pnpm a11y` checks it |
 | STAB-12 | 200% text at 320 px on the other screens: route panel, navigation, search, note and report sheets | S | now | done (2026-10-05) | Claude | `pnpm a11y` checks six more screens. Grids hold their width, chip rows and section headings wrap, navigation's two panels take half the screen each and scroll |
 | STAB-13 | The city name at the top of the map is cut off at 200% text on a 320 px phone ("Edinbur", under the layers button) | S | now | todo | Claude | Found doing STAB-12. `MapChrome.tsx`. Not caught by `pnpm a11y`: it's clipped, not off the side |
+| STAB-14 | Time limits for the sharing and review calls to Supabase | S | later | todo | Claude | Found doing STAB-05. `lib/sync.ts`, `lib/review.ts`. Sharing is off today (D-030), so nothing waits on them yet |
 | STAB-08 | Offline test: load a city, cut the network, route | S | later | todo | Claude | D-023 |
 
 ## Speed
@@ -192,12 +193,12 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | ID | Task | Size | Priority | Status | Who | Notes |
 |---|---|---|---|---|---|---|
 | SPEED-01 | Measure first load, city load and time to first route on a mid-range phone | S | next | todo | Claude | Numbers first, then targets |
-| SPEED-02 | Router benchmark in CI, failing if a journey gets much slower | S | next | done (2026-10-05) | Claude | D-055, [PERF_BASELINE](plans/PERF_BASELINE.md). Ported from PR #36. `scripts/perf-budget.test.ts` in `pnpm test`; `pnpm perf:baseline` |
+| SPEED-02 | Router benchmark in CI, failing if a journey gets much slower | S | next | done (2026-10-05) | Claude | D-056, [PERF_BASELINE](plans/PERF_BASELINE.md). Ported from PR #36. `scripts/perf-budget.test.ts` in `pnpm test`; `pnpm perf:baseline` |
 | SPEED-03 | Bundle-size and Lighthouse budgets in CI | S | later | todo | Claude | |
 | SPEED-04 | Load the `/review` page's code only for reviewers | S | later | todo | Claude | |
 | SPEED-05 | Smaller search index per city | S | later | todo | Claude | `data/places` |
 | SPEED-06 | A compact binary graph format instead of gzipped JSON | L | later | todo | Claude | Only if SPEED-01 shows graph load matters |
-| SPEED-07 | Speed budget follow-ups: a CI wall-time baseline from a few weeks of printed figures, and a re-baseline when the weekly refresh changes the graphs | S | later | todo | Claude | D-055. Settled nodes depend on the graph, so a refresh PR can trip the 10% check |
+| SPEED-07 | Speed budget follow-ups: a CI wall-time baseline from a few weeks of printed figures, and a re-baseline when the weekly refresh changes the graphs | S | later | todo | Claude | D-056. Settled nodes depend on the graph, so a refresh PR can trip the 10% check |
 
 ## Bloat reduction
 
@@ -266,6 +267,7 @@ Newest first. One line per change: date, ID, what happened, link.
 
 - 2026-10-05: SPEED-02 done (speed budget, ported from PR #36). Added SPEED-07.
 - 2026-10-05: Added DATA-28 (presets on Inclusive Mobility values, ported from PR #36) and marked it done.
+- 2026-10-05: STAB-05 done (D-052). Added STAB-14. Promoted STAB-07. Now: STAB-06, SEC-06, SMALL-01, STAB-13, STAB-07.
 - 2026-10-05: FEAT-02 done: road scooters go at road speed on roads, and pace learning skips road stretches (D-051). Added FEAT-18 (road speed setting) and RES-10 (ask riders about road routes).
 - 2026-10-05: STAB-12 done. Added STAB-13. Now: STAB-05, STAB-06, SEC-06, SMALL-01, STAB-13.
 - 2026-10-05: Added DATA-27 (the remaining AllThePlaces-only places), found doing DATA-01 in a parallel session (closed PR #37).

@@ -41,7 +41,7 @@ export class Router {
   readonly toiletM = new Map<number, number>();
   /** Edge id to what people's notes say about it. Held beside the graph, never written into it (D-008). */
   noteSignals = new Map<number, NoteSignal>();
-  /** Nodes settled by searches so far: a machine-independent measure of routing work, for the speed budget (D-055). */
+  /** Nodes settled by searches so far: a machine-independent measure of routing work, for the speed budget (D-056). */
   settled = 0;
 
   /** Everything around an edge the cost model needs that isn't the edge itself. */
@@ -235,7 +235,7 @@ export class Router {
     const h = (n: GraphNode) => haversine([n.lon, n.lat], [to.lon, to.lat]) / vmax;
     type Lab = { node: number; gap: number; cost: number; prev: Lab | null; step: Step | null };
     // State keys are numbers (node times buckets plus bucket), not strings, and each edge and node is costed once
-    // per search rather than once per bucket that reaches it: the same results, faster (D-054).
+    // per search rather than once per bucket that reaches it: the same results, faster (D-055).
     const K = B + 1;
     const best = new Map<number, number>();
     const heap = new MinHeap();
@@ -794,7 +794,7 @@ export function tradeoffs(router: Router, chosen: Route, from: GraphNode, to: Gr
       // own interval rarely finds anything. Start from the loosest interval worth offering (up to 8 times theirs,
       // or seven-tenths or half of this route's worst gap, and clearly shorter than that gap), then tighten once
       // and keep the better. At most two searches, each given up once it costs more than double the chosen route
-      // (or 15 minutes more). When the looser search finds nothing, the tighter one won't either: stop (D-053, D-054).
+      // (or 15 minutes more). When the looser search finds nothing, the tighter one won't either: stop (D-054, D-055).
       const maxCost = Math.max(chosen.cost * 2, chosen.cost + 900);
       let best: { r: Route; gap: number } | null = null;
       const ladder = [...new Set([...[8, 6, 4, 3, 2, 1.5, 1].map((f) => p.maxRestIntervalM! * f), gap * 0.7, gap * 0.5].map(Math.round))]

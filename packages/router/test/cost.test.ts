@@ -104,7 +104,7 @@ describe("evaluateNode", () => {
     expect(evaluateNode(node(), true, manual, DRY).passable).toBe("unknown");
   });
 
-  it("holds a manual chair to Inclusive Mobility's flush band, 0 to 6 mm (D-053)", () => {
+  it("holds a manual chair to Inclusive Mobility's flush band, 0 to 6 mm (D-054)", () => {
     expect(PRESETS["manual-wheelchair"].maxKerbCm).toBe(0.6);
     const lowered = (h: number | null) => node({ type: attr("lowered", "reported", "osm", null), heightCm: h === null ? unknownAttr() : attr(h, "reported", "osm", null), tactilePaving: unknownAttr() });
     // A dropped kerb with no height is taken at 6 mm: fine for a manual chair, not for "flush only".

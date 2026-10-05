@@ -10,6 +10,7 @@
  * - Flood Alert (3): named on the route, nothing more.
  */
 import type { LiveState } from "@causeway/graph";
+import { getJson, type LiveOptions } from "./http.js";
 
 export const EA_FLOODS_URL = "https://environment.data.gov.uk/flood-monitoring/id/floods";
 
@@ -48,10 +49,8 @@ export function parseFloodWarnings(json: unknown): FloodWarning[] {
     }));
 }
 
-export async function fetchFloodWarnings(fetchImpl: typeof fetch = fetch): Promise<FloodWarning[]> {
-  const res = await fetchImpl(EA_FLOODS_URL);
-  if (!res.ok) throw new Error(`EA flood warnings: HTTP ${res.status}`);
-  return parseFloodWarnings(await res.json());
+export async function fetchFloodWarnings(fetchImpl: typeof fetch = fetch, opts: Omit<LiveOptions, "fetchImpl"> = {}): Promise<FloodWarning[]> {
+  return parseFloodWarnings(await getJson(EA_FLOODS_URL, "EA flood warnings", { ...opts, fetchImpl }));
 }
 
 /** The warnings in force that touch our paths, worst first, for the route panel. */

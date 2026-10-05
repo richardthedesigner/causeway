@@ -2,7 +2,7 @@
  * Route every acceptance journey with every preset and print what came out:
  * verdict, time, distance, unknown metres, the longest stretch without a
  * bench, the "More benches" option, and a short fingerprint of the edges
- * taken. Run before and after a preset change and diff the two (D-053).
+ * taken. Run before and after a preset change and diff the two (D-054).
  *
  *   pnpm tsx scripts/preset-outcomes.ts > before.json
  */

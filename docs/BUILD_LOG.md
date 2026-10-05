@@ -6,21 +6,28 @@ A running record of what was built, newest first. Each entry links the decision 
 
 Richard chose main as the base; the overnight build's extras (PR #36) are ported by hand, smallest and safest first.
 
-**Honesty fixes** (D-052)
+**Honesty fixes** (D-053)
 - Edinburgh council widths and surfaces are inferred: a narrow council width costs time and no longer closes a pavement.
 - TfL street comments that deny a closure ("no footway closed") no longer close the pavement.
 - Street Manager activities show our own words and the street, never the record's free text. Three London entries lost their "(Impact Area)"-style endings.
 - Lift outages at one station count together: Canning Town lifts 1 and 3 out now cut off the Jubilee line.
 - A search result's first fact may take two lines before it is cut off.
 
-**Presets on Inclusive Mobility values** (D-053, D-054, DATA-28)
+**Presets on Inclusive Mobility values** (D-054, D-055, DATA-28)
 - Manual wheelchair kerb limit 2 cm to 6 mm; a dropped kerb with no measured height counts as 6 mm. Kerb limits under 1 cm read in millimetres. The rollator keeps 300 m between rests (Richard).
 - "More benches" starts loosest and makes at most two searches, each with a cost limit; its search is quicker. Waverley to the Grassmarket with a walking stick now gets an offer (470 m instead of 890 m).
 - `scripts/preset-outcomes.ts` records verdict, time, route and "More benches" for every journey and preset. No verdict, time or route changed.
 
-**A speed budget** (D-055, SPEED-02)
+**A speed budget** (D-056, SPEED-02)
 - `pnpm test` fails if routing the acceptance journeys settles 10% more nodes, or gets 10% slower over a fixed yardstick (on CI, printed and failing only past 50%). Rest presets' "More benches" searches are timed too.
 - Each city's data beside the graph stays under 400 KB compressed. Baseline and sizes: [PERF_BASELINE](plans/PERF_BASELINE.md). Re-measure with `pnpm perf:baseline`.
+
+## 2026-10-05 (afternoon)
+
+**Live feeds give up after 10 seconds** (D-052, STAB-05)
+- A hung feed never failed, so its fallback never showed: "Checking lifts with TfL…" could stay for good. Every live call now has a time limit: 10 s for TfL, the Environment Agency and Open-Meteo, 6 s for live search.
+- Fixed on the way: "Couldn't check the weather" flashed on every start in a remembered city, because a cancelled check was treated as a failed one.
+- `pnpm e2e` now runs a London journey with every live feed hanging. The route comes, and the weather and lift lines fall back in about 11 and 13 seconds.
 
 ## 2026-10-05 (later)
 
