@@ -194,7 +194,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | ID | Task | Size | Priority | Status | Who | Notes |
 |---|---|---|---|---|---|---|
 | STAB-01 | End-to-end test in the built app: search, route, start, end | M | next | done (2026-10-04) | Claude | `pnpm e2e` in CI, one journey per city. Found STAB-09 on its first run |
-| STAB-02 | Screenshot tests for the main screens, light and dark, 320 px and 200% text | M | next | todo | Claude | Replaces hand-checked screenshots |
+| STAB-02 | Screenshot tests for the main screens, light and dark, 320 px and 200% text | M | next | done (2026-10-05) | Claude | `pnpm screenshots` in CI: 10 screens, 40 pictures, 2.7 MB in `tests/screenshots/`: phone and 320 px in light, 320 px at 200% text in light and dark. `--update` rewrites them |
 | STAB-03 | Version the on-device stores (devices, notes, recents) and migrate old data | S | next | done (2026-10-04) | Claude | D-044. `lib/stored.ts` for devices, notes and reports: version in the key, old keys never rewritten, anything unreadable backed up |
 | STAB-04 | Router fuzz test: many random start and end points per city, no crashes, no impossible routes | M | now | done (2026-10-05) | Claude | PR #42. `packages/router/test/fuzz.test.ts`: 60 seeded journeys per city, 4 people, dry, wet and icy. About 14 s |
 | STAB-05 | Timeouts and fallbacks for every live adapter | S | now | done (2026-10-05) | Claude | D-052. `getJson` in `packages/live/src/http.ts`: 10 s for feeds, 6 s for live search. `pnpm e2e` hangs every feed in London and checks the fallbacks |
@@ -208,6 +208,9 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | STAB-14 | Time limits for the sharing and review calls to Supabase | S | now | done (2026-10-05) | Claude | PR #42. `lib/timed-fetch.ts`: 15 s, 30 s for a photo upload, with the same timeout error as the live feeds |
 | STAB-15 | The e2e preview walk runs at a fixed speed, so a slower runner can miss the 2-minute arrival limit (Edinburgh took 2 min 44 s on a 4-core box) | S | now | todo | Claude | Found doing SEC-06. `E2E_ARRIVE_MS` raises the limit locally; better to step the walk by distance, not time |
 | STAB-16 | `pnpm a11y` checks the high-contrast map and the open "Save this place" form | S | later | todo | Claude | Found doing SMALL-05 and FEAT-04. Both were checked by hand at 320 px, light and dark |
+| STAB-18 | At 320 px with 200% text the route panel leaves about 145 px of the sheet in view above the Start bar, so the route cards can barely be read without dragging | S | next | todo | Claude | Found doing STAB-02 (`route.*.w320-200.png`). Check the sheet's resting height and whether the bar can shrink |
+| STAB-19 | Toilet labels ("WC") stack on top of each other along a route, unreadable at the zoom the route fits to | S | later | todo | Claude | Found doing STAB-02 (`navigation.*.phone.png`). Hide or cluster labels that collide |
+| STAB-20 | Screenshot baselines are Linux Chromium only; refresh them once after UPD-03 and UPD-04 (Next.js and Node) land, and whenever Playwright's Chromium changes | S | later | todo | Claude | STAB-02. `pnpm screenshots --update`, then look at the diffs |
 | STAB-17 | The sheet trapped keyboard focus and hid the map from screen readers: Tab never reached the city, layers or location buttons | S | now | done (2026-10-05) | Claude | D-069. Found doing STAB-13. vaul 1.1.2 never passed `modal={false}` on, so a `pnpm patch` does; Radix also looped Tab inside the sheet. The map menus open above the sheet, take focus and give it back. `pnpm a11y` checks it |
 | STAB-08 | Offline test: load a city, cut the network, route | S | now | done (2026-10-05) | Claude | PR #42, with SMALL-06. `pnpm e2e` loads Edinburgh, cuts the network and routes. A reload offline (the service worker) isn't covered |
 
@@ -293,6 +296,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 
 Newest first. One line per change: date, ID, what happened, link.
 
+- 2026-10-05: STAB-02 done: `pnpm screenshots` captures 10 screens (40 pictures, 2.7 MB in `tests/screenshots/`): 390 px and 320 px in light, 320 px at 200% text in light and dark. CI runs it and uploads diffs on failure. Found STAB-18 to STAB-20.
 - 2026-10-05: UPD-03 and UPD-04 done in PR #54: Next.js 16.3 on webpack, Node 24 in CI and `engines`, static export unchanged (D-071). Added UPD-05 to UPD-07.
 - 2026-10-05: RES-09 done: 14 UK cities scored on Census 2021 and 2022, Blue Badge and station usage, open data, licences and code reuse. Glasgow first, then Leeds, then Sheffield; Cardiff and Swansea last, so DEF-09's "then Wales" isn't supported. Follow-ups RES-11 and DEF-10 added ([report](research/where-next.md)).
 - 2026-10-05: SEC-16 and SEC-19 done. `0007_supabase_grants.sql` takes back Supabase's default grants: `note_public` is read only, the graph tables have row-level security and no grants, and new objects in `public` start with none ([D-070](DECISIONS.md#d-070-every-grant-by-name-row-level-security-on-every-table)). CI and `scripts/test-db.sh` apply Supabase's grants first, with 13 new checks. The data refresh no longer leaves its token on disk, and installs pinned pip packages with hashes. BACKEND.md now lists `0006` and `0007` (part of SEC-22). Added SEC-24.

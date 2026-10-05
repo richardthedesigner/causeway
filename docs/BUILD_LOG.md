@@ -2,6 +2,14 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
+## 2026-10-05 (screenshot tests)
+
+STAB-02: `pnpm screenshots` (`scripts/screenshots.mjs`) replaces hand-checked screenshots.
+- Ten screens (map, Your data, search, route, note, navigation, report, setup, device list, device editor) at 390 by 844 and 320 by 640 in light, and at 320 by 640 with text at 200% in light and dark: 40 pictures, 2.7 MB, in `tests/screenshots/`. Kept small because each change to a screen adds its picture to git history again: the map is hidden except in `map` and `route`, and the sections-open variants were dropped (they were identical, the sections sit below the fold).
+- Steady by construction: every outside request is cut off so each screen shows its fallback, the clock is fixed, animations are off, navigation's preview walk is held still, the city is Edinburgh. Two runs in a row differ by at most 0.04% of pixels.
+- A pixel counts as changed past 24 of 255 on any channel; a screen fails past 0.2% changed (2% for the bare map, which WebGL draws). Comparing happens in the browser, so no new dependency. `--update` rewrites the baselines; `--only=route` checks some.
+- It serves and launches the browser through `scripts/serve-out.mjs`, as `pnpm a11y` and `pnpm e2e` do. CI runs it as its own step after e2e and uploads `tests/screenshots/diff/` on failure.
+
 ## 2026-10-05 (Next.js 16 and Node 24)
 
 UPD-03 and UPD-04 (D-071), PR #54.
