@@ -533,6 +533,7 @@ export default function Home() {
         <NavView
           route={selectedRoute}
           speedMps={routeProfile.speedMps}
+          roadSpeedMps={routeProfile.roadLegal ? routeProfile.roadSpeedMps : undefined}
           device={
             devices.devices.length > 1
               ? {

@@ -38,11 +38,12 @@ These numbers shape routes but are our estimates, not evidence.
 | Battery use: each metre climbed counted as 30 m of flat, and the demo Cherry's 12 km range | [D-043](DECISIONS.md#d-043-battery-range-is-a-warning-set-by-the-user) |
 | In ice, how much an ungritted pavement costs: 100% more time on wheels, 50% on foot | [D-047](DECISIONS.md#d-047-ice-gritting-and-floods) |
 | Rest distances from Inclusive Mobility (50 m with a stick or crutches, 100 m with fatigue): right for real people, given how few benches are mapped? | [D-013](DECISIONS.md#d-013-unknown-risk-weights-and-preset-thresholds-are-placeholders) |
+| Road scooters: 8 mph on every road without a mapped pavement, and whether riders want those road routes at all (RES-10) | [D-051](DECISIONS.md#d-051-road-scooters-go-at-road-speed-on-roads) |
 | Screen reader and switch-access testing: axe only catches about a third of WCAG issues | [BUILD_LOG](BUILD_LOG.md) |
 
 ## Known gaps
 
-- When someone deletes everything, a photo a reviewer had approved stays in the public bucket (hidden, as its note is gone) until a reviewer removes it. Worth a weekly clean-up step for the reviewer, or a server job, once sharing is on ([D-052](DECISIONS.md#d-052-your-data-a-copy-and-delete-everything)).
+- When someone deletes everything, a photo a reviewer had approved stays in the public bucket (hidden, as its note is gone) until a reviewer removes it. Worth a weekly clean-up step for the reviewer, or a server job, once sharing is on ([D-053](DECISIONS.md#d-053-your-data-a-copy-and-delete-everything)).
 - Weather beyond 48 hours ahead falls back to today's ([D-040](DECISIONS.md#d-040-leaving-later)).
 - A guess to check on the next production deploy: Vercel serves MapLibre's worker (`/maplibre/6.12.0/maplibre-gl-worker.mjs`) as JavaScript, so the map draws. The local checks confirm it with our own server ([D-050](DECISIONS.md#d-050-dependency-audit-in-ci-and-maplibre-6)).
 

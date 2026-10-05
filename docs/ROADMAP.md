@@ -107,13 +107,14 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | RES-07 | Accessibility testing on real devices: VoiceOver, TalkBack, Switch Control, Voice Control | M | next | todo | Richard, Claude | [UX_ASSESSMENT.md](UX_ASSESSMENT.md). axe catches about a third of WCAG issues |
 | RES-08 | Benchmark every acceptance journey against openrouteservice's wheelchair profile | M | later | todo | Claude | D-003 |
 | RES-09 | Choose where to go next with census disability data, Blue Badge statistics and station usage | M | later | todo | Claude | §5 |
+| RES-10 | Ask road scooter riders whether they want routes on roads, and whether to avoid busy ones | S | next | todo | Richard | D-051: routes now move onto roads at 8 mph |
 
 ## Features
 
 | ID | Task | Size | Priority | Status | Who | Notes |
 |---|---|---|---|---|---|---|
 | FEAT-01 | Battery range per device (`maxRangeKm`), with a warning on long routes | M | next | done (2026-10-04) | Claude | D-043. Range engine from PR #26, and "Warn me about battery range" in the device editor |
-| FEAT-02 | Separate road and pavement speeds for road scooters | M | later | todo | Claude | Only if pace learning shows it matters |
+| FEAT-02 | Separate road and pavement speeds for road scooters | M | later | done (2026-10-05) | Claude | D-051. Road speed setting is FEAT-18 |
 | FEAT-03 | "Report what's there" from "What we don't know" on a route | M | next | todo | Claude | UX_ASSESSMENT open finding. Reports stay on the device until the backend is back on |
 | FEAT-04 | Saved places (home, work, a friend's) | M | next | todo | Claude | On the device, like devices (D-009) |
 | FEAT-05 | Arrive by a time, as well as leave at one | M | later | todo | Claude | D-040 built "Leaving later" |
@@ -129,6 +130,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | FEAT-15 | Street-level imagery for complex junctions (Mapillary) | L | later | blocked | Richard, Claude | Licence (D-008) and a key ([#9](https://github.com/richardthedesigner/causeway/issues/9)) |
 | FEAT-16 | Welsh and Scottish Gaelic, with one place for all copy | L | later | todo | Claude | |
 | FEAT-17 | Indoor and station routing (lifts, platforms, step-free interchanges) | XL | later | todo | Claude | Start with one big station |
+| FEAT-18 | Road speed setting for road scooters in the device editor | S | later | todo | Claude | D-051. Everyone gets 8 mph on roads until then |
 
 ## Small features
 
@@ -156,7 +158,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | SEC-03 | Pin GitHub Actions to commit SHAs and give each workflow the least permissions it needs | S | next | done (2026-10-04) | Claude | Pinned to the latest release in each major, version in a comment. CI has `contents: read` |
 | SEC-04 | `pnpm audit` in CI, failing on high severity | S | now | done (2026-10-05) | Claude | PR #33, D-050. Found a critical MapLibre hole and two high PostCSS ones; fixed by MapLibre 6.12 and a PostCSS override |
 | SEC-05 | Check nothing leaks the profile (logs, URLs, error messages) | S | now | done (2026-10-05) | Claude | PR #33, D-009. No leak found. `pnpm e2e` now fails if any request carries the device's name, type or limits |
-| SEC-06 | Export and delete everything about me, in one place | M | now | done (2026-10-05) | Claude | PR #42, D-052. "Your data": what's kept, a copy as a file, and delete everything, shared notes, reports, flags and photos included. Migration 0006 |
+| SEC-06 | Export and delete everything about me, in one place | M | now | done (2026-10-05) | Claude | PR #42, D-053. "Your data": what's kept, a copy as a file, and delete everything, shared notes, reports, flags and photos included. Migration 0006 |
 | SEC-07 | Review row-level security and storage bucket rules against a threat model | M | later | todo | Claude | `db/migrations`, `scripts/test-db.sh` |
 | SEC-08 | Harden `/review`: sign-in rate limits, session length | S | later | todo | Claude | |
 | SEC-09 | Cloudflare Turnstile on anonymous sign-up, before any publicity | S | later | blocked | Richard, Claude | D-030 |
@@ -164,7 +166,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | SEC-12 | Check the headers are live on production (`curl -I`), and score them on securityheaders.com | S | next | todo | Claude | D-041. Production has Vercel login protection on its `vercel.app` URLs, which may need Richard |
 | SEC-13 | Drop `'unsafe-inline'` from the CSP's `script-src`: hashes for Next's inline scripts at build time | S | later | todo | Claude | D-041. They change every build |
 | SEC-14 | Turn on private vulnerability reporting (Settings, then Code security) | S | next | blocked | Richard | `SECURITY.md` points people to it |
-| SEC-15 | Remove a deleted note's approved photo from the public bucket | S | later | todo | Claude | D-052. Hidden once the note's gone, but the copy stays. A reviewer step or a server job, once sharing is on |
+| SEC-15 | Remove a deleted note's approved photo from the public bucket | S | later | todo | Claude | D-053. Hidden once the note's gone, but the copy stays. A reviewer step or a server job, once sharing is on |
 | SEC-11 | Name the weekly reviewer for flags, photos and reports | S | later | blocked | Richard | [BACKEND.md](BACKEND.md). Only once sharing is on |
 
 ## Stability and testing
@@ -175,7 +177,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | STAB-02 | Screenshot tests for the main screens, light and dark, 320 px and 200% text | M | next | todo | Claude | Replaces hand-checked screenshots |
 | STAB-03 | Version the on-device stores (devices, notes, recents) and migrate old data | S | next | done (2026-10-04) | Claude | D-044. `lib/stored.ts` for devices, notes and reports: version in the key, old keys never rewritten, anything unreadable backed up |
 | STAB-04 | Router fuzz test: many random start and end points per city, no crashes, no impossible routes | M | now | todo | Claude | |
-| STAB-05 | Timeouts and fallbacks for every live adapter | S | now | done (2026-10-05) | Claude | PR #42, D-051. Every live feed gives up after 10 s, body included, and its fallback takes over |
+| STAB-05 | Timeouts and fallbacks for every live adapter | S | now | done (2026-10-05) | Claude | PR #42, D-052. Every live feed gives up after 10 s, body included, and its fallback takes over |
 | STAB-06 | Data refresh guard: fail the weekly PR if counts drop by more than a set amount | S | now | done (2026-10-05) | Claude | PR #42, D-033. Per-row limits on falls; past one, the refresh PR opens as a draft that says not to merge, and the run fails |
 | STAB-07 | The routing worker recovers if it crashes, and says so | S | later | todo | Claude | `router.worker.ts` |
 | STAB-09 | A city opened from last time started from Edinburgh's Causewayside, 537 km from London | S | next | done (2026-10-04) | Claude | Found by STAB-01. `page.tsx` sets the saved city's start |
@@ -263,6 +265,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 Newest first. One line per change: date, ID, what happened, link.
 
 - 2026-10-05: STAB-05, STAB-06, SEC-06 and SMALL-01 done in PR #42 (STAB-12 was done in PR #41 alongside). Added STAB-14, SEC-15. Now: STAB-13, STAB-04, SMALL-04, SMALL-06, BLOAT-02.
+- 2026-10-05: FEAT-02 done: road scooters go at road speed on roads, and pace learning skips road stretches (D-051). Added FEAT-18 (road speed setting) and RES-10 (ask riders about road routes).
 - 2026-10-05: STAB-12 done. Added STAB-13. Now: STAB-05, STAB-06, SEC-06, SMALL-01, STAB-13.
 - 2026-10-05: Added DATA-27 (the remaining AllThePlaces-only places), found doing DATA-01 in a parallel session (closed PR #37).
 - 2026-10-05: DATA-23, SEC-04, SEC-05, STAB-10, STAB-11 done in PR #33, and UPD-02 with SEC-04. Added STAB-12, SMALL-12. Now: STAB-12, STAB-05, STAB-06, SEC-06, SMALL-01.

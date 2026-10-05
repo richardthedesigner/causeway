@@ -6,7 +6,7 @@ A running record of what was built, newest first. Each entry links the decision 
 
 Stability, privacy and bank holidays, from the roadmap's Now list.
 
-**Time limits on live feeds** (D-051, STAB-05)
+**Time limits on live feeds** (D-052, STAB-05)
 - Every live feed gives up after 10 seconds with an error naming it. The fallback each already had then takes over.
 
 **A guard on the weekly refresh** (D-033, STAB-06)
@@ -15,9 +15,14 @@ Stability, privacy and bank holidays, from the roadmap's Now list.
 **Bank holidays** (D-039, SMALL-01)
 - GOV.UK's dates for England and Wales and for Scotland, bundled and refreshed weekly. On a bank holiday a place's holiday hours apply; without any, it says the hours may differ that day only.
 
-**Your data** (D-052, SEC-06)
+**Your data** (D-053, SEC-06)
 - One sheet says what the phone keeps, downloads it as a file, and deletes everything, including what was shared. Migration 0006 lets people delete their own reports, flags and photos.
 - `pnpm e2e` downloads a copy and deletes it all; `pnpm a11y` checks the sheet, including at 200% text.
+## 2026-10-05 (later)
+
+**Road speed for road scooters** (D-051, FEAT-02)
+- A road scooter goes at 8 mph on roads without mapped pavements, and at its own pavement pace elsewhere. Pace learning learns only the pavement pace.
+- Central Edinburgh journeys get 20 to 45% quicker, and routes move onto roads (Marchmont to Leith Walk: 48% to 91% on roads).
 
 ## 2026-10-05 (late morning)
 
