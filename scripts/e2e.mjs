@@ -192,7 +192,9 @@ for (const j of JOURNEYS) {
       await words.click();
       await page.getByRole("button", { name: "Copy the route as text" }).click();
       // Copied, or (where the clipboard is blocked) the text offered to select. Either way, the route in words.
-      const copied = await page.getByText("Copied. Paste it into a message.").isVisible().catch(() => false);
+      const done = page.getByText("Copied. Paste it into a message.");
+      await done.or(page.getByLabel(/Select the text instead/)).waitFor();
+      const copied = await done.isVisible();
       const text = copied ? await page.evaluate(() => navigator.clipboard.readText()) : await page.getByLabel(/Select the text instead/).inputValue();
       if (!/^From .+ to Hamilton Place/.test(text) || !/\n1\. /.test(text)) throw new Error(`unexpected text: ${text.slice(0, 80)}`);
       if (text.includes(DEVICE)) throw new Error("the text names the device");
@@ -244,6 +246,54 @@ for (const j of JOURNEYS) {
     });
   } catch (e) {
     if (process.env.E2E_SHOT) await page.screenshot({ path: process.env.E2E_SHOT });
+    failures.push(`${name}: ${e.message}`);
+    console.log(`  FAIL ${e.message}`);
+  }
+  for (const p of problems) failures.push(`${name}: ${p}`), console.log(`  FAIL ${p}`);
+  await context.close();
+}
+
+// No signal (SMALL-06): a loaded city keeps routing, and the app says so.
+{
+  const name = "edinburgh: no signal";
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const page = await context.newPage();
+  const problems = [];
+  watchCsp(page, problems);
+  watchProfile(page, problems);
+  page.on("pageerror", (e) => problems.push(`page error: ${e.message}`));
+  await page.addInitScript(() => localStorage.setItem("causewayside.city.v1", "edinburgh"));
+  const step = async (label, fn) => {
+    try {
+      await fn();
+      console.log(`  ok   ${label}`);
+    } catch (e) {
+      throw new Error(`${label}: ${e.message.split("\n")[0]}`);
+    }
+  };
+  console.log(name);
+  try {
+    await step("app loads", async () => {
+      await page.goto(server.url);
+      await page.getByPlaceholder("Where to?").waitFor({ timeout: 60_000 });
+      await page.getByText("Places in Edinburgh").waitFor({ timeout: 60_000 });
+    });
+    await step("the signal goes, and the app says what still works", async () => {
+      await context.setOffline(true);
+      await page.getByRole("status").filter({ hasText: "No signal" }).waitFor();
+      await page.getByText(/Routes, search and the map for Edinburgh still work/).waitFor();
+    });
+    await step("a route is still found", async () => {
+      await page.getByPlaceholder("Where to?").fill("Hamilton Place");
+      await page.getByRole("option").first().waitFor({ timeout: 30_000 });
+      await page.getByRole("option").first().click();
+      await page.getByText("Why this way?").waitFor({ timeout: 60_000 });
+    });
+    await step("the signal comes back, and the notice goes", async () => {
+      await context.setOffline(false);
+      await page.getByRole("status").filter({ hasText: "No signal" }).waitFor({ state: "detached" });
+    });
+  } catch (e) {
     failures.push(`${name}: ${e.message}`);
     console.log(`  FAIL ${e.message}`);
   }

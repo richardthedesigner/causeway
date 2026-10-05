@@ -17,6 +17,8 @@ import { ReportSheet } from "@/components/ReportSheet";
 import { RoutePanel } from "@/components/RoutePanel";
 import { TripSettings } from "@/components/TripSettings";
 import { MyDataSheet } from "@/components/MyDataSheet";
+import { NoSignal } from "@/components/NoSignal";
+import { useOnline } from "@/lib/use-online";
 import { VerdictPill } from "@/components/RouteStrip";
 import { Button } from "@/components/ui/button";
 import { CommandGroup, CommandItem } from "@/components/ui/command";
@@ -59,6 +61,7 @@ const SNAP = { peek: 0.24, half: 0.52, full: 0.94 };
 export default function Home() {
   const [city, setCity] = useState<City>(CITIES[0]!);
   const [dataOpen, setDataOpen] = useState(false);
+  const online = useOnline();
   // Opening hours everywhere follow this city's bank holidays; set before anything below reads them (idempotent).
   setBankHolidays(city.holidays);
   useEffect(() => {
@@ -352,6 +355,7 @@ export default function Home() {
         if (snap !== SNAP.full && (e.target as HTMLElement).matches?.(":focus-visible")) setSnap(SNAP.full);
       }}
       className="min-h-0 flex-1 overflow-y-auto px-4 pt-1 pb-[calc(1.5rem+6dvh+env(safe-area-inset-bottom,0px))] [scroll-padding-bottom:calc(1rem+6dvh)] md:pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] md:[scroll-padding-bottom:1rem]">
+      {!online ? <NoSignal city={city.name} /> : null}
       {pin ? (
         <section aria-live="polite" aria-label="Dropped pin" className="mb-3 flex flex-wrap items-center gap-3 rounded-2xl border-2 border-accent p-3">
           <p className="m-0 min-w-0 flex-1">

@@ -5,6 +5,8 @@ import { useEffect, useRef, useState } from "react";
 import { RouteStrip } from "@/components/RouteStrip";
 import { Button } from "@/components/ui/button";
 import type { PlannedRoute } from "@/lib/plan-types";
+import { NoSignal } from "@/components/NoSignal";
+import { useOnline } from "@/lib/use-online";
 
 
 export interface Me {
@@ -44,6 +46,7 @@ const AHEAD_M = 300;
  * screen readers; speech is opt-in so it never talks over one.
  */
 export function NavView({ route, speedMps, roadSpeedMps, onEnd, onOffRoute, onPosition, onReport, onNote, onPace, device }: Props) {
+  const online = useOnline();
   const [asking, setAsking] = useState(false);
   const nav = useRef(new Navigator(route.nav));
   const [p, setP] = useState<Progress | null>(null);
@@ -187,6 +190,7 @@ export function NavView({ route, speedMps, roadSpeedMps, onEnd, onOffRoute, onPo
 
       <section aria-label="Journey progress" className="absolute inset-x-0 bottom-0 z-30 grid max-h-[50dvh] grid-cols-1 gap-3 overflow-y-auto rounded-t-[var(--radius)] border-t border-line bg-surface px-4 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] shadow-[0_-8px_40px_rgb(0_0_0/0.18)] md:bottom-4 md:left-4 md:w-[440px] md:rounded-[var(--radius)] md:border">
         <RouteStrip strip={route.strip} along={along} />
+        {!online ? <NoSignal compact /> : null}
         {mode !== "live" ? (
           <p className="m-0 text-sm text-muted">{mode === "locating" ? "Finding your location…" : "Preview: moving along the route for you. Live location isn't available here."}</p>
         ) : null}
