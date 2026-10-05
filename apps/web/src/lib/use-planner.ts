@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { fetchFloodWarnings, fetchLiftOutages, fetchRailDisruptions, fetchTflStreetWorks } from "@causeway/live";
+import { fetchFloodWarnings, fetchLiftOutages, fetchTflDisruptions, fetchTflStreetWorks, type DisruptionsMissing } from "@causeway/live";
 import type { UserNote } from "@causeway/graph";
 import type { Profile } from "@causeway/profile";
 import type { City } from "./cities";
@@ -23,7 +23,8 @@ type Ready = Extract<WorkerResponse, { type: "ready" }>;
 export type LiveLifts =
   | { state: "none" }
   | { state: "loading" }
-  | { state: "ok"; closed: number; limited: number; lines: string[]; at: string }
+  /** `liftsFailed`: the lift feed didn't answer this time. `missing`: which disruption feeds didn't (D-061). */
+  | { state: "ok"; closed: number; limited: number; lines: string[]; at: string; liftsFailed: boolean; missing: DisruptionsMissing }
   | { state: "failed" };
 
 const LIFT_REFRESH_MS = 5 * 60_000;
@@ -61,9 +62,10 @@ export function usePlanner(city: City) {
     const w = new Worker(new URL("./router.worker.ts", import.meta.url), { type: "module" });
     worker.current = w;
     let timer: ReturnType<typeof setInterval> | undefined;
-    // Lifts, plus line closures and station disruptions (DATA-04). Disruptions failing leaves the lifts working.
+    // Lifts, plus line closures and station disruptions (DATA-04), each feed on its own (D-061): one failing leaves the others,
+    // and the worker holds a failed feed's last answer for 15 minutes. The route card says which couldn't be checked.
     const refreshLifts = () =>
-      Promise.all([fetchLiftOutages(), fetchRailDisruptions().catch(() => undefined)])
+      Promise.all([fetchLiftOutages().catch(() => null), fetchTflDisruptions()])
         .then(([outages, disruptions]) => w.postMessage({ type: "live", outages, disruptions } satisfies WorkerRequest))
         .catch(() => setLifts({ state: "failed" }));
     // TfL street disruptions top up the Street Manager file in London; a failure leaves the file's works in place.
@@ -95,7 +97,7 @@ export function usePlanner(city: City) {
         }
       } else if (m.type === "works") setWorks(m.summary);
       else if (m.type === "floods") setFloods({ here: m.here, at: m.fetchedAt });
-      else if (m.type === "live") setLifts({ state: "ok", closed: m.applied, limited: m.limited, lines: m.lines, at: m.fetchedAt });
+      else if (m.type === "live") setLifts(m.liftsFailed && m.missing === "both" ? { state: "failed" } : { state: "ok", closed: m.applied, limited: m.limited, lines: m.lines, at: m.fetchedAt, liftsFailed: m.liftsFailed, missing: m.missing });
       else if (m.type === "error") {
         setError(m.message);
         setPlanning(false);

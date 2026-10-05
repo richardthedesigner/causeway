@@ -18,6 +18,8 @@ export interface Conditions {
   ice: boolean;
   /** After civil twilight: unlit stretches cost those who asked to avoid them. Absent means daylight. */
   dark?: boolean;
+  /** Treat live closures as open: only to find what a closure cuts off, for "In the way" (D-061). Never for a route we offer. */
+  ignoreClosures?: boolean;
 }
 
 export const DRY: Conditions = { now: new Date("2026-10-04T12:00:00Z"), wet: false, ice: false };
@@ -300,7 +302,8 @@ function evaluateEdgeBase(e: GraphEdge, forward: boolean, p: Profile, c: Conditi
   // Live state first: a closure beats everything.
   if (e.live && Date.parse(e.live.validUntil) > c.now.getTime() && Date.parse(e.live.validFrom) <= c.now.getTime()) {
     const applies = e.live.affects !== "step-free" || needsStepFree(p);
-    if (applies && e.live.status === "closed") return exclude("live", e.live.affects === "step-free" ? `lift out of service: ${e.live.reason}` : `closed: ${e.live.reason}`);
+    if (applies && e.live.status === "closed" && !c.ignoreClosures)
+      return exclude("live", e.live.affects === "step-free" ? `${e.live.headline === "No step-free access" ? "no step-free access" : "lift out of service"}: ${e.live.reason}` : `closed: ${e.live.reason}`);
     if (applies && (e.live.status === "restricted" || e.live.status === "degraded")) {
       // A works reason in our own words already says what it is ("Scaffolding on the pavement on ..."); others name the status.
       const stepFree = e.live.affects === "step-free";

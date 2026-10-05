@@ -10,7 +10,7 @@ import { describe, expect, it } from "vitest";
 import { applyStationAccess, loadSnapshot, refRides, type Graph, type TransitNetwork } from "@causeway/graph/node";
 import { applyLiveStates, fetchLiftOutages, liftOutageStates, PART_HEADLINE, parseLiftDisruptions, parseLineStatus, railDisruptionStates } from "@causeway/live";
 import { PRESETS } from "@causeway/profile";
-import { describeSegments, explain, Router, summarise } from "@causeway/router";
+import { describeSegments, diagnose, explain, Router, summarise } from "@causeway/router";
 import { LONDON_JOURNEYS } from "../../../scripts/journeys.js";
 
 const ROOT = join(import.meta.dirname, "../../..");
@@ -122,6 +122,21 @@ describe("Parliament Square to Canary Wharf", () => {
     }
     // The day after, it runs again.
     expect(plan(g, "walking", new Date("2026-10-05T09:00:00Z")).route).not.toBeNull();
+  });
+
+  it("when a closure cuts the only way, \"In the way\" names the closure, not unjoined data (D-061)", () => {
+    const g = fresh();
+    const closure = parseLineStatus(JSON.parse(readFileSync(join(ROOT, "packages/live/test/fixtures/tfl-line-status-2026-10-04.json"), "utf8")), "2026-10-04T12:00:00Z");
+    applyLiveStates(g, railDisruptionStates(closure, net, refs(g), NOW));
+    const r = new Router(g);
+    const p = PRESETS["manual-wheelchair"];
+    const c = { now: NOW, wet: false, ice: false };
+    const d = diagnose(r, r.snap(j.from.lon, j.from.lat, p, c), r.snap(j.to.lon, j.to.lat, PRESETS.walking, c), p, PRESETS.walking, c);
+    expect(d.blockers.length).toBeGreaterThan(0);
+    expect(d.blockers.every((b) => b.attr === "live")).toBe(true);
+    expect(d.blockers[0]).toMatchObject({ detail: "no service", name: "Jubilee line" });
+    // Nothing to relax: no limit of theirs is in the way.
+    expect(d.relax).toBeNull();
   });
 
   it("someone walking is not rerouted by a lift outage", () => {

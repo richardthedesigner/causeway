@@ -46,6 +46,7 @@ These numbers shape routes but are our estimates, not evidence.
 
 - The profile has a gap limit for boarding trains (`maxGapMm`), but no setting in the app: everyone gets TfL's 85 mm level band. Add a setting once research says people want one ([D-060](DECISIONS.md#d-060-boarding-the-train-against-each-persons-limits)).
 - TfL's level-access doors are in the spoken route only, not on the visual route card ([D-060](DECISIONS.md#d-060-boarding-the-train-against-each-persons-limits)).
+- TfL's informational station messages (a reduced escalator service, a platform gap) aren't shown anywhere: they need the "On this route" list, the last step of the overnight build's port ([D-061](DECISIONS.md#d-061-when-tfls-disruption-feeds-fail-and-when-a-closure-is-whats-in-the-way)).
 - Opening hours don't know bank holidays; the app says "may differ on bank holidays" ([D-039](DECISIONS.md#d-039-open-when-you-get-there)).
 - Weather beyond 48 hours ahead falls back to today's ([D-040](DECISIONS.md#d-040-leaving-later)).
 - The speed budget's timing checks hold 10% off CI. On a busy machine they can fail when nothing changed; run the test again before looking for a cause. A data refresh that rebuilds a graph can trip the settled-node check: re-baseline on purpose ([D-056](DECISIONS.md#d-056-a-speed-budget-the-tests-enforce), ROADMAP SPEED-07).

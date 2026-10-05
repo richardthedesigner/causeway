@@ -661,3 +661,23 @@ Main read the step and gap from platform to train into words only (the largest a
 - A location of level access that TfL doesn't mark as designated isn't offered as a door.
 - No setting for the gap limit yet: the band holds for everyone until research says what people want to set (OPEN_ITEMS).
 - Door advice is in the spoken route only; the visual route card shows the ride, not the doors (OPEN_ITEMS).
+
+## D-061 When TfL's disruption feeds fail, and when a closure is what's in the way
+
+**Decided.** 2026-10-05 (DATA-30, ported from the overnight build, PR #36, by hand). Builds on D-052 (time limits) and DATA-04. Code: `fetchTflDisruptions`, `holdDisruptions` and `readStationMessage` in `packages/live/src/tfl-disruptions.ts`, the worker's `live` handler, `liveFailedLine` in `apps/web/src/lib/live-status.ts`, `diagnose` in `packages/router/src/router.ts`.
+
+Main fetched line status and station disruptions together and dropped both silently if either failed (`.catch(() => undefined)`), and the worker then cleared every disruption state. So a feed that blinked opened every closed line and station, and nobody was told. A lift feed failure also threw the disruptions away.
+
+- **Each feed on its own.** Lifts, line status and station disruptions are fetched separately, each with D-052's 10-second limit. One failing leaves the others.
+- **A failed feed keeps its last good answer for 15 minutes** after that fetch (`DISRUPTION_HOLD_MINUTES`), then it is dropped. A station that had no step-free access five minutes ago doesn't open up because the feed blinked; an answer older than a refresh or two isn't trusted. A failed lift feed leaves the last outages, whose states already expire 15 minutes after their fetch (D-019).
+- **The route card says so** when the route rides a train: "Couldn't get live station disruptions from TfL. Check before you travel." (or "line status", or "station and line disruptions"), and with the lift feed, "Couldn't get live lift status or station and line disruptions from TfL." Lift status counts for every route, as before. It says so whenever this refresh failed, held answer or not.
+- **"Nothing fits" names the closure.** When a closure cuts the only way (our two London zones are joined only by the Jubilee line), the unconstrained route didn't exist either, so "In the way" was empty and the app said the start and destination "aren't joined up in our map data". Now `diagnose` looks again with `Conditions.ignoreClosures`, which only it uses, and names what's closed in its own few words: "No way there right now. In the way: no service on Jubilee line." When every blocker is a closure the heading is "No way there right now", not "No way there fits your limits": it's today, not their settings.
+- **Short words for closures.** TfL's states carry a headline: "No service", "Station closed", "Trains don't stop here", "No step-free access". A loss of step-free access from TfL's feeds says "no step-free access" in "Why this way?" and "In the way", not "lift out of service".
+- **Another way in named.** A station message that says there's no step-free access but names another way ("use the entrance on Bank Street", "use Bar station instead") restricts the platforms rather than closing them: unknown, at the unknown-station cost (D-058). "Step-free access is still available" still does nothing, as before.
+
+**Kept from main.** TfL's structured affected stops for line closures, TfL's own validity dates, `mergeLiveStates`, ride refs. Not ported: the overnight build's own reading of line closure text, and its 15-minute cap on TfL's end dates.
+
+**Conservative calls.**
+- Held answers expire; a closure from a feed that keeps failing is dropped after 15 minutes, and the card says we couldn't check, rather than keep a closure that may have ended.
+- `ignoreClosures` never plans a route we offer; it only finds what to name.
+- Escalator notes for everyone, which the overnight build listed under "On this route", wait for that list, the last step of the port: main shows no informational station messages today.

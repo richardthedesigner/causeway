@@ -93,7 +93,7 @@ Fix and fill the pilot cities. DATA-01 to DATA-10 are in order of value per day 
 | DATA-27 | Do the 348 places that come only from AllThePlaces break the no-scraping rule (DATA_SOURCES rule 5)? | S | next | blocked | Richard, Claude | D-028. Mostly chain stores, parcel lockers and scout halls. Overture doesn't say which spider a record came from. Richard decides; then filter in `scrapedOnly` or leave as is |
 | DATA-28 | Presets on Inclusive Mobility values: manual wheelchair kerb 6 mm, unmeasured dropped kerbs at 6 mm, kerb text in mm, "More benches" ladder and speed | S | now | done (2026-10-05) | Claude | D-054, D-055. Ported from PR #36. Rollator keeps 300 m (Richard). Outcomes for all 91 journey and preset pairs in D-054 |
 | DATA-29 | TfL station data on the platforms: a lift out that leaves some platforms step-free counts as unknown, and the step and gap to the train against each person's limits, with level-access doors | M | now | done (2026-10-05) | Claude | D-058, D-060. Ported from PR #36. No gap-limit setting yet (OPEN_ITEMS) |
-| DATA-30 | When TfL's disruption feeds fail: each feed apart, the last good answer kept for 15 minutes, the route card says which couldn't be checked, and "nothing fits" names the closure in the way | S | now | doing | Claude | 2026-10-05, branch `claude/vibrant-heisenberg-3j1kl2` (PR #44). Ported from PR #36. Builds on D-052 |
+| DATA-30 | When TfL's disruption feeds fail: each feed apart, the last good answer kept for 15 minutes, the route card says which couldn't be checked, and "nothing fits" names the closure in the way | S | now | done (2026-10-05) | Claude | D-061. Ported from PR #36. Builds on D-052 (STAB-05) |
 | DATA-21 | Map York Place and the western way into the Grassmarket in OSM (about 1.1 km) | M | later | todo | Richard | [DEVICES.md](plans/DEVICES.md). Turns unknowns into known ground |
 
 ## Research: check our guesses with real people
@@ -268,6 +268,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 
 Newest first. One line per change: date, ID, what happened, link.
 
+- 2026-10-05: DATA-30 done: TfL's lift, line and station feeds fetched apart, a failed feed's last answer held 15 minutes, the route card says which couldn't be checked, and "nothing fits" names the closure (D-061). Follows STAB-05.
 - 2026-10-05: DATA-29 done: the step and gap to the train held to each person's limits, with level-access doors in the spoken route (D-060).
 - 2026-10-05: Added DATA-29 (TfL station data on the platforms, ported from PR #36). A lift out that leaves some platforms step-free now counts as unknown, not closed (D-058).
 - 2026-10-05: DATA-05 extended: six monthly activity archives, closure words and a five-week horizon (D-027 update, ported from PR #36).

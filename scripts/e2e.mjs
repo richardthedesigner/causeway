@@ -223,7 +223,8 @@ for (const j of JOURNEYS) {
     await page.getByRole("option").first().click();
     await page.getByText("Why this way?").waitFor({ timeout: 60_000 });
     console.log("  ok   a route, with no live feed answering");
-    await page.getByText("Couldn't get live lift status from TfL").first().waitFor({ timeout: 25_000 });
+    // With a train in the route, the line names the disruption feeds too (D-061).
+    await page.getByText(/Couldn't get live lift status( or station and line disruptions)? from TfL/).first().waitFor({ timeout: 25_000 });
     console.log("  ok   the lift line says it couldn't check");
   } catch (e) {
     failures.push(`${name}: ${e.message.split("\n")[0]}`);

@@ -19,6 +19,7 @@ import { RouteStrip, VerdictPill } from "@/components/RouteStrip";
 import { Button } from "@/components/ui/button";
 import type { FloodHere, Place, PlannedRoute, PlanResult, WorksSummary } from "@/lib/plan-types";
 import { departure, type Conditions, type LiveLifts } from "@/lib/use-planner";
+import { liveFailedLine } from "@/lib/live-status";
 import type { FlagReason } from "@/lib/sync";
 import { cn } from "@/lib/utils";
 
@@ -143,10 +144,17 @@ export function RoutePanel(props: Props) {
 
   const worksClosed = props.works && props.works.closedNow > 0;
   const flood = props.floods?.here.find((f) => f.severity <= 2);
+  // A TfL feed that didn't answer: lifts for every route, line status and station disruptions only when the route rides a train (D-061).
+  const liveFailed =
+    props.lifts.state === "failed"
+      ? liveFailedLine(true, sel?.train ? "both" : null)
+      : props.lifts.state === "ok"
+        ? liveFailedLine(props.lifts.liftsFailed, sel?.train ? props.lifts.missing : null)
+        : null;
   const liveLine = flood
     ? `${flood.name}: ${flood.label}. ${flood.severity === 1 ? "Paths there are closed." : "Paths there may be flooded, so they count as unknown."} (Environment Agency)`
-    : props.lifts.state === "failed"
-      ? "Couldn't get live lift status from TfL. Check before you travel."
+    : liveFailed
+      ? liveFailed
       : props.lifts.state === "ok" && props.lifts.lines.length > 0
         ? `${props.lifts.lines[0]} Routed around (TfL, ${props.lifts.at.slice(11, 16)} UTC).`
       : props.lifts.state === "ok" && props.lifts.closed > 0
@@ -245,7 +253,7 @@ export function RoutePanel(props: Props) {
                 Ends at a gate into {result.gate.park}, the nearest on your way (OS Open Greenspace).
               </p>
             ) : null}
-            {liveLine ? <p className={cn("m-0 text-sm", props.lifts.state === "failed" ? "text-caution" : "text-muted")}>{liveLine}</p> : null}
+            {liveLine ? <p className={cn("m-0 text-sm", liveFailed && liveLine === liveFailed ? "text-caution" : "text-muted")}>{liveLine}</p> : null}
             {planning ? <p className="m-0 text-sm text-muted">Updating…</p> : null}
           </section>
 
@@ -397,7 +405,7 @@ export function RoutePanel(props: Props) {
                 <li>
                   Ground: {conditions.summary}. {conditions.source}.
                 </li>
-                {props.lifts.state === "ok" ? (
+                {props.lifts.state === "ok" && !props.lifts.liftsFailed ? (
                   <li>
                     Lift status from TfL at {props.lifts.at.slice(11, 16)} UTC: {props.lifts.closed === 0 && !props.lifts.limited ? "no outages on this network" : [props.lifts.closed ? `${props.lifts.closed} platform${props.lifts.closed === 1 ? "" : "s"} closed to step-free travel, routed around` : null, props.lifts.limited ? `${props.lifts.limited} line${props.lifts.limited === 1 ? "" : "s"} step-free to some platforms only, counted as unknown` : null].filter(Boolean).join("; ")}.
                   </li>

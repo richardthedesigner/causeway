@@ -6,6 +6,12 @@ A running record of what was built, newest first. Each entry links the decision 
 
 Richard chose main as the base; the overnight build's extras (PR #36) are ported by hand, smallest and safest first.
 
+**When TfL's feeds fail** (D-061, DATA-30)
+- Lifts, line status and station disruptions are fetched apart. One failing leaves the others, and a failed feed's last good answer counts for 15 minutes after it was fetched. Before, a failure in either disruption feed dropped both and opened every closed line and station without a word.
+- The route card says which couldn't be checked when the route rides a train: "Couldn't get live station disruptions from TfL. Check before you travel."
+- When a closure cuts the only way, "nothing fits" names it: "No way there right now. In the way: no service on Jubilee line." It used to say the start and destination weren't joined up.
+- A station message naming another step-free way in now makes the platforms unknown rather than closing them.
+
 **Platforms and lifts** (D-058, D-060, DATA-29)
 - A lift out that leaves some of a line's platforms step-free makes that line unknown, not closed, and costs a step-free user as much as a station we can't confirm. 46 of the 76 lifts whose loss changes a line are like this.
 - TfL's step and gap from platform to train, per platform and in figures, are held to each person's limits: within TfL's level band (50 mm step, 85 mm gap) for everyone, beyond it against their kerb limit and a gap limit (no setting yet). Missing figures are unknown. The staff ramp costs 3 minutes and says to ask. Kilburn, Stanmore and Bond Street need the ramp for wheeled presets; nothing else changes on today's data.

@@ -605,12 +605,12 @@ export function explain(router: Router, chosen: Route, from: GraphNode, to: Grap
   const sum = summarise(chosen, c.now);
   for (const a of avoided) {
     if (a.reason.attr !== "live") continue;
-    const full = a.reason.detail.replace(/^(lift out of service|closed): /, "");
+    const full = a.reason.detail.replace(/^(lift out of service|no step-free access|closed): /, "");
     // Live feeds say so; a works file built from a register is named, not called live.
     const src = liveSource.get(a.name) ?? "TfL";
     notes.push(`${a.name}: ${full} (${/^TfL/.test(src) ? "TfL, live" : /^Environment Agency/.test(src) ? "Environment Agency, live" : src})`);
     // Only an exclusion was closed; an unknown keeps its own short words ("Lift out of service: step-free to some platforms only").
-    const short = a.reason.kind !== "excluded" ? (liveShort.get(a.name) ?? "may be affected") : a.reason.detail.startsWith("lift") ? "lift out of service" : "closed";
+    const short = a.reason.kind !== "excluded" ? (liveShort.get(a.name) ?? "may be affected") : a.reason.detail.startsWith("lift") ? "lift out of service" : a.reason.detail.startsWith("no step-free") ? "no step-free access" : "closed";
     a.reason = { ...a.reason, detail: short };
   }
   for (const s of chosen.steps) {
@@ -1004,7 +1004,8 @@ const RELAXABLE = new Set(["steps", "escalator", "incline", "kerb", "surface", "
  * last point this person can reach: earlier obstacles already have a way round.
  */
 export function diagnose(router: Router, from: GraphNode, to: GraphNode, p: Profile, unconstrained: Profile, c: Conditions = DRY): Diagnosis {
-  const base = router.route(from, to, unconstrained, c);
+  // A closure (a line part-closed, a station shut) can cut the only way: then the way it cuts is the one to explain (D-061).
+  const base = router.route(from, to, unconstrained, c) ?? router.route(from, to, unconstrained, { ...c, ignoreClosures: true });
   if (!base) return { blockers: [], closest: null, relax: null };
 
   // How close: the last node along that way you can reach.
@@ -1031,7 +1032,9 @@ export function diagnose(router: Router, from: GraphNode, to: GraphNode, p: Prof
       [ev.reasons.find((x) => x.kind === "excluded"), mid],
       [nv.reasons.find((x) => x.kind === "excluded"), [s.node.lon, s.node.lat]],
     ] as [Reason | undefined, [number, number]][]) {
-      if (r) found.push({ b: { name: placeName(s.edge), attr: r.attr, detail: r.detail, lon: at[0], lat: at[1] }, r, s });
+      // A live closure in its own short words ("no service"), not the feed's whole message.
+      const detail = r?.attr === "live" && s.edge.live?.headline ? s.edge.live.headline.replace(/^(No|Trains|Station|Part|Lift|Pavement|Road|Path)\b/, (w) => w.toLowerCase()) : r?.detail;
+      if (r) found.push({ b: { name: placeName(s.edge), attr: r.attr, detail: detail ?? r.detail, lon: at[0], lat: at[1] }, r, s });
     }
   });
   // One entry per street and kind of obstacle.
