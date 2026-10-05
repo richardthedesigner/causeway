@@ -283,7 +283,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 | DEF-06 | Crowd verification: several people confirming the same note | L | later | blocked | Claude | Needs DEF-04 |
 | DEF-07 | Optional accounts: sync devices and saved places between phones, encrypted on the device, sign in with a passkey or email code | L | later | blocked | Richard, Claude | Health data makes this a privacy decision first (D-009) |
 | DEF-08 | Opt-in surface sensing from the accelerometer | L | later | blocked | Claude | Needs DEF-01 and a privacy review |
-| DEF-09 | Beyond the pilot cities: Glasgow first (once DATA-13 is licensed), then Wales | XL | later | blocked | Richard, Claude | §5 |
+| DEF-09 | Beyond the pilot cities: Glasgow first (once DATA-13 is licensed), then Leeds, then by city size | XL | later | blocked | Richard, Claude | D-072. Glasgow and Leeds decided 2026-10-05; after that, ordered by ONS/NRS population (largest first), skipping done cities |
 
 ## Log
 

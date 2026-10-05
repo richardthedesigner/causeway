@@ -852,3 +852,9 @@ The bottom sheet is meant to be non-modal (`modal={false}`), so the map stays us
 - Radix still loops Tab inside a non-modal dialog, so `DrawerContent` stops Tab reaching that loop. Tab now runs from the sheet to the map controls and back, in page order.
 - The city and layers menus are drawn at the end of the page, above the sheet. Inside the map they opened behind it. They take focus when they open; Escape, Tab or a choice gives it back to their button.
 - `pnpm a11y` checks that Tab reaches all three map controls, that `<main>` isn't hidden, and that both menus take and return focus.
+
+## D-072 Which city next
+
+**Decided.** 2026-10-05 (DEF-09 update). Richard chose Glasgow, then Leeds. After those, cities are chosen by population without asking Richard again: built-up area population from ONS (England and Wales) or NRS (Scotland), largest first, skipping cities already covered (Edinburgh, Newcastle, Gateshead, London).
+
+**The order.** Glasgow and Leeds settled. The following cities by ONS/NRS built-up area population, largest first: [to be filled in with figures and sources].
