@@ -206,6 +206,8 @@ export function compareLine(minutes: number, prev: { label: string; minutes: num
 export function presetProfile(current: Profile, preset: MobilityPreset): Profile {
   const next: Profile = { ...PRESETS[preset] };
   if (current.maxRangeKm && hasBattery(next)) next.maxRangeKm = current.maxRangeKm;
+  // How someone reads speeds is theirs, not the type's.
+  if (current.speedUnit) next.speedUnit = current.speedUnit;
   return next;
 }
 

@@ -2,6 +2,13 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
+## 2026-10-05 (midday)
+
+**Road speed in the device editor** (D-051, FEAT-18)
+- Road scooters: "Speed on the road", 4 to 8 mph in half-mph steps. The "Your limits" row says "8 mph on roads".
+- Every device: "Show speeds in: mph or km/h", for pace and road speed. Scooters start in mph, everyone else in km/h.
+- `pnpm a11y` checks a road scooter's settings in both units, and at 200% text on a 320 px phone.
+
 ## 2026-10-05 (later)
 
 **Road speed for road scooters** (D-051, FEAT-02)

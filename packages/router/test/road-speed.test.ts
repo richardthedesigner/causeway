@@ -56,3 +56,29 @@ describe("road speed for road-legal scooters", () => {
     expect(p.roadSpeedMps).toBe(road.roadSpeedMps);
   });
 });
+
+describe("speed units", () => {
+  it("defaults scooters to mph and everyone else to km/h", async () => {
+    const { speedUnit } = await import("@causeway/profile");
+    expect(speedUnit(PRESETS["mobility-scooter-road"])).toBe("mph");
+    expect(speedUnit(PRESETS["mobility-scooter"])).toBe("mph");
+    expect(speedUnit(PRESETS["powerchair"])).toBe("kmh");
+    expect(speedUnit({ ...PRESETS["powerchair"], speedUnit: "mph" })).toBe("mph");
+    // A bad stored value falls back to the type's default.
+    expect(speedUnit({ ...PRESETS["mobility-scooter-road"], speedUnit: "knots" as never })).toBe("mph");
+  });
+
+  it("writes speeds plainly, with a long form for screen readers", async () => {
+    const { formatSpeed, MPS_PER_MPH } = await import("@causeway/profile");
+    expect(formatSpeed(8 * MPS_PER_MPH, "mph")).toBe("8 mph");
+    expect(formatSpeed(7.5 * MPS_PER_MPH, "mph", true)).toBe("7.5 miles per hour");
+    expect(formatSpeed(8 * MPS_PER_MPH, "kmh")).toBe("12.9 km/h");
+    expect(formatSpeed(1.25, "kmh", true)).toBe("4.5 kilometres per hour");
+  });
+
+  it("sets the default road speed to the 8 mph legal top speed", async () => {
+    const { formatSpeed, MPS_PER_MPH, ROAD_MPH_MAX } = await import("@causeway/profile");
+    expect(Math.abs(road.roadSpeedMps! / MPS_PER_MPH - ROAD_MPH_MAX)).toBeLessThan(0.01);
+    expect(formatSpeed(road.roadSpeedMps!, "mph")).toBe("8 mph");
+  });
+});

@@ -170,3 +170,12 @@ describe("battery range across a change of type (D-043)", () => {
     expect(presetProfile(PRESETS["manual-wheelchair"], "powerchair").maxRangeKm).toBeUndefined();
   });
 });
+
+describe("speed unit across a change of type (FEAT-18)", () => {
+  it("keeps the unit someone chose; a type change never picks one for them", () => {
+    const lulu = { ...PRESETS["mobility-scooter-road"], speedUnit: "kmh" as const };
+    expect(presetProfile(lulu, "mobility-scooter").speedUnit).toBe("kmh");
+    expect(presetProfile(lulu, "powerchair").speedUnit).toBe("kmh");
+    expect(presetProfile(PRESETS["mobility-scooter-road"], "powerchair").speedUnit).toBeUndefined();
+  });
+});
