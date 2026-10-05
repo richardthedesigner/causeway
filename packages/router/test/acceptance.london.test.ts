@@ -10,7 +10,7 @@ import { describe, expect, it } from "vitest";
 import { applyStationAccess, loadSnapshot, refRides, type Graph, type TransitNetwork } from "@causeway/graph/node";
 import { applyLiveStates, fetchLiftOutages, liftOutageStates, PART_HEADLINE, parseLiftDisruptions, parseLineStatus, railDisruptionStates } from "@causeway/live";
 import { PRESETS } from "@causeway/profile";
-import { describeSegments, diagnose, explain, Router, summarise } from "@causeway/router";
+import { closureBlind, describeSegments, diagnose, explain, onRoute, Router, summarise } from "@causeway/router";
 import { LONDON_JOURNEYS } from "../../../scripts/journeys.js";
 
 const ROOT = join(import.meta.dirname, "../../..");
@@ -79,7 +79,10 @@ describe("Parliament Square to Canary Wharf", () => {
     const ex = explain(r, route, a, b, p, PRESETS.walking, c);
     // Canary Wharf is where this journey ends, so the route still uses it, and says so.
     expect(route.steps.some((s) => s.edge.ref === "board:jubilee:940GZZLUCYF")).toBe(true);
-    expect(ex.notes).toContain("Canary Wharf, Jubilee line: Lift out of service: step-free to some platforms only: Canary Wharf lift 1 out. (TfL, live). Check before you travel.");
+    // Under "On this route" as Slower, with its source and time (D-067); not blocked, and nothing to go round.
+    const items = onRoute(r, route, p, c, { avoided: ex.avoided, blind: closureBlind(r, a, b, p, c) });
+    expect(items).toContainEqual({ group: "slower", text: "Lift out of service: step-free to some platforms only: Canary Wharf lift 1 out.", where: ["Canary Wharf, Jubilee line"], label: "live", source: "TfL", date: "2026-10-04T12:00:00Z", until: null });
+    expect(items.some((i) => i.group === "blocked")).toBe(false);
     expect(ex.headline).not.toMatch(/closed/);
   });
 
@@ -104,7 +107,12 @@ describe("Parliament Square to Canary Wharf", () => {
     expect(rides.length).toBeGreaterThan(0);
     const ex = explain(r, route, a, b, p, PRESETS.walking, c);
     expect(ex.headline).toMatch(/Avoids Canary Wharf, Jubilee line \(lift out of service\)\. Adds \d+ minutes?\./);
-    expect(ex.notes.some((n) => /faulty lift/.test(n) && /TfL/.test(n))).toBe(true);
+    // Blocked under "On this route", once, with TfL's words and the fetch time (D-067). Walking, nothing is blocked.
+    const blocked = onRoute(r, route, p, c, { avoided: ex.avoided, blind: closureBlind(r, a, b, p, c) }).filter((i) => i.group === "blocked");
+    expect(blocked.length).toBeGreaterThan(0);
+    expect(blocked.some((i) => /faulty lift/.test(i.text) && i.source === "TfL" && i.label === "live" && i.where.some((w) => /Canary Wharf/.test(w)))).toBe(true);
+    const w = plan(g, "walking");
+    expect(onRoute(w.r, w.route, w.p, w.c, { avoided: explain(w.r, w.route, w.a, w.b, w.p, PRESETS.walking, w.c).avoided, blind: closureBlind(w.r, w.a, w.b, w.p, w.c) }).some((i) => i.group === "blocked")).toBe(false);
     expect(describeSegments(route).some((s) => /^Take the /.test(s))).toBe(true);
   });
 

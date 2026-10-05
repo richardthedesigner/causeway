@@ -4,6 +4,7 @@
  * (scripts/build-osm-notes.ts), so no route leaves the device.
  */
 import { haversine } from "@causeway/graph";
+import type { OnRouteItem } from "@causeway/router";
 
 export interface OsmNotesFile {
   area: string;
@@ -13,17 +14,23 @@ export interface OsmNotesFile {
   notes: { id: number; lon: number; lat: number; opened: string; text: string }[];
 }
 
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const when = (d: string) => `${MONTHS[Number(d.slice(5, 7)) - 1]} ${d.slice(0, 4)}`;
+/** Where the list says they're from (D-067). */
+export const NOTES_SOURCE = "OpenStreetMap Notes";
+/** At most this many are listed; one line counts the rest (D-048). */
+export const NOTES_LISTED = 3;
 
-/** Notes within `withinM` of the route's line, in order along it, as route notes. Past `max`, one line counts the rest (D-048). */
-export function osmNotesNear(file: OsmNotesFile | null, coords: [number, number][], withinM = 20, max = 3): string[] {
+/**
+ * Notes within `withinM` of the route's line, in order along it, as "On this
+ * route" items: worth knowing, reported by people, dated when the note was
+ * opened. Past `max`, one line counts the rest.
+ */
+export function osmNoteItems(file: OsmNotesFile | null, coords: [number, number][], withinM = 20, max = NOTES_LISTED): OnRouteItem[] {
   if (!file?.notes.length || coords.length < 2) return [];
   const xs = coords.map((c) => c[0]),
     ys = coords.map((c) => c[1]);
   const pad = 0.0005;
   const [x0, y0, x1, y1] = [Math.min(...xs) - pad, Math.min(...ys) - pad, Math.max(...xs) + pad, Math.max(...ys) + pad];
-  const hits: { at: number; text: string }[] = [];
+  const hits: { at: number; text: string; opened: string }[] = [];
   for (const n of file.notes) {
     if (n.lon < x0 || n.lon > x1 || n.lat < y0 || n.lat > y1) continue;
     const k = Math.cos((n.lat * Math.PI) / 180);
@@ -38,11 +45,12 @@ export function osmNotesNear(file: OsmNotesFile | null, coords: [number, number]
       if (d < best.d) best = { d, at: along + t * haversine(a, b) };
       along += haversine(a, b);
     }
-    if (best.d <= withinM) hits.push({ at: best.at, text: `An OpenStreetMap note near the route, from ${when(n.opened)}: "${n.text}" Not checked by us.` });
+    if (best.d <= withinM) hits.push({ at: best.at, text: n.text, opened: n.opened });
   }
   hits.sort((a, b) => a.at - b.at);
-  const out = hits.slice(0, max).map((h) => h.text);
-  const more = hits.length - out.length;
-  if (more > 0) out.push(`${more} more ${more === 1 ? "place" : "places"} a mapper flagged on this route in OpenStreetMap. Not checked by us.`);
+  const item = (text: string, date: string | null): OnRouteItem => ({ group: "info", text, where: [], label: "reported", source: NOTES_SOURCE, date, until: null });
+  const out = hits.slice(0, max).map((h) => item(`A mapper wrote: “${h.text}” Not checked by us`, h.opened));
+  const rest = hits.slice(max);
+  if (rest.length) out.push(item(`${rest.length} more ${rest.length === 1 ? "place" : "places"} a mapper flagged on this route`, rest.map((h) => h.opened).sort().at(-1)!));
   return out;
 }

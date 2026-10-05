@@ -7,7 +7,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 import type { GraphEdge } from "@causeway/graph";
 import { loadSnapshot } from "@causeway/graph/node";
 import { PRESETS, type Profile } from "@causeway/profile";
-import { DRY, evaluateEdge, explain, GUST_BRIDGE_KMH, Router, windSensitive, type Conditions } from "@causeway/router";
+import { DRY, evaluateEdge, explain, GUST_BRIDGE_KMH, onRoute, Router, windSensitive, type Conditions } from "@causeway/router";
 
 const walking = PRESETS.walking;
 const manual = PRESETS["manual-wheelchair"];
@@ -54,14 +54,15 @@ describe("gusts on exposed bridges", () => {
     expect(evaluateEdge(bridge, true, manual, GUST).passable).toBe(evaluateEdge(bridge, true, manual, DRY).passable);
   });
 
-  it("are said on a route over North Bridge, with source and time", () => {
+  it("are listed under On this route over North Bridge, with source and time, and not in Why this way? (D-067)", () => {
     const from = router.snap(-3.1907, 55.9496, manual)!,
       to = router.snap(-3.1893, 55.952, manual)!;
     const r = router.route(from, to, manual, GUST)!;
-    expect(explain(router, r, from, to, manual, walking, GUST).notes).toContain("Strong gusts on exposed bridges: up to 62 km/h (Open-Meteo, 5 Oct, 01:00 UTC).");
+    expect(onRoute(router, r, manual, GUST)).toContainEqual({ group: "info", text: "Strong gusts on exposed bridges: up to 62 km/h", where: expect.arrayContaining(["North Bridge"]), label: "live", source: "Open-Meteo", date: "2026-10-05T01:00:00Z", until: null });
+    expect(explain(router, r, from, to, manual, walking, GUST).notes.some((n) => n.startsWith("Strong gusts"))).toBe(false);
     // Walking: no cost, so no line.
     const w = router.route(from, to, walking, GUST)!;
-    expect(explain(router, w, from, to, walking, walking, GUST).notes.some((n) => n.startsWith("Strong gusts"))).toBe(false);
+    expect(onRoute(router, w, walking, GUST).some((i) => i.text.startsWith("Strong gusts"))).toBe(false);
   });
 });
 
@@ -78,12 +79,13 @@ describe("UKHSA heat and cold alerts", () => {
     expect(hot.passable).toBe(base.passable);
   });
 
-  it("are said to everyone, with UKHSA's end date", () => {
+  it("are listed for everyone under On this route, with UKHSA's end date (D-067)", () => {
     const from = router.snap(-3.1812, 55.9385, walking)!,
       to = router.snap(-3.1897, 55.9469, walking)!;
     const r = router.route(from, to, walking, HEAT)!;
-    expect(explain(router, r, from, to, walking, walking, HEAT).notes).toContain("Amber heat health alert for London until 20 Jul, 08:00 UTC (UKHSA, updated 18 Jul, 08:00 UTC).");
+    expect(onRoute(router, r, walking, HEAT)).toContainEqual({ group: "info", text: "Amber heat health alert for London", where: [], label: "live", source: "UKHSA", date: "2026-07-18T08:00:00Z", until: "2026-07-20T08:00:00Z" });
+    expect(explain(router, r, from, to, walking, walking, HEAT).notes.some((n) => /health alert/.test(n))).toBe(false);
     const f = router.route(from, to, fatigue, HEAT)!;
-    expect(explain(router, f, from, to, fatigue, walking, HEAT).notes).toContain("Amber heat health alert for London until 20 Jul, 08:00 UTC. We've favoured places to rest (UKHSA, updated 18 Jul, 08:00 UTC).");
+    expect(onRoute(router, f, fatigue, HEAT).map((i) => i.text)).toContain("Amber heat health alert for London: we've favoured places to rest");
   });
 });

@@ -19,7 +19,9 @@ import { RouteStrip, VerdictPill } from "@/components/RouteStrip";
 import { Button } from "@/components/ui/button";
 import type { FloodHere, Place, PlannedRoute, PlanResult, WorksSummary } from "@/lib/plan-types";
 import { departure, type Conditions, type LiveArea, type LiveHealthAlert, type LiveLifts } from "@/lib/use-planner";
-import { airLines, areaStatus, gustStatus, healthAlertStatus } from "@/lib/area-status";
+import { areaStatus, gustStatus, healthAlertStatus } from "@/lib/area-status";
+import { airItems, blockedLine, floodLine } from "@/lib/on-route";
+import { OnThisRoute } from "@/components/OnThisRoute";
 import { liveFailedLine } from "@/lib/live-status";
 import type { FlagReason } from "@/lib/sync";
 import { cn } from "@/lib/utils";
@@ -149,28 +151,18 @@ export function RoutePanel(props: Props) {
       }),
   ];
 
-  const worksClosed = props.works && props.works.closedNow > 0;
-  // Air quality, pollen and UV when high: area-wide, after the route's own lines (D-066).
-  const air = airLines(props.area?.air ?? null);
-  const flood = props.floods?.here.find((f) => f.severity <= 2);
-  // A TfL feed that didn't answer: lifts for every route, line status and station disruptions only when the route rides a train (D-061).
+  // "On this route" (D-067): the route's own list, then air quality, pollen and UV when high, which are area-wide (D-066).
+  const onRouteItems = sel ? [...sel.onRoute, ...airItems(props.area?.air ?? null)] : [];
+  // The route card says only what changed the route or needs doing (D-067). A TfL feed that didn't answer: lifts for every
+  // route, line status and station disruptions only when the route rides a train (D-061). Then a closure this route went
+  // round, as a count, and a flood warning area this route passes through. The area's counts stay under "Where this comes from".
   const liveFailed =
     props.lifts.state === "failed"
       ? liveFailedLine(true, sel?.train ? "both" : null)
       : props.lifts.state === "ok"
         ? liveFailedLine(props.lifts.liftsFailed, sel?.train ? props.lifts.missing : null)
         : null;
-  const liveLine = flood
-    ? `${flood.name}: ${flood.label}. ${flood.severity === 1 ? "Paths there are closed." : "Paths there may be flooded, so they count as unknown."} (Environment Agency)`
-    : liveFailed
-      ? liveFailed
-      : props.lifts.state === "ok" && props.lifts.lines.length > 0
-        ? `${props.lifts.lines[0]} Routed around (TfL, ${props.lifts.at.slice(11, 16)} UTC).`
-      : props.lifts.state === "ok" && props.lifts.closed > 0
-        ? `${props.lifts.closed} lift${props.lifts.closed === 1 ? "" : "s"} out of service, routed around (TfL, ${props.lifts.at.slice(11, 16)} UTC).`
-        : worksClosed
-          ? `${props.works!.closedNow} pavement closure${props.works!.closedNow === 1 ? "" : "s"} nearby, avoided.`
-          : null;
+  const cardLines = sel ? [blockedLine(sel.onRoute), floodLine(sel.onRoute)].filter((x): x is string => !!x) : [];
   // The sentence that says why this route: the explanation for the best route, the trade-off for the others.
   const why = !sel ? null : result?.status === "ok" && sel.id === result.routes[0]?.id ? result.headline : (selTitle?.why ?? null);
 
@@ -262,7 +254,12 @@ export function RoutePanel(props: Props) {
                 Ends at a gate into {result.gate.park}, the nearest on your way (OS Open Greenspace).
               </p>
             ) : null}
-            {liveLine ? <p className={cn("m-0 text-sm", liveFailed && liveLine === liveFailed ? "text-caution" : "text-muted")}>{liveLine}</p> : null}
+            {liveFailed ? <p className="m-0 text-sm text-caution">{liveFailed}</p> : null}
+            {cardLines.map((l) => (
+              <p key={l} className="m-0 text-sm text-muted">
+                {l}
+              </p>
+            ))}
             {planning ? <p className="m-0 text-sm text-muted">Updating…</p> : null}
           </section>
 
@@ -316,6 +313,7 @@ export function RoutePanel(props: Props) {
           })()}
 
           <div className="grid gap-2 [&>*]:min-w-0">
+            <OnThisRoute items={onRouteItems} routeId={sel.id} />
             {isVenue ? (
               <More
                 title="Getting in"
@@ -333,10 +331,10 @@ export function RoutePanel(props: Props) {
                   </div>
                 ) : null}
                 {entrances.length ? (
-                  <ul className="m-0 grid list-none gap-3 p-0">
+                  <ul className="m-0 grid list-none grid-cols-1 gap-3 p-0 [overflow-wrap:anywhere]">
                     {entrances.map((e) => (
-                      <li key={e.osmId} className="grid gap-0.5">
-                        <span className="flex items-center gap-2">
+                      <li key={e.osmId} className="grid min-w-0 gap-0.5">
+                        <span className="flex min-w-0 items-center gap-2">
                           {e.verdict.passable === "yes" ? (
                             <CircleCheck aria-hidden className="size-5 shrink-0 text-ok" />
                           ) : e.verdict.passable === "no" ? (
@@ -344,7 +342,7 @@ export function RoutePanel(props: Props) {
                           ) : (
                             <CircleHelp aria-hidden className="size-5 shrink-0 text-unknown" />
                           )}
-                          <span>
+                          <span className="min-w-0">
                             {e.name ? `${e.name}: ` : "Entrance: "}
                             {e.verdict.detail}
                             <span className="sr-only">. {e.verdict.passable === "yes" ? "Usable with your settings" : e.verdict.passable === "no" ? "Not usable with your settings" : "Not known"}</span>
@@ -365,9 +363,9 @@ export function RoutePanel(props: Props) {
             ) : null}
 
             <More title="Why this way?" aside={peopleCount ? `${peopleCount} note${peopleCount === 1 ? "" : "s"} from people` : undefined}>
-              {result.notes.length || air.length ? (
+              {result.notes.length ? (
                 <ul className="m-0 grid list-none grid-cols-1 gap-1 p-0">
-                  {[...result.notes, ...air].map((n) => (
+                  {result.notes.map((n) => (
                     <li key={n}>{n}</li>
                   ))}
                 </ul>

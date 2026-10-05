@@ -18,7 +18,7 @@ export interface Conditions {
   ice: boolean;
   /** After civil twilight: unlit stretches cost those who asked to avoid them. Absent means daylight. */
   dark?: boolean;
-  /** Treat live closures as open: only to find what a closure cuts off, for "In the way" (D-061). Never for a route we offer. */
+  /** Treat live closures as open: only to find what a closure cuts off, for "In the way" (D-061) and "On this route" (D-067). Never for a route we offer. */
   ignoreClosures?: boolean;
   /** The strongest gust now, or at the hour you leave, with its source and time (D-066). */
   gust?: { kmh: number; at: string; source: string };

@@ -16,7 +16,7 @@ import { join } from "node:path";
 import { gzipSync } from "node:zlib";
 import { addBus, applyCouncilFootways, applyStationAccess, loadSnapshot, refRides, type BusNetwork, type CouncilFootways, type Graph, type TransitNetwork } from "@causeway/graph/node";
 import { PRESETS } from "@causeway/profile";
-import { Router, tradeoffs, type Conditions } from "@causeway/router";
+import { closureBlind, onRoute, Router, tradeoffs, type Conditions } from "@causeway/router";
 import { EDINBURGH_CENTRAL_JOURNEYS, LONDON_JOURNEYS, NEWCASTLE_JOURNEYS, type Journey } from "./journeys.js";
 
 export const ROOT = join(import.meta.dirname, "..");
@@ -252,7 +252,7 @@ export function timeRoutes(router: Router, journeys: Journey[], runs = 3): Journ
   return out;
 }
 
-/** Route plus trade-offs for every journey with every rest preset; fastest of `runs` timings each. */
+/** Route, trade-offs and the "On this route" list for every journey with every rest preset; fastest of `runs` timings each. */
 export function timePlans(router: Router, journeys: Journey[], runs = 3): JourneyTiming[] {
   const c = PERF_CONDITIONS;
   const out: JourneyTiming[] = [];
@@ -267,6 +267,9 @@ export function timePlans(router: Router, journeys: Journey[], runs = 3): Journe
           const s = performance.now();
           const r = router.route(from, to, p, c);
           routes = r ? 1 + tradeoffs(router, r, from, to, p, c).filter((t) => t.route).length : 0;
+          // "On this route" (D-067), as the worker builds it: the closure-blind search runs only when something is
+          // closed, which with no live data here is never, so this times the check and the list.
+          if (r) onRoute(router, r, p, c, { blind: closureBlind(router, from, to, p, c) });
           return performance.now() - s;
         }),
       );

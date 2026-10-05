@@ -4,14 +4,11 @@
  * line says where it's from and when. A feed that failed is said quietly in
  * "Where this comes from" and changes nothing else.
  */
-import { WATER_OF_LEITH_HIGH_M, type AreaNote } from "@causeway/live";
+import { WATER_OF_LEITH_HIGH_M } from "@causeway/live";
 import { GUST_BRIDGE_KMH, utcShort } from "@causeway/router";
 import type { LiveArea, LiveHealthAlert } from "./use-planner";
 
 const hhmm = (iso: string) => `${iso.slice(11, 16)} UTC`;
-
-/** Area-wide air lines for "Why this way?": only what is high (the feed sends nothing else). */
-export const airLines = (notes: readonly AreaNote[] | null): string[] => (notes ?? []).map((n) => `${n.text}, across the area (${n.source}, ${utcShort(n.at)}).`);
 
 /** "Where this comes from": UKHSA. */
 export function healthAlertStatus(a: LiveHealthAlert): string | null {

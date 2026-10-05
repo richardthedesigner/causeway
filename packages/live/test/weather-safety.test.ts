@@ -22,7 +22,7 @@ import {
   parseLatestLevel,
   parseRegionAlerts,
   riverHigh,
-  riverLine,
+  riverText,
   sepaLevelUrl,
   strongestAlert,
   ukhsaAlertsUrl,
@@ -181,6 +181,6 @@ describe("SEPA: the Water of Leith at Murrayfield", () => {
   it("only matters on the walkway, and says where it's from", () => {
     expect(usesWalkway(["Leith Walk", null, "Water of Leith Walkway"])).toBe(true);
     expect(usesWalkway(["Leith Walk", "Water of Leith Visitor Centre"])).toBe(false);
-    expect(riverLine({ metres: 1.2, at: "2026-10-05T00:00:00.000Z" }, (t) => t.slice(11, 16))).toBe("Water of Leith high at Murrayfield (1.20 m): the walkway can flood. Worth knowing, not a warning (SEPA, 00:00).");
+    expect(riverText({ metres: 1.2, at: "2026-10-05T00:00:00.000Z" })).toBe("Water of Leith high at Murrayfield (1.20 m): the walkway can flood");
   });
 });

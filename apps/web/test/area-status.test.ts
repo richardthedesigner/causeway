@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { airLines, areaStatus, gustStatus, healthAlertStatus } from "../src/lib/area-status";
+import { areaStatus, gustStatus, healthAlertStatus } from "../src/lib/area-status";
+import { airItems } from "../src/lib/on-route";
 import { CITIES } from "../src/lib/cities";
 
 describe("weather and health extras (D-066)", () => {
@@ -28,8 +29,8 @@ describe("weather and health extras (D-066)", () => {
 
   it("lists air lines only when high, and the river quietly", () => {
     const air = [{ text: "UV high (index 7)", source: "Open-Meteo, Copernicus Atmosphere Monitoring Service", at: "2026-06-20T13:00:00Z" }];
-    expect(airLines(air)).toEqual(["UV high (index 7), across the area (Open-Meteo, Copernicus Atmosphere Monitoring Service, 20 Jun, 13:00 UTC)."]);
-    expect(airLines(null)).toEqual([]);
+    expect(airItems(air)).toEqual([{ group: "info", text: "UV high (index 7), across the area", where: [], label: "live", source: "Open-Meteo, Copernicus Atmosphere Monitoring Service", date: "2026-06-20T13:00:00Z", until: null }]);
+    expect(airItems(null)).toEqual([]);
     expect(areaStatus({ air: [], airFailed: false, river: { metres: 0.484, at: "2026-10-05T00:00:00.000Z" }, riverFailed: false }, true)).toEqual([
       "Air quality, pollen and UV from the Copernicus Atmosphere Monitoring Service, via Open-Meteo: nothing high.",
       "Water of Leith at Murrayfield from SEPA at 00:00 UTC: 0.48 m. Said on routes using the walkway from 1.05 m.",

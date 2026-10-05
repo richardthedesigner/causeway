@@ -160,6 +160,9 @@ export function mergeLiveStates(...maps: Map<string, LiveState>[]): Map<string, 
   return out;
 }
 
+/** Lines outside our network: a message naming only these isn't about our platforms. */
+const OTHER_LINES = /\b(bakerloo|central|circle|district|hammersmith|metropolitan|northern|piccadilly|victoria|waterloo|elizabeth|overground)\b/i;
+
 /**
  * Live states for rides and boarding. Line closures close the rides between
  * the stations TfL names (or the whole line); station messages close or flag
@@ -202,13 +205,44 @@ export function railDisruptionStates(
       const named = lineNames.filter(([id, name]) => d.message.toLowerCase().includes(name.toLowerCase()) || (id === "dlr" && /\bdlr\b/i.test(d.message))).map(([id]) => id);
       const lines = named.length ? named : null;
       // Another line named, none of ours: it isn't about our platforms.
-      if (!lines && /\b(bakerloo|central|circle|district|hammersmith|metropolitan|northern|piccadilly|victoria|waterloo|elizabeth|overground)\b/i.test(d.message)) continue;
+      if (!lines && OTHER_LINES.test(d.message)) continue;
       for (const st of d.stations) {
         for (const ref of boards(st, lines)) {
           if (effect === "no-step-free") put(ref, { status: partial ? "restricted" : "closed", affects: "step-free", headline: partial ? "No step-free access to part of the station" : NO_STEP_FREE, source: "TfL station disruptions", ...base });
           else put(ref, { status: partial ? "restricted" : "closed", headline: effect === "not-calling" ? (partial ? "Trains don't stop at some platforms" : "Trains don't stop here") : partial ? "Part of the station closed" : "Station closed", source: "TfL station disruptions", ...base });
         }
       }
+    }
+  }
+  return out;
+}
+
+/**
+ * TfL's station messages that change nothing for routing (a reduced escalator
+ * service, a platform gap, step-free access still available), by our station
+ * id, for "On this route" on routes through that station (D-067). Only
+ * stations on our network with a platform or entrance in the graph, and only
+ * messages still in force or to come.
+ */
+export function stationInfoNotes(
+  disruptions: RailDisruption[],
+  net: { routes: { line: string; lineName: string }[] },
+  edgeRefs: Set<string>,
+  fetchedAt: string,
+  now = new Date(),
+): Map<string, { message: string; at: string; validFrom: string; validUntil: string }[]> {
+  const lineNames = [...new Map(net.routes.map((r) => [r.line, r.lineName])).values()];
+  const ours = (m: string) => lineNames.some((n) => m.toLowerCase().includes(n.toLowerCase())) || /\bdlr\b/i.test(m);
+  const stationsHere = new Set([...edgeRefs].filter((r) => (r.startsWith("board:") && !r.startsWith("board:bus:")) || r.startsWith("link:")).map((r) => r.split(":").pop()!));
+  const out = new Map<string, { message: string; at: string; validFrom: string; validUntil: string }[]>();
+  for (const d of disruptions) {
+    if (d.kind !== "station" || Date.parse(d.validUntil) <= now.getTime()) continue;
+    if (readStationMessage(d.message).effect) continue;
+    if (!ours(d.message) && OTHER_LINES.test(d.message)) continue;
+    for (const st of d.stations) {
+      if (!stationsHere.has(st)) continue;
+      const list = out.get(st) ?? out.set(st, []).get(st)!;
+      if (!list.some((x) => x.message === d.message)) list.push({ message: d.message, at: fetchedAt, validFrom: d.validFrom, validUntil: d.validUntil });
     }
   }
   return out;

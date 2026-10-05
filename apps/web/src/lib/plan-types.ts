@@ -1,5 +1,5 @@
 import type { FloodWarning, RiverLevel } from "@causeway/live";
-import type { Conditions, EntranceOption, NavPlan, RouteSummary } from "@causeway/router";
+import type { Conditions, EntranceOption, NavPlan, OnRouteItem, RouteSummary } from "@causeway/router";
 import type { Profile } from "@causeway/profile";
 import type { WorksObservation } from "@causeway/live";
 import type { Stretch, UserNote } from "@causeway/graph";
@@ -47,6 +47,8 @@ export interface PlannedRoute {
   strip: RouteStrip;
   /** The route line in pieces by slope band, so the map matches the strip. */
   bands: { bin: number; coords: [number, number][] }[];
+  /** "On this route" (D-067): blocked, slower and worth knowing, each with its label, source and date. */
+  onRoute: OnRouteItem[];
 }
 
 /**

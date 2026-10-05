@@ -48,9 +48,8 @@ export const usesWalkway = (names: Iterable<string | null>) => {
   return false;
 };
 
-/** The line for a route on the walkway when the river is high, with source and time. */
-export const riverLine = (level: RiverLevel, at: (iso: string) => string) =>
-  `Water of Leith high at Murrayfield (${level.metres.toFixed(2)} m): the walkway can flood. Worth knowing, not a warning (${SEPA_SOURCE}, ${at(level.at)}).`;
+/** The words for a route on the walkway when the river is high. Listed under "On this route", worth knowing, with SEPA and the reading's time (D-067). */
+export const riverText = (level: RiverLevel) => `Water of Leith high at Murrayfield (${level.metres.toFixed(2)} m): the walkway can flood`;
 
 export async function fetchRiverLevel(opts: LiveOptions = {}): Promise<RiverLevel | null> {
   return parseLatestLevel(await getJson<unknown>(sepaLevelUrl(), "SEPA river level", opts));

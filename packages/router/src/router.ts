@@ -562,6 +562,8 @@ export interface Avoided {
   name: string;
   reason: Reason;
   lengthM: number;
+  /** For a live state: the edge that carried it, so "On this route" can say what it was and where it came from (D-067). */
+  edgeId?: number;
 }
 
 export interface Explanation {
@@ -586,8 +588,6 @@ export function explain(router: Router, chosen: Route, from: GraphNode, to: Grap
   const base = router.route(from, to, unconstrained, c);
   const chosenIds = new Set(chosen.steps.map((s) => s.edge.id));
   const avoidedByName = new Map<string, Avoided>();
-  /** Where each avoided street's live closure came from, for the note. */
-  const liveSource = new Map<string, string>();
   /** Short words for a live state that doesn't close the way: its headline. */
   const liveShort = new Map<string, string>();
   if (base) {
@@ -600,12 +600,9 @@ export function explain(router: Router, chosen: Route, from: GraphNode, to: Grap
         .sort((a, b) => b.seconds - a.seconds)[0];
       if (!worst) continue;
       const name = placeName(s.edge);
-      if (worst.attr === "live" && s.edge.live) {
-        liveSource.set(name, s.edge.live.source);
-        liveShort.set(name, s.edge.live.headline ?? "may be affected");
-      }
+      if (worst.attr === "live" && s.edge.live) liveShort.set(name, s.edge.live.headline ?? "may be affected");
       const cur = avoidedByName.get(name);
-      if (!cur || worst.seconds > cur.reason.seconds) avoidedByName.set(name, { name, reason: worst, lengthM: (cur?.lengthM ?? 0) + s.edge.lengthM });
+      if (!cur || worst.seconds > cur.reason.seconds) avoidedByName.set(name, { name, reason: worst, lengthM: (cur?.lengthM ?? 0) + s.edge.lengthM, ...(worst.attr === "live" ? { edgeId: s.edge.id } : {}) });
       else cur.lengthM += s.edge.lengthM;
     }
   }
@@ -619,24 +616,17 @@ export function explain(router: Router, chosen: Route, from: GraphNode, to: Grap
 
   const notes: string[] = [];
   const sum = summarise(chosen, c.now);
+  // Live states (closures gone round, stations we can't confirm), health alerts and gusts are listed under "On this route" with their source and time (D-067), not here.
   for (const a of avoided) {
     if (a.reason.attr !== "live") continue;
-    const full = a.reason.detail.replace(/^(lift out of service|no step-free access|closed): /, "");
-    // Live feeds say so; a works file built from a register is named, not called live.
-    const src = liveSource.get(a.name) ?? "TfL";
-    notes.push(`${a.name}: ${full} (${/^TfL/.test(src) ? "TfL, live" : /^Environment Agency/.test(src) ? "Environment Agency, live" : src})`);
     // Only an exclusion was closed; an unknown keeps its own short words ("Lift out of service: step-free to some platforms only").
     const short = a.reason.kind !== "excluded" ? (liveShort.get(a.name) ?? "may be affected") : a.reason.detail.startsWith("lift") ? "lift out of service" : a.reason.detail.startsWith("no step-free") ? "no step-free access" : "closed";
     a.reason = { ...a.reason, detail: short };
   }
   for (const s of chosen.steps) {
-    const live = s.eval.reasons.find((x) => x.attr === "live" && x.kind === "unknown");
-    if ((s.edge.kind === "board" || s.edge.kind === "station_link") && live) {
-      const note = `${s.edge.name}: ${live.detail} (TfL, live). Check before you travel.`;
-      if (!notes.includes(note)) notes.push(note);
-      continue;
-    }
     if (s.edge.kind !== "board") continue;
+    // A live doubt about the station is listed under "On this route"; this says what's known about boarding.
+    if (s.eval.reasons.some((x) => x.attr === "live" && x.kind === "unknown")) continue;
     // Platform to train (D-060): an unknown says which platform and why; the staff ramp says to ask.
     const why = s.eval.reasons.find((x) => x.attr === "boarding" || x.attr === "ramp");
     const note =
@@ -648,16 +638,6 @@ export function explain(router: Router, chosen: Route, from: GraphNode, to: Grap
             ? `${s.edge.name}: board with the staff ramp, so ask staff (TfL station data).`
             : null;
     if (note && !notes.includes(note)) notes.push(note);
-  }
-  // Amber and red health alerts, for everyone, with UKHSA's end date (D-066).
-  if (c.healthAlert) {
-    const h = c.healthAlert;
-    const until = h.until ? ` until ${utcShort(h.until)}` : "";
-    notes.push(`${h.level === "red" ? "Red" : "Amber"} ${h.kind} health alert for ${h.region}${until}${p.maxRestIntervalM ? ". We've favoured places to rest" : ""} (UKHSA, updated ${utcShort(h.at)}).`);
-  }
-  // Gusts on an exposed bridge this route crosses, for scooters and light chairs (D-066).
-  if (c.gust && chosen.steps.some((s) => s.eval.reasons.some((r) => r.attr === "gust"))) {
-    notes.push(`Strong gusts on exposed bridges: up to ${Math.round(c.gust.kmh)} km/h (${c.gust.source}, ${utcShort(c.gust.at)}).`);
   }
   if (sum.lifts) {
     const live = router.graph.meta.liveFeeds?.some((f) => f.endsWith("lifts"));

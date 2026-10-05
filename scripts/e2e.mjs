@@ -8,13 +8,16 @@
  * Then one journey through the rest of the trip (STAB-10): set up two devices
  * and switch between them, leave later, and add a note. And one in London with
  * every live feed hanging (STAB-05): the route still comes, and the weather and
- * lift lines fall back within their time limit instead of waiting for ever. Every request any
+ * lift lines fall back within their time limit instead of waiting for ever. And
+ * "On this route" (D-067): a London route round a lift out, from TfL's recorded
+ * feeds, and an Edinburgh route's summary row. Every request any
  * journey makes is checked for the profile (SEC-05, D-009): the device's name,
  * its type and its limits must never leave the phone.
  * Exits 1 on any failed step, page error, profile leak, or anything the Content
  * Security Policy blocks. Runs in CI (.github/workflows/ci.yml). Set E2E_SHOT=<file.png>
  * to keep a screenshot of the trip journey when it fails.
  */
+import { readFileSync } from "node:fs";
 import { launchBrowser, serveOut, watchCsp } from "./serve-out.mjs";
 
 const JOURNEYS = [
@@ -226,6 +229,75 @@ for (const j of JOURNEYS) {
     // With a train in the route, the line names the disruption feeds too (D-061).
     await page.getByText(/Couldn't get live lift status( or station and line disruptions)? from TfL/).first().waitFor({ timeout: 25_000 });
     console.log("  ok   the lift line says it couldn't check");
+  } catch (e) {
+    failures.push(`${name}: ${e.message.split("\n")[0]}`);
+    console.log(`  FAIL ${e.message.split("\n")[0]}`);
+  }
+  for (const p of problems) failures.push(`${name}: ${p}`), console.log(`  FAIL ${p}`);
+  await context.close();
+}
+
+// "On this route" (D-067). London with TfL's recorded lift outages and station messages: a wheelchair route to Canary Wharf
+// goes round the faulty lift, the route card says so in one line, and the list opens by itself with it under Blocked and
+// the escalator message at Canning Town under Worth knowing. Then Edinburgh: the list is there, closed, saying what's in it.
+{
+  const name = "london: a lift out on the way, in On this route";
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const page = await context.newPage();
+  const problems = [];
+  watchCsp(page, problems);
+  page.on("pageerror", (e) => problems.push(`page error: ${e.message}`));
+  const fixture = (f) => readFileSync(new URL(`../packages/live/test/fixtures/${f}`, import.meta.url), "utf8");
+  await page.route(/open-meteo\.com|environment\.data\.gov\.uk|ukhsa-dashboard\.data\.gov\.uk/, (r) => r.abort());
+  await page.route(/api\.tfl\.gov\.uk/, (r) => {
+    const u = r.request().url();
+    const body = /Disruptions\/Lifts/.test(u) ? fixture("tfl-lifts-2026-10-04.json") : /StopPoint\/Mode/.test(u) ? fixture("tfl-station-disruptions-2026-10-04.json") : "[]";
+    return r.fulfill({ contentType: "application/json", body });
+  });
+  await page.addInitScript(() => localStorage.setItem("causewayside.city.v1", "london"));
+  console.log(name);
+  try {
+    await page.goto(server.url);
+    await page.getByPlaceholder("Where to?").waitFor({ timeout: 60_000 });
+    await page.getByPlaceholder("Where to?").fill("Canary Wharf station");
+    await page.getByRole("option").first().click();
+    await page.getByText("Goes round a closure on the way. See On this route.").waitFor({ timeout: 60_000 });
+    console.log("  ok   the route card says it goes round a closure, in one line");
+    const list = page.locator("details", { hasText: "On this route" }).first();
+    if (!(await list.evaluate((el) => el.open))) throw new Error("On this route didn't open by itself");
+    await list.getByRole("heading", { name: "Blocked (1 item)" }).waitFor();
+    await list.getByText(/faulty lift/).first().waitFor();
+    await list.getByText(/Live, TfL, at \d\d:\d\d/).first().waitFor();
+    console.log("  ok   On this route opens by itself, with the lift under Blocked, labelled live from TfL");
+    await list.getByText(/reduced escalator service/i).first().waitFor();
+    if (await page.getByText(/lifts? out of service, routed around/).count()) throw new Error("the card still counts lift outages across London");
+    console.log("  ok   TfL's escalator message is worth knowing, and the card has no area-wide lift count");
+  } catch (e) {
+    failures.push(`${name}: ${e.message.split("\n")[0]}`);
+    console.log(`  FAIL ${e.message.split("\n")[0]}`);
+  }
+  for (const p of problems) failures.push(`${name}: ${p}`), console.log(`  FAIL ${p}`);
+  await context.close();
+}
+{
+  const name = "edinburgh: On this route on a route with nothing blocked";
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const page = await context.newPage();
+  const problems = [];
+  page.on("pageerror", (e) => problems.push(`page error: ${e.message}`));
+  await page.addInitScript(() => localStorage.setItem("causewayside.city.v1", "edinburgh"));
+  console.log(name);
+  try {
+    await page.goto(server.url);
+    await page.getByPlaceholder("Where to?").waitFor({ timeout: 60_000 });
+    await page.getByPlaceholder("Where to?").fill("Grassmarket");
+    await page.getByRole("option").first().click();
+    await page.getByText("Why this way?").waitFor({ timeout: 60_000 });
+    const summary = page.locator("details summary", { hasText: "On this route" }).first();
+    const text = (await summary.innerText()).replace(/\s+/g, " ");
+    if (!/On this route (Nothing known|(\d+ (blocked|slower|worth knowing)(, )?)+)/.test(text)) throw new Error(`summary says "${text}"`);
+    if (/blocked/.test(text)) throw new Error(`something blocked on a quiet day: "${text}"`);
+    console.log(`  ok   the summary row says what's inside: "${text.replace("On this route ", "")}"`);
   } catch (e) {
     failures.push(`${name}: ${e.message.split("\n")[0]}`);
     console.log(`  FAIL ${e.message.split("\n")[0]}`);
