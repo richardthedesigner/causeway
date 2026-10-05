@@ -325,6 +325,8 @@ ATP's waiver can't grant rights it doesn't hold.
 
 OSM-mapped `changing_places=yes` toilets are fine to keep.
 
+**Fixed 2026-10-05** (ROADMAP DATA-01, D-028): those 29, and 20 AllThePlaces-only GP, dental and hospital records, are out of the indexes and filtered from future builds.
+
 ## 10. Looked for and not found
 
 - **Dropped kerbs and tactile paving:**

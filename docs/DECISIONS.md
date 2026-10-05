@@ -204,6 +204,8 @@ Next adapters, in order of value: Overture places (more venues and addresses; re
 
 Update (issue #15): an Overture place is also a duplicate when an OSM place within 40 m has the same house number and street and either shares a name word or is the same kind of place. An address alone isn't enough, because one building can hold many businesses. This removed 409 more duplicates in Edinburgh, 58 in Newcastle and 16 in London.
 
+Update 2026-10-05 (ROADMAP DATA-01): AllThePlaces labels its output CC0, but some of its spiders scrape sites with no open licence: the Changing Places map, nhs.uk and NHS inform (DATA_SURVEY_UK §9). An Overture place is left out when AllThePlaces is its only source and it is a Changing Places toilet or an NHS service (GP, dentist, hospital). Overture doesn't say which spider a record came from, so every AllThePlaces-only GP, dentist and hospital goes, including a few private ones. Another source listing the same place keeps it. This removed 49 places: 29 Changing Places (15 Edinburgh, 10 Newcastle, 4 London) and 20 health services. `scrapedOnly` in `scripts/overture-merge.ts`.
+
 ## D-029 Buses: frequency-based, built from open timetables, honest about the wheelchair space
 
 **Decided.** 2026-10-04. Buses come from the Bus Open Data Service GTFS downloads (England and Scotland, no key, OGL; `pnpm build:bus`). For each route direction we keep the stops inside the area, the typical ride time between stops and how many buses leave each stop in each hour on a typical weekday, Saturday and Sunday. The app adds them to the graph when a city loads (`addBus`), so timetables refresh without rebuilding streets.

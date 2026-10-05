@@ -4,7 +4,7 @@ The one list of work for Causewayside: what's next, in what order, how big it is
 
 This file is the master copy. A read-only copy for sharing and comments lives in Google Drive: [Causewayside roadmap](https://docs.google.com/document/d/1T-RPq188B09LBahJIWPg_Hapm6m_vYbHB88pUzxJXV4/edit). Change this file, then update the Doc to match. Edits made only in the Doc are lost.
 
-Last updated: 2026-10-04.
+Last updated: 2026-10-05.
 
 - What's waiting on Richard, blocked, or a guess: [OPEN_ITEMS.md](OPEN_ITEMS.md)
 - What shipped and when: [BUILD_LOG.md](BUILD_LOG.md) and the phase reports
@@ -50,11 +50,11 @@ The current direction: **fix and fill the pilot cities** with open data that nee
 
 The next five things to pick up, in order.
 
-1. **DATA-01**: remove the scraped Changing Places records. It breaks our own no-scraping rule today.
-2. **DATA-02**: Scottish Road Works Register adapter for Edinburgh.
-3. **DATA-03**: TfL station data, with lift outages joined on `LiftUniqueId`.
-4. **SEC-01**: security headers and a Content Security Policy.
-5. **UPD-01**: Dependabot for npm and GitHub Actions.
+1. **DATA-02**: Scottish Road Works Register adapter for Edinburgh.
+2. **DATA-03**: TfL station data, with lift outages joined on `LiftUniqueId`.
+3. **SEC-01**: security headers and a Content Security Policy.
+4. **UPD-01**: Dependabot for npm and GitHub Actions.
+5. **DATA-22**: check the remaining AllThePlaces-only places against the no-scraping rule.
 
 ## Data and coverage
 
@@ -62,7 +62,7 @@ Fix and fill the pilot cities. DATA-01 to DATA-10 are in order of value per day 
 
 | ID | Task | Size | Priority | Status | Who | Notes |
 |---|---|---|---|---|---|---|
-| DATA-01 | Remove scraped Changing Places records (29) from the search indexes, and filter them in the Overture build | S | now | todo | Claude | §9, D-028 |
+| DATA-01 | Remove scraped Changing Places records (29) from the search indexes, and filter them in the Overture build | S | now | done (2026-10-05) | Claude | §9, D-028. Also removed 20 GP, dental and hospital records likely from AllThePlaces' NHS spiders: 49 in all |
 | DATA-02 | Scottish Road Works Register adapter for Edinburgh: footway works, café tables, scaffolding, hoardings, events | M | now | todo | Claude | §2 #1. SRWR is open (OGL), no application needed. [#10](https://github.com/richardthedesigner/causeway/issues/10) |
 | DATA-03 | TfL station data: platform step and gap, which areas each lift connects, toilets. Join lift outages on `LiftUniqueId` | M | now | todo | Claude | §2 #2 and #3, D-020 |
 | DATA-04 | TfL station and line disruptions on transit edges | M | next | todo | Claude | §2 #4. Closures and planned step-free losses are invisible today |
@@ -83,6 +83,7 @@ Fix and fill the pilot cities. DATA-01 to DATA-10 are in order of value per day 
 | DATA-19 | Tyne and Wear Metro lift status | M | later | blocked | Richard, Claude | Waits on Nexus. [#13](https://github.com/richardthedesigner/causeway/issues/13) |
 | DATA-20 | Live bus and tram departures in Edinburgh and Newcastle | M | later | blocked | Claude | [#8](https://github.com/richardthedesigner/causeway/issues/8). Lothian 403, Transport for Edinburgh 522, Nexus needs a key |
 | DATA-21 | Map York Place and the western way into the Grassmarket in OSM (about 1.1 km) | M | later | todo | Richard | [DEVICES.md](plans/DEVICES.md). Turns unknowns into known ground |
+| DATA-22 | Check the 352 remaining AllThePlaces-only places against the no-scraping rule (DATA_SOURCES rule 5) | S | now | todo | Richard, Claude | Mostly chain stores, parcel lockers and scout halls. Overture doesn't say which spider a record came from. Richard decides whether chain-store sites count |
 
 ## Research: check our guesses with real people
 
@@ -243,6 +244,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 
 Newest first. One line per change: date, ID, what happened, link.
 
+- 2026-10-05: DATA-01 done. 49 AllThePlaces-only records out of the search indexes (29 Changing Places, 20 NHS services) and `scrapedOnly` filters them in future builds. Added DATA-22.
 - 2026-10-04: Merged the two roadmaps (#31 and #34) into this one. Kept #34's order, phases and Drive copy; added IDs, sizes and owners across every area. Gateshead walking (#7) and Overture duplicates (#15) were already closed.
 - 2026-10-04: DEP-02 done: Vercel no longer builds `claude/*` branches (3decc02).
 - 2026-10-04: Roadmap created (#34), from the UK data survey.

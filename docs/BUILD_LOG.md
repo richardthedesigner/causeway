@@ -2,6 +2,13 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
+## 2026-10-05
+
+**Scraped places out of search** (D-028 update, ROADMAP DATA-01)
+- 49 places whose only source was AllThePlaces are gone from the three search indexes: 29 Changing Places toilets and 20 GP, dental and hospital records, likely from its NHS spiders.
+- `scrapedOnly` drops them from future Overture builds. A place another source also lists stays.
+- 352 AllThePlaces-only places remain, mostly chain stores. Whether those count as scraping is DATA-22.
+
 ## 2026-10-04 (evening)
 
 **One roadmap** (`docs/ROADMAP.md`, #31 merged with #34)

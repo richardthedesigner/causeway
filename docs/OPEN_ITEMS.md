@@ -2,7 +2,7 @@
 
 What's outstanding on Causewayside: things waiting on Richard, things blocked outside the project, and guesses to check with users. Keep this up to date: add an item when it comes up, and move it to "Done" with the date when it's settled. Details live in the linked issue or decision. The order of work is in [ROADMAP.md](ROADMAP.md).
 
-Last updated: 2026-10-04.
+Last updated: 2026-10-05.
 
 ## Waiting on Richard
 
@@ -36,7 +36,7 @@ These numbers shape routes but are our estimates, not evidence.
 
 ## Known gaps
 
-- The search indexes hold 29 "Changing Places" toilets that reached us through Overture from AllThePlaces, which scraped them from the Changing Places site (no open licence). Filter them out ([DATA_SURVEY_UK §9](DATA_SURVEY_UK.md#9-a-licensing-problem-we-already-have)).
+- 352 places in search come only from AllThePlaces, which scrapes some sites. Mostly chain stores, parcel lockers and scout halls. Do chain-store websites count as scraping under our rule? (ROADMAP DATA-22)
 - Opening hours don't know bank holidays; the app says "may differ on bank holidays" ([D-039](DECISIONS.md#d-039-open-when-you-get-there)).
 - Weather beyond 48 hours ahead falls back to today's ([D-040](DECISIONS.md#d-040-leaving-later)).
 
@@ -46,4 +46,4 @@ Not now, on purpose: a phone app, whole cities, a reports backend, app accounts.
 
 ## Done
 
-Nothing settled yet. Move items here with the date.
+- 2026-10-05: The 29 scraped Changing Places toilets, and 20 GP, dental and hospital records likely scraped from NHS sites, are out of the search indexes and filtered from future builds (ROADMAP DATA-01, D-028).

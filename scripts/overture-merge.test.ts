@@ -36,3 +36,18 @@ describe("address matching", () => {
     expect(mergeOverture(osmHotel, [{ ...ovHotel, n: "Smith Accountants", c: "accountant" }])).toHaveLength(1);
   });
 });
+
+describe("scraped AllThePlaces records", () => {
+  const toilet = { id: "cp", n: "Changing Places", c: "public_restroom", x: -3.2, y: 55.96, ad: null, conf: 0.9 };
+  const gp = { id: "gp", n: "Slateford Medical Practice", c: "doctors_office", x: -3.2, y: 55.96, ad: null, conf: 0.9 };
+
+  it("drops Changing Places toilets and NHS services whose only source is AllThePlaces", () => {
+    expect(mergeOverture([], [{ ...toilet, src: ["AllThePlaces", "Overture"] }, { ...gp, src: ["AllThePlaces", "Overture"] }])).toEqual([]);
+  });
+
+  it("keeps them when another source lists them, and keeps other AllThePlaces records", () => {
+    expect(mergeOverture([], [{ ...gp, src: ["AllThePlaces", "Overture", "meta"] }])).toHaveLength(1);
+    expect(mergeOverture([], [{ ...toilet, n: "Public toilets", src: ["AllThePlaces", "Overture"] }])).toHaveLength(1);
+    expect(mergeOverture([], [{ ...gp, n: "Boots", c: "pharmacy", src: ["AllThePlaces", "Overture"] }])).toHaveLength(1);
+  });
+});

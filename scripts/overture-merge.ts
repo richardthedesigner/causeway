@@ -92,15 +92,32 @@ export function streetAddress(ad: string | null): string | null {
   return `${m[1]} ${street}`;
 }
 
+/**
+ * NHS services (GPs, dentists, hospitals) as AllThePlaces lists them. Its NHS spiders scrape nhs.uk and NHS inform,
+ * which have no open licence, and an AllThePlaces-only record doesn't say which spider it came from.
+ */
+const NHS_SCRAPED = new Set(["hospital", "doctor", "doctors_office", "dentist", "dental_clinic"]);
+
+/**
+ * True for a record we may not use: AllThePlaces is its only source besides Overture itself, and it is a Changing
+ * Places toilet (scraped from the Changing Places map) or an NHS service. AllThePlaces calls its output CC0, but it
+ * can't waive rights it doesn't hold (DATA_SOURCES rule 5, DATA_SURVEY_UK §9, D-028).
+ */
+export function scrapedOnly(o: { n: string; c: string | null; h?: string[]; src?: string[] }): boolean {
+  const others = (o.src ?? []).filter((s) => s !== "Overture");
+  if (others.length !== 1 || others[0] !== "AllThePlaces") return false;
+  return /changing places/i.test(o.n) || [o.c, ...(o.h ?? [])].some((k) => k !== null && NHS_SCRAPED.has(k));
+}
+
 /** Things nobody walks to: services that come to you, and uncategorised records. */
 const NOT_VISITABLE = new Set(["home_service", "b2b_office_and_professional_service", "corporate_or_business_office", "media_service", "technical_service", "design_service", "event_or_party_service"]);
 
 /**
- * Overture places worth adding: confident (0.7 and over), somewhere people go, and not
+ * Overture places worth adding: confident (0.7 and over), somewhere people go, not scraped (scrapedOnly), and not
  * already in OSM under a similar name within 75 m. Category kept as "overture=<basic_category>" unless it maps
  * to an OSM tag, so category searches find both.
  */
-export function mergeOverture(osm: { n: string; x: number; y: number; ad?: string; c?: string }[], ov: { id: string; n: string; c: string | null; h?: string[]; x: number; y: number; ad: string | null; conf: number | null }[]) {
+export function mergeOverture(osm: { n: string; x: number; y: number; ad?: string; c?: string }[], ov: { id: string; n: string; c: string | null; h?: string[]; x: number; y: number; ad: string | null; conf: number | null; src?: string[] }[]) {
   const cell = (x: number, y: number) => `${Math.round(x * 500)}:${Math.round(y * 500)}`;
   const grid = new Map<string, { n: string; x: number; y: number; ad?: string; c?: string }[]>();
   for (const p of osm) {
@@ -117,7 +134,7 @@ export function mergeOverture(osm: { n: string; x: number; y: number; ad?: strin
   const metres = (a: { x: number; y: number }, b: { x: number; y: number }) => Math.hypot((a.x - b.x) * Math.cos((a.y * Math.PI) / 180), a.y - b.y) * 111_320;
   const added: { n: string; c: string; x: number; y: number; ad?: string; id: string; src: "overture" }[] = [];
   for (const o of ov) {
-    if ((o.conf ?? 0) < 0.7 || !o.n || !o.c || [o.c, ...(o.h ?? [])].some((k) => NOT_VISITABLE.has(k))) continue;
+    if ((o.conf ?? 0) < 0.7 || !o.n || !o.c || [o.c, ...(o.h ?? [])].some((k) => NOT_VISITABLE.has(k)) || scrapedOnly(o)) continue;
     const n = tokens(o.n);
     if (!n.size) continue;
     const addr = streetAddress(o.ad);
