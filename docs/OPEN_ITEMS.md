@@ -38,6 +38,7 @@ These numbers shape routes but are our estimates, not evidence.
 | Rest distances from Inclusive Mobility (50 m with a stick or crutches, 100 m with fatigue): right for real people, given how few benches are mapped? | [D-013](DECISIONS.md#d-013-unknown-risk-weights-and-preset-thresholds-are-placeholders) |
 | A manual wheelchair held to 6 mm kerbs, with every unmeasured dropped kerb taken as 6 mm: right for real chairs and real kerbs? | [D-054](DECISIONS.md#d-054-presets-on-inclusive-mobility-values-kerbs-credit-and-more-benches) |
 | Road scooters: 8 mph on every road without a mapped pavement, and whether riders want those road routes at all (RES-10) | [D-051](DECISIONS.md#d-051-road-scooters-go-at-road-speed-on-roads) |
+| Weather and health nudges: gusts from 50 km/h double an exposed bridge for scooters and light chairs; in an amber or red alert, a quarter more of the rest cost and 5% more in the sun; the Water of Leith worth a line from 1.05 m at Murrayfield | [D-066](DECISIONS.md#d-066-heat-and-cold-alerts-gusts-air-quality-and-the-water-of-leith) |
 | Boarding with the staff ramp: 3 minutes to find staff and get the ramp | [D-060](DECISIONS.md#d-060-boarding-the-train-against-each-persons-limits) |
 | Screen reader and switch-access testing: axe only catches about a third of WCAG issues | [BUILD_LOG](BUILD_LOG.md) |
 
@@ -54,6 +55,8 @@ These numbers shape routes but are our estimates, not evidence.
 - Street Manager's June 2026 activity archive is published truncated, so the build skips it; activities created or last changed only in June are missing until a later event brings them back ([D-027](DECISIONS.md#d-027-live-and-third-party-data-come-in-through-adapters)).
 - Whether a register entry closes the pavement is read from its free text. Check a sample of Edinburgh road closures on the ground or with testers (D-057).
 - Edinburgh's pavement gritting routes were last published in 2021. The route says so; check with the council whether they still hold before winter ([D-064](DECISIONS.md#d-064-gritting-routes-from-the-councils-licensed-layer-matched-by-direction-dated-2021)).
+- UKHSA can issue a heat or cold alert outside its core season (heat June to September, cold November to March). We don't count one then, so an early or late alert is missed. Check how often it happens before relying on the season ([D-066](DECISIONS.md#d-066-heat-and-cold-alerts-gusts-air-quality-and-the-water-of-leith)).
+- The weather and health lines (alerts, gusts, air, the Water of Leith) sit in "Why this way?" until the "On this route" list is ported ([D-066](DECISIONS.md#d-066-heat-and-cold-alerts-gusts-air-quality-and-the-water-of-leith)).
 - Toilet Map records over 2 years old still count on routes as stops; they only say they may be out of date. Whether they should count less is for research ([D-065](DECISIONS.md#d-065-when-osm-and-the-toilet-map-disagree-and-when-a-record-is-old)).
 
 ## Deferred by Richard
@@ -62,6 +65,8 @@ Not now, on purpose: a phone app, whole cities, a reports backend, app accounts.
 
 ## Done
 
+- 2026-10-05: Open-Meteo's times were read as the phone's local time, an hour out in British Summer Time. Now read as UTC everywhere, with a test ([D-066](DECISIONS.md#d-066-heat-and-cold-alerts-gusts-air-quality-and-the-water-of-leith)).
+- 2026-10-05: an ended UKHSA alert no longer counts: past its end date or outside its season, it's ignored (the overnight build's follow-up #4, [D-066](DECISIONS.md#d-066-heat-and-cold-alerts-gusts-air-quality-and-the-water-of-leith)).
 - 2026-10-05: Edinburgh council's pavement surface wins over OSM on streets drawn as one line, where OSM only has the carriageway's surface. Richard's call (ROADMAP DATA-22, [D-063](DECISIONS.md#d-063-on-a-street-drawn-as-one-line-the-councils-pavement-surface-beats-the-carriageways)).
 - 2026-10-05: Edinburgh's roadworks from the Scottish Road Works Register: the site answers from the cloud container now, and `pnpm build:srwr` builds them (ROADMAP DATA-02, [D-057](DECISIONS.md#d-057-edinburghs-works-from-the-scottish-road-works-register)).
 - 2026-10-05: North Bridge is passable on foot (Richard). The register records it as a road closure since 2018; D-057 keeps it open to people on foot, as works on the pavement.

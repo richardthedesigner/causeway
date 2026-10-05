@@ -6,6 +6,14 @@ A running record of what was built, newest first. Each entry links the decision 
 
 Richard chose main as the base; the overnight build's extras (PR #36) are ported by hand, smallest and safest first.
 
+**Weather and health extras** (D-066, DATA-32, DATA-25 in part)
+- UKHSA heat and cold alerts for London and the North East. Amber and red are said on every route with UKHSA's end date, and nudge routes for presets with a rest limit towards benches (and cover, in heat). An alert counts only in its season and before its end: the feed still lists February's cold status in October.
+- Gusts from Open-Meteo, now and next hour or at the hour you leave. From 50 km/h an exposed bridge costs as much again for scooters, manual wheelchairs and lightweight powerchairs, and a route over one says so.
+- Open-Meteo's times are read as UTC on every phone. They were read as local time, an hour out in summer, so a forecast hour of rain could count as already fallen.
+- Air quality, pollen and UV from CAMS via Open-Meteo, only when high, area-wide.
+- The Water of Leith at Murrayfield from SEPA: a line on routes using the walkway from 1.05 m. Not a flood warning.
+- All fetched in parallel with the live-feed time limit; a failure is said quietly under "Where this comes from". The CSP allows the three new hosts.
+
 **Parks and notes** (D-048 update, SMALL-13)
 - A park found by name ends at its gate, not at the door of a building nearby: 26 of 119 named Edinburgh parks with gates had a fitting door within 50 m. `pnpm a11y` checks a route to The Meadows.
 - OpenStreetMap notes over 3 years old with no comment, and StreetComplete's business questions, are left out (Edinburgh 27 kept, London 21). Past three, a route counts the rest: "2 more places a mapper flagged on this route".

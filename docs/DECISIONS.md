@@ -474,6 +474,8 @@ Update (D-062, D-063): matched along each edge in British National Grid, not at 
 
 Update (D-064): the gritting routes now come from the council's "Gritting Routes" layer, which its DCAT feed lists under OGL v3 (published 2021-05-27), matched by direction along each edge: 1,648 pavement edges. Main's layer had no published licence and came back about 90 m off the streets. The reason gives the routes' year. The ice costs are unchanged.
 
+Update (D-066): four more feeds sit beside these, none of which closes anything: UKHSA heat and cold health alerts (England), gusts on exposed bridges, air quality, pollen and UV, and the Water of Leith level from SEPA (a partial answer to DATA-25: a level, not a flood warning).
+
 ## D-048 Park gates and OpenStreetMap notes
 
 **Decided.** 2026-10-04 (DATA-08).
@@ -760,3 +762,28 @@ Main merged a Toilet Map record into the OSM toilet within 30 m and let OSM's ta
 **Conservative calls.**
 - Neither source wins a dispute: the toilet counts as unknown on routes, and both views are shown.
 - Old Toilet Map toilets still count on routes, as before; only the words and the search order change. Whether an old record should count less on routes is a question for research (OPEN_ITEMS).
+
+## D-066 Heat and cold alerts, gusts, air quality and the Water of Leith
+
+**Decided.** 2026-10-05 (DATA-32, DATA-25 in part; ported from the overnight build, PR #36, by hand into main's structures). Amends D-047. Code: `packages/live/src/health-alerts.ts`, `packages/live/src/sepa.ts`, `packages/live/src/weather.ts`, `weatherCosts` in `packages/router/src/cost.ts`, `explain` in `packages/router/src/router.ts`, `apps/web/src/lib/use-planner.ts`, `apps/web/src/lib/area-status.ts`.
+
+Four open feeds, none needing a key, all open to browsers. Each is fetched with D-052's time limit, in parallel, and never holds up a route: a failure is said quietly in "Where this comes from" ("Couldn't get … from …") and changes nothing else. Every line says its source and time. None of them closes anything.
+
+**UKHSA heat and cold health alerts (England).** From `https://ukhsa-dashboard.data.gov.uk/api/proxy/alerts/v1/heat` and `/cold` (OGL v3), pinned by a test, for the city's region (`ukhsaRegion` in `cities.ts`: London E12000007, North East E12000001; Edinburgh has none, as UKHSA covers England only). Green and yellow change nothing. Amber and red:
+- are said on every route, to everyone, with UKHSA's end date: "Amber heat health alert for London until 20 Jul, 08:00 UTC (UKHSA, updated 18 Jul, 08:00 UTC)." The end comes from the region's own record, which also has the last word on the status.
+- nudge routes for presets with a rest limit: a stretch with no bench costs a quarter more of its rest cost, and in heat, uncovered ground costs 5% more of its time. A nudge, never a closure.
+- count only while in force (the overnight build's follow-up #4): never at or past the end date UKHSA gives, and never outside the season (heat 1 June to 30 September, cold 1 November to 31 March, by the UK date). The list keeps a region's last status for months: on 2026-10-05 the cold list still showed February's. Out of season the app doesn't ask at all. Leaving later, the alert must still be in force when you leave.
+
+**Gusts on exposed bridges.** Open-Meteo's `wind_gusts_10m`: the stronger of now and the next hour, or the forecast hour when leaving later. From 50 km/h (`GUST_BRIDGE_KMH`, about 31 mph), an exposed bridge (15 m or longer, not covered) costs as much again for the presets a gust can push sideways: scooters, manual wheelchairs and lightweight powerchairs (`windSensitive`). A route that still crosses one says "Strong gusts on exposed bridges: up to 62 km/h (Open-Meteo, 5 Oct, 01:00 UTC)." The gust stays when you set the ground yourself.
+
+**Open-Meteo times are UTC.** Asked for UTC, Open-Meteo gives times with no zone ("2026-10-05T01:00"), and `Date.parse` read them as the phone's local time: an hour out in British Summer Time, so a forecast hour could count as rain already fallen. Every time now goes through `utcIso` first, with a test that runs in Europe/London time.
+
+**Air quality, pollen and UV.** From `air-quality-api.open-meteo.com`, which serves the Copernicus Atmosphere Monitoring Service (CAMS) forecast; credited in each city's credit and on each line. Lines only when high: European AQI 60 or more (poor), grass pollen 50 or more, birch or alder 80 or more grains per cubic metre, UV index 6 or more. Area-wide, after the route's own lines; never in routing.
+
+**The Water of Leith (Edinburgh).** SEPA's KiWIS service (OGL v3) gives the level at Murrayfield every 15 minutes. SEPA publishes no level at which the walkway floods, so a line goes on a route only when it uses the Water of Leith Walkway or Path and the level is 1.05 m or above, the lowest peak in SEPA's peaks-over-threshold record for the station since 2015 (a typical level is about 0.5 m). It says it's worth knowing, not a warning. SEPA's flood warnings still have no open feed, so DATA-25 stays open.
+
+**Where the lines go.** Main's route notes ("Why this way?") for now. The "On this route" list (next in the port) will take them over.
+
+**Conservative calls.** An alert outside its season doesn't count even if UKHSA issued it: UKHSA can issue alerts outside the core seasons, and we would miss those (OPEN_ITEMS). A region's record that doesn't answer leaves an in-season alert counting, with no end date shown. The thresholds (50 km/h, a quarter, 5%, 1.05 m) are guesses to check.
+
+**CSP.** `connect-src` gains `https://ukhsa-dashboard.data.gov.uk`, `https://air-quality-api.open-meteo.com` and `https://timeseries.sepa.org.uk` (D-041). The a11y and e2e servers take their headers from `vercel.json`.
