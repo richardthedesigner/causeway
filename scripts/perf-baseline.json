@@ -1,0 +1,62 @@
+{
+  "measuredAt": "2026-10-05T10:20:12.269Z",
+  "note": "Written by pnpm perf:baseline --write. Read by scripts/perf-budget.test.ts. Re-baseline only on purpose.",
+  "normalised": 27.562,
+  "calibrationMs": 100.87,
+  "totalMs": 2780.3,
+  "cities": [
+    {
+      "area": "edinburgh-central",
+      "totalSettled": 224919,
+      "totalMs": 2283.3,
+      "settled": {
+        "waverley-grassmarket/walking": 11532,
+        "waverley-grassmarket/manual-wheelchair": 47386,
+        "waverley-grassmarket/visual-impairment": 16087,
+        "royal-mile-victoria-street/walking": 2396,
+        "royal-mile-victoria-street/manual-wheelchair": 33201,
+        "royal-mile-victoria-street/visual-impairment": 2279,
+        "market-street-high-street/walking": 675,
+        "market-street-high-street/manual-wheelchair": 4576,
+        "market-street-high-street/visual-impairment": 1455,
+        "causewayside-museum/walking": 11594,
+        "causewayside-museum/manual-wheelchair": 17784,
+        "causewayside-museum/visual-impairment": 16639,
+        "causewayside-waverley/walking": 18137,
+        "causewayside-waverley/manual-wheelchair": 25493,
+        "causewayside-waverley/visual-impairment": 15685
+      }
+    },
+    {
+      "area": "newcastle-gateshead",
+      "totalSettled": 36774,
+      "totalMs": 295.3,
+      "settled": {
+        "grey-street-baltic/walking": 12638,
+        "grey-street-baltic/manual-wheelchair": 13286,
+        "grey-street-baltic/visual-impairment": 10850
+      }
+    },
+    {
+      "area": "london-jubilee",
+      "totalSettled": 34696,
+      "totalMs": 201.7,
+      "settled": {
+        "parliament-square-canada-square/walking": 13545,
+        "parliament-square-canada-square/manual-wheelchair": 9728,
+        "parliament-square-canada-square/visual-impairment": 11423
+      }
+    }
+  ],
+  "plans": {
+    "presets": [
+      "rollator",
+      "fatigue"
+    ],
+    "measuredAt": "2026-10-05T10:22:26.359Z",
+    "note": "Route plus trade-offs for the rest presets (measurePlans).",
+    "normalised": 65.747,
+    "calibrationMs": 96.69,
+    "totalMs": 6356.8
+  }
+}

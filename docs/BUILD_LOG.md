@@ -18,6 +18,10 @@ Richard chose main as the base; the overnight build's extras (PR #36) are ported
 - "More benches" starts loosest and makes at most two searches, each with a cost limit; its search is quicker. Waverley to the Grassmarket with a walking stick now gets an offer (470 m instead of 890 m).
 - `scripts/preset-outcomes.ts` records verdict, time, route and "More benches" for every journey and preset. No verdict, time or route changed.
 
+**A speed budget** (D-054, SPEED-02)
+- `pnpm test` fails if routing the acceptance journeys settles 10% more nodes, or gets 10% slower over a fixed yardstick (on CI, printed and failing only past 50%). Rest presets' "More benches" searches are timed too.
+- Each city's data beside the graph stays under 400 KB compressed. Baseline and sizes: [PERF_BASELINE](plans/PERF_BASELINE.md). Re-measure with `pnpm perf:baseline`.
+
 ## 2026-10-05 (late morning)
 
 **200% text on a small phone, everywhere else** (STAB-12)

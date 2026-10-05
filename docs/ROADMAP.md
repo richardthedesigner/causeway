@@ -190,11 +190,12 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | ID | Task | Size | Priority | Status | Who | Notes |
 |---|---|---|---|---|---|---|
 | SPEED-01 | Measure first load, city load and time to first route on a mid-range phone | S | next | todo | Claude | Numbers first, then targets |
-| SPEED-02 | Router benchmark in CI, failing if a journey gets much slower | S | next | todo | Claude | Uses the acceptance journeys |
+| SPEED-02 | Router benchmark in CI, failing if a journey gets much slower | S | next | done (2026-10-05) | Claude | D-054, [PERF_BASELINE](plans/PERF_BASELINE.md). Ported from PR #36. `scripts/perf-budget.test.ts` in `pnpm test`; `pnpm perf:baseline` |
 | SPEED-03 | Bundle-size and Lighthouse budgets in CI | S | later | todo | Claude | |
 | SPEED-04 | Load the `/review` page's code only for reviewers | S | later | todo | Claude | |
 | SPEED-05 | Smaller search index per city | S | later | todo | Claude | `data/places` |
 | SPEED-06 | A compact binary graph format instead of gzipped JSON | L | later | todo | Claude | Only if SPEED-01 shows graph load matters |
+| SPEED-07 | Speed budget follow-ups: a CI wall-time baseline from a few weeks of printed figures, and a re-baseline when the weekly refresh changes the graphs | S | later | todo | Claude | D-054. Settled nodes depend on the graph, so a refresh PR can trip the 10% check |
 
 ## Bloat reduction
 
@@ -261,6 +262,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 
 Newest first. One line per change: date, ID, what happened, link.
 
+- 2026-10-05: SPEED-02 done (speed budget, ported from PR #36). Added SPEED-07.
 - 2026-10-05: Added DATA-28 (presets on Inclusive Mobility values, ported from PR #36) and marked it done.
 - 2026-10-05: STAB-12 done. Added STAB-13. Now: STAB-05, STAB-06, SEC-06, SMALL-01, STAB-13.
 - 2026-10-05: Added DATA-27 (the remaining AllThePlaces-only places), found doing DATA-01 in a parallel session (closed PR #37).

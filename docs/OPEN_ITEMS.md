@@ -45,6 +45,7 @@ These numbers shape routes but are our estimates, not evidence.
 
 - Opening hours don't know bank holidays; the app says "may differ on bank holidays" ([D-039](DECISIONS.md#d-039-open-when-you-get-there)).
 - Weather beyond 48 hours ahead falls back to today's ([D-040](DECISIONS.md#d-040-leaving-later)).
+- The speed budget's timing checks hold 10% off CI. On a busy machine they can fail when nothing changed; run the test again before looking for a cause. A data refresh that rebuilds a graph can trip the settled-node check: re-baseline on purpose ([D-054](DECISIONS.md#d-054-a-speed-budget-the-tests-enforce), ROADMAP SPEED-07).
 - A guess to check on the next production deploy: Vercel serves MapLibre's worker (`/maplibre/6.12.0/maplibre-gl-worker.mjs`) as JavaScript, so the map draws. The local checks confirm it with our own server ([D-050](DECISIONS.md#d-050-dependency-audit-in-ci-and-maplibre-6)).
 
 ## Deferred by Richard

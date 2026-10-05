@@ -41,6 +41,8 @@ export class Router {
   readonly toiletM = new Map<number, number>();
   /** Edge id to what people's notes say about it. Held beside the graph, never written into it (D-008). */
   noteSignals = new Map<number, NoteSignal>();
+  /** Nodes settled by searches so far: a machine-independent measure of routing work, for the speed budget (D-054). */
+  settled = 0;
 
   /** Everything around an edge the cost model needs that isn't the edge itself. */
   edgeContext(id: number): EdgeContext {
@@ -178,6 +180,7 @@ export class Router {
       const u = heap.pop()!;
       if (closed.has(u)) continue;
       closed.add(u);
+      this.settled++;
       if (u === to.id) break;
       const gu = g.get(u)!;
       for (const a of this.out.get(u) ?? []) {

@@ -550,3 +550,20 @@ Update (D-051): the council's surface and width are now written as inferred, not
 - The cost limit is not lowered: that would offer fewer routes for no measurable gain.
 - The speed budget's measure of route plus trade-offs for rest presets is SPEED-02's (D-054).
 
+## D-054 A speed budget the tests enforce
+
+**Decided.** 2026-10-05 (SPEED-02, ported from the overnight build, PR #36, by hand). Baseline: [plans/PERF_BASELINE.md](plans/PERF_BASELINE.md), measured on this branch after D-051 to D-053. Test: `scripts/perf-budget.test.ts`, in `pnpm test`. Shared code: `scripts/perf.ts`. Re-measure with `pnpm perf:baseline --write`.
+
+- **Download:** the data a city downloads beside its street graph, search index, buses and base map comes to at most 400 KB compressed. Today: Edinburgh 125 KB (110 KB of it the council layer), London 76 KB, Newcastle 9 KB.
+- **Routing work:** nodes settled on the acceptance journeys, with walking, manual wheelchair and visual impairment, may rise at most 10% over the stored baseline. This is exact and the same on every machine. It needed a counter on the router (`Router.settled`): one increment per node, no measurable cost.
+- **Wall time:** route time over a fixed yardstick workload may rise at most 10% over the stored baseline, best of four attempts.
+- **Rest presets:** route plus trade-offs for rollator and fatigue ("More benches", "Past more toilets"), on the same terms. The worker runs these before it posts the verdict, and `alternatives` never does (D-053).
+- **Baseline:** route time normalised 27.56 (rounds 25.98 to 28.90); rest presets 65.75 (63.60 to 68.66); 224,919 nodes settled in Edinburgh, 36,774 in Newcastle, 34,696 in London.
+
+**Conservative calls.**
+- Wall time on one machine against a baseline set on another is noisy, and a check that fails at random would teach people to ignore it. So on CI runners (`CI` set) both timing checks print their figure and fail only past 50%. The download and settled-node checks, which don't depend on the machine, hold their line everywhere. A CI baseline from a few weeks of printed figures is SPEED-07.
+- The overnight build's check that attribute layers slow routing by at most 10% isn't ported. Main writes the council's values onto the edges when the city loads (D-046), so a search makes no per-edge layer lookup, and there is nothing separate to switch off and time.
+- The download budget covers the data beside the graph, not the graph, search index or base map. Those change with every refresh and are already as small as their content allows; the budget is for new sources. Each city's full download is printed in PERF_BASELINE.md.
+- Live data (works, floods, lifts, disruptions) is left out of the timed graph, so the figures don't depend on the day the test runs.
+- Settled nodes depend on the graph, so a weekly data refresh that rebuilds a graph can trip the 10% check. Then re-baseline on purpose in that pull request, and say so (SPEED-07).
+
