@@ -29,6 +29,8 @@ interface Props {
   preview?: Pick<PlannedRoute, "coords" | "bands" | "rides"> | null;
   /** Centre here (the locate button); `n` changes to re-centre on the same spot. */
   focus?: { lon: number; lat: number; n: number } | null;
+  /** The high-contrast map (SMALL-05): plain ground, edged roads, a wider route with an ink edge. */
+  highContrast?: boolean;
 }
 
 const css = (v: string) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
@@ -47,8 +49,9 @@ const point = (p: { lon: number; lat: number }, props: Record<string, unknown> =
 /**
  * Our own footway graph and routes, drawn over a Protomaps base map (D-024).
  * Colours come from the page's CSS tokens and follow theme changes live.
+ * The high-contrast map (SMALL-05) swaps the base map palette and widens the route.
  */
-export function MapView({ network, routes, selectedId, from, to, pin, showSlopes, entrances, onMapClick, me, basemap, toilets = [], blockers = [], preview = null, focus = null }: Props) {
+export function MapView({ network, routes, selectedId, from, to, pin, showSlopes, entrances, onMapClick, me, basemap, toilets = [], blockers = [], preview = null, focus = null, highContrast = false }: Props) {
   const el = useRef<HTMLDivElement>(null);
   const map = useRef<MLMap | null>(null);
   const ready = useRef(false);
@@ -128,7 +131,7 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
       (m.getSource("network") as GeoJSONSource).setData(
         fc((network ?? []).map((n) => line(n.coords, { bin: n.bin, c: showSlopes && n.bin >= 0 && n.bin < 5 ? ramp[n.bin] : n.bin === -1 && showSlopes ? css("--unknown") : neutral }))),
       );
-      m.setPaintProperty("network", "line-opacity", showSlopes ? 0.9 : 0.22);
+      m.setPaintProperty("network", "line-opacity", showSlopes ? 0.9 : highContrast ? 0.5 : 0.22);
       const sel = routes.find((r) => r.id === selectedId) ?? routes[0];
       (m.getSource("route") as GeoJSONSource).setData(fc(sel ? [line(sel.coords)] : preview ? [line(preview.coords)] : []));
       const bandColour = (bin: number) => (bin >= 0 && bin < 5 ? ramp[bin]! : bin === 6 ? css("--accent") : css("--unknown"));
@@ -145,7 +148,7 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
     };
     draw();
     redraw.current = draw;
-  }, [network, routes, selectedId, from, to, pin, showSlopes, entrances, toilets, blockers, preview]);
+  }, [network, routes, selectedId, from, to, pin, showSlopes, entrances, toilets, blockers, preview, highContrast]);
 
   const [mapReady, setMapReady] = useState(false);
   const dark = useDark();
@@ -154,10 +157,12 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
   useEffect(() => {
     const m = map.current;
     if (!m || !mapReady) return;
-    m.setPaintProperty("ground", "background-color", css("--ground"));
+    m.setPaintProperty("ground", "background-color", highContrast ? (dark ? "#000000" : "#ffffff") : css("--ground"));
     m.setPaintProperty("network-steps", "line-color", css("--muted"));
     m.setPaintProperty("route-alt", "line-color", css("--route-alt"));
-    m.setPaintProperty("route-casing", "line-color", css("--surface"));
+    m.setPaintProperty("route-casing", "line-color", css(highContrast ? "--ink" : "--surface"));
+    m.setPaintProperty("route-casing", "line-width", highContrast ? 15 : 12);
+    for (const id of ["route", "route-unknown", "route-steps"]) m.setPaintProperty(id, "line-width", highContrast ? 9 : 7);
     m.setPaintProperty("route-unknown", "line-color", css("--unknown"));
     m.setPaintProperty("route-steps", "line-color", css("--stop"));
     m.setPaintProperty("blockers", "circle-color", css("--stop"));
@@ -176,7 +181,7 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
     m.setPaintProperty("me", "circle-color", css("--accent"));
     m.setPaintProperty("me", "circle-stroke-color", css("--surface"));
     redraw.current();
-  }, [dark, mapReady]);
+  }, [dark, mapReady, highContrast]);
 
   // Base map: swap in the city's extract under our own layers (and restyle it when the theme changes).
   const shownKey = useRef<string | null>(null);
@@ -190,7 +195,7 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
         for (const l of m.getStyle().layers ?? []) if ((l as { source?: string }).source === "basemap") m.removeLayer(l.id);
         if (m.getSource("basemap")) m.removeSource("basemap");
         m.addSource("basemap", { type: "vector", url, attribution: "© OpenStreetMap contributors, Protomaps" });
-        for (const l of basemapLayers(dark)) if (l.type !== "background") m.addLayer(l, "network");
+        for (const l of basemapLayers(dark, highContrast)) if (l.type !== "background") m.addLayer(l, "network");
         if (shownKey.current !== basemap.key) m.jumpTo({ center: basemap.center, zoom: 14 });
         shownKey.current = basemap.key;
       })
@@ -200,7 +205,7 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
     return () => {
       cancelled = true;
     };
-  }, [basemap, mapReady, dark]);
+  }, [basemap, mapReady, dark, highContrast]);
 
   // Position and follow mode.
   useEffect(() => {

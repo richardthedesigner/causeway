@@ -19,6 +19,7 @@ import { TripSettings } from "@/components/TripSettings";
 import { MyDataSheet } from "@/components/MyDataSheet";
 import { NoSignal } from "@/components/NoSignal";
 import { useOnline } from "@/lib/use-online";
+import { loadMapContrast, mapContrastOn, saveMapContrast } from "@/lib/map-contrast";
 import { VerdictPill } from "@/components/RouteStrip";
 import { Button } from "@/components/ui/button";
 import { CommandGroup, CommandItem } from "@/components/ui/command";
@@ -102,6 +103,15 @@ export default function Home() {
   const [leaveAt, setLeaveAt] = useState<Date | null>(null);
   const conditions = useMemo(() => ({ ...ground0, leaveAt }), [ground0, leaveAt]);
   const [showSlopes, setShowSlopes] = useState(false);
+  // High-contrast map (SMALL-05): on for the low-vision device or when the phone asks, unless changed in the layers menu.
+  const [contrastChoice, setContrastChoice] = useState<boolean | null>(null);
+  const phoneAsksContrast = useMediaQuery("(prefers-contrast: more)");
+  useEffect(() => setContrastChoice(loadMapContrast()), []);
+  const highContrast = mapContrastOn(contrastChoice, profile.preset, phoneAsksContrast);
+  const chooseContrast = (v: boolean) => {
+    setContrastChoice(v);
+    saveMapContrast(v);
+  };
   const [snap, setSnap] = useState<number | string | null>(SNAP.half);
   const [geoError, setGeoError] = useState<string | null>(null);
   const [locating, setLocating] = useState(false);
@@ -540,6 +550,7 @@ export default function Home() {
         blockers={blockers}
         preview={preview}
         focus={focus}
+        highContrast={highContrast}
       />
       <MapChrome
         city={city}
@@ -547,6 +558,8 @@ export default function Home() {
         onCity={switchCity}
         showSlopes={showSlopes}
         onSlopes={setShowSlopes}
+        highContrast={highContrast}
+        onHighContrast={chooseContrast}
         onLocate={locate}
         locating={locating}
         credit={`${city.credit} Pavement data built ${planner.ready?.builtAt.slice(0, 10) ?? ""}.`}
@@ -656,13 +669,17 @@ export default function Home() {
 }
 
 function useWide() {
-  const [wide, setWide] = useState(false);
+  return useMediaQuery("(min-width: 768px)");
+}
+
+function useMediaQuery(query: string) {
+  const [matches, setMatches] = useState(false);
   useEffect(() => {
-    const mq = matchMedia("(min-width: 768px)");
-    const on = () => setWide(mq.matches);
+    const mq = matchMedia(query);
+    const on = () => setMatches(mq.matches);
     on();
     mq.addEventListener("change", on);
     return () => mq.removeEventListener("change", on);
-  }, []);
-  return wide;
+  }, [query]);
+  return matches;
 }

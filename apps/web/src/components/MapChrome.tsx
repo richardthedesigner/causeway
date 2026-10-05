@@ -12,6 +12,8 @@ interface Props {
   onCity: (c: City) => void;
   showSlopes: boolean;
   onSlopes: (v: boolean) => void;
+  highContrast: boolean;
+  onHighContrast: (v: boolean) => void;
   onLocate: () => void;
   locating: boolean;
   credit: string;
@@ -107,6 +109,18 @@ export function MapChrome(props: Props) {
                   Not known
                 </li>
               </ul>
+              <button
+                type="button"
+                role="menuitemcheckbox"
+                aria-checked={props.highContrast}
+                onClick={() => props.onHighContrast(!props.highContrast)}
+                className="flex min-h-12 items-center gap-3 rounded-xl px-3 text-left hover:bg-surface-2"
+              >
+                <span className="min-w-0 flex-1 font-bold">High contrast map</span>
+                <span aria-hidden className={cn("relative h-[28px] w-[48px] shrink-0 rounded-full transition-colors", props.highContrast ? "bg-accent" : "bg-line")}>
+                  <span className={cn("absolute top-[4px] size-[20px] rounded-full bg-surface transition-[left]", props.highContrast ? "left-[24px]" : "left-[4px]")} />
+                </span>
+              </button>
               <details className="px-3 pb-2 text-sm text-muted">
                 <summary className="min-h-10 cursor-pointer py-2 font-bold text-ink">About this map</summary>
                 {props.credit}
