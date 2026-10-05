@@ -185,7 +185,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | SEC-21 | Name the one Supabase host in the CSP instead of `*.supabase.co` | S | later | todo | Claude | [Review](reviews/security-2026-10.md) L4. Once the project exists. With SEC-13 |
 | SEC-22 | `BACKEND.md`: add `0006`, fix who can do what, add running Supabase's Security Advisor | S | next | todo | Claude | [Review](reviews/security-2026-10.md) L5 |
 | SEC-23 | Check branch protection on `main` and the production branch blocks direct pushes | S | next | blocked | Richard | [Review](reviews/security-2026-10.md) M3. Needs repo admin |
-| SEC-24 | Score the headers on securityheaders.com | S | next | blocked | Richard, Claude | SEC-12's headers are live; score blocked by Vercel login protection on `vercel.app` URLs. Needs custom domain (DEP-07) or relaxed login protection. |
+| SEC-25 | Score the headers on securityheaders.com | S | next | blocked | Richard, Claude | SEC-12's headers are live; score blocked by Vercel login protection on `vercel.app` URLs. Needs custom domain (DEP-07) or relaxed login protection. |
 | SEC-11 | Name the weekly reviewer for flags, photos and reports | S | later | blocked | Richard | [BACKEND.md](BACKEND.md). Only once sharing is on |
 
 ## Stability and testing
