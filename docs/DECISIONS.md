@@ -519,6 +519,7 @@ Update (D-052): the council's surface and width are now written as inferred, not
 **Conservative calls.**
 - An inferred council surface still counts in full, as an inferred OSM surface does: council setts or flags in ice still close the pavement for wheeled users. Only the width is softened. No preset refuses outright any surface the council layer can name. Every other reader of surface and width (the route's surface mix, the setts warning in navigation, "relax a limit" suggestions) still needs checking against inferred council values; that's a follow-up.
 - The committed London works file was edited in place rather than rebuilt: rebuilding would also have moved every other date in it.
+- The figures here and in D-053 were measured before D-051 (road speed for road scooters) reached this branch. D-051 since changed all six road scooter journeys outside London (Causewayside to the museum now 9.5 minutes); no other preset's outcome moved, and the speed budget's settled nodes are the same.
 
 ## D-053 Presets on Inclusive Mobility values: kerbs, credit and "More benches"
 
