@@ -8,7 +8,7 @@
  */
 import { attr, unknownAttr, type Attr } from "./attribute.js";
 import { haversine } from "./geo.js";
-import type { EdgeAttrs, Graph, GraphEdge, GraphNode } from "./schema.js";
+import type { EdgeAttrs, Graph, GraphEdge, GraphNode, PlatformBoarding } from "./schema.js";
 
 export interface TransitStation {
   id: string;
@@ -54,6 +54,8 @@ export interface StationLineAccess {
   mapped: boolean;
   /** Platform to train, in words: the step and gap, or where level boarding is. */
   train: string | null;
+  /** Platform to train, in figures, one entry per platform (D-068). Absent in data built before it. */
+  boarding?: PlatformBoarding[];
 }
 
 /**
@@ -123,6 +125,8 @@ export function applyStationAccess(g: Graph, net: TransitNetwork): number {
       const why = `${s.access.source}: ${state === "yes" ? "step-free from street to every platform" : state === "part" ? "step-free to some platforms only" : state === "no" ? "no step-free route to the platform" : "no step-free route information"}${train ? `. ${train}` : ""}`;
       e.attrs.stepCount = state === "yes" ? attr(0, "reported", "tfl", net.fetchedAt, why) : state === "no" ? attr(1, "reported", "tfl", net.fetchedAt, why) : { ...unknownAttr<number>(), method: why };
       e.attrs.wheelchair = state === "yes" ? attr("yes", "reported", "tfl", net.fetchedAt, why) : state === "no" ? attr("no", "reported", "tfl", net.fetchedAt, why) : unknownAttr();
+      const boarding = s.access.lines[line]?.boarding;
+      if (boarding?.length) e.boarding = { platforms: boarding, source: s.access.source };
       n++;
     }
   }

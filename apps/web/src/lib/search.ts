@@ -26,6 +26,8 @@ export interface Entry {
   words: string[];
   /** The name's words run together, so "grass market" finds "Grassmarket" and the other way round. */
   joined: string;
+  /** OSM and the Toilet Map disagree about whether this toilet is accessible: shown with both views, never counted on routes (D-065). */
+  disputed?: boolean;
 }
 
 export interface Index {

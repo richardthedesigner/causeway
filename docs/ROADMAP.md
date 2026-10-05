@@ -53,11 +53,11 @@ The next five things to pick up, in order.
 
 1. **STAB-15**: step the e2e preview walk by distance, not time.
 2. **SMALL-02**: a miles or kilometres setting.
-3. **SPEED-02**: a router benchmark in CI.
+3. **SPEED-01**: measure first load, city load and time to first route on a mid-range phone.
 4. **FEAT-03**: "Report what's there" from "What we don't know".
 5. **SMALL-12**: a favicon and app icons.
 
-The rest of the pilot-city data (DATA-02, DATA-12 to DATA-20) is blocked on access, licences or keys. Research (RES) needs Richard and testers.
+The rest of the pilot-city data (DATA-12 to DATA-20) is blocked on access, licences or keys. Research (RES) needs Richard and testers.
 
 ## Data and coverage
 
@@ -66,10 +66,10 @@ Fix and fill the pilot cities. DATA-01 to DATA-10 are in order of value per day 
 | ID | Task | Size | Priority | Status | Who | Notes |
 |---|---|---|---|---|---|---|
 | DATA-01 | Remove scraped Changing Places records (29) from the search indexes, and filter them in the Overture build | S | now | done (2026-10-04) | Claude | D-028. `scrapedOnly()` in the Overture merge; 53 records stripped from the indexes (29 Changing Places, 24 GP, dentist, hospital and pharmacy) |
-| DATA-02 | Scottish Road Works Register adapter for Edinburgh: footway works, café tables, scaffolding, hoardings, events | M | now | blocked | Claude | §2 #1. SRWR is open (OGL), but `downloads.srwr.scot` resets every TLS connection from the cloud build container (2026-10-04). Build it from a laptop or a runner the site answers. [#10](https://github.com/richardthedesigner/causeway/issues/10) |
+| DATA-02 | Scottish Road Works Register adapter for Edinburgh: footway works, café tables, scaffolding, hoardings, events | M | now | done (2026-10-05) | Claude | §2 #1. D-057. `pnpm build:srwr`, weekly in the data refresh: 456 entries from the export of 2026-10-05, in our own words. Advance notices left out. [#10](https://github.com/richardthedesigner/causeway/issues/10) |
 | DATA-03 | TfL station data: platform step and gap, which areas each lift connects, toilets. Join lift outages on `LiftUniqueId` | M | now | done (2026-10-04) | Claude | D-020. `scripts/tfl-station-access.ts`; `applyStationAccess` and `stepFreeLines`. 10 northern Jubilee stations now known not step-free |
 | DATA-04 | TfL station and line disruptions on transit edges | M | now | done (2026-10-04) | Claude | D-020. `packages/live/src/tfl-disruptions.ts`, refreshed with the lifts. Rides get refs at load (`refRides`) |
-| DATA-05 | Street Manager activity archive: skips, scaffolding, hoardings | S | now | done (2026-10-04) | Claude | D-027. Activity archive in `pnpm build:works`: 9 in Newcastle, 5 in London, all "on the pavement" |
+| DATA-05 | Street Manager activity archive: skips, scaffolding, hoardings | S | now | done (2026-10-04) | Claude | D-027. Activity archive in `pnpm build:works`: 9 in Newcastle, 5 in London, all "on the pavement". 2026-10-05: six monthly archives (a bad month skipped), a five-week horizon, multi-part shapes split, closed only on the activity's own words (D-027 update, from PR #36) |
 | DATA-06 | Edinburgh Adopted Roads: footway surface and width as a separate layer | M | next | done (2026-10-04) | Claude | D-046. `pnpm build:footways`, `data/council/`. Widths on pavement edges 1,731 to 8,707 |
 | DATA-07 | Weather warnings, floods and gritted footways: prefer gritted pavements in ice, flag riverside paths in floods | M | now | done (2026-10-04) | Claude | D-047. Edinburgh gritting routes in the council layer (1,130 edges); EA flood warnings live (`pnpm build:floods`). Met Office warnings still wait on a key (DATA-17); Scotland floods are DATA-25 |
 | DATA-08 | Park entrances (OS Open Greenspace) and OSM Notes | M | now | done (2026-10-04) | Claude | D-048. `pnpm build:greenspace` (648 gates in Edinburgh); `pnpm build:osm-notes` (28 in Edinburgh, 23 in London), shown only |
@@ -85,12 +85,17 @@ Fix and fill the pilot cities. DATA-01 to DATA-10 are in order of value per day 
 | DATA-18 | Live Street Manager feed for England | M | later | blocked | Richard, Claude | Waits on Richard's application. [#10](https://github.com/richardthedesigner/causeway/issues/10) |
 | DATA-19 | Tyne and Wear Metro lift status | M | later | blocked | Richard, Claude | Waits on Nexus. [#13](https://github.com/richardthedesigner/causeway/issues/13) |
 | DATA-20 | Live bus and tram departures in Edinburgh and Newcastle | M | later | blocked | Claude | [#8](https://github.com/richardthedesigner/causeway/issues/8). Lothian 403, Transport for Edinburgh 522, Nexus needs a key |
-| DATA-22 | Should the council's pavement surface win over OSM on streets drawn as one line? | S | next | blocked | Richard, Claude | D-046. They disagree on 2,822 of 6,341 edges; OSM wins today. A decision, then a one-line change |
+| DATA-22 | Should the council's pavement surface win over OSM on streets drawn as one line? | S | next | done (2026-10-05) | Richard, Claude | D-063. Richard said yes for streets whose OSM surface is only the carriageway's: the council's surface replaces it on 7,812 edges, a different value on 3,044 |
 | DATA-23 | TfL station toilets in the toilet layer and search (65 at our stations, with RADAR and accessible flags) | S | now | done (2026-10-05) | Claude | PR #33. One place per station (24 stations, 65 toilets); toilets past the gates are for customers and aren't offered as stops |
 | DATA-24 | Rebuild the council footway layer on the weekly refresh | S | later | done (2026-10-04) | Claude | Done by DATA-11 |
-| DATA-25 | Scotland's flood warnings (SEPA) for the Water of Leith walkway | M | later | todo | Claude | D-047. No open feed matching the EA's found yet; look again |
+| DATA-25 | Scotland's flood warnings (SEPA) for the Water of Leith walkway | M | later | todo | Claude | D-047. Partly done (2026-10-05, D-066): SEPA's live level at Murrayfield is said on routes using the walkway from 1.05 m. Flood warnings themselves still have no open feed; look again |
 | DATA-26 | Pavement gritting routes for Newcastle and London | S | later | todo | Claude | D-047. None open found; City of London has priority pavements (survey §2 #10) |
 | DATA-27 | Do the 348 places that come only from AllThePlaces break the no-scraping rule (DATA_SOURCES rule 5)? | S | next | blocked | Richard, Claude | D-028. Mostly chain stores, parcel lockers and scout halls. Overture doesn't say which spider a record came from. Richard decides; then filter in `scrapedOnly` or leave as is |
+| DATA-28 | Presets on Inclusive Mobility values: manual wheelchair kerb 6 mm, unmeasured dropped kerbs at 6 mm, kerb text in mm, "More benches" ladder and speed | S | now | done (2026-10-05) | Claude | D-054, D-055. Ported from PR #36. Rollator keeps 300 m (Richard). Outcomes for all 91 journey and preset pairs in D-054 |
+| DATA-29 | TfL station data on the platforms: a lift out that leaves some platforms step-free counts as unknown, and the step and gap to the train against each person's limits, with level-access doors | M | now | done (2026-10-05) | Claude | D-058, D-068. Ported from PR #36. No gap-limit setting yet (OPEN_ITEMS) |
+| DATA-30 | When TfL's disruption feeds fail: each feed apart, the last good answer kept for 15 minutes, the route card says which couldn't be checked, and "nothing fits" names the closure in the way | S | now | done (2026-10-05) | Claude | D-061. Ported from PR #36. Builds on D-052 (STAB-05) |
+| DATA-31 | Council footways and gritting matched along each edge, not at its middle: surface and width from points every 5 m, gritting only where the route runs the same way, each with the council's own published date | S | now | done (2026-10-05) | Claude | D-062, D-064. Ported from PR #36. In British National Grid: the server's WGS84 was tens of metres out. Council surfaces 2,556 to 12,182 edges, widths 6,976 to 12,069, gritted 1,130 to 1,648 from the council's licensed layer (2021) |
+| DATA-32 | Weather and health extras: UKHSA heat and cold alerts (England), gusts on exposed bridges, air quality, pollen and UV when high | M | now | done (2026-10-05) | Claude | D-066. Ported from PR #36. Alerts count only in season and before their end; Open-Meteo times now read as UTC on every phone. Lines in "On this route" since FEAT-19 (D-067) |
 | DATA-21 | Map York Place and the western way into the Grassmarket in OSM (about 1.1 km) | M | later | todo | Richard | [DEVICES.md](plans/DEVICES.md). Turns unknowns into known ground |
 
 ## Research: check our guesses with real people
@@ -132,6 +137,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | FEAT-16 | Welsh and Scottish Gaelic, with one place for all copy | L | later | todo | Claude | |
 | FEAT-17 | Indoor and station routing (lifts, platforms, step-free interchanges) | XL | later | todo | Claude | Start with one big station |
 | FEAT-18 | Road speed setting for road scooters in the device editor | S | later | done (2026-10-05) | Claude | D-051. 4 to 8 mph, and a per-device mph or km/h choice for speeds |
+| FEAT-19 | "On this route": what a route went round, what may slow you and what's worth knowing, in one grouped list, each with its label, source and date; the route card says only what changed the route or needs doing | M | now | done (2026-10-05) | Claude | D-067. Ported from PR #36 (its D-041). Blocked from the explanation and one closure-blind search per plan, only when something is closed. TfL's informational station messages, the weather and health lines and mappers' notes moved into it |
 
 ## Small features
 
@@ -150,6 +156,8 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | SMALL-11 | Weather for trips more than 48 hours ahead | S | later | todo | Claude | D-040 falls back to today's |
 | SMALL-12 | A favicon and app icons (every page load asks for `/favicon.ico` and gets a 404) | S | now | todo | Claude | Found doing SEC-04 |
 | SMALL-13 | Saved places on the map, and as a start as well as a destination from the route screen | S | later | todo | Claude | Found doing FEAT-04. Today they show in search, and as starts in "Starting from?" |
+| SMALL-14 | Toilet Map: say when OSM and the Toilet Map disagree, keep disputed toilets off routes, and say when a record is over 2 years old | S | now | done (2026-10-05) | Claude | D-065. Ported from PR #36. 5 disputes in Edinburgh, 1 in Newcastle |
+| SMALL-15 | Parks and OpenStreetMap notes: a park found by name ends at its gate, not a nearby building's door; old notes and business questions left out; "N more places a mapper flagged" | S | now | done (2026-10-05) | Claude | D-048 update. Ported from PR #36. 26 of 119 named Edinburgh parks with gates had a fitting door within 50 m |
 
 ## Security and privacy
 
@@ -196,12 +204,13 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 
 | ID | Task | Size | Priority | Status | Who | Notes |
 |---|---|---|---|---|---|---|
-| SPEED-01 | Measure first load, city load and time to first route on a mid-range phone | S | next | todo | Claude | Numbers first, then targets |
-| SPEED-02 | Router benchmark in CI, failing if a journey gets much slower | S | now | todo | Claude | Uses the acceptance journeys |
+| SPEED-01 | Measure first load, city load and time to first route on a mid-range phone | S | now | todo | Claude | Numbers first, then targets |
+| SPEED-02 | Router benchmark in CI, failing if a journey gets much slower | S | now | done (2026-10-05) | Claude | D-056, [PERF_BASELINE](plans/PERF_BASELINE.md). Ported from PR #36. `scripts/perf-budget.test.ts` in `pnpm test`; `pnpm perf:baseline` |
 | SPEED-03 | Bundle-size and Lighthouse budgets in CI | S | later | todo | Claude | |
 | SPEED-04 | Load the `/review` page's code only for reviewers | S | later | todo | Claude | |
 | SPEED-05 | Smaller search index per city | S | later | todo | Claude | `data/places` |
 | SPEED-06 | A compact binary graph format instead of gzipped JSON | L | later | todo | Claude | Only if SPEED-01 shows graph load matters |
+| SPEED-07 | Speed budget follow-ups: a CI wall-time baseline from a few weeks of printed figures, and a re-baseline when the weekly refresh changes the graphs | S | later | todo | Claude | D-056. Settled nodes depend on the graph, so a refresh PR can trip the 10% check |
 
 ## Bloat reduction
 
@@ -234,6 +243,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | DEP-05 | Privacy-safe error reporting (no locations, no profile) | M | later | todo | Richard, Claude | Choose a tool and record it in DECISIONS |
 | DEP-06 | Release notes and version numbers users can see | S | later | todo | Claude | The build log is internal |
 | DEP-07 | A custom domain | S | later | blocked | Richard | Needs a name and payment |
+| DEP-08 | Merge PR #44 on top of PR #42: conflicts, D-numbers and task IDs (PORT-44) | S | now | done (2026-10-05) | Claude | Merge commits only. No numbers collided. CSP checked for #44's new feeds |
 
 ## Reviews
 
@@ -268,6 +278,19 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 
 Newest first. One line per change: date, ID, what happened, link.
 
+- 2026-10-05: DEP-08 (PORT-44) done: PR #44 merged with PR #42. No D-number or task ID collided: #42 holds D-059 and D-060, #44 D-053 to D-058 and D-061 to D-068. SPEED-02 was done in #44, so SPEED-01 joins Now in its place.
+- 2026-10-05: FEAT-19 done: "On this route" under the route card, grouped Blocked, Slower and Worth knowing, each fact labelled live, static data or reported by people with its source and date; the route card keeps only failed feeds, a count of closures gone round and a flood area on the route (D-067, ported from PR #36).
+- 2026-10-05: DATA-32 done: UKHSA heat and cold alerts (only in season and before their end), gusts on exposed bridges, and air quality, pollen and UV when high; Open-Meteo times read as UTC (D-066). DATA-25 in part: SEPA's Water of Leith level on routes using the walkway.
+- 2026-10-05: SMALL-15 done: a park found by name ends at its gate, not a neighbouring building's door; OpenStreetMap notes over 3 years old and business questions left out, the rest past three counted (D-048 update).
+- 2026-10-05: SMALL-14 done: where OSM and the Toilet Map disagree on access the toilet says so first and stays off routes; old records say they may be out of date (D-065).
+- 2026-10-05: DATA-31 done: council footways and gritting matched along each edge in British National Grid, with the council's own dates; gritting from its licensed layer (D-062, D-064). DATA-22 done: on streets drawn as one line, the council's pavement surface beats the carriageway's (Richard, D-063).
+- 2026-10-05: DATA-30 done: TfL's lift, line and station feeds fetched apart, a failed feed's last answer held 15 minutes, the route card says which couldn't be checked, and "nothing fits" names the closure (D-061). Follows STAB-05.
+- 2026-10-05: DATA-29 done: the step and gap to the train held to each person's limits, with level-access doors in the spoken route (D-068).
+- 2026-10-05: Added DATA-29 (TfL station data on the platforms, ported from PR #36). A lift out that leaves some platforms step-free now counts as unknown, not closed (D-058).
+- 2026-10-05: DATA-05 extended: six monthly activity archives, closure words and a five-week horizon (D-027 update, ported from PR #36).
+- 2026-10-05: DATA-02 done: Edinburgh's works from the Scottish Road Works Register (D-057, ported from PR #36).
+- 2026-10-05: SPEED-02 done (speed budget, ported from PR #36). Added SPEED-07.
+- 2026-10-05: Added DATA-28 (presets on Inclusive Mobility values, ported from PR #36) and marked it done.
 - 2026-10-05: STAB-07, STAB-14, SMALL-03, SMALL-05 and FEAT-04 done in PR #42 (D-060). Added SMALL-13, STAB-16. Now: STAB-15, SMALL-02, SPEED-02, FEAT-03, SMALL-12.
 - 2026-10-05: STAB-13, STAB-04, SMALL-04, SMALL-06 and BLOAT-02 done in PR #42, and STAB-08 with SMALL-06. Now: STAB-07, STAB-14, SMALL-03, SMALL-05, FEAT-04.
 - 2026-10-05: STAB-06, SEC-06 and SMALL-01 done in PR #42 (STAB-12 was done in PR #41 alongside). Added STAB-15 (was STAB-14 here), SEC-15. Now: STAB-13, STAB-04, SMALL-04, SMALL-06, BLOAT-02.

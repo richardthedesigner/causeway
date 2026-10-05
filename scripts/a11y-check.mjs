@@ -1,6 +1,6 @@
 /**
  * WCAG 2.2 AA check of the built app with axe-core, light and dark, on the
- * screens people use most: start, search results, a route with buses and
+ * screens people use most: start, a route to a park, search results, a route with buses and
  * toilets (every section open), first-visit setup, the device list and the
  * device settings, with a battery range and as a road scooter in mph and
  * km/h (FEAT-18), and the update prompt. Then the
@@ -10,6 +10,8 @@
  * a route with every section open, the note sheet, navigation and the report
  * sheet. Nothing runs off the side, and in navigation the next instruction and
  * the journey panel don't cover each other (STAB-12). Your data is checked too (SEC-06).
+ * And a London route that goes round a lift out (TfL's recorded feeds), with
+ * "On this route" open by itself, light, dark and at 320 px with 200% text (D-067).
  *   pnpm web:build && pnpm a11y
  * Exits 1 on any violation, or anything the Content Security Policy blocks. Runs in CI (.github/workflows/ci.yml).
  */
@@ -40,6 +42,16 @@ for (const scheme of ["light", "dark"]) {
   await page.getByPlaceholder("Where to?").waitFor({ timeout: 60_000 });
   await page.waitForTimeout(1500);
   await check("start");
+
+  // A park: the route ends at a gate into it and says so (DATA-08, D-048). Then back to the start.
+  await page.getByPlaceholder("Where to?").fill("The Meadows");
+  await page.getByRole("option").first().click();
+  await page.getByText(/Ends at a gate into/).waitFor({ timeout: 60_000 });
+  await page.waitForTimeout(1000);
+  await check("route to a park");
+  await page.goto(url);
+  await page.getByPlaceholder("Where to?").waitFor({ timeout: 60_000 });
+  await page.waitForTimeout(1500);
 
   // Your data (SEC-06), at the point of deleting.
   await page.getByPlaceholder("Where to?").focus();
@@ -101,6 +113,60 @@ for (const scheme of ["light", "dark"]) {
   });
   await page.getByRole("button", { name: "Reload" }).waitFor();
   await check("update prompt");
+}
+// "On this route" with something blocked (D-067): London, TfL's recorded lift outages and station messages, a wheelchair
+// route to Canary Wharf that goes round the faulty lift. The list opens by itself. Light and dark, then 320 px at 200% text.
+const FX = new URL("../packages/live/test/fixtures/", import.meta.url);
+async function londonLiftOut(page) {
+  await page.route(/open-meteo\.com|environment\.data\.gov\.uk|ukhsa-dashboard\.data\.gov\.uk/, (r) => r.abort());
+  await page.route(/api\.tfl\.gov\.uk/, (r) => {
+    const u = r.request().url();
+    const body = /Disruptions\/Lifts/.test(u) ? readFileSync(new URL("tfl-lifts-2026-10-04.json", FX), "utf8") : /StopPoint\/Mode/.test(u) ? readFileSync(new URL("tfl-station-disruptions-2026-10-04.json", FX), "utf8") : "[]";
+    return r.fulfill({ contentType: "application/json", body });
+  });
+  await page.addInitScript(() => localStorage.setItem("causewayside.city.v1", "london"));
+  await page.goto(url);
+  await page.getByPlaceholder("Where to?").waitFor({ timeout: 60_000 });
+  // The lift feed answers before the route is asked for.
+  await page.waitForFunction(() => !document.body.innerText.includes("Checking lifts"), null, { timeout: 30_000 }).catch(() => undefined);
+  await page.waitForTimeout(2000);
+  await page.getByPlaceholder("Where to?").fill("Canary Wharf station");
+  await page.getByRole("option").first().click();
+  await page.getByText("Goes round a closure on the way. See On this route.").waitFor({ timeout: 60_000 });
+  const open = await page.locator("details", { hasText: "On this route" }).first().evaluate((el) => el.open);
+  if (!open) failures.push("On this route didn't open by itself with something blocked");
+  await page.getByRole("heading", { name: /^Blocked/ }).waitFor();
+}
+for (const scheme of ["light", "dark"]) {
+  const page = await (await browser.newContext({ viewport: { width: 390, height: 844 }, colorScheme: scheme })).newPage();
+  watchCsp(page, csp);
+  await londonLiftOut(page);
+  await page.addScriptTag({ content: AXE });
+  for (const d of await page.locator("details").all()) await d.evaluate((el) => (el.open = true));
+  const violations = await page.evaluate(async () => (await window.axe.run(document, { runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"] } })).violations.map((v) => ({ id: v.id, impact: v.impact, help: v.help, targets: v.nodes.slice(0, 3).map((n) => n.target.join(" ")) })));
+  console.log(`${scheme} / route with a lift out, On this route open: ${violations.length} violation${violations.length === 1 ? "" : "s"}`);
+  for (const v of violations) {
+    console.log(`  [${v.impact}] ${v.id}: ${v.help}\n    ${v.targets.join("\n    ")}`);
+    failures.push(`${scheme} / route with a lift out / ${v.id}`);
+  }
+}
+{
+  const page = await (await browser.newContext({ viewport: { width: 320, height: 640 } })).newPage();
+  watchCsp(page, csp);
+  await londonLiftOut(page);
+  await page.addStyleTag({ content: "html { font-size: 200% !important }" });
+  for (const d of await page.locator("details").all()) await d.evaluate((el) => (el.open = true));
+  await page.waitForTimeout(500);
+  const off = await page.evaluate(() => {
+    const all = [...document.querySelectorAll("body *")].filter((e) => {
+      if (e.closest(".maplibregl-map") || (e.closest("svg") && e.tagName !== "svg")) return false;
+      const b = e.getBoundingClientRect();
+      return b.width > 0 && b.height > 0 && (b.right > innerWidth + 1 || b.left < -1);
+    });
+    return all.filter((e) => !all.some((o) => o !== e && e.contains(o))).slice(0, 3).map((e) => `${e.tagName.toLowerCase()} "${(e.textContent ?? "").trim().slice(0, 30)}"`);
+  });
+  console.log(`200% text / route with a lift out, every section open: ${off.length ? off.map((o) => `${o} runs off the side`).join("; ") : "fits"}`);
+  for (const o of off) failures.push(`200% text / route with a lift out / ${o} runs off the side`);
 }
 // Reflow (WCAG 1.4.4, 1.4.10): the device sheets at 320 by 640 with text at 200% (STAB-11).
 {

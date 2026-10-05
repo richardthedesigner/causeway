@@ -113,8 +113,8 @@ Update (SEC-05, 2026-10-05): checked. The app logs nothing; its only URL paramet
 
 **Decided**, explicitly provisional. The presets cite Inclusive Mobility (2021) where it applies (5% preferred, 8% absolute over short distances; cross-fall 2.5%) and are otherwise judgement.
 
-Update (DATA-10): rest distances now follow Inclusive Mobility (2021) section 3.4, "Recommended distance limit without a rest": walking stick and crutches 50 m (were 500 and 400), fatigue or chronic illness 100 m, IM's figure for people with a mobility impairment and no stick (was 250). IM's 150 m for wheelchair users and people with a vision impairment isn't used: they can stop anywhere, so a bench isn't the point. The rollator keeps 300 m: it has a seat. Mapped benches rarely come every 50 m, so "More benches" also tries half and seven-tenths of the route's longest gap, and offers the best it finds with the real figure.
-- Kerbs stay as they were. IM's "flush, with a maximum 6 mm tolerance" is how a dropped kerb should be built, not what someone can manage, and real lowered kerbs often aren't. So an OSM `lowered` kerb with no height still counts as 2 cm.
+Update (DATA-10): rest distances now follow Inclusive Mobility (2021) section 3.4, "Recommended distance limit without a rest": walking stick and crutches 50 m (were 500 and 400), fatigue or chronic illness 100 m, IM's figure for people with a mobility impairment and no stick (was 250). IM's 150 m for wheelchair users and people with a vision impairment isn't used: they can stop anywhere, so a bench isn't the point. The rollator keeps 300 m: it has a seat (confirmed by Richard, 2026-10-05, D-054). Mapped benches rarely come every 50 m, so "More benches" also tries half and seven-tenths of the route's longest gap, and offers the best it finds with the real figure. *Since D-054 and D-055 it starts from the loosest of these and makes at most two searches.*
+- Kerbs stay as they were. IM's "flush, with a maximum 6 mm tolerance" is how a dropped kerb should be built, not what someone can manage, and real lowered kerbs often aren't. So an OSM `lowered` kerb with no height still counts as 2 cm. *Superseded by D-054: Richard decided to apply IM's 6 mm to the manual wheelchair, and an unmeasured dropped kerb now counts as 6 mm.*
 - Gradients and cross-fall already cite IM (above). Users can change every figure, and Phase 2 testing (RES-01, RES-02) replaces them. The unknown-risk weights (60 s per 100 m for unknown gradient, 120 s per unmapped kerb at a crossing) are guesses. Both are calibrated in Phase 2 with disabled testers in each city. Every number lives in one place (`packages/profile`, `packages/router/src/cost.ts`).
 
 ## D-014 Phase 1 area: central Edinburgh first, whole city with the worker
@@ -156,7 +156,7 @@ Update (DATA-10): rest distances now follow Inclusive Mobility (2021) section 3.
 
 Update (DATA-03): TfL's station data (`tfl-stationdata-detailed.zip`, TfL open data) maps each station's areas and the level paths, ramps and lifts between them. `scripts/transit-london.ts` adds it to `network.json` for all 72 stations, and the app puts it on the board edges when London loads (`applyStationAccess`), per line:
 - **Step-free** means every platform of that line can be reached from "Outside" by level paths, ramps and lifts. Some platforms only (one direction) stays unknown. None, where TfL has mapped the routes, now means not step-free: 10 Jubilee line stations north of Baker Street, which wheelchair users are routed around. Canada Water and Canning Town's Jubilee platforms are now confirmed step-free.
-- **Lift outages** are joined on `LiftUniqueId`: a line is closed only if the lifts out cut every step-free route to its platforms. A lift outage on the District line at Westminster no longer touches the Jubilee line. Stations without TfL station data fall back to reading the message, as before.
+- **Lift outages** are joined on `LiftUniqueId`: a line is closed only if the lifts out cut every step-free route to its platforms. A lift outage on the District line at Westminster no longer touches the Jubilee line. Stations without TfL station data fall back to reading the message, as before. Every lift out at a station counts together, even when TfL sends them as separate messages (D-053).
 - The platform-to-train step and gap (and level-boarding doors, and manual ramps) are kept with the fact and shown with it.
 
 Update (DATA-04): TfL line status and station disruptions now act on the rail graph too (`packages/live/src/tfl-disruptions.ts`), refreshed with the lifts.
@@ -211,9 +211,13 @@ Open: whether notes should carry the conditions ("when wet") as a field rather t
 
 **Decided.** 2026-10-04. Every outside feed gets a small adapter in `packages/live` that turns its records into one of our shapes (`LiftOutage`, `WorksObservation`, weather `Conditions`), and one function that puts those shapes on the graph as dated `LiveState`s (`liftOutageStates`, `worksStates`). The router never knows which feed a state came from, so adding a city or a source is an adapter plus a test, not a router change.
 
-First use: pavement works. Street Manager (England, OGL) permits that close the footway close those pavement edges for everyone until the works' end date; works on the footway that don't close it, including a temporary walkway in the road, are "degraded" and counted as unknown; carriageway-only works are left out. In London TfL street disruptions that mention the pavement top this up live every 5 minutes. The build reads Street Manager's monthly archive (`pnpm build:works`, 1 GB, about a minute); production should subscribe to Street Manager's live notifications (free, needs registering an endpoint) through the same adapter. Scotland's register (SRWR) has no open feed: Edinburgh says "No open roadworks feed here yet" rather than implying there are none.
+First use: pavement works. Street Manager (England, OGL) permits that close the footway close those pavement edges for everyone until the works' end date; works on the footway that don't close it, including a temporary walkway in the road, are "degraded" and counted as unknown; carriageway-only works are left out. In London TfL street disruptions that mention the pavement top this up live every 5 minutes. The build reads Street Manager's monthly archive (`pnpm build:works`, 1 GB, about a minute); production should subscribe to Street Manager's live notifications (free, needs registering an endpoint) through the same adapter. Scotland's register (SRWR) has no open feed: Edinburgh says "No open roadworks feed here yet" rather than implying there are none. *Superseded for Scotland by D-057: the register is open data, and Edinburgh's works now come from it.*
 
 Update (DATA-05): the build also reads Street Manager's activity archive (`activity/YYYY/MM.zip`, about 12 MB a month, same bucket, OGL): skips, scaffolding, hoardings, cranes and mobile platforms, events and other non-works licences. Only those on the footway or a footpath are kept. The archive doesn't say whether the pavement is closed, so each one is "on the pavement" and counted as unknown, never closed. With no end time given, an activity runs to the end of its last day. September 2026 added 9 in Newcastle and 5 in London.
+
+Update (D-053): activities are described in our own words and the street name only ("Scaffolding on the pavement"). The record's free-text details can name addresses, businesses and people, so they are never shown. The committed London file had three "(Impact Area)" and "(Bridge maintenance works)" endings; they were removed. TfL's street comments close a pavement only when no word around the closure phrase denies it (`saysClosed`).
+
+Update (2026-10-05, ported from the overnight build, PR #36): the build reads the last six monthly activity archives, not one: a scaffold licensed in May can still stand in October, and an activity only appears in the months it was created or changed. The latest event per activity wins. A month that fails to download, isn't a zip or breaks part way through is skipped whole with a warning, and the file's source line names it; the June 2026 archive is published truncated, so today's files read April, May, July, August and September. Activities starting more than five weeks after the build are left out, as in D-057. A shape in several parts becomes one entry per part. An activity closes the pavement only when its own name, type details or location description say so, read with D-057's plain-words rule and denial check (`saysClosed`); none did in this build. A footpath on its own is "the path", not "the pavement". The type list stays as it was (skips, scaffolding, hoardings, cranes, compounds, events, section 50 and 58 licences, and "An obstruction" for the rest), all in our own words. Rebuilt 2026-10-05: Newcastle 51 works (38 closing a pavement) and 9 activities (7 cranes); the London zones 17 works (5 closing) and 6 activities (2 cranes).
 
 Next adapters, in order of value: Overture places (more venues and addresses; release 2026-09-23.1 is on S3), National Rail Knowledgebase stations (step-free access and staffing; needs a free key), Met Office DataHub (warnings; key), Mapillary (kerb and surface detections; key), accessibility.cloud (venue accessibility; key, and its own sources' licences). Keys stay server-side once there is a backend; until then these run in the build.
 
@@ -453,6 +457,10 @@ When there is nothing to compare with, it builds. Once DEP-01 makes `main` the p
 - Widths outside 0.5 to 10 m are ignored; a few large polygons carry area-like figures.
 - Credit: "Pavement surfaces and widths: City of Edinburgh Council, Open Government Licence v3.0", in the city credit line.
 
+Update (D-053): the council's surface and width are now written as inferred, not reported. The council records the whole footway polygon, matched to our edge by shape, and its width is the full width, not the clear width past bins and posts. As reported values, narrow council widths closed pavements outright for wheelchair users (231 edges under 0.9 m, 700 under 1.2 m). As inferred values they cost time and say "about", and never close a pavement on their own.
+
+Update (D-062, D-063): matched along each edge in British National Grid, not at its middle from the server's WGS84 (which was tens of metres out); width the 20th percentile across both sides; setts on a quarter of the points; "Surface Dressing" unknown; dated with the council's published date. On a street proxy whose OSM surface is only the carriageway's, the council's pavement surface now wins (Richard, DATA-22).
+
 
 ## D-047 Ice, gritting and floods
 
@@ -468,6 +476,10 @@ When there is nothing to compare with, it builds. Once DEP-01 makes `main` the p
 
 **Not yet.** Met Office weather warnings need a key (DATA-17). Scotland's flood warnings come from SEPA, which has no matching open feed we've found (DATA-25).
 
+Update (D-064): the gritting routes now come from the council's "Gritting Routes" layer, which its DCAT feed lists under OGL v3 (published 2021-05-27), matched by direction along each edge: 1,648 pavement edges. Main's layer had no published licence and came back about 90 m off the streets. The reason gives the routes' year. The ice costs are unchanged.
+
+Update (D-066): four more feeds sit beside these, none of which closes anything: UKHSA heat and cold health alerts (England), gusts on exposed bridges, air quality, pollen and UV, and the Water of Leith level from SEPA (a partial answer to DATA-25: a level, not a flood warning).
+
 ## D-048 Park gates and OpenStreetMap notes
 
 **Decided.** 2026-10-04 (DATA-08).
@@ -475,6 +487,11 @@ When there is nothing to compare with, it builds. Once DEP-01 makes `main` the p
 **Park gates.** A route to a park used to end at the park's middle, which might be a pond or the far side of a fence. OS Open Greenspace (OGL) draws parks as sites with access points (`pnpm build:greenspace`: 153 named sites and 648 pedestrian gates in central Edinburgh, 12 and 73 in Newcastle, 73 and 299 in London). When the destination is a park or garden in our search and sits inside a site (the smallest, so a garden inside a park wins), or shares its name with one nearby, the route ends at the gate nearest the way you're coming, trying up to three, and says which park. OS splits some parks (The Meadows is "West Meadow Park" and "East Meadow Park"), so position matters more than name. A door that fits (D-018) still comes first.
 
 **OpenStreetMap notes.** Open notes are people saying a path is blocked or steps have appeared, but also shop closures and StreetComplete's questions. `pnpm build:osm-notes` keeps those about the ground (paths, steps, kerbs, gates, bridges and so on: 28 in Edinburgh, 23 in London), at build time, so no route's area is sent to a third party (D-009). Up to three within 20 m of the best route are shown with it, dated and marked "Not checked by us". They never change the route: anyone can write a note, and many are stale.
+
+Update (2026-10-05, SMALL-15, ported from the overnight build, PR #36):
+- **A park's gate beats a neighbour's door.** The worker tried a building door that fits first for every venue, and every search result except a bus stop is a venue, so a park found by name could end at the door of a building across the road. Of 119 named Edinburgh parks with OS gates, 26 had a door within 50 m that fits a walker, a manual wheelchair or a powerchair (London 7 of 16, Newcastle 0 of 5). Now a park or garden we have gates for skips the door step and ends at its gate (`doorFirst` in `apps/web/src/lib/destination.ts`). Pins and other venues, a café in a park among them, keep door-first. `pnpm a11y` checks the route to a park.
+- **Fewer, fresher notes.** A note opened over 3 years ago with no comment since is left out, and so are StreetComplete's questions about a business ("What are the opening hours?", "Is this place still here?") (`scripts/osm-notes-lib.ts`). Rebuilt 2026-10-05: Edinburgh 27 kept, London 21, Newcastle none: one note in each city dropped for its age, and in London a business's own submission (onosm.org) too.
+- **The rest counted.** Past the three notes listed with a route, one line counts the others: "2 more places a mapper flagged on this route in OpenStreetMap. Not checked by us."
 
 ## D-049 The Toilet Map fills OSM's gaps
 
@@ -486,6 +503,8 @@ When there is nothing to compare with, it builds. Once DEP-01 makes `main` the p
 - Each place says "checked" (someone verified it on the ground) or "updated", with the month, so an old record looks old.
 - Weekly opening times become OSM opening hours, so "open when you pass" works for them too.
 - Credit in each city line: "Toilets: Great British Public Toilet Map, Public Convenience Ltd (CC BY 4.0)".
+
+Update (D-065): where OSM and the Toilet Map disagree on access, the first fact says so before anything else and the toilet doesn't count on routes. A record over 2 years old says it may be out of date, and an added one ranks a little lower in search.
 
 ## D-050 Dependency audit in CI, and MapLibre 6
 
@@ -519,6 +538,127 @@ Update (BLOAT-02, 2026-10-05): CI also runs `pnpm knip` for unused files, export
 - **Tested.** `getJson` unit tests (`packages/live/test/http.test.ts`), and a `pnpm e2e` journey in London where TfL, Open-Meteo and the Environment Agency never answer: the route still comes, and the weather and lift lines fall back.
 - **Not covered.** The Supabase calls for sharing and review (STAB-14). Sharing is off today.
 
+## D-053 Honesty fixes from the overnight build
+
+**Decided.** 2026-10-05. Ported by hand from the overnight build (PR #36) onto main. Each one stops the app saying more than its data supports. Code: `packages/graph/src/council.ts`, `packages/live/src/works.ts`, `packages/live/src/tfl.ts`, `apps/web/src/components/PlaceSearch.tsx`.
+
+- **Council widths and surfaces are inferred** (amends D-046). They cost time and never close a pavement on their own. OSM's own reported width still closes one. On the 91 acceptance journey and preset pairs (`scripts/preset-outcomes.ts`), three Edinburgh routes changed, all by scooter: Causewayside to the museum by road scooter (17.0 to 18.4 minutes, now with no unknowns), and Causewayside to Waverley by scooter (29.5 to 23.4 minutes) and road scooter (29.7 to 25.2 minutes), through pavements that had been closed by a council width.
+- **Denied closures don't close.** TfL's street disruption comments are free text. "No footway closed" or "footway closed: not required" used to match the closure words and close the pavement. Now a closure phrase counts only when the words just before and after it don't deny it (`saysClosed`). One plain closure anywhere in the text still closes.
+- **Street Manager activities without their free text** (amends D-027). The details field can name addresses, businesses and people. We show the activity type in our own words and the street. Since D-057 the free text is still read, but only for closure words, and the same rule covers the Scottish register.
+- **Lift outages grouped by station.** TfL can report two lifts at one station on two messages. Each message was checked alone, so two lifts that between them cut off a line closed nothing. At Canning Town, lifts 1 and 3 are the two ways from the street to the ticket hall: either alone leaves a way, both out cut off the Jubilee line. Now every lift out at a station goes into one search, and the reason quotes each message once.
+- **A search result's first fact may take two lines.** On a 390 px phone one line is about 40 characters, so the first fact was often cut off mid-word. It now wraps to two lines before it is cut. Every row, not only long ones, so the list is easy to scan; not three, so the list stays short on a phone.
+
+**Conservative calls.**
+- An inferred council surface still counts in full, as an inferred OSM surface does: council setts or flags in ice still close the pavement for wheeled users. Only the width is softened. No preset refuses outright any surface the council layer can name. Every other reader of surface and width (the route's surface mix, the setts warning in navigation, "relax a limit" suggestions) still needs checking against inferred council values; that's a follow-up. Checked in D-062: they all read the edge's attributes, so they see council values as they see OSM's.
+- The committed London works file was edited in place rather than rebuilt: rebuilding would also have moved every other date in it.
+- The figures here and in D-054 were measured before D-051 (road speed for road scooters) reached this branch. D-051 since changed all six road scooter journeys outside London (Causewayside to the museum now 9.5 minutes); no other preset's outcome moved, and the speed budget's settled nodes are the same.
+
+## D-054 Presets on Inclusive Mobility values: kerbs, credit and "More benches"
+
+**Decided.** 2026-10-05. Richard decided to apply these values (overnight build, PR #36, ported by hand). Updates D-013. Source: DfT, Inclusive Mobility, December 2021, Open Government Licence v3.0: the dropped kerbs paragraph ("preferably flush with the road, but with a maximum 6mm tolerance") and section 3.4. Code: `packages/profile/src/index.ts`, `LOWERED_KERB_CM` in `packages/router/src/cost.ts`, `tradeoffs` in `packages/router/src/router.ts`, `DeviceEditor.tsx`, `DeviceSetup.tsx`.
+
+**What changed.**
+- **Manual wheelchair: highest kerb 2 cm to 6 mm**, IM's flush band. Other wheeled presets keep their limits: 6 mm is how a kerb should be built, not what a powerchair or scooter can climb.
+- **An unmeasured dropped kerb counts as 6 mm**, not 2 cm (`LOWERED_KERB_CM`). Without this the 6 mm limit shuts out nearly every inferred dropped kerb (D-015): measured on main, the manual wheelchair then had no route on 3 of 7 journeys (Waverley to the Grassmarket, Causewayside to the museum, Parliament Square to Canada Square), and Causewayside to Waverley went from 32 to 63 minutes. "Flush only" (0) still avoids such kerbs. A measured kerb is always held to its measured height. Recorded so the two changes are never split.
+- **Kerb limits under 1 cm read in millimetres** ("6 mm"). The plus and minus buttons step to whole centimetres (6 mm goes to 1 cm or to flush).
+- **Rest intervals stay as D-013 set them**: walking stick and crutches 50 m, fatigue 100 m, **rollator 300 m**. The overnight build had the rollator at 50 m; Richard confirmed on 2026-10-05 that it keeps 300 m because it has a seat.
+- **"More benches" starts from the loosest interval worth offering and tightens once.** The candidates are 8, 6, 4, 3, 2, 1.5 and 1 times the user's interval, and seven-tenths and half of the route's own worst gap, all clearly shorter than that gap (under 85%). It searches the loosest, then the next, at most two searches, and stops early when a search finds nothing. Each search gives up past double the chosen route's cost or 15 minutes more (D-055). The best result is offered.
+- **The credits name Inclusive Mobility**, in every city's line.
+
+**Before and after.** All 7 acceptance journeys with all 13 presets, 91 pairs, recorded with `scripts/preset-outcomes.ts` (Monday lunchtime, dry, daylight; each city loaded as the worker loads it, without live data). "Before" is main with D-053.
+- **Verdict, time, distance and route:** no change in any of the 91.
+- **"More benches":** two changes, both Waverley to the Grassmarket.
+  - Walking stick: before, "No way there has mapped benches closer together than this". Now a route whose longest stretch without a bench is 470 m instead of 890 m, 4 minutes longer.
+  - Crutches: before, 860 m instead of 1,260 m, 10 minutes longer. Now 890 m instead of 1,260 m, no longer than the chosen route.
+- The other 25 rest-preset pairs say "No way there has mapped benches closer together than this", before and after.
+- **Speed** (route plus trade-offs for the four rest presets, 28 pairs, three runs each on a busy machine): 13.5 to 15.4 s before, 12.2 to 12.6 s after. Waverley to the Grassmarket by rollator is slower, 1.5 to 1.7 s to 1.7 to 2.2 s, because it now makes two searches where it used to stop at the first success.
+
+**Conservative calls.**
+- The overnight build's ladder (8 down to 1 times the interval) alone lost the crutches offer above, and stopped when the looser search found nothing better. So the route's own seven-tenths and half rungs from D-013 stay in the ladder, and a search that finds nothing better moves on to the second rung instead of stopping. Still at most two searches.
+- Saved devices keep the numbers they were saved with. Presets are starting points, and nobody's own settings change under them.
+- Treating an unmeasured dropped kerb as 6 mm is no more permissive than before for any preset with a limit of 2 cm or more. It is more permissive only for someone who sets 1 cm by hand.
+
+## D-055 "More benches" kept off the verdict's time
+
+**Decided.** 2026-10-05 (overnight build, PR #36, ported by hand). The router worker runs the trade-offs before it posts the verdict, so their time is the verdict's time. Code: `routeWithRests` and `tradeoffs` in `packages/router/src/router.ts`.
+
+**What changed.**
+- `routeWithRests` keys its states by number, not by string, and costs each edge and node once per search, not once for every gap bucket that reaches it. It finds the same routes: with this and D-054 together, `scripts/preset-outcomes.ts` gives the same verdict, time, distance and route for all 91 pairs. The "Past more toilets" search shares the code and gains too.
+- It takes a cost limit (`maxCost`). "More benches" passes double the chosen route's cost or 15 minutes more, so a search that can't succeed stops instead of exhausting the graph. The overnight build measured 1.25, 1.5 and 2 times and found no speed difference: failing searches run out of reachable benches first.
+- At most two searches per plan (D-054).
+
+**Conservative calls.**
+- The search stays in the plan reply, not after it. Moving it later would change the worker's messages and the route screen.
+- The cost limit is not lowered: that would offer fewer routes for no measurable gain.
+- The speed budget's measure of route plus trade-offs for rest presets is SPEED-02's (D-056).
+
+## D-056 A speed budget the tests enforce
+
+**Decided.** 2026-10-05 (SPEED-02, ported from the overnight build, PR #36, by hand). Baseline: [plans/PERF_BASELINE.md](plans/PERF_BASELINE.md), measured on this branch after D-053 to D-055. Test: `scripts/perf-budget.test.ts`, in `pnpm test`. Shared code: `scripts/perf.ts`. Re-measure with `pnpm perf:baseline --write`.
+
+- **Download:** the data a city downloads beside its street graph, search index, buses and base map comes to at most 400 KB compressed. Today: Edinburgh 125 KB (110 KB of it the council layer), London 76 KB, Newcastle 9 KB.
+- **Routing work:** nodes settled on the acceptance journeys, with walking, manual wheelchair and visual impairment, may rise at most 10% over the stored baseline. This is exact and the same on every machine. It needed a counter on the router (`Router.settled`): one increment per node, no measurable cost.
+- **Wall time:** route time over a fixed yardstick workload may rise at most 10% over the stored baseline, best of four attempts.
+- **Rest presets:** route plus trade-offs for rollator and fatigue ("More benches", "Past more toilets"), on the same terms. The worker runs these before it posts the verdict, and `alternatives` never does (D-055).
+- **Baseline:** route time normalised 27.56 (rounds 25.98 to 28.90); rest presets 65.75 (63.60 to 68.66); 224,919 nodes settled in Edinburgh, 36,774 in Newcastle, 34,696 in London.
+
+**Conservative calls.**
+- Wall time on one machine against a baseline set on another is noisy, and a check that fails at random would teach people to ignore it. So on CI runners (`CI` set) both timing checks print their figure and fail only past 50%. The download and settled-node checks, which don't depend on the machine, hold their line everywhere. A CI baseline from a few weeks of printed figures is SPEED-07.
+- The overnight build's check that attribute layers slow routing by at most 10% isn't ported. Main writes the council's values onto the edges when the city loads (D-046), so a search makes no per-edge layer lookup, and there is nothing separate to switch off and time.
+- The download budget covers the data beside the graph, not the graph, search index or base map. Those change with every refresh and are already as small as their content allows; the budget is for new sources. Each city's full download is printed in PERF_BASELINE.md.
+- Live data (works, floods, lifts, disruptions) is left out of the timed graph, so the figures don't depend on the day the test runs.
+- Settled nodes depend on the graph, so a weekly data refresh that rebuilds a graph can trip the 10% check. Then re-baseline on purpose in that pull request, and say so (SPEED-07).
+
+## D-057 Edinburgh's works from the Scottish Road Works Register
+
+**Decided.** 2026-10-05 (DATA-02, ported from the overnight build, PR #36, by hand). Source: [DATA_SURVEY_UK §2 #1](DATA_SURVEY_UK.md). Supersedes the Scotland part of D-027 ("Scotland's register has no open feed"; the overnight build numbered it D-026). Code: `srwrObservations` and `worksStates` in `packages/live/src/works.ts`, `scripts/build-srwr.ts`, `scripts/srwr-extract.py`.
+
+The register's daily disruptions export (OGL v3, no key) is Edinburgh's works source. `pnpm build:srwr` downloads it once (it redirects to a dated zip), keeps City of Edinburgh rows in the area, and writes `data/live/edinburgh-central.works.json` in the same shape as Street Manager's file. The router and the worker use it with no new code path. The weekly data refresh runs it.
+
+What is kept, each as works on the pavement (counted as unknown) unless the register says the footway is closed:
+- works entirely on the footway;
+- road closures whose words mention the footway, pavement or pedestrians;
+- street café permits, picked by licence type, because they are coded "No Obstruction On C/W Or F/W";
+- scaffolding, hoardings, cabins, skips, materials and building sites on the footway;
+- public events on the footway.
+
+**Our own words only.** Each entry says what it is in our words and the street ("Café tables on the pavement on Grassmarket until 2026-12-30", "Road closed, works on the pavement on North Bridge"). The register's description, its location text and the promoter are read for the closure words and never shown or stored: they name businesses (every café permit is the café's name), addresses and permit numbers. The same rule as Street Manager activities (D-053).
+
+**Conservative calls.**
+- Café tables narrow the pavement; they never close it.
+- A closure is read only from plain words, with the same denial check as TfL's comments (`saysClosed`): "footway closed", "footway closure", "including footpaths", "footpath diversion", "closed to pedestrians". "Full width" and "C/Way & F/Way" say where the works are, not that people are shut out, so they count as works on the pavement. North Bridge, a road closure since 2018 with "full width, footways and carriageway", is the case in point: Richard confirmed on 2026-10-05 that North Bridge is passable on foot. It stays as works on the pavement (unknown), not closed.
+- Early notices are left out: "Potential", and "Advance Planning", the months-ahead notice of major works without firm dates. In the export of 2026-10-05 the area has 360 Advance Planning rows; 259 are the council's "Find and Fix" pavement repairs, one entry per street, each covering the full length of the street from 15 October 2026 to June 2027, though each street's repair takes days. Counted, they made every one of the 65 acceptance journey and preset pairs unsure from 15 October (17 fit today without works). The works come back with firm dates as "Proposed" before they start, and the weekly build picks them up.
+- Short jobs stay in. 69 of the 456 entries last a day or less. Leaving them out changed no verdict on the acceptance journeys on 10, 20 October or 1 November, so there is nothing to gain from dropping real works.
+- Anything starting more than five weeks after the build is left out; the next weekly build picks it up.
+- Multi-part shapes are split into their parts, so works in two places never join up across the streets between them. The app counts each works once.
+- The export date comes from the redirect's file name. No date, no build: never the build day in its place.
+
+**What it found** (export of 2026-10-05). 999 rows of the kinds above in the area; 456 entries kept: 307 café footprints, 63 events, 41 road closures with works on the pavement, 31 works on the pavement, 7 building sites, 3 scaffolds, a hoarding, a site cabin, and 2 closing the pavement (both one cycle track, Warriston to Powderhall). On the 65 acceptance pairs (`EDINBURGH_CENTRAL_JOURNEYS`, all 13 presets, dry, midday), 17 fit with no works and 11 with them: the 6 that change are walking (4) and visual impairment (2), past café tables on Grassmarket, West Bow, Cockburn Street, the High Street and Hope Park Terrace, or over North Bridge. In the built app (Playwright at phone size, walking and visual impairment, Waverley to the Grassmarket, St Giles' to Victoria Street, the Grassmarket and Causewayside to the museum), every route already says Unsure without works, from unmapped stretches and entrances. With the file, unknown metres rise by up to 160 m, mostly café tables; with the advance notices counted, as on 16 October, by a further 110 to 260 m.
+
+**Speed.** Matching works to edges now uses a grid of pavement edge middles, so each works looks only at edges near it. On the Edinburgh graph with this file it takes 77 ms instead of 1.5 s, with the same states (checked on all three cities). The file is 27 KB compressed; Edinburgh's data beside the graph comes to 155 KB of the 400 KB budget (D-056).
+
+**Still open.** The register is daily but the refresh is weekly, so new works can be up to a week late (OPEN_ITEMS).
+
+## D-058 A lift out that leaves some platforms step-free counts as unknown, not closed
+
+**Decided.** 2026-10-05 (DATA-29, ported from the overnight build, PR #36, by hand). Amends D-020 and D-053's lift grouping. Code: `liftOutageStates` in `packages/live/src/tfl.ts`, `evaluateEdgeBase` in `packages/router/src/cost.ts`, `explain` in `packages/router/src/router.ts`.
+
+TfL's station layout (DATA-03) tells us, for every lift out at a station, which of a line's platforms can still be reached without steps. Main closed a line's board edge for step-free users whenever any of its platforms was cut off. But a board edge stands for all of the line's platforms at that station, and it can't tell which way you're going: with one lift out, the westbound platform may be fine and the eastbound not.
+
+- **Every platform cut off: closed**, as before.
+- **Some platforms only: restricted.** The state says "Lift out of service: step-free to some platforms only" and quotes TfL's message.
+- **For someone who needs step-free access, a restricted board edge or street link costs what a station we can't confirm costs**: 15 minutes times (1 minus their uncertainty tolerance), and the route is unknown there, not a fit. Before, a restricted state on these edges cost nothing extra, so a cautious user was sent through it as freely as an open platform. The same now applies to TfL's station disruptions that main already marked restricted ("no step-free access" naming one platform or entrance).
+- People who can use stairs or escalators pay nothing.
+- An edge already unconfirmed (no step-free data) is charged once, not twice.
+- "Why this way?" says it: "North Greenwich, Jubilee line: Lift out of service: step-free to some platforms only: … (TfL, live). Check before you travel." The route card's sources line counts these lines separately from closed platforms. An avoided unknown is no longer called "closed" in the reasons list.
+
+**What it changes.** Of the 76 single lifts in TfL's layout for our 72 stations whose loss changes a line, 46 leave some of its platforms step-free (all the two-lift DLR stations, North Greenwich lifts 1 and 2, Wembley Park, Kingsbury) and now restrict instead of closing; 30 still close. The recorded outages of 2026-10-04 (Canary Wharf, Jubilee line) still close, and the acceptance routes don't change.
+
+**Conservative calls.**
+- Restricted, not open: we don't know the direction, so we don't say it fits.
+- A line that was already step-free to some platforms only and loses the rest is closed.
+- Outages we can't place from the layout still go by TfL's message and close what it names, as before.
+
 ## D-059 Your data: a copy, and delete everything
 
 **Decided.** 2026-10-05 (SEC-06, UK GDPR). "Your data", under the trip settings, says what's kept on the phone, gives a copy as one JSON file, and deletes everything in one step.
@@ -532,3 +672,172 @@ Update (BLOAT-02, 2026-10-05): CI also runs `pnpm knip` for unused files, export
 **Decided.** 2026-10-05 (FEAT-04). Home, work or a friend's address says where someone lives and who they visit. Saved places are kept in this phone's storage only, one list per city, like devices (D-009). They are never shared, synced or sent with a note or report. They show in Your data, go in its copy, and go with "Delete everything". Home comes first, then work, then the rest. Saving a place or a name again replaces the old one.
 
 **To revisit** if accounts come back (deferred by Richard): syncing them would need consent, like the profile.
+
+## D-061 When TfL's disruption feeds fail, and when a closure is what's in the way
+
+**Decided.** 2026-10-05 (DATA-30, ported from the overnight build, PR #36, by hand). Builds on D-052 (time limits) and DATA-04. Code: `fetchTflDisruptions`, `holdDisruptions` and `readStationMessage` in `packages/live/src/tfl-disruptions.ts`, the worker's `live` handler, `liveFailedLine` in `apps/web/src/lib/live-status.ts`, `diagnose` in `packages/router/src/router.ts`.
+
+Main fetched line status and station disruptions together and dropped both silently if either failed (`.catch(() => undefined)`), and the worker then cleared every disruption state. So a feed that blinked opened every closed line and station, and nobody was told. A lift feed failure also threw the disruptions away.
+
+- **Each feed on its own.** Lifts, line status and station disruptions are fetched separately, each with D-052's 10-second limit. One failing leaves the others.
+- **A failed feed keeps its last good answer for 15 minutes** after that fetch (`DISRUPTION_HOLD_MINUTES`), then it is dropped. A station that had no step-free access five minutes ago doesn't open up because the feed blinked; an answer older than a refresh or two isn't trusted. A failed lift feed leaves the last outages, whose states already expire 15 minutes after their fetch (D-019).
+- **The route card says so** when the route rides a train: "Couldn't get live station disruptions from TfL. Check before you travel." (or "line status", or "station and line disruptions"), and with the lift feed, "Couldn't get live lift status or station and line disruptions from TfL." Lift status counts for every route, as before. It says so whenever this refresh failed, held answer or not.
+- **"Nothing fits" names the closure.** When a closure cuts the only way (our two London zones are joined only by the Jubilee line), the unconstrained route didn't exist either, so "In the way" was empty and the app said the start and destination "aren't joined up in our map data". Now `diagnose` looks again with `Conditions.ignoreClosures`, which only it uses, and names what's closed in its own few words: "No way there right now. In the way: no service on Jubilee line." When every blocker is a closure the heading is "No way there right now", not "No way there fits your limits": it's today, not their settings.
+- **Short words for closures.** TfL's states carry a headline: "No service", "Station closed", "Trains don't stop here", "No step-free access". A loss of step-free access from TfL's feeds says "no step-free access" in "Why this way?" and "In the way", not "lift out of service".
+- **Another way in named.** A station message that says there's no step-free access but names another way ("use the entrance on Bank Street", "use Bar station instead") restricts the platforms rather than closing them: unknown, at the unknown-station cost (D-058). "Step-free access is still available" still does nothing, as before.
+
+**Kept from main.** TfL's structured affected stops for line closures, TfL's own validity dates, `mergeLiveStates`, ride refs. Not ported: the overnight build's own reading of line closure text, and its 15-minute cap on TfL's end dates.
+
+**Conservative calls.**
+- Held answers expire; a closure from a feed that keeps failing is dropped after 15 minutes, and the card says we couldn't check, rather than keep a closure that may have ended.
+- `ignoreClosures` never plans a route we offer; it only finds what to name.
+- Escalator notes for everyone, which the overnight build listed under "On this route", waited for that list. Since D-067 TfL's informational station messages are listed under Worth knowing on routes through the station.
+
+## D-062 Council footways matched along each edge, on the British National Grid
+
+**Decided.** 2026-10-05 (DATA-31, ported from the overnight build, PR #36, by hand into main's council layer). Amends D-046. Code: `scripts/council-footways-lib.ts`, `scripts/build-council-footways.ts`, `packages/graph/src/council.ts`.
+
+**What was wrong.** Main asked the council's ArcGIS service for its Adopted Roads polygons in WGS84 and let the server reproject them. Its transformation put them tens of metres off our streets: only 18% of our drawn pavements' points lay within a metre of a council footway polygon. So D-046 matched many edges to a neighbour's footway or a side street's. It also judged each edge by its middle alone, took the narrowest width and roughest surface within 12 m of a street proxy's middle, and dated the layer with the day of the build.
+
+**What we do now.**
+- **British National Grid.** The layer comes in BNG and our edges are projected with OSTN15, as the LiDAR is. Now 91% of our drawn pavements' points lie within a metre of a footway polygon.
+- **Points along the edge.** Every 5 m, kept 5 m clear of the junctions at its ends (the middle alone for a short edge). A path or pavement drawn as its own line takes the polygon it lies in, or the nearest within 3 m. A street proxy takes the nearest footway polygon within 15 m on each side.
+- **Width:** the 20th percentile of the widths found, across both sides, so a narrow stretch or side counts without one sliver deciding. Widths under 0.6 m (drawing slivers at corners) and over 10 m (area-like figures) are dropped.
+- **Surface:** setts when they cover a quarter of the points, so a setted stretch isn't outvoted; otherwise the commonest surface when it covers half. "Surface Dressing" (chippings rolled into tar) is now unknown, not asphalt.
+- **Under half the points matched gets nothing.**
+- **The council's date.** Each layer's date is the one the council publishes in its DCAT feed (Adopted Roads: 2026-10-01), never the build's. A layer missing from the feed, without Open Government Licence v3 there, or without a date stops the build.
+- **Credit** now carries the attribution the council's licence asks for: "Copyright City of Edinburgh Council, contains Ordnance Survey data © Crown copyright and database right 2021 and 2026".
+
+**Numbers** (central Edinburgh, 31,750 pavement edges; before is main with D-053):
+- Council surfaces on pavement edges: 2,556 before, 12,182 now. 4,370 fill a surface OSM didn't have; 7,812 replace a street proxy's carriageway surface (D-063). 158 are setts.
+- Council widths: 6,976 before, 12,069 now; 302 under 0.9 m, 1,060 under 1.2 m. Widths stay inferred (D-053): they cost time and never close a pavement.
+- On the 91 acceptance journey and preset pairs (`scripts/preset-outcomes.ts`, with D-063 and D-064 together), every verdict is the same and nine routes moved. Waverley to the Grassmarket: crutches 34.0 to 29.5 minutes, road scooter 19.3 to 18.7, manual wheelchair with a companion 36.1 to 36.3 and pram 25.3 to 25.6 (both with fewer unknown metres), fatigue the same time by other streets. Causewayside to Waverley: scooter 23.4 to 23.1, manual wheelchair with a companion 29.9 to 30.1, pram 28.9 to 29.1. Causewayside to the museum by road scooter 9.6 to 9.8.
+
+**Every reader checked.** Council values are written into the edge's attributes when the city loads, so the route's surface mix, navigation's setts warning, "Avoid setts" and "relax a limit" all see them, as they see OSM's (`packages/router/test/council-readers.test.ts`). A council width never closes a pavement, so it is never offered as a limit to relax. Council "Grass" stays unknown: on a footway polygon it is most likely a verge, and as a surface it would close the pavement for anyone who avoids grass.
+
+**Conservative calls.**
+- Council setts still count as setts, inferred or not, as an inferred OSM surface does: a device set to avoid setts won't take them.
+- Not ported: the overnight build's general "fill" layer rows and its per-edge layer facts. Main's keyed council file stays.
+
+## D-063 On a street drawn as one line, the council's pavement surface beats the carriageway's
+
+**Decided.** 2026-10-05 by Richard (DATA-22). Amends D-046. Code: `carriagewayOnly` and `applyCouncilFootways` in `packages/graph/src/council.ts`.
+
+Where OSM draws a street as one line (a street proxy), our builder reads the pavement's surface from `sidewalk:*:surface` when it is tagged, and otherwise from the street's own `surface` tag, marked inferred, "carriageway surface; the pavement may differ". That tag describes the road. A setted street with flagged pavements read as setts; a tarmac road with slabbed pavements read as tarmac.
+
+**What we do.** On a street proxy whose OSM surface is only that carriageway guess, the council's pavement surface wins. OSM's `sidewalk:*:surface` still wins over the council, and so does any surface on a pavement or path drawn as its own line. The council's value stays inferred, and the method says what it replaced ("OSM's sett is the carriageway's").
+
+**Numbers.** 10,151 street proxy edges carry only the carriageway's surface; the council replaces it on 7,812, with a different value on 3,044. The commonest: tarmac to paving slabs (1,330), setts to paving slabs (498), setts to tarmac (411), tarmac to concrete (267), setts to concrete (139). 44 tarmac streets become setts.
+
+**What it changes.** People who avoid setts now get the setted Old Town streets whose pavements are flagged or tarmac, and lose the 44 whose pavements are setted. The acceptance routes' changes are counted with D-062's.
+
+## D-064 Gritting routes from the council's licensed layer, matched by direction, dated 2021
+
+**Decided.** 2026-10-05 (DATA-31, ported from the overnight build, PR #36). Amends D-047. Code: `onGrittingRoute` in `scripts/council-footways-lib.ts`, `scripts/build-council-footways.ts`, `applyCouncilFootways`, the gritting reason in `packages/router/src/cost.ts`. Keeps D-047's ice costs.
+
+**The layer.** Main read "Pavement gritting routes (priority 1)" from the council's Transport service (layer 3). That layer isn't in the council's DCAT feed, so it has no published licence, and asked for in WGS84 it came back about 90 m west of the streets: only 22% of its points lay within 3 m of one of our streets. The same 429 lines are in "Gritting Routes" (`Misc/INSPIRE/MapServer/9`, footway priority 1), which the feed lists under Open Government Licence v3, published 2021-05-27. We use that one, in British National Grid (D-062). The build stops if the feed stops listing it as OGL v3 or gives no date.
+
+**Matching.** An edge is on a route when at least 60% of its points (every 5 m, clear of its ends) lie near a route line running the same way, within 30 degrees: within 6 m for a street proxy or a pedestrian street, whose line follows the middle of the street as the council's does, and within 12 m for a pavement or path drawn as its own line, which runs beside it. So a side street or a path crossing the route at a corner doesn't count. Steps and crossings are never marked: steps are rarely gritted, and a crossing is the road.
+
+**Date.** The gritted state carries the routes' own date, and the reason says it: "on a gritting route (council routes from 2021)", "not on a gritting route (council routes from 2021), so it may be icy". Never the build date.
+
+**Numbers.** 1,648 pavement edges (64 km) are on a route, against 1,130 (32 km) before; only 264 are in both, since main's were matched against lines 90 m out. Routes in ice weren't part of the acceptance runs; dry routes don't change.
+
+**Conservative calls.** The council's routes are from 2021 and may have changed. The penalty stays the same either way: a 2021 route is still better evidence than none, and the reason says how old it is.
+
+## D-065 When OSM and the Toilet Map disagree, and when a record is old
+
+**Decided.** 2026-10-05 (SMALL-14, ported from the overnight build, PR #36, by hand into main's `mergeToiletMap`). Amends D-049. Code: `apps/web/src/lib/toiletmap.ts`, `toiletsAlong` in `apps/web/src/lib/toilets.ts`, `Router.addToilets`, `apps/web/src/app/page.tsx`.
+
+Main merged a Toilet Map record into the OSM toilet within 30 m and let OSM's tags win, silently. Where OSM said accessible and the Toilet Map said not, or the other way round, nobody was told, and the route counted OSM's word.
+
+- **Disputes said first.** Where OSM's `wheelchair` tag and the Toilet Map's accessible flag disagree, the toilet's first fact starts "Sources differ: OpenStreetMap says accessible, the Toilet Map says not accessible." It goes first because the search list shows only the first fact (two lines, D-053). The facts after it are still OSM's. "Partly accessible" in OSM against either answer counts as a dispute.
+- **Disputed toilets stay off routes.** They aren't sent to the router as stops, and the graph's own toilet within 30 m of one stops counting as accessible, so "Past more toilets" and "an accessible toilet at least every…" don't lean on it. The route's toilet list still shows it, with "Sources differ on access" first, and it doesn't close a gap there either.
+- **Old records.** A Toilet Map record last checked or updated over 2 years ago says so in the first fact, after any dispute: "Toilet Map last checked Sep 2021, may be out of date". Only where the record added something; an OSM toilet the Toilet Map adds nothing to says nothing about it. A toilet only the Toilet Map has ranks a little lower in name search when its record is old (3.1 against 2.6, lower first).
+
+**Numbers** (export of 2026-10-04, today's date): Edinburgh 5 disputes (three where OSM says accessible or partly and the Toilet Map disagrees), Newcastle 1, London none. Old records shown as such: Edinburgh 49, Newcastle 15, London 28.
+
+**Conservative calls.**
+- Neither source wins a dispute: the toilet counts as unknown on routes, and both views are shown.
+- Old Toilet Map toilets still count on routes, as before; only the words and the search order change. Whether an old record should count less on routes is a question for research (OPEN_ITEMS).
+
+## D-066 Heat and cold alerts, gusts, air quality and the Water of Leith
+
+**Decided.** 2026-10-05 (DATA-32, DATA-25 in part; ported from the overnight build, PR #36, by hand into main's structures). Amends D-047. Code: `packages/live/src/health-alerts.ts`, `packages/live/src/sepa.ts`, `packages/live/src/weather.ts`, `weatherCosts` in `packages/router/src/cost.ts`, `explain` in `packages/router/src/router.ts`, `apps/web/src/lib/use-planner.ts`, `apps/web/src/lib/area-status.ts`.
+
+Four open feeds, none needing a key, all open to browsers. Each is fetched with D-052's time limit, in parallel, and never holds up a route: a failure is said quietly in "Where this comes from" ("Couldn't get … from …") and changes nothing else. Every line says its source and time. None of them closes anything.
+
+**UKHSA heat and cold health alerts (England).** From `https://ukhsa-dashboard.data.gov.uk/api/proxy/alerts/v1/heat` and `/cold` (OGL v3), pinned by a test, for the city's region (`ukhsaRegion` in `cities.ts`: London E12000007, North East E12000001; Edinburgh has none, as UKHSA covers England only). Green and yellow change nothing. Amber and red:
+- are said on every route, to everyone, with UKHSA's end date: "Amber heat health alert for London until 20 Jul, 08:00 UTC (UKHSA, updated 18 Jul, 08:00 UTC)." The end comes from the region's own record, which also has the last word on the status.
+- nudge routes for presets with a rest limit: a stretch with no bench costs a quarter more of its rest cost, and in heat, uncovered ground costs 5% more of its time. A nudge, never a closure.
+- count only while in force (the overnight build's follow-up #4): never at or past the end date UKHSA gives, and never outside the season (heat 1 June to 30 September, cold 1 November to 31 March, by the UK date). The list keeps a region's last status for months: on 2026-10-05 the cold list still showed February's. Out of season the app doesn't ask at all. Leaving later, the alert must still be in force when you leave.
+
+**Gusts on exposed bridges.** Open-Meteo's `wind_gusts_10m`: the stronger of now and the next hour, or the forecast hour when leaving later. From 50 km/h (`GUST_BRIDGE_KMH`, about 31 mph), an exposed bridge (15 m or longer, not covered) costs as much again for the presets a gust can push sideways: scooters, manual wheelchairs and lightweight powerchairs (`windSensitive`). A route that still crosses one says "Strong gusts on exposed bridges: up to 62 km/h (Open-Meteo, 5 Oct, 01:00 UTC)." The gust stays when you set the ground yourself.
+
+**Open-Meteo times are UTC.** Asked for UTC, Open-Meteo gives times with no zone ("2026-10-05T01:00"), and `Date.parse` read them as the phone's local time: an hour out in British Summer Time, so a forecast hour could count as rain already fallen. Every time now goes through `utcIso` first, with a test that runs in Europe/London time.
+
+**Air quality, pollen and UV.** From `air-quality-api.open-meteo.com`, which serves the Copernicus Atmosphere Monitoring Service (CAMS) forecast; credited in each city's credit and on each line. Lines only when high: European AQI 60 or more (poor), grass pollen 50 or more, birch or alder 80 or more grains per cubic metre, UV index 6 or more. Area-wide, after the route's own lines; never in routing.
+
+**The Water of Leith (Edinburgh).** SEPA's KiWIS service (OGL v3) gives the level at Murrayfield every 15 minutes. SEPA publishes no level at which the walkway floods, so a line goes on a route only when it uses the Water of Leith Walkway or Path and the level is 1.05 m or above, the lowest peak in SEPA's peaks-over-threshold record for the station since 2015 (a typical level is about 0.5 m). It says it's worth knowing, not a warning. SEPA's flood warnings still have no open feed, so DATA-25 stays open.
+
+**Where the lines go.** Main's route notes ("Why this way?") at first. Since D-067 they are in the "On this route" list, under Worth knowing, with their source and time.
+
+**Conservative calls.** An alert outside its season doesn't count even if UKHSA issued it: UKHSA can issue alerts outside the core seasons, and we would miss those (OPEN_ITEMS). A region's record that doesn't answer leaves an in-season alert counting, with no end date shown. The thresholds (50 km/h, a quarter, 5%, 1.05 m) are guesses to check.
+
+**CSP.** `connect-src` gains `https://ukhsa-dashboard.data.gov.uk`, `https://air-quality-api.open-meteo.com` and `https://timeseries.sepa.org.uk` (D-041). The a11y and e2e servers take their headers from `vercel.json`.
+
+## D-067 More data, same calm
+
+**Decided.** 2026-10-05 (FEAT-19; ported from the overnight build, PR #36, where it was its D-041, by hand into main's structures). Builds on D-035; amends where D-061 and D-066 put their lines. Code: `packages/router/src/on-route.ts`, `stationInfoNotes` in `packages/live/src/tfl-disruptions.ts`, the worker's `plan`, `apps/web/src/lib/on-route.ts`, `apps/web/src/components/OnThisRoute.tsx`, `RoutePanel.tsx`.
+
+The app now knows about works, lift outages, line and station disruptions, floods, council surfaces and widths, gritting, mappers' notes, health alerts, gusts, air quality and the Water of Leith. Shown naively, every route would carry a dozen warnings. The app should know more and look the same.
+
+**Principles**
+- **The verdict comes first** (D-035): Fits, Unsure or Doesn't fit, then the time.
+- **New data mostly acts through route cost.** A closure closes edges; works on the pavement cost time. The person sees a better route, not a warning.
+- **The route card says only what changed the route or needs doing.** A failed live feed ("Couldn't get live lift status from TfL. Check before you travel.") stays there (D-061). A closure the route went round is one line with a count: "Goes round a closure on the way. See On this route." A flood warning area this route passes through is one line too. Nothing else.
+- **Everything else goes in one grouped list, "On this route"**, the first of the sections you open, under the route card and Start:
+  - **Blocked**: closed for you, so the route went round it;
+  - **Slower**: on the route, and may slow you down: works on the pavement (café tables, scaffolding), a station we can't confirm, a flood warning area, and the council's setts or narrow pavement where they add a fifth or more to that stretch's time for this person (setts for a wheelchair, not for someone walking);
+  - **Worth knowing**: unmapped stretches, lighting after dark (only for people whose settings avoid unlit streets, D-038), TfL's informational station messages for everyone (a reduced escalator service), boarding with the staff ramp, gritting in ice, OpenStreetMap notes (three, then "N more places a mapper flagged on this route", D-048), and the area lines: a UKHSA alert, gusts on an exposed bridge the route crosses, air quality, pollen and UV when high, the Water of Leith on routes using the walkway (D-066).
+- **Every fact is labelled** "Live", "Static data" or "Reported by people", with its source and date, and an end date when the source gives one: "Static data, Scottish Road Works Register, dated 5 Oct 2026, until 31 Mar 2027"; "Live, TfL, at 14:58".
+- **Map layers stay off by default.**
+- **WCAG 2.2 AA.** A details section whose summary row counts what's inside ("1 blocked, 6 worth knowing", or "Nothing known"); a heading per group with its count for screen readers; a list for the facts; words wherever the eye gets an icon. It opens by itself when something is blocked or slower.
+
+**Blocked comes from two places.** What the explanation says the route avoided, when that was a closure; and one search as if nothing were closed (`closureBlind`, using `Conditions.ignoreClosures`), whose closed edges this route doesn't use. A closure that only sits next to the route is never listed: the route never needed it, so it did not change the route. (The overnight build first listed every closed edge touching the route, which would have put "Goes round a closure" on most routes once a city has a works feed; its fix, 8d9a917, is kept, with a test that closes side edges one at a time.)
+
+**Speed.** The closure-blind search is made at most once per plan, and only when something is closed for this person somewhere in the area (a scan of live states, no search). Every route on show is compared with that one search; none makes its own. The speed budget's "route plus trade-offs" workload now also builds the list, as the worker does; with no live data in it the extra search never runs there, so it times the scan and the list. A unit test counts the searches: none when nothing is closed, one when something is.
+
+**Dates.** A works file's items are dated by the file's export (the register's or Street Manager's), not the build; live feeds by the time they were read. Works carry their end. TfL's line and station disruptions carry an end only when TfL gave a period. Lift outages and flood warnings show none: they last until the next refresh, and that time isn't an end anyone set. An end over a year away is a placeholder and isn't shown.
+
+**What moved out of "Why this way?"** Live closures gone round, a station we can't confirm, health alerts, gusts, air quality, the river and mappers' notes are now only in the list. **What stays in both**: lighting after dark ("Why this way?" also says when every stretch is lit), how much isn't fully mapped (it says it's dashed on the map; the list gives the streets; both use the route summary's measure, so the numbers agree), and boarding with the staff ramp or an unpublished step ("Why this way?" says to check before you travel). Benches, toilets, lifts, moving bridges, setts in total, the steepest part and battery range stay in "Why this way?" only.
+
+**The area's counts** (lifts out across London, line closures, every flood warning over the city, pavement closures nearby) left the route card. They stay under "Where this comes from".
+
+**Not ported.** The overnight build's attribute layers (its D-042) and its per-edge layer facts. Council values come from main's council layer, read off the edge's attributes (D-062); main's live states feed the rest.
+
+**Conservative calls**
+- Toilet Map disagreements (D-065) stay in "Accessible toilets", not in the list: they're about stops, not the way.
+- An informational TfL message is listed for routes boarding, leaving or passing through that station's entrances, even when it names a platform the route doesn't use: we don't read which platform. Messages naming only lines we don't route are left out.
+- Station messages are listed for everyone, with no step-free filter: an escalator note matters to people who don't count as step-free.
+
+## D-068 Boarding the train against each person's limits
+
+**Decided.** 2026-10-05 (DATA-29, ported from the overnight build, PR #36, by hand). Builds on DATA-03. Code: `boardingOf` in `scripts/tfl-station-access.ts`, `PlatformBoarding` in `packages/graph/src/schema.ts`, `applyStationAccess` in `packages/graph/src/transit.ts`, `platformFit` and `boardingReason` in `packages/router/src/cost.ts`, `levelAccessAdvice` in `packages/router/src/boarding.ts`, `describeSegments` and `explain` in `packages/router/src/router.ts`.
+
+Main read the step and gap from platform to train into words only (the largest across a line's platforms), shown in a board edge's source. TfL publishes them per platform in figures, so we can hold them to each person's limits.
+
+- **The data.** For each platform of each line at our 72 stations: the step and the gap in millimetres, smallest and largest along the platform (`MinStep`, `MaxStep`, `MinGap`, `MaxGap`), whether staff put a manual ramp down (`LevelAccessByManualRamp`), where the designated level access is (`LocationOfLevelAccess`, only where `DesignatedLevelAccessPoint` is true), and the direction (`DirectionTowards`, the platform's `FriendlyName`). They sit beside the words in `network.json` (`lines[line].boarding`) and go onto the board edges when the city loads, so a refreshed `network.json` needs no graph rebuild. A figure TfL leaves blank stays blank: **unknown, never level.**
+- **The level band.** TfL counts a step of up to 50 mm and a gap of up to 85 mm as level access (`LEVEL_STEP_MM`, `LEVEL_GAP_MM`). Within it a platform fits everyone.
+- **Beyond it, against the person.** The largest step is held to the kerb they can manage (never less than the band); the largest gap to their gap limit (`maxGapMm` on the profile, the band when unset). A platform that fits somewhere along its length counts when TfL names its level-access doors. Otherwise the staff ramp is the way on, if TfL lists one, at a cost of 3 minutes (`STAFF_RAMP_S`, a guess) and a note: "Kilburn, Jubilee line: board with the staff ramp, so ask staff (TfL station data)." No figures and no ramp: unknown.
+- **All the line's platforms together.** A board edge stands for every platform of its line, and can't tell which way you're going. If every platform is out of reach, the edge closes for that person ("step up to 173 mm, gap up to 100 mm between platform and train"). If some are, or any has no figures, it is unknown and costs what a station we can't confirm costs (15 minutes times (1 minus uncertainty tolerance)), with a note naming the platform.
+- **Only for step-free users.** People who can use stairs or escalators aren't judged on the step to the train.
+- **Doors in the spoken route.** For someone who needs step-free access, a train leg in the non-visual route says where TfL's level-access doors are, picking the platform by the ride's direction: "Take the Jubilee line from Kingsbury to Canons Park, 2 stops. For level access, board at the 2 centre doors on cars 5 and 6." It also says where to be on the train to get off level, when TfL says.
+
+**What it changes** (feed of 2026-08-03, on the 62 board edges where TfL's layout says the line is step-free to every platform). Westminster, Canary Wharf, Canning Town and North Greenwich's Jubilee platforms are within the band: no change. Three need the staff ramp for every wheeled preset: Kilburn (step up to 140 mm), Stanmore (147 to 173 mm) and Bond Street, whose southbound platform has no figures but a ramp listed. Finchley Road (step up to 163 mm, ramp listed) has no step-free route from the street, so it stays closed to step-free users before the train comes into it. No edge closes or turns unknown on today's data. The acceptance routes and the speed budget's settled nodes don't change. `network.json` grows from 15 KB to 17 KB compressed.
+
+**Conservative calls.**
+- Blank figures are unknown even though most such platforms sit where trains are level: TfL didn't measure, so we don't say.
+- A location of level access that TfL doesn't mark as designated isn't offered as a door.
+- No setting for the gap limit yet: the band holds for everyone until research says what people want to set (OPEN_ITEMS).
+- Door advice is in the spoken route only; the visual route card shows the ride, not the doors (OPEN_ITEMS).

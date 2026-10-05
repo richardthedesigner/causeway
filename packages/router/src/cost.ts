@@ -7,7 +7,7 @@
  * scaled by (1 - uncertaintyTolerance): a cautious user pays more to avoid
  * the unknown, an adventurous one barely notices it.
  */
-import { confidence, isKnown, type EntranceInfo, type GraphEdge, type GraphNode, type NoteSignal, type Surface } from "@causeway/graph";
+import { confidence, isKnown, type EntranceInfo, type GraphEdge, type GraphNode, type NoteSignal, type PlatformBoarding, type Surface } from "@causeway/graph";
 import { isPowerchair, isScooter, type Profile } from "@causeway/profile";
 
 export interface Conditions {
@@ -18,7 +18,40 @@ export interface Conditions {
   ice: boolean;
   /** After civil twilight: unlit stretches cost those who asked to avoid them. Absent means daylight. */
   dark?: boolean;
+  /** Treat live closures as open: only to find what a closure cuts off, for "In the way" (D-061) and "On this route" (D-067). Never for a route we offer. */
+  ignoreClosures?: boolean;
+  /** The strongest gust now, or at the hour you leave, with its source and time (D-066). */
+  gust?: { kmh: number; at: string; source: string };
+  /** A UKHSA heat or cold health alert at amber or red, in force where the route is (England only, D-066). */
+  healthAlert?: HealthAlert;
 }
+
+/** A UKHSA weather-health alert in force for the area (D-066). */
+export interface HealthAlert {
+  kind: "heat" | "cold";
+  level: "amber" | "red";
+  /** The UKHSA region: "London", "North East". */
+  region: string;
+  /** ISO 8601: when UKHSA last updated it. */
+  at: string;
+  /** ISO 8601: when the alert period ends, if UKHSA said. */
+  until?: string;
+}
+
+/** Gusts at or above this make exposed bridges cost more for scooters and light chairs (D-066). About 31 mph. */
+export const GUST_BRIDGE_KMH = 50;
+/** Bridges shorter than this are culverts and short spans, not exposed crossings. */
+export const GUST_BRIDGE_MIN_M = 15;
+/** In an amber or red health alert, people who need rests pay this share more of the rest cost on stretches with no bench (D-066). */
+const ALERT_REST_SHARE = 0.25;
+/** And, in heat, this share of the time on uncovered ground. */
+const ALERT_SUN_SHARE = 0.05;
+
+/** Scooters, manual wheelchairs and lightweight powerchairs: the ones a gust can push sideways on an open bridge. */
+export const windSensitive = (p: Profile) => isScooter(p) || p.preset === "manual-wheelchair" || p.preset === "manual-wheelchair-companion" || p.preset === "powerchair-light";
+
+/** Outdoor ground you walk or wheel along: not crossings (the road), stations or rides. */
+const OUTDOOR_GROUND = new Set<GraphEdge["kind"]>(["sidewalk", "footway", "pedestrian", "steps", "ramp", "street_proxy"]);
 
 export const DRY: Conditions = { now: new Date("2026-10-04T12:00:00Z"), wet: false, ice: false };
 
@@ -156,6 +189,8 @@ const UNKNOWN_RISK_PER_100M: Record<string, number> = {
 };
 /** Unknown kerb at a crossing is the classic strand point: a flat cost per crossing. */
 const UNKNOWN_KERB_S = 120;
+/** A dropped kerb with no measured height, centimetres: the top of Inclusive Mobility's flush band, 6 mm (D-054). */
+export const LOWERED_KERB_CM = 0.6;
 const LIFT_WAIT_S = 45;
 const RIDE_MPS = 8.5;
 /** Average wait plus platform walk when boarding; alighting is quicker. */
@@ -166,6 +201,55 @@ const UNKNOWN_STATION_S = 900;
 
 /** Someone who needs lifts or ramps rather than stairs and escalators. */
 export const needsStepFree = (p: Profile) => p.maxSteps < 10 || !p.escalators;
+
+/** TfL's level-access band between platform and train: a step of up to 50 mm and a gap of up to 85 mm (D-068). */
+export const LEVEL_STEP_MM = 50;
+export const LEVEL_GAP_MM = 85;
+/** Getting the staff ramp: finding someone and them bringing it. A working guess. */
+export const STAFF_RAMP_S = 180;
+
+/**
+ * One platform against this person's limits (D-068). Within TfL's level-access
+ * band it fits everyone. Beyond it, the measured step is held to the kerb they
+ * can manage (never less than the band) and the gap to their gap limit (the
+ * band unless they set one). Where the figures run past their limits: the
+ * level-access doors if TfL says where they are and some of the platform fits,
+ * then the staff ramp if TfL lists one, otherwise "part" (some of the platform
+ * fits) or "no". No figures: unknown, or the staff ramp if TfL lists one.
+ */
+export type PlatformFit = "level" | "fits" | "doors" | "ramp" | "part" | "no" | "unknown";
+export function platformFit(b: PlatformBoarding, p: Profile): PlatformFit {
+  if (!b.stepMm || !b.gapMm) return b.ramp ? "ramp" : "unknown";
+  if (b.stepMm[1] <= LEVEL_STEP_MM && b.gapMm[1] <= LEVEL_GAP_MM) return "level";
+  const stepLimit = Math.max(LEVEL_STEP_MM, p.maxKerbCm * 10);
+  const gapLimit = p.maxGapMm ?? LEVEL_GAP_MM;
+  if (b.stepMm[1] <= stepLimit && b.gapMm[1] <= gapLimit) return "fits";
+  const somewhere = b.stepMm[0] <= stepLimit && b.gapMm[0] <= gapLimit;
+  if (somewhere && b.levelAccessAt) return "doors";
+  if (b.ramp) return "ramp";
+  return somewhere ? "part" : "no";
+}
+
+const mmText = (b: PlatformBoarding) => [b.stepMm ? `step up to ${b.stepMm[1]} mm` : null, b.gapMm ? `gap up to ${b.gapMm[1]} mm` : null].filter(Boolean).join(", ");
+
+/** A line's platforms at a station, judged together: the board edge doesn't know which way you'll go. */
+export function boardingReason(platforms: PlatformBoarding[], p: Profile): Reason | null {
+  if (!platforms.length) return null;
+  const fits = platforms.map((b) => ({ b, f: platformFit(b, p) }));
+  const worst = (f: PlatformFit) => fits.filter((x) => x.f === f);
+  const no = worst("no");
+  if (no.length === fits.length) return { kind: "excluded", attr: "boarding", detail: `${mmText(no[0]!.b)} between platform and train`, seconds: Infinity };
+  const unsure = [...no, ...worst("part"), ...worst("unknown")];
+  if (unsure.length) {
+    const s = UNKNOWN_STATION_S * (1 - p.uncertaintyTolerance);
+    const x = unsure[0]!;
+    const detail =
+      x.f === "unknown" ? `TfL doesn't publish the step and gap to the train on ${x.b.platform}` : x.f === "no" ? `${mmText(x.b)} to the train on ${x.b.platform}` : `${mmText(x.b)} to the train on parts of ${x.b.platform}`;
+    return { kind: "unknown", attr: "boarding", detail, seconds: s };
+  }
+  if (worst("ramp").length) return { kind: "penalty", attr: "ramp", detail: "staff ramp onto the train: ask staff", seconds: STAFF_RAMP_S };
+  return null;
+}
 
 /** Speed multiplier for a signed gradient. Wheeled users slow hard uphill; walkers follow Tobler. */
 export function speedFactor(p: Profile, gradePct: number): number {
@@ -211,8 +295,31 @@ export function evaluateEdge(e: GraphEdge, forward: boolean, p: Profile, c: Cond
   }
   const dark = darkCost(e, p, c);
   if (dark) extra.push(dark);
+  if ((c.gust && c.gust.kmh >= GUST_BRIDGE_KMH) || c.healthAlert) extra.push(...weatherCosts(e, base, p, c));
   if (!extra.length) return base;
   return { ...base, cost: base.cost + extra.reduce((t, r) => t + r.seconds, 0), reasons: [...base.reasons, ...extra] };
+}
+
+/**
+ * Gusts and health alerts as small costs (D-066). Neither closes anything:
+ * - gusts of 50 km/h or more: an exposed bridge (15 m or longer, not covered) costs as much again
+ *   for scooters, manual wheelchairs and lightweight powerchairs;
+ * - an amber or red heat or cold alert: for presets with a rest limit, stretches with no bench cost a
+ *   quarter more of their rest cost, and in heat, uncovered ground 5% more.
+ */
+export function weatherCosts(e: GraphEdge, base: Evaluation, p: Profile, c: Conditions): Reason[] {
+  if (e.service || !OUTDOOR_GROUND.has(e.kind) || e.attrs.covered.value === true) return [];
+  const out: Reason[] = [];
+  if (c.gust && c.gust.kmh >= GUST_BRIDGE_KMH && e.bridge && e.lengthM >= GUST_BRIDGE_MIN_M && windSensitive(p)) {
+    out.push({ kind: "penalty", attr: "gust", detail: `exposed bridge in gusts up to ${Math.round(c.gust.kmh)} km/h`, seconds: Math.round(base.seconds) });
+  }
+  if (c.healthAlert && p.maxRestIntervalM) {
+    const rest = base.reasons.find((r) => r.attr === "rest");
+    const sun = c.healthAlert.kind === "heat" ? base.seconds * ALERT_SUN_SHARE : 0;
+    const s = Math.round((rest?.seconds ?? 0) * ALERT_REST_SHARE + sun);
+    if (s > 0) out.push({ kind: "penalty", attr: "alert", detail: `${c.healthAlert.level} ${c.healthAlert.kind} health alert: ${rest ? "no bench nearby" : "in the sun"}`, seconds: s });
+  }
+  return out;
 }
 
 const INDOORS = new Set<GraphEdge["kind"]>(["transit", "board", "corridor", "elevator", "escalator"]);
@@ -234,6 +341,8 @@ function evaluateEdgeBase(e: GraphEdge, forward: boolean, p: Profile, c: Conditi
   const reasons: Reason[] = [];
   const a = e.attrs;
   let unknownCritical = false;
+  /** A live state that leaves station access unknown for this person: priced like a station we can't confirm. */
+  let livePenalty = 0;
 
   const exclude = (attr: string, detail: string): Evaluation => ({
     passable: "no",
@@ -247,9 +356,16 @@ function evaluateEdgeBase(e: GraphEdge, forward: boolean, p: Profile, c: Conditi
   // Live state first: a closure beats everything.
   if (e.live && Date.parse(e.live.validUntil) > c.now.getTime() && Date.parse(e.live.validFrom) <= c.now.getTime()) {
     const applies = e.live.affects !== "step-free" || needsStepFree(p);
-    if (applies && e.live.status === "closed") return exclude("live", e.live.affects === "step-free" ? `lift out of service: ${e.live.reason}` : `closed: ${e.live.reason}`);
+    if (applies && e.live.status === "closed" && !c.ignoreClosures)
+      return exclude("live", e.live.affects === "step-free" ? `${e.live.headline === "No step-free access" ? "no step-free access" : "lift out of service"}: ${e.live.reason}` : `closed: ${e.live.reason}`);
     if (applies && (e.live.status === "restricted" || e.live.status === "degraded")) {
-      reasons.push({ kind: "unknown", attr: "live", detail: `${e.live.status}: ${e.live.reason}`, seconds: 0 });
+      // A works reason in our own words already says what it is ("Scaffolding on the pavement on ..."); others name the status.
+      const stepFree = e.live.affects === "step-free";
+      const detail = stepFree && e.live.headline ? `${e.live.headline}: ${e.live.reason}` : e.live.headline ? e.live.reason : `${e.live.status}: ${e.live.reason}`;
+      // Step-free access to a platform or the street that may be cut off (a lift out reaching only some platforms) costs
+      // what any station we can't confirm costs (D-058); otherwise a cautious user is sent through it as if nothing were wrong.
+      if (stepFree && e.live.status === "restricted" && (e.kind === "board" || e.kind === "station_link")) livePenalty = UNKNOWN_STATION_S * (1 - p.uncertaintyTolerance);
+      reasons.push({ kind: "unknown", attr: "live", detail, seconds: livePenalty });
       unknownCritical = true;
     }
   }
@@ -268,10 +384,20 @@ function evaluateEdgeBase(e: GraphEdge, forward: boolean, p: Profile, c: Conditi
       return exclude("steps", a.stepCount.method?.split(": ").slice(1).join(": ") || "no step-free route to the platform");
     }
     if (needsStepFree(p) && !isKnown(a.stepCount)) {
+      // One unknown is enough: a live doubt on top of an unconfirmed station doesn't count twice.
       const s = UNKNOWN_STATION_S * (1 - p.uncertaintyTolerance);
-      return { passable: "unknown", seconds, cost: seconds + s, reasons: [...reasons, { kind: "unknown", attr: "station", detail: "step-free access not confirmed", seconds: s }] };
+      return { passable: "unknown", seconds, cost: seconds + s, reasons: [...reasons.map((r) => (r.attr === "live" ? { ...r, seconds: 0 } : r)), { kind: "unknown", attr: "station", detail: "step-free access not confirmed", seconds: s }] };
     }
-    return { passable: unknownCritical ? "unknown" : "yes", seconds, cost: seconds, reasons };
+    // Platform to train: TfL's measured step and gap against this person's limits (D-068).
+    const boarding = e.kind === "board" && e.boarding && needsStepFree(p) ? boardingReason(e.boarding.platforms, p) : null;
+    if (boarding?.kind === "excluded") return exclude(boarding.attr, boarding.detail);
+    if (boarding?.kind === "unknown") {
+      // One unknown is enough: a live doubt on top of an unpublished step doesn't count twice.
+      const s = Math.max(boarding.seconds, livePenalty);
+      return { passable: "unknown", seconds, cost: seconds + s, reasons: [...reasons.map((r) => (r.attr === "live" ? { ...r, seconds: 0 } : r)), { ...boarding, seconds: s }] };
+    }
+    if (boarding) return { passable: unknownCritical ? "unknown" : "yes", seconds, cost: seconds + livePenalty + boarding.seconds, reasons: [...reasons, boarding] };
+    return { passable: unknownCritical ? "unknown" : "yes", seconds, cost: seconds + livePenalty, reasons };
   }
 
   // Vertical connectors.
@@ -299,7 +425,7 @@ function evaluateEdgeBase(e: GraphEdge, forward: boolean, p: Profile, c: Conditi
   if (Math.abs(grade) > Math.abs(worst)) worst = grade;
   const speed = baseSpeed(e, p) * (e.kind === "steps" ? 0.4 : speedFactor(p, grade));
   const seconds = e.lengthM / speed;
-  let penalty = 0;
+  let penalty = livePenalty;
 
   if (isKnown(a.inclineMax) || isKnown(a.incline)) {
     const limit = worst >= 0 ? p.maxInclineUpPct : p.maxInclineDownPct;
@@ -330,12 +456,14 @@ function evaluateEdgeBase(e: GraphEdge, forward: boolean, p: Profile, c: Conditi
   }
 
   // Ice and gritting (DATA-07): where the council's routes are known, pavements off them cost more in ice.
+  // The routes' own date, never the build's (Edinburgh's are from 2021): an old route list looks old.
   if (c.ice && a.gritted && isKnown(a.gritted) && e.kind !== "steps") {
-    if (a.gritted.value) reasons.push({ kind: "penalty", attr: "gritted", detail: "on a gritting route", seconds: 0 });
+    const when = a.gritted.observedAt ? ` (council routes from ${a.gritted.observedAt.slice(0, 4)})` : "";
+    if (a.gritted.value) reasons.push({ kind: "penalty", attr: "gritted", detail: `on a gritting route${when}`, seconds: 0 });
     else {
       const s = seconds * (WHEELED(p) ? ICE_UNGRITTED_WHEELED : ICE_UNGRITTED);
       penalty += s;
-      reasons.push({ kind: "penalty", attr: "gritted", detail: "not on a gritting route, so it may be icy", seconds: s });
+      reasons.push({ kind: "penalty", attr: "gritted", detail: `not on a gritting route${when}, so it may be icy`, seconds: s });
     }
   }
 
@@ -482,7 +610,8 @@ function evaluateNodeBase(n: GraphNode, viaCrossing: boolean, p: Profile, _c: Co
   }
   if (n.kerb) {
     const t = n.kerb.type.value;
-    const h = isKnown(n.kerb.heightCm) ? n.kerb.heightCm.value : t === "raised" ? 12 : t === "flush" ? 0 : t === "lowered" ? 2 : null;
+    // No measured height: a dropped kerb is taken at the most Inclusive Mobility 2021 allows (flush, 0 to 6 mm), so "flush only" still avoids it (D-054).
+    const h = isKnown(n.kerb.heightCm) ? n.kerb.heightCm.value : t === "raised" ? 12 : t === "flush" ? 0 : t === "lowered" ? LOWERED_KERB_CM : null;
     if (h === null) {
       if (p.maxKerbCm < 10) {
         const s = UNKNOWN_KERB_S * (1 - p.uncertaintyTolerance);

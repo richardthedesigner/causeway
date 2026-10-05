@@ -1,12 +1,13 @@
 /**
  * TfL's station data (DATA-03, survey §2 #2): how each station's areas join up
- * by level paths, ramps and lifts, the step and gap from platform to train,
+ * by level paths, ramps and lifts, the step and gap from platform to train
+ * (in words, and in figures per platform: D-068),
  * and toilets. Read from the detailed zip (TfL open data, no key).
  *   Used by scripts/transit-london.ts; the zip is cached in .data-cache.
  */
 import { execFileSync } from "node:child_process";
 import { join } from "node:path";
-import type { StationAccess, StationLineAccess } from "@causeway/graph";
+import type { PlatformBoarding, StationAccess, StationLineAccess } from "@causeway/graph";
 import { cached, CACHE } from "./sources.js";
 
 const TFL_STATION_DATA_URL = "https://api.tfl.gov.uk/stationdata/tfl-stationdata-detailed.zip";
@@ -54,6 +55,43 @@ export function trainNote(rows: Record<string, string>[]): string | null {
   return parts.length ? `${parts.join(". ")}.` : null;
 }
 
+const range = (lo: string | undefined, hi: string | undefined): [number, number] | null => {
+  const a = mm(lo),
+    b = mm(hi);
+  if (a === null && b === null) return null;
+  return [a ?? b!, b ?? a!];
+};
+
+/**
+ * The step and gap to the train from each platform of a line, in figures (D-068).
+ * One row per platform and direction; a platform can list several "towards".
+ * A figure TfL leaves blank stays null: unknown, never level. Where the level
+ * access is counts only on a designated level access point, as in `trainNote`.
+ */
+export function boardingOf(rows: Record<string, string>[], platforms: Map<string, Record<string, string>>): PlatformBoarding[] {
+  const out = new Map<string, PlatformBoarding>();
+  for (const r of rows) {
+    const id = r.PlatformUniqueId;
+    if (!id) continue;
+    const towards = r.DirectionTowards || null;
+    const cur = out.get(id);
+    if (cur) {
+      if (towards && !cur.towards.includes(towards)) cur.towards.push(towards);
+      continue;
+    }
+    const p = platforms.get(id);
+    out.set(id, {
+      platform: p?.FriendlyName || (p?.PlatformNumber ? `Platform ${p.PlatformNumber}` : "Platform"),
+      towards: towards ? [towards] : [],
+      stepMm: range(r.MinStep, r.MaxStep),
+      gapMm: range(r.MinGap, r.MaxGap),
+      ramp: yes(r.LevelAccessByManualRamp),
+      levelAccessAt: (yes(r.DesignatedLevelAccessPoint) && r.LocationOfLevelAccess) || null,
+    });
+  }
+  return [...out.values()];
+}
+
 /** Access for each of our stations, keyed by our station id (the 940G NaPTAN code). */
 export async function stationAccess(ours: { id: string; lines: string[] }[]): Promise<Record<string, StationAccess>> {
   await cached(ZIP, TFL_STATION_DATA_URL);
@@ -92,7 +130,7 @@ export async function stationAccess(ours: { id: string; lines: string[] }[]): Pr
       const lr = rows.filter((r) => r.Line === line);
       const plats = [...new Set(lr.map((r) => r.PlatformUniqueId!))];
       if (!plats.length) continue;
-      byLine[line] = { platforms: plats, mapped: plats.every((p) => yes(platforms.get(p)?.HasStepFreeRouteInformation)), train: trainNote(lr) };
+      byLine[line] = { platforms: plats, mapped: plats.every((p) => yes(platforms.get(p)?.HasStepFreeRouteInformation)), train: trainNote(lr), boarding: boardingOf(lr, platforms) };
     }
     out[id] = {
       tflId,

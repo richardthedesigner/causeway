@@ -13,7 +13,7 @@ export interface City {
   index: string;
   /** Bus network from BODS GTFS (scripts/build-bus.ts). */
   bus?: string;
-  /** Street works on pavements (scripts/build-works.ts). England only: Scotland has no open feed yet. */
+  /** Street works on pavements: Street Manager in England (scripts/build-works.ts), the Scottish Road Works Register in Edinburgh (scripts/build-srwr.ts). */
   works?: string;
   /** Rail network for live lift outages (London only for now). */
   network?: string;
@@ -27,6 +27,10 @@ export interface City {
   osmNotes?: string;
   /** The Great British Public Toilet Map, cut to this city (DATA-09). */
   toiletMap?: string;
+  /** UKHSA region for heat and cold health alerts (England only, D-066). */
+  ukhsaRegion?: { code: string; name: string };
+  /** SEPA's Water of Leith level at Murrayfield (Edinburgh, D-066). */
+  riverLevel?: boolean;
   /** Whose bank holidays apply to opening hours (SMALL-01). */
   holidays: HolidayDivision;
   liveLifts: boolean;
@@ -36,7 +40,8 @@ export interface City {
   credit: string;
 }
 
-const OSM = "Map data © OpenStreetMap contributors (ODbL). Base map: Protomaps. Extra places: Overture Maps Foundation (CDLA Permissive 2.0). Bus timetables: Bus Open Data Service, Open Government Licence v3.0. Toilets: Great British Public Toilet Map, Public Convenience Ltd (CC BY 4.0).";
+const OSM = "Map data © OpenStreetMap contributors (ODbL). Base map: Protomaps. Extra places: Overture Maps Foundation (CDLA Permissive 2.0). Bus timetables: Bus Open Data Service, Open Government Licence v3.0. Toilets: Great British Public Toilet Map, Public Convenience Ltd (CC BY 4.0). Starting limits for kerbs and rest stops: Inclusive Mobility (Department for Transport, 2021), Open Government Licence v3.0. Weather and gusts: Open-Meteo (CC BY 4.0). Air quality, pollen and UV: Copernicus Atmosphere Monitoring Service, via Open-Meteo.";
+const UKHSA = "Heat and cold health alerts: UK Health Security Agency, Open Government Licence v3.0.";
 
 export const CITIES: City[] = [
   {
@@ -47,10 +52,12 @@ export const CITIES: City[] = [
     basemap: "basemap/edinburgh-central.pmtiles",
     index: "places/edinburgh-central.json.gz",
     bus: "graph/edinburgh-central-bus.json",
+    works: "live/edinburgh-central.works.json",
     footways: "graph/edinburgh-central-footways.json",
     greenspace: "places/edinburgh-central.greenspace.json",
     osmNotes: "places/edinburgh-central.osm-notes.json",
     toiletMap: "places/edinburgh-central.toiletmap.json",
+    riverLevel: true,
     holidays: "scotland",
     liveLifts: false,
     weatherAt: [55.9486, -3.1999],
@@ -63,7 +70,7 @@ export const CITIES: City[] = [
       { id: "st-giles", name: "High Street by St Giles'", kind: "Royal Mile", lon: -3.1907, lat: 55.9496 },
       { id: "meadows", name: "The Meadows", kind: "Park", lon: -3.1925, lat: 55.9405 },
     ],
-    credit: `${OSM} Terrain: LiDAR for Scotland, Open Government Licence v3.0. Pavement surfaces, widths and gritting: City of Edinburgh Council, Open Government Licence v3.0. Park gates: contains OS data © Crown copyright and database right.`,
+    credit: `${OSM} Terrain: LiDAR for Scotland, Open Government Licence v3.0. Pavement surfaces, widths and gritting routes: Copyright City of Edinburgh Council, contains Ordnance Survey data © Crown copyright and database right 2021 and 2026, Open Government Licence v3.0. Road works, street cafés and events: Scottish Road Works Register, Open Government Licence v3.0. Park gates: contains OS data © Crown copyright and database right. River levels: SEPA, Open Government Licence v3.0.`,
   },
   {
     id: "newcastle",
@@ -78,6 +85,7 @@ export const CITIES: City[] = [
     greenspace: "places/newcastle-gateshead.greenspace.json",
     osmNotes: "places/newcastle-gateshead.osm-notes.json",
     toiletMap: "places/newcastle-gateshead.toiletmap.json",
+    ukhsaRegion: { code: "E12000001", name: "North East" },
     holidays: "england-and-wales",
     liveLifts: false,
     weatherAt: [54.97, -1.607],
@@ -88,7 +96,7 @@ export const CITIES: City[] = [
       { id: "quayside", name: "Quayside", kind: "Newcastle riverside", lon: -1.6036, lat: 54.9696 },
       { id: "millennium-bridge", name: "Gateshead Millennium Bridge", kind: "Tilting footbridge", lon: -1.5995, lat: 54.9697 },
     ],
-    credit: `${OSM} Terrain: © Environment Agency, Open Government Licence v3.0. Flood warnings: Environment Agency, Open Government Licence v3.0. Park gates: contains OS data © Crown copyright and database right.`,
+    credit: `${OSM} Terrain: © Environment Agency, Open Government Licence v3.0. Flood warnings: Environment Agency, Open Government Licence v3.0. ${UKHSA} Park gates: contains OS data © Crown copyright and database right.`,
   },
   {
     id: "london",
@@ -105,6 +113,7 @@ export const CITIES: City[] = [
     toiletMap: "places/london-jubilee.toiletmap.json",
     holidays: "england-and-wales",
     network: "graph/london-network.json",
+    ukhsaRegion: { code: "E12000007", name: "London" },
     liveLifts: true,
     weatherAt: [51.502, -0.07],
     start: { id: "parliament-square", name: "Parliament Square", kind: "Westminster", lon: -0.1263, lat: 51.5007 },
@@ -113,7 +122,7 @@ export const CITIES: City[] = [
       { id: "westminster-abbey", name: "Westminster Abbey", kind: "Westminster", lon: -0.1275, lat: 51.4994, venue: true },
       { id: "museum-docklands", name: "Museum of London Docklands", kind: "West India Quay", lon: -0.0235, lat: 51.5075, venue: true },
     ],
-    credit: `${OSM} Terrain: © Environment Agency, Open Government Licence v3.0. Lines, stations, station toilets and lift status: Powered by TfL Open Data. Flood warnings: Environment Agency, Open Government Licence v3.0. Park gates: contains OS data © Crown copyright and database right.`,
+    credit: `${OSM} Terrain: © Environment Agency, Open Government Licence v3.0. Lines, stations, station toilets and lift status: Powered by TfL Open Data. Flood warnings: Environment Agency, Open Government Licence v3.0. ${UKHSA} Park gates: contains OS data © Crown copyright and database right.`,
   },
 ];
 
