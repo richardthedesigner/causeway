@@ -2,6 +2,39 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
+## 2026-10-05 (screenshot tests)
+
+STAB-02: `pnpm screenshots` (`scripts/screenshots.mjs`) replaces hand-checked screenshots.
+- Ten screens (map, Your data, search, route, note, navigation, report, setup, device list, device editor) at 390 by 844 and 320 by 640 in light, and at 320 by 640 with text at 200% in light and dark: 40 pictures, 2.7 MB, in `tests/screenshots/`. Kept small because each change to a screen adds its picture to git history again: the map is hidden except in `map` and `route`, and the sections-open variants were dropped (they were identical, the sections sit below the fold).
+- Steady by construction: every outside request is cut off so each screen shows its fallback, the clock is fixed, animations are off, navigation's preview walk is held still, the city is Edinburgh. Two runs in a row differ by at most 0.04% of pixels.
+- A pixel counts as changed past 24 of 255 on any channel; a screen fails past 0.2% changed (2% for the bare map, which WebGL draws). Comparing happens in the browser, so no new dependency. `--update` rewrites the baselines; `--only=route` checks some.
+- It serves and launches the browser through `scripts/serve-out.mjs`, as `pnpm a11y` and `pnpm e2e` do. CI runs it as its own step after e2e and uploads `tests/screenshots/diff/` on failure.
+
+## 2026-10-05 (Next.js 16 and Node 24)
+
+UPD-03 and UPD-04 (D-071), PR #54.
+- Next.js 15.5.27 to 16.3.8. React stays on 19.3. Built with webpack (`--webpack`), since Turbopack can't resolve the workspace packages' `.js` specifiers. Turbopack is UPD-05.
+- The export keeps its three static routes. Next 16 adds segment prefetch files (`__next.*.txt`) and `_not-found.html`. Client JavaScript is 709 KB gzipped, up from 684 KB. The CSP needs no change.
+- CI and `engines` on Node 24, the current LTS. The data refresh stays on 22 (UPD-07).
+- Under Node 24 the local speed budget check fails: routing is 15% to 25% slower against the yardstick. CI passes (50% limit). Re-baseline is UPD-06.
+
+## 2026-10-05 (RES-09: where next)
+
+Research only. No code, data or workflow changes.
+- Scored 14 UK cities on reach (Census 2021 TS038 for England and Wales, Scotland's Census 2022), need, rail station usage (ORR 2024-25), open accessibility data, licence and code reuse. Report and scores: [where-next.md](research/where-next.md) and [where-next-scores.csv](research/where-next-scores.csv).
+- Result: Glasgow, then Leeds, then Sheffield. Bristol, Manchester and Birmingham are within a point of Sheffield. Cardiff and Swansea score last, so DEF-09's "then Wales" isn't supported.
+- Gaps: Scotland's council-level disability tables sit behind a bot check at the UK Data Service, so Dundee and Aberdeen use an estimate; Blue Badges by council exist for England only. Both are in RES-11.
+- DEF-10 (Leeds) added. DEF-09 is unchanged until Richard decides (OPEN_ITEMS).
+
+## 2026-10-05 (Supabase grants and data-refresh token)
+
+SEC-16 and SEC-19: the critical and high findings of the [security review](reviews/security-2026-10.md), and its data-refresh token finding ([D-070](DECISIONS.md#d-070-every-grant-by-name-row-level-security-on-every-table)).
+- `0007_supabase_grants.sql`: `note_public` is select only; row-level security, and no grants, on the eight graph tables; no grants on `edge_attribute_resolved` or the sequences; new objects in `public` start with no grants for `anon` and `authenticated`.
+- `scripts/test-db.sh` and CI apply Supabase's default grants before the migrations (`db/test/supabase-stub.sql`). `db/test/grants.test.sql` adds 13 checks: nobody can delete or write through `note_public`, nobody can write a graph table, every table in `public` has row-level security on, new tables aren't granted. The 38 earlier checks still pass.
+- The review's probes, signed out as `anon` with Supabase's grants: before, `delete from note_public` gave `DELETE 1`, `insert into area` `INSERT 0 1`, `delete from source where id = 'crowd'` `DELETE 1`, and eight tables had no row-level security. After, all three are `permission denied` and every table has it.
+- Data refresh: `persist-credentials: false` on checkout, the token passed to `create-pull-request` itself, and `pip install --require-hashes -r scripts/requirements.txt` (osmium 4.3.1, duckdb 1.5.6, pyshp 3.1.6, the same versions it fetched unpinned).
+- BACKEND.md: migrations up to `0007`, PostGIS in the `extensions` schema, who can do what.
+
 ## 2026-10-05 (late night)
 
 **The map controls by keyboard** (STAB-17, D-069)

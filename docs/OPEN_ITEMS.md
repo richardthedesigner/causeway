@@ -2,14 +2,12 @@
 
 What's outstanding on Causewayside: things waiting on Richard, things blocked outside the project, and guesses to check with users. Keep this up to date: add an item when it comes up, and move it to "Done" with the date when it's settled. Details live in the linked issue or decision. The order of work is in [ROADMAP.md](ROADMAP.md).
 
-Last updated: 2026-10-05 (after release check).
+Last updated: 2026-10-05.
 
 ## Waiting on Richard
 
 | What | Why it matters | Effort | Link |
 |---|---|---|---|
-| Apply db/migrations/0006_my_data.sql before sharing is switched on | Sharing requires the database schema. The migration is ready; it needs to be applied to production before features that depend on it are enabled | 1 minute (with admin access) | docs/releases/2026-10-05.md, [ROADMAP](ROADMAP.md) SEC-06 |
-| SEC-25's securityheaders.com score: needs custom domain or relaxed login protection | Production is behind Vercel login protection on vercel.app, so the security scoring tool can't reach it. Score can be checked once there's a custom domain or protection is relaxed | A decision or a purchase | [ROADMAP](ROADMAP.md) SEC-25 |
 | Run the data refresh once by hand: Actions, then data-refresh, then Run workflow on `main` | Proves the weekly refresh works. It has never run, and this project's sessions can't start workflows | 1 minute | [#14](https://github.com/richardthedesigner/causeway/issues/14) |
 | Sign up for free API keys: National Rail, Met Office, Mapillary, BODS, Nexus | Each unlocks a data adapter (live trains, better weather, street photos, live buses) | About 30 minutes | [#9](https://github.com/richardthedesigner/causeway/issues/9) |
 | Decide whether to show OpenStreetMap access tags for named venues at public launch | Saying a named business is or isn't accessible carries reputational and legal risk | A decision | [#11](https://github.com/richardthedesigner/causeway/issues/11) |
@@ -19,8 +17,8 @@ Last updated: 2026-10-05 (after release check).
 | Ask Nexus for Tyne and Wear Metro lift status | Without it, Metro stations reached by lift are always "unknown" for step-free users | An email | [#13](https://github.com/richardthedesigner/causeway/issues/13) |
 | Decide whether chain-store websites scraped by AllThePlaces count as scraping under our rule | 348 places in search come only from AllThePlaces: mostly chain stores, parcel lockers and scout halls. Its Changing Places and NHS records are already out | A decision | ROADMAP DATA-27, [D-028](DECISIONS.md#d-028-overture-fills-search-gaps-osm-stays-the-source-of-access-facts) |
 | Turn on private vulnerability reporting: Settings, then Code security | `SECURITY.md` sends people there; until it's on they have nowhere private to report | 1 minute | [ROADMAP](ROADMAP.md) SEC-14 |
+| Decide whether to change DEF-09 from "Glasgow, then Wales" to "Glasgow, then Leeds", and whether Glasgow starts before its licence is confirmed | RES-09 ranks Cardiff and Swansea last of 14 (no open roadworks, new terrain source, little council data). Glasgow's best layers are unlicensed, so DATA-13 is the one thing that can slow it | A decision | [where-next.md](research/where-next.md) |
 | Check branch protection on `main` and `claude/sleepy-johnson-mavbrs`: Settings, then Branches. Direct pushes from Actions should be blocked, except the mirror | A compromised package in the data refresh could otherwise push straight to production | 5 minutes | [ROADMAP](ROADMAP.md) SEC-23, [security review](reviews/security-2026-10.md) M3 |
-| There is no Causeway Supabase project yet. When one is made, run db/migrations 0001 to 0007 in order, and only after SEC-16 (PR #55) is merged | Supabase starts with default grants: anyone could delete every shared note and write the graph tables. SEC-16 fixes the grants; migrations must follow | A setup step, deferred until Supabase exists | [ROADMAP](ROADMAP.md) SEC-16, [security review](reviews/security-2026-10.md) C1 |
 
 ## Blocked outside the project
 
@@ -54,6 +52,7 @@ These numbers shape routes but are our estimates, not evidence.
 - When someone deletes everything, a photo a reviewer had approved stays in the public bucket (hidden, as its note is gone) until a reviewer removes it. Worth a weekly clean-up step for the reviewer, or a server job, once sharing is on ([D-059](DECISIONS.md#d-059-your-data-a-copy-and-delete-everything)).
 - Weather beyond 48 hours ahead falls back to today's ([D-040](DECISIONS.md#d-040-leaving-later)).
 - The speed budget's timing checks hold 10% off CI. On a busy machine they can fail when nothing changed; run the test again before looking for a cause. A data refresh that rebuilds a graph can trip the settled-node check: re-baseline on purpose ([D-056](DECISIONS.md#d-056-a-speed-budget-the-tests-enforce), ROADMAP SPEED-07).
+- A guess to check on the next production deploy: Vercel serves MapLibre's worker (`/maplibre/6.12.0/maplibre-gl-worker.mjs`) as JavaScript, so the map draws. The local checks confirm it with our own server ([D-050](DECISIONS.md#d-050-dependency-audit-in-ci-and-maplibre-6)).
 - The Scottish Road Works Register is daily, but the data refresh is weekly, so new Edinburgh works can be up to a week late ([D-057](DECISIONS.md#d-057-edinburghs-works-from-the-scottish-road-works-register)).
 - Street Manager's June 2026 activity archive is published truncated, so the build skips it; activities created or last changed only in June are missing until a later event brings them back ([D-027](DECISIONS.md#d-027-live-and-third-party-data-come-in-through-adapters)).
 - Whether a register entry closes the pavement is read from its free text. Check a sample of Edinburgh road closures on the ground or with testers (D-057).
@@ -67,8 +66,7 @@ Not now, on purpose: a phone app, whole cities, a reports backend, app accounts.
 
 ## Done
 
-- 2026-10-05: City expansion decided: Glasgow next (once DATA-13 is licensed), then Leeds. After that, cities by built-up area population (ONS/NRS, largest first), skipping done cities. Richard's call ([D-072](DECISIONS.md#d-072-which-city-next), [ROADMAP](ROADMAP.md) DEF-09).
-- 2026-10-05: MapLibre worker confirmed on production: Vercel serves `maplibre-gl-worker.mjs` as JavaScript (content-type: application/javascript), so the map draws ([D-050](DECISIONS.md#d-050-dependency-audit-in-ci-and-maplibre-6), [REL-01](ROADMAP.md)).
+- 2026-10-05: the migrations can run on Supabase (BACKEND.md step 3). `0007_supabase_grants.sql` takes back Supabase's default grants, so nobody signed out can delete notes or write the graph tables. Run all seven in one go (SEC-16, [D-070](DECISIONS.md#d-070-every-grant-by-name-row-level-security-on-every-table)).
 - 2026-10-05: TfL's informational station messages (a reduced escalator service) are shown, under Worth knowing in "On this route" on routes through the station ([D-067](DECISIONS.md#d-067-more-data-same-calm)).
 - 2026-10-05: the weather and health lines (alerts, gusts, air, the Water of Leith) moved from "Why this way?" into "On this route", with their source and time ([D-067](DECISIONS.md#d-067-more-data-same-calm)).
 - 2026-10-05: Open-Meteo's times were read as the phone's local time, an hour out in British Summer Time. Now read as UTC everywhere, with a test ([D-066](DECISIONS.md#d-066-heat-and-cold-alerts-gusts-air-quality-and-the-water-of-leith)).

@@ -5,8 +5,8 @@ Decision: [D-030](DECISIONS.md). Without the two environment variables below, th
 ## Set up (once)
 
 1. **Supabase project** in the London region (`eu-west-2`).
-2. **Extensions:** turn on `postgis` (Database > Extensions).
-3. **Migrations,** in order: `db/migrations/0001_graph.sql` to `0007_sharing.sql` (or the latest migration in `db/migrations/`).
+2. **Extensions:** turn on `postgis` (Database > Extensions), in the `extensions` schema it suggests, not `public`.
+3. **Migrations,** in order: `db/migrations/0001_graph.sql` to `0007_supabase_grants.sql`. Run them all in one go. Until `0007` has run, Supabase's default grants let anyone signed out delete notes through `note_public` and write the graph tables (SEC-16).
 4. **Auth:** turn on *Anonymous sign-ins* (Authentication > Sign In / Providers). Turn on *CAPTCHA protection* with Cloudflare Turnstile before any publicity, so sign-ups can't be scripted.
 5. **Vercel:** set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` (Supabase: Project settings > API) on the `causeway` project, then redeploy. The anon key is meant to be public; the database rules do the protecting.
 
@@ -16,9 +16,13 @@ Decision: [D-030](DECISIONS.md). Without the two environment variables below, th
 |---|---|
 | Anyone | Read visible notes through `note_public` (never author ids; photos only once approved) |
 | Signed in (anonymous) | Add notes as themselves (30 a day), delete their own, flag others', send reports |
-| Service role only | Read reports, see hidden notes, approve photos |
+| Signed in (anonymous) | Read back and delete their own notes, reports and flags (`0006_my_data.sql`) |
+| Reviewers | See hidden notes and flags, read reports, approve photos (below) |
+| Nobody but the owner and service role | Write the graph tables (`source`, `area`, `graph_node`, `graph_edge` and the rest), add reviewers, edit the review log |
 
-Check the rules locally (Postgres 16 + PostGIS): `PGHOST=/var/run/postgresql scripts/test-db.sh`. CI runs the same.
+Every table in `public` has row-level security on, and `anon` and `authenticated` hold only the grants the migrations give by name (`0007_supabase_grants.sql`, D-070). Anything new added to `public` starts with no grants for them: grant it by name in its migration.
+
+Check the rules locally (Postgres 16 + PostGIS): `PGHOST=/var/run/postgresql scripts/test-db.sh`. CI runs the same. Both apply Supabase's default grants first (`db/test/supabase-stub.sql`), so the tests see what a real project has.
 
 ## Reviewers
 
