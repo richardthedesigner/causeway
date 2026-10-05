@@ -7,6 +7,7 @@
  * `toLiveStates` takes that mapping as an index so the adapter stays pure.
  */
 import { stepFreeLines, type LiveState, type StationAccess } from "@causeway/graph";
+import { getJson, type LiveOptions } from "./http.js";
 
 export interface TflLiftDisruption {
   stationUniqueId: string;
@@ -43,10 +44,8 @@ export function parseLiftDisruptions(json: unknown, fetchedAt: string): LiftOuta
     });
 }
 
-export async function fetchLiftOutages(fetchImpl: typeof fetch = fetch, now = new Date()): Promise<LiftOutage[]> {
-  const res = await fetchImpl(TFL_LIFTS_URL);
-  if (!res.ok) throw new Error(`TfL lift feed: HTTP ${res.status}`);
-  return parseLiftDisruptions(await res.json(), now.toISOString());
+export async function fetchLiftOutages(fetchImpl: typeof fetch = fetch, now = new Date(), opts: Omit<LiveOptions, "fetchImpl"> = {}): Promise<LiftOutage[]> {
+  return parseLiftDisruptions(await getJson(TFL_LIFTS_URL, "TfL lift feed", { ...opts, fetchImpl }), now.toISOString());
 }
 
 /**
@@ -146,10 +145,8 @@ export function applyLiveStates(g: { edges: { ref?: string; live?: LiveState }[]
 }
 
 /** Live departures from a London stop, minutes away, for one route. TfL's arrivals feed, no key. */
-export async function fetchTflArrivals(stopId: string, route: string, fetchImpl: typeof fetch = fetch): Promise<number[]> {
-  const res = await fetchImpl(`https://api.tfl.gov.uk/StopPoint/${encodeURIComponent(stopId)}/Arrivals`);
-  if (!res.ok) throw new Error(`TfL arrivals: HTTP ${res.status}`);
-  const rows = (await res.json()) as { lineName: string; timeToStation: number }[];
+export async function fetchTflArrivals(stopId: string, route: string, fetchImpl: typeof fetch = fetch, opts: Omit<LiveOptions, "fetchImpl"> = {}): Promise<number[]> {
+  const rows = await getJson<{ lineName: string; timeToStation: number }[]>(`https://api.tfl.gov.uk/StopPoint/${encodeURIComponent(stopId)}/Arrivals`, "TfL arrivals", { ...opts, fetchImpl });
   return rows
     .filter((r) => r.lineName.toLowerCase() === route.toLowerCase())
     .map((r) => Math.round(r.timeToStation / 60))

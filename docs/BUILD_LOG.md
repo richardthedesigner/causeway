@@ -2,6 +2,13 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
+## 2026-10-05 (afternoon)
+
+**Live feeds give up after 10 seconds** (D-052, STAB-05)
+- A hung feed never failed, so its fallback never showed: "Checking lifts with TfL…" could stay for good. Every live call now has a time limit: 10 s for TfL, the Environment Agency and Open-Meteo, 6 s for live search.
+- Fixed on the way: "Couldn't check the weather" flashed on every start in a remembered city, because a cancelled check was treated as a failed one.
+- `pnpm e2e` now runs a London journey with every live feed hanging. The route comes, and the weather and lift lines fall back in about 11 and 13 seconds.
+
 ## 2026-10-05 (midday)
 
 **Road speed in the device editor** (D-051, FEAT-18)

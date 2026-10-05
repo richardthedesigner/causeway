@@ -502,3 +502,13 @@ When there is nothing to compare with, it builds. Once DEP-01 makes `main` the p
 - **Effect.** Central Edinburgh journeys get 20 to 45% quicker, and routes move onto roads. Marchmont to Leith Walk went from 48% to 91% on roads, with only 7% of the route kept. That fits the law, but some riders keep to pavements or avoid busy roads. Ask them (RES-10) before adding a "prefer pavements" or "avoid busy roads" option.
 - **In the editor** (FEAT-18, 2026-10-05): road scooters get "Speed on the road", 4 to 8 mph in half-mph steps. Below 4 mph the road isn't worth using (that's the pavement limit), and 8 mph is the legal top speed.
 - **Speed units** (FEAT-18): each device has "Show speeds in: mph or km/h" (`speedUnit`), used for pace and road speed. Scooters default to mph, the unit they're sold and regulated in; everyone else to km/h, as before. Distances stay metric; a full miles or kilometres setting is SMALL-02.
+
+## D-052 Live feeds get a time limit
+
+**Decided.** 2026-10-05 (ROADMAP STAB-05). Every live feed already had a fallback for a failure: lifts say "Couldn't get live lift status from TfL", works and floods keep what they had, bus times say they're unavailable, the weather assumes dry and says so. But a feed that hangs never fails, so the fallback never came. "Checking lifts with TfL…" could stay for good, and each refresh added another request that never ended.
+
+- **What we do.** Every live call goes through `getJson` (`packages/live/src/http.ts`): TfL lifts, line and station disruptions, street works and bus arrivals, Environment Agency floods, Open-Meteo, Photon and postcodes.io. It aborts the request when time runs out, counts reading the body against the limit, and holds even for a fetch that ignores its signal.
+- **Limits.** 10 s for the feeds (`LIVE_TIMEOUT_MS`): they refresh every few minutes, so a slow answer is better than none, but 10 s is already longer than anyone will watch "Checking…". 6 s for live search, where someone is waiting on the list and the bundled results are already showing.
+- **A cancel isn't a failure.** The weather check restarts when the city or leaving time changes. The cancelled check used to land in the same handler as a failure, so "Couldn't check the weather" flashed on every app start in a remembered city. It now waits for a real failure or the limit.
+- **Tested.** `getJson` unit tests (`packages/live/test/http.test.ts`), and a `pnpm e2e` journey in London where TfL, Open-Meteo and the Environment Agency never answer: the route still comes, and the weather and lift lines fall back.
+- **Not covered.** The Supabase calls for sharing and review (STAB-14). Sharing is off today.
