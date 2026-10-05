@@ -254,14 +254,15 @@ describe("powerchair and scooter classes", () => {
 
 describe("ice and gritting (DATA-07)", () => {
   const ice = { ...DRY, wet: true, ice: true };
-  const gritted = (v: boolean) => ({ gritted: attr(v, "reported", "council", "2026-10-04") });
+  const gritted = (v: boolean) => ({ gritted: attr(v, "reported", "council", "2021-05-27") });
 
   it("in ice, a pavement off the gritting routes costs more than one on them, most for wheels", () => {
     const on = evaluateEdge(edge({}, gritted(true)), true, manual, ice);
     const off = evaluateEdge(edge({}, gritted(false)), true, manual, ice);
     expect(off.cost).toBeGreaterThan(on.cost);
     expect(off.reasons.some((r) => r.attr === "gritted" && /not on a gritting route/.test(r.detail))).toBe(true);
-    expect(on.reasons.some((r) => r.attr === "gritted" && r.detail === "on a gritting route")).toBe(true);
+    // The routes' own year, never the build date (D-064).
+    expect(on.reasons.some((r) => r.attr === "gritted" && r.detail === "on a gritting route (council routes from 2021)")).toBe(true);
     const walkOff = evaluateEdge(edge({}, gritted(false)), true, walking, ice);
     const walkOn = evaluateEdge(edge({}, gritted(true)), true, walking, ice);
     expect(walkOff.cost - walkOn.cost).toBeLessThan(off.cost - on.cost);

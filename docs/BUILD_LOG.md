@@ -6,6 +6,14 @@ A running record of what was built, newest first. Each entry links the decision 
 
 Richard chose main as the base; the overnight build's extras (PR #36) are ported by hand, smallest and safest first.
 
+**Council footways and gritting** (D-062, D-063, D-064, DATA-31, DATA-22)
+- `pnpm build:footways` reads both council layers in British National Grid. Asked for in WGS84, the council's server put them tens of metres off our streets (the gritting lines about 90 m west), so main's matches were often a neighbour's footway.
+- Footways matched along each edge every 5 m: width the 20th percentile across both sides, setts on a quarter of the points, nothing under half the points matched. Council surfaces on pavement edges 2,556 to 12,182, widths 6,976 to 12,069.
+- On streets drawn as one line, the council's pavement surface replaces OSM's carriageway surface (Richard): 7,812 edges, a different value on 3,044.
+- Gritting from the council's "Gritting Routes" layer, the one its DCAT feed licenses (OGL v3, published 2021-05-27), matched only where the route runs the same way: 1,648 pavement edges (64 km). The reason in ice says "council routes from 2021".
+- Both layers are dated with the council's published date; the build stops without an OGL listing or a date. The city credit carries the council's attribution.
+- Every verdict on the 91 journey and preset pairs is the same; nine routes moved, the most Waverley to the Grassmarket on crutches (34.0 to 29.5 minutes).
+
 **When TfL's feeds fail** (D-061, DATA-30)
 - Lifts, line status and station disruptions are fetched apart. One failing leaves the others, and a failed feed's last good answer counts for 15 minutes after it was fetched. Before, a failure in either disruption feed dropped both and opened every closed line and station without a word.
 - The route card says which couldn't be checked when the route rides a train: "Couldn't get live station disruptions from TfL. Check before you travel."

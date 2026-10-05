@@ -60,7 +60,7 @@ export const CITIES: City[] = [
       { id: "st-giles", name: "High Street by St Giles'", kind: "Royal Mile", lon: -3.1907, lat: 55.9496 },
       { id: "meadows", name: "The Meadows", kind: "Park", lon: -3.1925, lat: 55.9405 },
     ],
-    credit: `${OSM} Terrain: LiDAR for Scotland, Open Government Licence v3.0. Pavement surfaces, widths and gritting: City of Edinburgh Council, Open Government Licence v3.0. Road works, street cafés and events: Scottish Road Works Register, Open Government Licence v3.0. Park gates: contains OS data © Crown copyright and database right.`,
+    credit: `${OSM} Terrain: LiDAR for Scotland, Open Government Licence v3.0. Pavement surfaces, widths and gritting routes: Copyright City of Edinburgh Council, contains Ordnance Survey data © Crown copyright and database right 2021 and 2026, Open Government Licence v3.0. Road works, street cafés and events: Scottish Road Works Register, Open Government Licence v3.0. Park gates: contains OS data © Crown copyright and database right.`,
   },
   {
     id: "newcastle",

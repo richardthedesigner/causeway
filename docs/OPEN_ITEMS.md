@@ -16,7 +16,6 @@ Last updated: 2026-10-05.
 | Apply for an NHS Service Search v3 key and an Edinburgh Festivals type C key; register for Spatial Hub | Each has a long approval lead time | Three applications | [DATA_SURVEY_UK §7](DATA_SURVEY_UK.md#7-who-to-ask-for-richard) |
 | Ask Nexus for Tyne and Wear Metro lift status | Without it, Metro stations reached by lift are always "unknown" for step-free users | An email | [#13](https://github.com/richardthedesigner/causeway/issues/13) |
 | Decide whether chain-store websites scraped by AllThePlaces count as scraping under our rule | 348 places in search come only from AllThePlaces: mostly chain stores, parcel lockers and scout halls. Its Changing Places and NHS records are already out | A decision | ROADMAP DATA-27, [D-028](DECISIONS.md#d-028-overture-fills-search-gaps-osm-stays-the-source-of-access-facts) |
-| Decide whether Edinburgh council's pavement surface should win over OSM on streets drawn as one line | They disagree on 2,822 edges; OSM wins today, and on those streets OSM's tag may describe the road, not the pavement | A decision | [D-046](DECISIONS.md#d-046-council-footway-data-as-a-separate-layer), ROADMAP DATA-22 |
 | Turn on private vulnerability reporting: Settings, then Code security | `SECURITY.md` sends people there; until it's on they have nowhere private to report | 1 minute | [ROADMAP](ROADMAP.md) SEC-14 |
 
 ## Blocked outside the project
@@ -54,6 +53,7 @@ These numbers shape routes but are our estimates, not evidence.
 - The Scottish Road Works Register is daily, but the data refresh is weekly, so new Edinburgh works can be up to a week late ([D-057](DECISIONS.md#d-057-edinburghs-works-from-the-scottish-road-works-register)).
 - Street Manager's June 2026 activity archive is published truncated, so the build skips it; activities created or last changed only in June are missing until a later event brings them back ([D-027](DECISIONS.md#d-027-live-and-third-party-data-come-in-through-adapters)).
 - Whether a register entry closes the pavement is read from its free text. Check a sample of Edinburgh road closures on the ground or with testers (D-057).
+- Edinburgh's pavement gritting routes were last published in 2021. The route says so; check with the council whether they still hold before winter ([D-064](DECISIONS.md#d-064-gritting-routes-from-the-councils-licensed-layer-matched-by-direction-dated-2021)).
 
 ## Deferred by Richard
 
@@ -61,6 +61,7 @@ Not now, on purpose: a phone app, whole cities, a reports backend, app accounts.
 
 ## Done
 
+- 2026-10-05: Edinburgh council's pavement surface wins over OSM on streets drawn as one line, where OSM only has the carriageway's surface. Richard's call (ROADMAP DATA-22, [D-063](DECISIONS.md#d-063-on-a-street-drawn-as-one-line-the-councils-pavement-surface-beats-the-carriageways)).
 - 2026-10-05: Edinburgh's roadworks from the Scottish Road Works Register: the site answers from the cloud container now, and `pnpm build:srwr` builds them (ROADMAP DATA-02, [D-057](DECISIONS.md#d-057-edinburghs-works-from-the-scottish-road-works-register)).
 - 2026-10-05: North Bridge is passable on foot (Richard). The register records it as a road closure since 2018; D-057 keeps it open to people on foot, as works on the pavement.
 - 2026-10-05: the rollator keeps 300 m between rests, not Inclusive Mobility's 50 m for stick users: it has a seat. Richard's call ([D-054](DECISIONS.md#d-054-presets-on-inclusive-mobility-values-kerbs-credit-and-more-benches), ROADMAP DATA-28).

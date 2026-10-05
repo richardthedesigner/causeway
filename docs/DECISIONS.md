@@ -455,6 +455,8 @@ When there is nothing to compare with, it builds. Once DEP-01 makes `main` the p
 
 Update (D-053): the council's surface and width are now written as inferred, not reported. The council records the whole footway polygon, matched to our edge by shape, and its width is the full width, not the clear width past bins and posts. As reported values, narrow council widths closed pavements outright for wheelchair users (231 edges under 0.9 m, 700 under 1.2 m). As inferred values they cost time and say "about", and never close a pavement on their own.
 
+Update (D-062, D-063): matched along each edge in British National Grid, not at its middle from the server's WGS84 (which was tens of metres out); width the 20th percentile across both sides; setts on a quarter of the points; "Surface Dressing" unknown; dated with the council's published date. On a street proxy whose OSM surface is only the carriageway's, the council's pavement surface now wins (Richard, DATA-22).
+
 
 ## D-047 Ice, gritting and floods
 
@@ -469,6 +471,8 @@ Update (D-053): the council's surface and width are now written as inferred, not
 - A flood state never weakens one already there (works closing a pavement stay closed), and each refresh replaces the last, so a lifted warning lifts.
 
 **Not yet.** Met Office weather warnings need a key (DATA-17). Scotland's flood warnings come from SEPA, which has no matching open feed we've found (DATA-25).
+
+Update (D-064): the gritting routes now come from the council's "Gritting Routes" layer, which its DCAT feed lists under OGL v3 (published 2021-05-27), matched by direction along each edge: 1,648 pavement edges. Main's layer had no published licence and came back about 90 m off the streets. The reason gives the routes' year. The ice costs are unchanged.
 
 ## D-048 Park gates and OpenStreetMap notes
 
@@ -530,7 +534,7 @@ Update (D-053): the council's surface and width are now written as inferred, not
 - **A search result's first fact may take two lines.** On a 390 px phone one line is about 40 characters, so the first fact was often cut off mid-word. It now wraps to two lines before it is cut. Every row, not only long ones, so the list is easy to scan; not three, so the list stays short on a phone.
 
 **Conservative calls.**
-- An inferred council surface still counts in full, as an inferred OSM surface does: council setts or flags in ice still close the pavement for wheeled users. Only the width is softened. No preset refuses outright any surface the council layer can name. Every other reader of surface and width (the route's surface mix, the setts warning in navigation, "relax a limit" suggestions) still needs checking against inferred council values; that's a follow-up.
+- An inferred council surface still counts in full, as an inferred OSM surface does: council setts or flags in ice still close the pavement for wheeled users. Only the width is softened. No preset refuses outright any surface the council layer can name. Every other reader of surface and width (the route's surface mix, the setts warning in navigation, "relax a limit" suggestions) still needs checking against inferred council values; that's a follow-up. Checked in D-062: they all read the edge's attributes, so they see council values as they see OSM's.
 - The committed London works file was edited in place rather than rebuilt: rebuilding would also have moved every other date in it.
 - The figures here and in D-054 were measured before D-051 (road speed for road scooters) reached this branch. D-051 since changed all six road scooter journeys outside London (Causewayside to the museum now 9.5 minutes); no other preset's outcome moved, and the speed budget's settled nodes are the same.
 
@@ -681,3 +685,55 @@ Main fetched line status and station disruptions together and dropped both silen
 - Held answers expire; a closure from a feed that keeps failing is dropped after 15 minutes, and the card says we couldn't check, rather than keep a closure that may have ended.
 - `ignoreClosures` never plans a route we offer; it only finds what to name.
 - Escalator notes for everyone, which the overnight build listed under "On this route", wait for that list, the last step of the port: main shows no informational station messages today.
+
+## D-062 Council footways matched along each edge, on the British National Grid
+
+**Decided.** 2026-10-05 (DATA-31, ported from the overnight build, PR #36, by hand into main's council layer). Amends D-046. Code: `scripts/council-footways-lib.ts`, `scripts/build-council-footways.ts`, `packages/graph/src/council.ts`.
+
+**What was wrong.** Main asked the council's ArcGIS service for its Adopted Roads polygons in WGS84 and let the server reproject them. Its transformation put them tens of metres off our streets: only 18% of our drawn pavements' points lay within a metre of a council footway polygon. So D-046 matched many edges to a neighbour's footway or a side street's. It also judged each edge by its middle alone, took the narrowest width and roughest surface within 12 m of a street proxy's middle, and dated the layer with the day of the build.
+
+**What we do now.**
+- **British National Grid.** The layer comes in BNG and our edges are projected with OSTN15, as the LiDAR is. Now 91% of our drawn pavements' points lie within a metre of a footway polygon.
+- **Points along the edge.** Every 5 m, kept 5 m clear of the junctions at its ends (the middle alone for a short edge). A path or pavement drawn as its own line takes the polygon it lies in, or the nearest within 3 m. A street proxy takes the nearest footway polygon within 15 m on each side.
+- **Width:** the 20th percentile of the widths found, across both sides, so a narrow stretch or side counts without one sliver deciding. Widths under 0.6 m (drawing slivers at corners) and over 10 m (area-like figures) are dropped.
+- **Surface:** setts when they cover a quarter of the points, so a setted stretch isn't outvoted; otherwise the commonest surface when it covers half. "Surface Dressing" (chippings rolled into tar) is now unknown, not asphalt.
+- **Under half the points matched gets nothing.**
+- **The council's date.** Each layer's date is the one the council publishes in its DCAT feed (Adopted Roads: 2026-10-01), never the build's. A layer missing from the feed, without Open Government Licence v3 there, or without a date stops the build.
+- **Credit** now carries the attribution the council's licence asks for: "Copyright City of Edinburgh Council, contains Ordnance Survey data © Crown copyright and database right 2021 and 2026".
+
+**Numbers** (central Edinburgh, 31,750 pavement edges; before is main with D-053):
+- Council surfaces on pavement edges: 2,556 before, 12,182 now. 4,370 fill a surface OSM didn't have; 7,812 replace a street proxy's carriageway surface (D-063). 158 are setts.
+- Council widths: 6,976 before, 12,069 now; 302 under 0.9 m, 1,060 under 1.2 m. Widths stay inferred (D-053): they cost time and never close a pavement.
+- On the 91 acceptance journey and preset pairs (`scripts/preset-outcomes.ts`, with D-063 and D-064 together), every verdict is the same and nine routes moved. Waverley to the Grassmarket: crutches 34.0 to 29.5 minutes, road scooter 19.3 to 18.7, manual wheelchair with a companion 36.1 to 36.3 and pram 25.3 to 25.6 (both with fewer unknown metres), fatigue the same time by other streets. Causewayside to Waverley: scooter 23.4 to 23.1, manual wheelchair with a companion 29.9 to 30.1, pram 28.9 to 29.1. Causewayside to the museum by road scooter 9.6 to 9.8.
+
+**Every reader checked.** Council values are written into the edge's attributes when the city loads, so the route's surface mix, navigation's setts warning, "Avoid setts" and "relax a limit" all see them, as they see OSM's (`packages/router/test/council-readers.test.ts`). A council width never closes a pavement, so it is never offered as a limit to relax. Council "Grass" stays unknown: on a footway polygon it is most likely a verge, and as a surface it would close the pavement for anyone who avoids grass.
+
+**Conservative calls.**
+- Council setts still count as setts, inferred or not, as an inferred OSM surface does: a device set to avoid setts won't take them.
+- Not ported: the overnight build's general "fill" layer rows and its per-edge layer facts. Main's keyed council file stays.
+
+## D-063 On a street drawn as one line, the council's pavement surface beats the carriageway's
+
+**Decided.** 2026-10-05 by Richard (DATA-22). Amends D-046. Code: `carriagewayOnly` and `applyCouncilFootways` in `packages/graph/src/council.ts`.
+
+Where OSM draws a street as one line (a street proxy), our builder reads the pavement's surface from `sidewalk:*:surface` when it is tagged, and otherwise from the street's own `surface` tag, marked inferred, "carriageway surface; the pavement may differ". That tag describes the road. A setted street with flagged pavements read as setts; a tarmac road with slabbed pavements read as tarmac.
+
+**What we do.** On a street proxy whose OSM surface is only that carriageway guess, the council's pavement surface wins. OSM's `sidewalk:*:surface` still wins over the council, and so does any surface on a pavement or path drawn as its own line. The council's value stays inferred, and the method says what it replaced ("OSM's sett is the carriageway's").
+
+**Numbers.** 10,151 street proxy edges carry only the carriageway's surface; the council replaces it on 7,812, with a different value on 3,044. The commonest: tarmac to paving slabs (1,330), setts to paving slabs (498), setts to tarmac (411), tarmac to concrete (267), setts to concrete (139). 44 tarmac streets become setts.
+
+**What it changes.** People who avoid setts now get the setted Old Town streets whose pavements are flagged or tarmac, and lose the 44 whose pavements are setted. The acceptance routes' changes are counted with D-062's.
+
+## D-064 Gritting routes from the council's licensed layer, matched by direction, dated 2021
+
+**Decided.** 2026-10-05 (DATA-31, ported from the overnight build, PR #36). Amends D-047. Code: `onGrittingRoute` in `scripts/council-footways-lib.ts`, `scripts/build-council-footways.ts`, `applyCouncilFootways`, the gritting reason in `packages/router/src/cost.ts`. Keeps D-047's ice costs.
+
+**The layer.** Main read "Pavement gritting routes (priority 1)" from the council's Transport service (layer 3). That layer isn't in the council's DCAT feed, so it has no published licence, and asked for in WGS84 it came back about 90 m west of the streets: only 22% of its points lay within 3 m of one of our streets. The same 429 lines are in "Gritting Routes" (`Misc/INSPIRE/MapServer/9`, footway priority 1), which the feed lists under Open Government Licence v3, published 2021-05-27. We use that one, in British National Grid (D-062). The build stops if the feed stops listing it as OGL v3 or gives no date.
+
+**Matching.** An edge is on a route when at least 60% of its points (every 5 m, clear of its ends) lie near a route line running the same way, within 30 degrees: within 6 m for a street proxy or a pedestrian street, whose line follows the middle of the street as the council's does, and within 12 m for a pavement or path drawn as its own line, which runs beside it. So a side street or a path crossing the route at a corner doesn't count. Steps and crossings are never marked: steps are rarely gritted, and a crossing is the road.
+
+**Date.** The gritted state carries the routes' own date, and the reason says it: "on a gritting route (council routes from 2021)", "not on a gritting route (council routes from 2021), so it may be icy". Never the build date.
+
+**Numbers.** 1,648 pavement edges (64 km) are on a route, against 1,130 (32 km) before; only 264 are in both, since main's were matched against lines 90 m out. Routes in ice weren't part of the acceptance runs; dry routes don't change.
+
+**Conservative calls.** The council's routes are from 2021 and may have changed. The penalty stays the same either way: a 2021 route is still better evidence than none, and the reason says how old it is.

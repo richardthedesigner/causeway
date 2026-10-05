@@ -402,12 +402,14 @@ function evaluateEdgeBase(e: GraphEdge, forward: boolean, p: Profile, c: Conditi
   }
 
   // Ice and gritting (DATA-07): where the council's routes are known, pavements off them cost more in ice.
+  // The routes' own date, never the build's (Edinburgh's are from 2021): an old route list looks old.
   if (c.ice && a.gritted && isKnown(a.gritted) && e.kind !== "steps") {
-    if (a.gritted.value) reasons.push({ kind: "penalty", attr: "gritted", detail: "on a gritting route", seconds: 0 });
+    const when = a.gritted.observedAt ? ` (council routes from ${a.gritted.observedAt.slice(0, 4)})` : "";
+    if (a.gritted.value) reasons.push({ kind: "penalty", attr: "gritted", detail: `on a gritting route${when}`, seconds: 0 });
     else {
       const s = seconds * (WHEELED(p) ? ICE_UNGRITTED_WHEELED : ICE_UNGRITTED);
       penalty += s;
-      reasons.push({ kind: "penalty", attr: "gritted", detail: "not on a gritting route, so it may be icy", seconds: s });
+      reasons.push({ kind: "penalty", attr: "gritted", detail: `not on a gritting route${when}, so it may be icy`, seconds: s });
     }
   }
 

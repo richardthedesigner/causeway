@@ -28,11 +28,14 @@ The machine: 4 cores, 15 GB, Node 22, a cloud session container.
 | Search index | 1268 KB | 1268 KB |
 | Buses, trams and Metro | 900 KB | 85 KB |
 | Base map | 8804 KB | 8804 KB |
-| Council footways | 502 KB | 110 KB |
+| Council footways | 943 KB | 190 KB |
 | Park gates | 34 KB | 9 KB |
 | OpenStreetMap notes | 7 KB | 3 KB |
 | Toilet Map | 13 KB | 3 KB |
-| **Total** | | **14074 KB** (5269 KB without the base map; 125 KB beside the graph, the budgeted part) |
+| Pavement works | 191 KB | 26 KB |
+| **Total** | | **14179 KB** (5375 KB without the base map; 231 KB beside the graph, the budgeted part) |
+
+Refreshed 2026-10-05 after the council footway layer was rebuilt (D-062): 502 KB to 943 KB, 110 KB to 190 KB over the wire. The settled nodes moved 0.7% (224,919 to 226,479), inside the budget, so the baseline stands.
 
 ### Newcastle and Gateshead (`newcastle-gateshead`)
 

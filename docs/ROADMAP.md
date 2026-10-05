@@ -85,7 +85,7 @@ Fix and fill the pilot cities. DATA-01 to DATA-10 are in order of value per day 
 | DATA-18 | Live Street Manager feed for England | M | later | blocked | Richard, Claude | Waits on Richard's application. [#10](https://github.com/richardthedesigner/causeway/issues/10) |
 | DATA-19 | Tyne and Wear Metro lift status | M | later | blocked | Richard, Claude | Waits on Nexus. [#13](https://github.com/richardthedesigner/causeway/issues/13) |
 | DATA-20 | Live bus and tram departures in Edinburgh and Newcastle | M | later | blocked | Claude | [#8](https://github.com/richardthedesigner/causeway/issues/8). Lothian 403, Transport for Edinburgh 522, Nexus needs a key |
-| DATA-22 | Should the council's pavement surface win over OSM on streets drawn as one line? | S | next | doing | Richard, Claude | D-046. Richard said yes on 2026-10-05 for streets whose OSM surface is only the carriageway's. 2026-10-05, `claude/vibrant-heisenberg-3j1kl2` (PR #44) |
+| DATA-22 | Should the council's pavement surface win over OSM on streets drawn as one line? | S | next | done (2026-10-05) | Richard, Claude | D-063. Richard said yes for streets whose OSM surface is only the carriageway's: the council's surface replaces it on 7,812 edges, a different value on 3,044 |
 | DATA-23 | TfL station toilets in the toilet layer and search (65 at our stations, with RADAR and accessible flags) | S | now | done (2026-10-05) | Claude | PR #33. One place per station (24 stations, 65 toilets); toilets past the gates are for customers and aren't offered as stops |
 | DATA-24 | Rebuild the council footway layer on the weekly refresh | S | later | done (2026-10-04) | Claude | Done by DATA-11 |
 | DATA-25 | Scotland's flood warnings (SEPA) for the Water of Leith walkway | M | later | todo | Claude | D-047. No open feed matching the EA's found yet; look again |
@@ -94,7 +94,7 @@ Fix and fill the pilot cities. DATA-01 to DATA-10 are in order of value per day 
 | DATA-28 | Presets on Inclusive Mobility values: manual wheelchair kerb 6 mm, unmeasured dropped kerbs at 6 mm, kerb text in mm, "More benches" ladder and speed | S | now | done (2026-10-05) | Claude | D-054, D-055. Ported from PR #36. Rollator keeps 300 m (Richard). Outcomes for all 91 journey and preset pairs in D-054 |
 | DATA-29 | TfL station data on the platforms: a lift out that leaves some platforms step-free counts as unknown, and the step and gap to the train against each person's limits, with level-access doors | M | now | done (2026-10-05) | Claude | D-058, D-060. Ported from PR #36. No gap-limit setting yet (OPEN_ITEMS) |
 | DATA-30 | When TfL's disruption feeds fail: each feed apart, the last good answer kept for 15 minutes, the route card says which couldn't be checked, and "nothing fits" names the closure in the way | S | now | done (2026-10-05) | Claude | D-061. Ported from PR #36. Builds on D-052 (STAB-05) |
-| DATA-31 | Council footways and gritting matched along each edge, not at its middle: surface and width from points every 5 m, gritting only where the route runs the same way, each with the council's own published date | S | now | doing | Claude | D-046, D-047. Ported from PR #36. 2026-10-05, `claude/vibrant-heisenberg-3j1kl2` (PR #44) |
+| DATA-31 | Council footways and gritting matched along each edge, not at its middle: surface and width from points every 5 m, gritting only where the route runs the same way, each with the council's own published date | S | now | done (2026-10-05) | Claude | D-062, D-064. Ported from PR #36. In British National Grid: the server's WGS84 was tens of metres out. Council surfaces 2,556 to 12,182 edges, widths 6,976 to 12,069, gritted 1,130 to 1,648 from the council's licensed layer (2021) |
 | DATA-21 | Map York Place and the western way into the Grassmarket in OSM (about 1.1 km) | M | later | todo | Richard | [DEVICES.md](plans/DEVICES.md). Turns unknowns into known ground |
 
 ## Research: check our guesses with real people
@@ -269,6 +269,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 
 Newest first. One line per change: date, ID, what happened, link.
 
+- 2026-10-05: DATA-31 done: council footways and gritting matched along each edge in British National Grid, with the council's own dates; gritting from its licensed layer (D-062, D-064). DATA-22 done: on streets drawn as one line, the council's pavement surface beats the carriageway's (Richard, D-063).
 - 2026-10-05: DATA-30 done: TfL's lift, line and station feeds fetched apart, a failed feed's last answer held 15 minutes, the route card says which couldn't be checked, and "nothing fits" names the closure (D-061). Follows STAB-05.
 - 2026-10-05: DATA-29 done: the step and gap to the train held to each person's limits, with level-access doors in the spoken route (D-060).
 - 2026-10-05: Added DATA-29 (TfL station data on the platforms, ported from PR #36). A lift out that leaves some platforms step-free now counts as unknown, not closed (D-058).
