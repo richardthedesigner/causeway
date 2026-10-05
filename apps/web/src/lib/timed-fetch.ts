@@ -8,7 +8,7 @@
 import { LiveTimeoutError } from "@causeway/live";
 
 /** Calls that send or read a little JSON. */
-export const SHARE_TIMEOUT_MS = 15_000;
+const SHARE_TIMEOUT_MS = 15_000;
 /** A photo going up on a slow connection. */
 export const UPLOAD_TIMEOUT_MS = 30_000;
 
