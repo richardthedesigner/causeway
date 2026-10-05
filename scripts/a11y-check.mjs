@@ -5,6 +5,10 @@
  * device settings, with a battery range, and the update prompt. Then the
  * setup and device settings sheets on a 320 by 640 phone at 200% text: the
  * header takes at most a third of the screen, and nothing runs off the side (STAB-11).
+ * And the other screens at the same size: start with "This trip", search,
+ * a route with every section open, the note sheet, navigation and the report
+ * sheet. Nothing runs off the side, and in navigation the next instruction and
+ * the journey panel don't cover each other (STAB-12).
  *   pnpm web:build && pnpm a11y
  * Exits 1 on any violation, or anything the Content Security Policy blocks. Runs in CI (.github/workflows/ci.yml).
  */
@@ -119,6 +123,48 @@ for (const scheme of ["light", "dark"]) {
   await page.getByRole("switch", { name: "Warn me about battery range" }).click();
   await reflow("device settings, every section open");
 }
+// Reflow on the other screens at 320 by 640 with text at 200% (STAB-12). The map draws its own labels, so it's left out.
+{
+  const page = await (await browser.newContext({ viewport: { width: 320, height: 640 } })).newPage();
+  watchCsp(page, csp);
+  await page.goto(url);
+  await page.getByPlaceholder("Where to?").waitFor({ timeout: 60_000 });
+  await page.addStyleTag({ content: "html { font-size: 200% !important }" });
+  const reflow = async (name, extra = []) => {
+    await page.waitForTimeout(500);
+    const off = await page.evaluate(() => {
+      const all = [...document.querySelectorAll("body *")].filter((e) => {
+        if (e.closest(".maplibregl-map") || (e.closest("svg") && e.tagName !== "svg")) return false;
+        const b = e.getBoundingClientRect();
+        return b.width > 0 && b.height > 0 && (b.right > innerWidth + 1 || b.left < -1);
+      });
+      // Report the innermost: a row is off the side because of what's in it.
+      return all.filter((e) => !all.some((o) => o !== e && e.contains(o))).slice(0, 3).map((e) => `${e.tagName.toLowerCase()} "${(e.textContent ?? "").trim().slice(0, 30)}"`);
+    });
+    const problems = [...off.map((o) => `${o} runs off the side`), ...extra];
+    console.log(`200% text / ${name}: ${problems.length ? problems.join("; ") : "fits"}`);
+    for (const p of problems) failures.push(`200% text / ${name} / ${p}`);
+  };
+  await reflow("start, with This trip");
+  await page.getByPlaceholder("Where to?").fill("Hamilton Place");
+  await page.getByRole("option").first().waitFor({ timeout: 30_000 });
+  await reflow("search");
+  await page.getByRole("option").first().click();
+  await page.getByText("Why this way?").waitFor({ timeout: 60_000 });
+  for (const d of await page.locator("details").all()) await d.evaluate((el) => (el.open = true));
+  await reflow("route, all sections open");
+  await page.getByRole("button", { name: "Add a note about this route" }).click();
+  await page.getByRole("radio", { name: "Bad" }).waitFor();
+  await reflow("note sheet");
+  await page.keyboard.press("Escape");
+  await page.getByRole("button", { name: "Start", exact: true }).click();
+  await page.getByRole("region", { name: "Next instruction" }).waitFor();
+  const [top, bottom] = await page.evaluate(() => ["Next instruction", "Journey progress"].map((n) => document.querySelector(`[aria-label="${n}"]`).getBoundingClientRect().toJSON()));
+  await reflow("navigation", top.bottom > bottom.top ? [`the journey panel covers the next instruction (${Math.round(top.bottom)} > ${Math.round(bottom.top)})`] : []);
+  await page.getByRole("button", { name: "Report a problem here" }).click();
+  await page.getByRole("dialog", { name: "Report a problem" }).waitFor();
+  await reflow("report sheet");
+}
 await browser.close();
 server.close();
 // axe fetches the page's stylesheets itself to check them; the app never fetches the font CSS, it links it.
@@ -127,4 +173,4 @@ if (failures.length) {
   console.error(`\n${failures.length} accessibility or Content Security Policy problem(s).`);
   process.exit(1);
 }
-console.log("\nNo WCAG 2.2 AA violations found by axe, and the device sheets reflow at 200% text.");
+console.log("\nNo WCAG 2.2 AA violations found by axe, and every screen checked reflows at 200% text.");

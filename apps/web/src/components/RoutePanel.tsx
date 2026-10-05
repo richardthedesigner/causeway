@@ -280,10 +280,10 @@ export function RoutePanel(props: Props) {
           {(() => {
             const actions = (
               <div className="flex gap-2">
-                <Button variant="primary" size="lg" onClick={props.onStart} className="flex-1 rounded-2xl">
+                <Button variant="primary" size="lg" onClick={props.onStart} className="min-w-0 flex-1 rounded-2xl">
                   Start
                 </Button>
-                <Button size="lg" onClick={() => props.onAddNote(choices)} disabled={!choices.length} aria-label="Add a note about this route" className="w-14 rounded-2xl px-0">
+                <Button size="lg" onClick={() => props.onAddNote(choices)} disabled={!choices.length} aria-label="Add a note about this route" className="w-[56px] shrink-0 rounded-2xl px-0">
                   <MessageSquarePlus aria-hidden className="size-6" />
                 </Button>
                 <ShareButton to={to.name} minutes={sel.summary.minutes} />
@@ -349,7 +349,7 @@ export function RoutePanel(props: Props) {
 
             <More title="Why this way?" aside={peopleCount ? `${peopleCount} note${peopleCount === 1 ? "" : "s"} from people` : undefined}>
               {result.notes.length ? (
-                <ul className="m-0 grid list-none gap-1 p-0">
+                <ul className="m-0 grid list-none grid-cols-1 gap-1 p-0">
                   {result.notes.map((n) => (
                     <li key={n}>{n}</li>
                   ))}
@@ -366,7 +366,7 @@ export function RoutePanel(props: Props) {
 
             {sel.unknowns.length ? (
               <More title="What we don't know" aside={`${sel.unknowns.length} place${sel.unknowns.length === 1 ? "" : "s"}`}>
-                <ul className="m-0 grid list-none gap-3 p-0">
+                <ul className="m-0 grid list-none grid-cols-1 gap-3 p-0">
                   {sel.unknowns.slice(0, 12).map((u) => (
                     <li key={u.name} className="grid">
                       <span>
@@ -503,17 +503,18 @@ const entranceName = (e: { name: string | null; verdict: { detail: string } }) =
 function More({ title, aside, icon, children }: { title: string; aside?: string; icon?: React.ReactNode; children: React.ReactNode }) {
   return (
     <details className="group rounded-2xl border border-line">
-      <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4">
-        <span className="flex items-center gap-2 font-bold">
+      {/* The summary wraps under large text: the count and arrow drop below the title (STAB-12). */}
+      <summary className="flex min-h-14 cursor-pointer list-none flex-wrap items-center justify-between gap-x-3 px-4 py-1">
+        <span className="flex min-w-0 items-center gap-2 font-bold [overflow-wrap:anywhere]">
           {icon}
           {title}
         </span>
-        <span className="flex items-center gap-2 text-sm text-muted">
+        <span className="ml-auto flex items-center gap-2 text-sm text-muted">
           {aside}
           <ChevronDown aria-hidden className="size-5 shrink-0 transition-transform group-open:rotate-180" />
         </span>
       </summary>
-      <div className="grid gap-3 px-4 pb-4">{children}</div>
+      <div className="grid grid-cols-1 gap-3 px-4 pb-4 [overflow-wrap:break-word]">{children}</div>
     </details>
   );
 }
@@ -573,7 +574,7 @@ function ShareButton({ to, minutes }: { to: string; minutes: number }) {
     }
   };
   return (
-    <Button size="lg" onClick={share} aria-label={copied ? "Copied your arrival time" : "Share your arrival time"} className="w-14 rounded-2xl px-0">
+    <Button size="lg" onClick={share} aria-label={copied ? "Copied your arrival time" : "Share your arrival time"} className="w-[56px] shrink-0 rounded-2xl px-0">
       <Share2 aria-hidden className="size-6 shrink-0" />
       <span aria-live="polite" className="sr-only">
         {copied ? "Copied" : ""}
