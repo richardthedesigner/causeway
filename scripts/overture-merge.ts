@@ -111,7 +111,7 @@ export interface OverturePlace {
  * them, so a place whose only source is AllThePlaces is left out when it's a toilet or a health
  * service. The same place from another source, or mapped in OSM, stays.
  */
-export function scrapedOnly(o: Pick<OverturePlace, "n" | "c" | "h" | "src">): boolean {
+function scrapedOnly(o: Pick<OverturePlace, "n" | "c" | "h" | "src">): boolean {
   const atpOnly = !!o.src?.includes("AllThePlaces") && o.src.every((s) => s === "AllThePlaces" || s === "Overture");
   if (!atpOnly) return false;
   return /changing places/i.test(o.n) || o.c === "public_restroom" || o.c === "pharmacy" || (o.h ?? []).includes("health_care");

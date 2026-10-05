@@ -34,7 +34,7 @@ export interface Index {
   zones: [number, number, number, number][];
 }
 
-export const norm = (s: string) =>
+const norm = (s: string) =>
   s
     .normalize("NFD")
     .replace(/[̀-ͯ]/g, "")
@@ -91,7 +91,7 @@ const LABELS: Record<string, string> = {
   "office=company": "Office",
 };
 
-export function categoryLabel(cat: string): string {
+function categoryLabel(cat: string): string {
   const l = LABELS[cat];
   if (l) return l;
   const v = cat.split("=")[1] ?? cat;
@@ -140,7 +140,7 @@ export const formatPostcode = (q: string) => {
 };
 
 /** Mapped as wheelchair accessible (or an accessible toilet, for toilets). */
-export function accessibleMapped(e: Pick<Entry, "cat" | "access">): boolean {
+function accessibleMapped(e: Pick<Entry, "cat" | "access">): boolean {
   const a = e.access ?? {};
   if (e.cat === "amenity=toilets") return a.wheelchair === "yes" || a.wheelchair === "designated";
   return a.wheelchair === "yes" || a.wheelchair === "designated" || a["toilets:wheelchair"] === "yes";

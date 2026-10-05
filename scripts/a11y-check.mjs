@@ -9,7 +9,7 @@
  * And the other screens at the same size: start with "This trip", search,
  * a route with every section open, the note sheet, navigation and the report
  * sheet. Nothing runs off the side, and in navigation the next instruction and
- * the journey panel don't cover each other (STAB-12).
+ * the journey panel don't cover each other (STAB-12). Your data is checked too (SEC-06).
  *   pnpm web:build && pnpm a11y
  * Exits 1 on any violation, or anything the Content Security Policy blocks. Runs in CI (.github/workflows/ci.yml).
  */
@@ -40,6 +40,15 @@ for (const scheme of ["light", "dark"]) {
   await page.getByPlaceholder("Where to?").waitFor({ timeout: 60_000 });
   await page.waitForTimeout(1500);
   await check("start");
+
+  // Your data (SEC-06), at the point of deleting.
+  await page.getByPlaceholder("Where to?").focus();
+  await page.getByRole("button", { name: "Your data", exact: true }).click();
+  await page.getByRole("dialog", { name: "Your data" }).waitFor();
+  await page.getByRole("button", { name: "Delete everything" }).click();
+  await check("your data, deleting");
+  await page.keyboard.press("Escape");
+  await page.getByPlaceholder("Where to?").blur();
 
   await page.getByRole("button", { name: "Accessible toilets" }).click();
   await page.getByRole("option").first().waitFor();
@@ -157,7 +166,20 @@ for (const scheme of ["light", "dark"]) {
     console.log(`200% text / ${name}: ${problems.length ? problems.join("; ") : "fits"}`);
     for (const p of problems) failures.push(`200% text / ${name} / ${p}`);
   };
-  await reflow("start, with This trip");
+  // The city name sits beside the map buttons; with large text it slid under them, cut off but on screen (STAB-13).
+  const city = await page.evaluate(() => {
+    const c = document.querySelector('[data-menu="city"]');
+    const l = document.querySelector('[data-menu="layers"]').getBoundingClientRect();
+    const r = c.getBoundingClientRect();
+    return { spills: c.scrollWidth > c.clientWidth + 1, under: r.right > l.left && r.top < l.bottom && r.bottom > l.top };
+  });
+  const cityProblems = [...(city.spills ? ["the city name spills out of its button"] : []), ...(city.under ? ["the city name runs under the map layers button"] : [])];
+  await reflow("start, with This trip", cityProblems);
+  await page.getByRole("button", { name: "Your data", exact: true }).click();
+  await page.getByRole("dialog", { name: "Your data" }).waitFor();
+  await page.getByRole("button", { name: "Delete everything" }).click();
+  await reflow("your data, deleting");
+  await page.keyboard.press("Escape");
   await page.getByPlaceholder("Where to?").fill("Hamilton Place");
   await page.getByRole("option").first().waitFor({ timeout: 30_000 });
   await reflow("search");

@@ -290,6 +290,8 @@ Update (DATA-11): the street graphs join the weekly refresh. They read the same 
 
 **Known limit:** pull requests opened with the workflow token don't trigger CI themselves; the workflow runs the tests before opening one.
 
+Update (STAB-06, 2026-10-05): each row of the count table has a limit on how far it may fall (graph edges 5%, places 10%, stops and park gates 20%, flood paths and Toilet Map toilets 30%; works and OSM notes none, as they come and go). Past a limit, or a file that had counts and vanished, the pull request opens as a draft that lists the drops and says not to merge, and the run fails. The refresh also fetches UK bank holidays (D-039).
+
 ## D-034 Powered devices in four classes, and saved named devices
 
 **Decided.** 2026-10-04, from tester feedback. Plan and UI spec: [plans/DEVICES.md](plans/DEVICES.md).
@@ -384,6 +386,8 @@ The visual-impairment preset sets 60 s per 100 m; anyone can turn it on with "Af
 **Honesty.** Anything we can't read fully (months, sunrise, comments, "open end") shows the hours as mapped, never a guess. We don't know bank holidays, so a rule for them adds "(may differ on bank holidays)". Hours are volunteer-mapped and can be stale; the line says they're from OpenStreetMap.
 
 **Later.** With a departure time (not built yet), "when you arrive" should use it.
+
+Update (SMALL-01, 2026-10-05): bank holidays. GOV.UK's dates (OGL) for England and Wales and for Scotland are bundled with the app and refreshed weekly; each city names its nation. On a bank holiday a place's `PH` rule applies ("Open until 16:00 (Christmas Day)", or closed until the next working day). A place without one says "may differ today: Christmas Day" on that day only, not every day. Past GOV.UK's published dates the old general warning returns.
 
 ## D-040 Leaving later
 
@@ -493,6 +497,8 @@ When there is nothing to compare with, it builds. Once DEP-01 makes `main` the p
 - **PostCSS**: a pnpm override (`next>postcss`) lifts Next's copy to 8.5.28. Next only uses it at build time. Drop the override when Next's own pin passes 8.5.23.
 - The local check server serves `.mjs` as JavaScript, as Vercel does; a module worker is refused otherwise.
 
+Update (BLOAT-02, 2026-10-05): CI also runs `pnpm knip` for unused files, exports and dependencies. `knip.json` names the entry points it can't see (build scripts, the service worker). knip 6, not 5: 5 depends on a `braces` with a high advisory and no fix, which the audit would fail.
+
 ## D-051 Road scooters go at road speed on roads
 
 **Decided.** 2026-10-05. Tester feedback: a road scooter (class 3) does 8 mph on the road but 4 mph on pavements, and the router used one pace for both.
@@ -512,3 +518,17 @@ When there is nothing to compare with, it builds. Once DEP-01 makes `main` the p
 - **A cancel isn't a failure.** The weather check restarts when the city or leaving time changes. The cancelled check used to land in the same handler as a failure, so "Couldn't check the weather" flashed on every app start in a remembered city. It now waits for a real failure or the limit.
 - **Tested.** `getJson` unit tests (`packages/live/test/http.test.ts`), and a `pnpm e2e` journey in London where TfL, Open-Meteo and the Environment Agency never answer: the route still comes, and the weather and lift lines fall back.
 - **Not covered.** The Supabase calls for sharing and review (STAB-14). Sharing is off today.
+
+## D-059 Your data: a copy, and delete everything
+
+**Decided.** 2026-10-05 (SEC-06, UK GDPR). "Your data", under the trip settings, says what's kept on the phone, gives a copy as one JSON file, and deletes everything in one step.
+- **The copy** holds every `causewayside.` key on the phone, backups included. The sign-in tokens are left out: they're credentials, not information about the person.
+- **Delete everything** first removes what was shared, by the anonymous id the server knows (photos in the private bucket, flags, reports, notes), then every `causewayside.` key on the phone, then starts the app afresh. If the server can't be reached, nothing is deleted on the phone either, because the sign-in there is the only key to the shared data. It says so and offers to try again.
+- **Database:** migration `0006_my_data.sql` lets people read back and delete their own reports and flags, and read and delete their own photos. `db/test/my-data.test.sql` checks someone can delete all of theirs and nobody else's.
+- **Not covered:** a photo a reviewer approved is copied to the public bucket. Deleting the note hides it, but the copy stays until a reviewer removes it (OPEN_ITEMS).
+
+## D-060 Saved places stay on the phone
+
+**Decided.** 2026-10-05 (FEAT-04). Home, work or a friend's address says where someone lives and who they visit. Saved places are kept in this phone's storage only, one list per city, like devices (D-009). They are never shared, synced or sent with a note or report. They show in Your data, go in its copy, and go with "Delete everything". Home comes first, then work, then the rest. Saving a place or a name again replaces the old one.
+
+**To revisit** if accounts come back (deferred by Richard): syncing them would need consent, like the profile.

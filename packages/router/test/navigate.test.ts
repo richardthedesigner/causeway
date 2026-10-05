@@ -62,6 +62,23 @@ describe("Navigator", () => {
     expect(new Set(said).size).toBe(said.length);
   });
 
+  it("says what each announcement is about, so hazards-only speech can skip the turns (SMALL-03)", () => {
+    const nav = new Navigator(plan);
+    const kinds: [string, string][] = [];
+    for (const [lon, lat] of walk(plan)) {
+      const p = nav.update(lon, lat, 8);
+      if (p.announce) kinds.push([p.announceKind!, p.announce]);
+      else expect(p.announceKind).toBeNull();
+    }
+    for (const [k, text] of kinds) {
+      if (k === "hazard") expect(text).toMatch(/Setts|Steep|Missing data|Kerb|Dropped kerb|slopes sideways|bridge/i);
+      if (k === "turn") expect(text).not.toMatch(/^(Setts|Steep section)/);
+    }
+    expect(kinds.some(([k]) => k === "hazard")).toBe(true);
+    expect(kinds.some(([k]) => k === "turn")).toBe(true);
+    expect(kinds.at(-1)![0]).toBe("arrive");
+  });
+
   it("calls off-route only after two fixes well away from the line", () => {
     const nav = new Navigator(plan);
     const [lon, lat] = plan.coords[3]!;

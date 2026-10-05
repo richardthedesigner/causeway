@@ -4,5 +4,12 @@
   "private": true,
   "type": "module",
   "main": "src/index.ts",
-  "types": "src/index.ts"
+  "types": "src/index.ts",
+  "dependencies": {
+    "@causeway/graph": "workspace:*",
+    "@causeway/router": "workspace:*"
+  },
+  "devDependencies": {
+    "@causeway/profile": "workspace:*"
+  }
 }

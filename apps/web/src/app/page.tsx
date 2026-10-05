@@ -16,6 +16,10 @@ import { PlaceIcon, PlaceSearch } from "@/components/PlaceSearch";
 import { ReportSheet } from "@/components/ReportSheet";
 import { RoutePanel } from "@/components/RoutePanel";
 import { TripSettings } from "@/components/TripSettings";
+import { MyDataSheet } from "@/components/MyDataSheet";
+import { NoSignal } from "@/components/NoSignal";
+import { useOnline } from "@/lib/use-online";
+import { loadMapContrast, mapContrastOn, saveMapContrast } from "@/lib/map-contrast";
 import { VerdictPill } from "@/components/RouteStrip";
 import { Button } from "@/components/ui/button";
 import { CommandGroup, CommandItem } from "@/components/ui/command";
@@ -24,8 +28,10 @@ import { CITIES, cityById, type City } from "@/lib/cities";
 import type { Place, PlannedRoute } from "@/lib/plan-types";
 import { activeDevice, deviceLabel, FIRST_VISIT, loadDeviceState, saveDeviceState, setTip, tipPending, withActive, withActiveName, withActiveProfile, withDeviceProfile, withFavourite, withoutDevice, withSetup, type DeviceState } from "@/lib/devices";
 import { addRecent, loadRecents } from "@/lib/recents";
+import { loadSaved, savePlace, unsavePlace, type SavedPlace } from "@/lib/saved-places";
+import { SavePlace } from "@/components/SavePlace";
 import { useNotes } from "@/lib/use-notes";
-import { hoursText } from "@/lib/opening-hours";
+import { hoursText, setBankHolidays } from "@/lib/opening-hours";
 import { toiletsAlong } from "@/lib/toilets";
 import { usePlaces } from "@/lib/use-places";
 import { departure, usePlanner, type Conditions } from "@/lib/use-planner";
@@ -57,6 +63,10 @@ const SNAP = { peek: 0.24, half: 0.52, full: 0.94 };
  */
 export default function Home() {
   const [city, setCity] = useState<City>(CITIES[0]!);
+  const [dataOpen, setDataOpen] = useState(false);
+  const online = useOnline();
+  // Opening hours everywhere follow this city's bank holidays; set before anything below reads them (idempotent).
+  setBankHolidays(city.holidays);
   useEffect(() => {
     try {
       const saved = localStorage.getItem(CITY_KEY);
@@ -95,6 +105,15 @@ export default function Home() {
   const [leaveAt, setLeaveAt] = useState<Date | null>(null);
   const conditions = useMemo(() => ({ ...ground0, leaveAt }), [ground0, leaveAt]);
   const [showSlopes, setShowSlopes] = useState(false);
+  // High-contrast map (SMALL-05): on for the low-vision device or when the phone asks, unless changed in the layers menu.
+  const [contrastChoice, setContrastChoice] = useState<boolean | null>(null);
+  const phoneAsksContrast = useMediaQuery("(prefers-contrast: more)");
+  useEffect(() => setContrastChoice(loadMapContrast()), []);
+  const highContrast = mapContrastOn(contrastChoice, profile.preset, phoneAsksContrast);
+  const chooseContrast = (v: boolean) => {
+    setContrastChoice(v);
+    saveMapContrast(v);
+  };
   const [snap, setSnap] = useState<number | string | null>(SNAP.half);
   const [geoError, setGeoError] = useState<string | null>(null);
   const [locating, setLocating] = useState(false);
@@ -107,13 +126,19 @@ export default function Home() {
   /** A limit stretched for this journey only. Never saved; cleared when the journey changes. */
   const [once, setOnce] = useState<{ patch: Partial<Profile>; what: string[] } | null>(null);
   const [recents, setRecents] = useState<Place[]>([]);
+  const [saved, setSaved] = useState<SavedPlace[]>([]);
   const wide = useWide();
 
   useEffect(() => {
     setDevices(loadDeviceState(undefined, { demo: new URLSearchParams(location.search).get("demo") === "devices" }));
     setTipShown(tipPending());
   }, []);
-  useEffect(() => setRecents(loadRecents(city.id)), [city]);
+  useEffect(() => {
+    setRecents(loadRecents(city.id));
+    setSaved(loadSaved(city.id));
+  }, [city]);
+  // Saved places come first in search; a recent that's also saved shows once, under its name.
+  const recentOnly = recents.filter((p) => !saved.some((s) => s.place.id === p.id));
   const shared = useNotes(city.id);
   const cityNotes = shared.notes;
   // Large text leaves little room at half height: open the sheet fully instead.
@@ -190,9 +215,9 @@ export default function Home() {
 
   // Recent places answer "can I get there?" before you search: a verdict for each from where you start.
   useEffect(() => {
-    if (!planner.ready || view !== "home" || !recents.length) return;
-    planner.check(from, recents, profile, conditions);
-  }, [planner.ready, view, recents, from, profile, conditions]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (!planner.ready || view !== "home" || !(recents.length || saved.length)) return;
+    planner.check(from, [...saved.map((s) => s.place), ...recentOnly], profile, conditions);
+  }, [planner.ready, view, recents, saved, from, profile, conditions]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const goTo = (p: Place) => {
     setTo(p);
@@ -292,37 +317,38 @@ export default function Home() {
     />
   );
 
+  const placeRow = (p: Place, title: string, sub: string, value: string) => {
+    const c = planner.checks[p.id];
+    return (
+      <CommandItem key={value} value={value} onSelect={() => goTo(p)}>
+        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-surface-2">
+          <PlaceIcon p={p} />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block truncate font-bold">{title}</span>
+          <span className="block truncate text-sm text-muted">{sub}</span>
+        </span>
+        {c ? (
+          <span className="grid shrink-0 justify-items-end gap-0.5">
+            <VerdictPill v={c.verdict} />
+            {c.minutes !== null ? <span className="tabular text-sm text-muted">{c.minutes} min</span> : null}
+          </span>
+        ) : null}
+      </CommandItem>
+    );
+  };
+  const groupHeading = (t: string) => <span className="block px-3 pt-2 pb-1 font-mono text-xs tracking-[0.08em] text-muted uppercase">{t}</span>;
   const recentItems = (
     <>
-      {recents.length ? (
-        <CommandGroup heading={<span className="block px-3 pt-2 pb-1 font-mono text-xs tracking-[0.08em] text-muted uppercase">Recent</span>}>
-          {recents.map((p) => {
-            const c = planner.checks[p.id];
-            return (
-              <CommandItem key={p.id} value={`recent:${p.id}`} onSelect={() => goTo(p)}>
-                <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-surface-2">
-                  <PlaceIcon p={p} />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate font-bold">{p.name}</span>
-                  <span className="block truncate text-sm text-muted">{p.kind}</span>
-                </span>
-                {c ? (
-                  <span className="grid shrink-0 justify-items-end gap-0.5">
-                    <VerdictPill v={c.verdict} />
-                    {c.minutes !== null ? <span className="tabular text-sm text-muted">{c.minutes} min</span> : null}
-                  </span>
-                ) : null}
-              </CommandItem>
-            );
-          })}
-        </CommandGroup>
+      {saved.length ? <CommandGroup heading={groupHeading("Saved")}>{saved.map((s) => placeRow(s.place, s.label, s.place.name, `saved:${s.place.id}`))}</CommandGroup> : null}
+      {recentOnly.length ? (
+        <CommandGroup heading={groupHeading("Recent")}>{recentOnly.map((p) => placeRow(p, p.name, p.kind, `recent:${p.id}`))}</CommandGroup>
       ) : null}
       {planner.ready ? (
         <CommandGroup heading={<span className="block px-3 pt-2 pb-1 font-mono text-xs tracking-[0.08em] text-muted uppercase">Places in {city.name}</span>}>
           {planner.ready.places
-            .filter((p) => p.kind !== "Street" && !recents.some((r) => r.id === p.id))
-            .slice(0, recents.length ? 4 : 8)
+            .filter((p) => p.kind !== "Street" && !recents.some((r) => r.id === p.id) && !saved.some((x) => x.place.id === p.id))
+            .slice(0, recents.length || saved.length ? 4 : 8)
             .map((p) => (
               <CommandItem key={p.id} value={p.id} onSelect={() => goTo(p)}>
                 <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-surface-2">
@@ -342,8 +368,27 @@ export default function Home() {
   // Fully open, the drawer still sits (1 - SNAP.full) of the screen below the bottom edge. Pad by that much, or the last
   // things in the list (the trip settings, the end of a route) can never scroll into view (STAB-10). Scroll padding does the
   // same for anything scrolled to by keyboard focus.
+  // Keyboard focus moving into the list opens the drawer fully, so what's focused is never under the screen's edge
+  // (WCAG 2.4.11). A tap doesn't: it would jump the sheet under the finger.
   const body = (
-    <div className="min-h-0 flex-1 overflow-y-auto px-4 pt-1 pb-[calc(1.5rem+6dvh+env(safe-area-inset-bottom,0px))] [scroll-padding-bottom:calc(1rem+6dvh)] md:pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] md:[scroll-padding-bottom:1rem]">
+    <div
+      onFocusCapture={(e) => {
+        if (snap !== SNAP.full && (e.target as HTMLElement).matches?.(":focus-visible")) setSnap(SNAP.full);
+      }}
+      className="min-h-0 flex-1 overflow-y-auto px-4 pt-1 pb-[calc(1.5rem+6dvh+env(safe-area-inset-bottom,0px))] [scroll-padding-bottom:calc(1rem+6dvh)] md:pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] md:[scroll-padding-bottom:1rem]">
+      {!online ? <NoSignal city={city.name} /> : null}
+      {planner.restarted === "restarting" || planner.restarted === "restarted" ? (
+        <p role="status" className="mb-3 rounded-2xl border-2 border-caution bg-caution-soft p-3">
+          {planner.restarted === "restarting" ? "Routing hit a problem on this phone. Starting it again…" : "Routing hit a problem and was started again. Anything you'd asked for has been worked out again."}
+        </p>
+      ) : planner.restarted === "gave-up" ? (
+        <div role="alert" className="mb-3 grid gap-2 rounded-2xl border-2 border-stop p-3">
+          <p className="m-0">Routing stopped working on this phone, and starting it again didn&apos;t help.</p>
+          <Button variant="secondary" onClick={() => location.reload()} className="justify-self-start">
+            Reload
+          </Button>
+        </div>
+      ) : null}
       {pin ? (
         <section aria-live="polite" aria-label="Dropped pin" className="mb-3 flex flex-wrap items-center gap-3 rounded-2xl border-2 border-accent p-3">
           <p className="m-0 min-w-0 flex-1">
@@ -414,6 +459,9 @@ export default function Home() {
             leaveAt={leaveAt}
             onLeave={setLeaveAt}
           />
+          <button type="button" onClick={() => setDataOpen(true)} className="min-h-11 justify-self-start px-1 text-sm font-bold text-accent underline underline-offset-4">
+            Your data
+          </button>
         </div>
       ) : view === "from" ? (
         <div className="grid gap-3 [&>*]:min-w-0">
@@ -424,7 +472,7 @@ export default function Home() {
             key={`${city.id}-from`}
             label="Starting from?"
             index={index}
-            suggestions={planner.ready.places.filter((p) => p.kind !== "Street").slice(0, 8)}
+            suggestions={[...saved.map((x) => ({ ...x.place, kind: `Saved as ${x.label}` })), ...planner.ready.places.filter((p) => p.kind !== "Street" && !saved.some((x) => x.place.id === p.id))].slice(0, 8 + saved.length)}
             near={to ?? from}
             bbox={planner.ready.bbox}
             cityName={city.name}
@@ -472,6 +520,11 @@ export default function Home() {
           floods={planner.floods}
           worksCovered={!!city.works}
           liveBuses={city.liveLifts}
+          save={
+            to.id.startsWith("closest:") ? undefined : (
+              <SavePlace key={to.id} saved={saved.find((x) => x.place.id === to.id)} onSave={(label) => setSaved(savePlace(city.id, label, to))} onRemove={() => setSaved(unsavePlace(city.id, to.id))} />
+            )
+          }
           onStart={() => setNavigating(true)}
           notes={cityNotes}
           author={shared.author}
@@ -511,6 +564,7 @@ export default function Home() {
         blockers={blockers}
         preview={preview}
         focus={focus}
+        highContrast={highContrast}
       />
       <MapChrome
         city={city}
@@ -518,6 +572,8 @@ export default function Home() {
         onCity={switchCity}
         showSlopes={showSlopes}
         onSlopes={setShowSlopes}
+        highContrast={highContrast}
+        onHighContrast={chooseContrast}
         onLocate={locate}
         locating={locating}
         credit={`${city.credit} Pavement data built ${planner.ready?.builtAt.slice(0, 10) ?? ""}.`}
@@ -620,19 +676,24 @@ export default function Home() {
         }
       />
       <NoteSheet choices={noteChoices} onOpenChange={(v) => !v && setNoteChoices(null)} city={city.id} preset={profile.preset} sharing={shared.sharing !== "off"} onSaved={shared.saved} />
+      <MyDataSheet open={dataOpen} onOpenChange={setDataOpen} />
       <ReportSheet open={reportAt !== null} onOpenChange={(v) => !v && setReportAt(null)} where={reportAt} city={city.id} sharing={shared.sharing !== "off"} onSaved={shared.saved} />
     </main>
   );
 }
 
 function useWide() {
-  const [wide, setWide] = useState(false);
+  return useMediaQuery("(min-width: 768px)");
+}
+
+function useMediaQuery(query: string) {
+  const [matches, setMatches] = useState(false);
   useEffect(() => {
-    const mq = matchMedia("(min-width: 768px)");
-    const on = () => setWide(mq.matches);
+    const mq = matchMedia(query);
+    const on = () => setMatches(mq.matches);
     on();
     mq.addEventListener("change", on);
     return () => mq.removeEventListener("change", on);
-  }, []);
-  return wide;
+  }, [query]);
+  return matches;
 }
