@@ -158,8 +158,17 @@ for (const j of JOURNEYS) {
       await tip.waitFor({ timeout: 6_000 }).then(() => tip.getByRole("button", { name: "Got it" }).click(), () => undefined);
     });
     await step("leave in an hour", async () => {
+      // The trip settings sit under the search box, below the half-open drawer. Focusing search opens it fully, as a person dragging it up would.
+      await page.getByPlaceholder("Where to?").focus();
       const soon = page.getByRole("button", { name: "In 1 hour" });
+      await soon.waitFor();
       await soon.scrollIntoViewIfNeeded();
+      // Really on screen, not just inside the drawer's scroll area (which runs below the bottom edge).
+      await page.waitForFunction(() => {
+        const b = [...document.querySelectorAll("button")].find((x) => x.textContent === "In 1 hour");
+        const r = b?.getBoundingClientRect();
+        return !!r && r.top >= 0 && r.bottom <= innerHeight;
+      }, null, { timeout: 10_000 });
       await soon.click();
       await page.getByText(/^Routes, bus waits, opening hours, daylight and the forecast are for/).waitFor();
     });

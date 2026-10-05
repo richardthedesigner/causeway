@@ -18,6 +18,7 @@ Security and stability, from the roadmap's Now list.
 
 **More end-to-end journeys** (STAB-10)
 - Two devices and a switch, leaving in an hour, a route, and a note kept on the phone.
+- It found a real bug: fully open, the drawer sits 6% of the screen below the bottom edge, so the last things in it (the trip settings, on a phone this size) could never scroll into view. The drawer's list now has that much padding, and scroll padding for keyboard focus.
 
 **Large text on a small phone** (STAB-11)
 - Sheets keep only the title and Close at the top; the description scrolls. Bars, icon buttons and switches are sized in pixels. The device type chips drop to one column when the text is large.
