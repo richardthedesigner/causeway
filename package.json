@@ -26,6 +26,7 @@
     "build:toilets": "tsx scripts/build-toiletmap.ts",
     "perf:baseline": "tsx scripts/perf-baseline.ts",
     "a11y": "node scripts/a11y-check.mjs",
+    "screenshots": "node scripts/screenshots.mjs",
     "e2e": "node scripts/e2e.mjs",
     "build:srwr": "tsx scripts/build-srwr.ts",
     "build:holidays": "tsx scripts/build-bank-holidays.ts",

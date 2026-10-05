@@ -35,6 +35,17 @@ jobs:
       - run: pnpm a11y
       # End to end: search, route, start, arrive and end in each city, under the real security headers (scripts/e2e.mjs).
       - run: pnpm e2e
+      # Screenshots of the main screens, light and dark, 320 px and 200% text, against tests/screenshots/ (scripts/screenshots.mjs).
+      # Run `pnpm screenshots --update` and commit the pictures when a screen is meant to change.
+      - name: Screenshots
+        run: pnpm screenshots
+      - name: Screenshot differences
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: screenshot-diffs
+          path: tests/screenshots/diff/
+          if-no-files-found: ignore
 
   migrations:
     runs-on: ubuntu-latest
