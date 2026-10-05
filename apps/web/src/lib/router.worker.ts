@@ -27,6 +27,7 @@ import {
 } from "@causeway/router";
 import type { Check, Place, PlannedRoute, PlanResult, RouteStrip, WorkerRequest, WorkerResponse } from "./plan-types";
 import { parkGates, type GreenspaceFile } from "./greenspace";
+import { doorFirst } from "./destination";
 import { osmNotesNear, type OsmNotesFile } from "./osm-notes";
 
 declare const self: DedicatedWorkerGlobalScope;
@@ -324,8 +325,9 @@ function plan(req: Extract<WorkerRequest, { type: "plan" }>): PlanResult {
   router.noteSignals = noteSignals(req.notes, graph, c.now, mobilityLabelFor(p.preset), c.wet);
   const a = router.snap(req.from.lon, req.from.lat, p, c);
   // A building: aim for the door that fits this person (D-018), not its middle. Fall back to the middle if no door fits or none is reachable.
-  const isVenue = !!req.to.venue || req.to.id.startsWith("pin:");
-  const entrances = isVenue ? entrancesNear(graph, req.to.lon, req.to.lat, p, 50).slice(0, 4) : [];
+  // A park found by name skips the door step: its gate wins over a neighbouring building's door (D-048).
+  const gates = parkGates(greenspace, req.to, req.from);
+  const entrances = doorFirst(req.to, gates) ? entrancesNear(graph, req.to.lon, req.to.lat, p, 50).slice(0, 4) : [];
   const fits = entrances.find((e) => e.verdict.passable === "yes");
   let door: { name: string | null; osmId: number; detail: string } | null = null;
   let b = router.snap(req.to.lon, req.to.lat, p, c);
@@ -341,7 +343,7 @@ function plan(req: Extract<WorkerRequest, { type: "plan" }>): PlanResult {
   // A park: end at the gate nearest the way you're coming (DATA-08), if one can be reached.
   let gate: { park: string } | null = null;
   if (!alts.length) {
-    for (const g of parkGates(greenspace, req.to, req.from)) {
+    for (const g of gates) {
       const bg = router.snap(g.lon, g.lat, p, c);
       alts = router.alternatives(a, bg, p, c, 3);
       if (alts.length) {

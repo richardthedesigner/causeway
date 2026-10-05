@@ -6,6 +6,10 @@ A running record of what was built, newest first. Each entry links the decision 
 
 Richard chose main as the base; the overnight build's extras (PR #36) are ported by hand, smallest and safest first.
 
+**Parks and notes** (D-048 update, SMALL-13)
+- A park found by name ends at its gate, not at the door of a building nearby: 26 of 119 named Edinburgh parks with gates had a fitting door within 50 m. `pnpm a11y` checks a route to The Meadows.
+- OpenStreetMap notes over 3 years old with no comment, and StreetComplete's business questions, are left out (Edinburgh 27 kept, London 21). Past three, a route counts the rest: "2 more places a mapper flagged on this route".
+
 **Toilet Map disputes and old records** (D-065, SMALL-14)
 - Where OSM and the Toilet Map disagree on whether a toilet is accessible, its first fact starts "Sources differ: OpenStreetMap says accessible, the Toilet Map says not accessible", and it no longer counts on routes. 5 in Edinburgh, 1 in Newcastle.
 - A record over 2 years old says "may be out of date" after any dispute, and a toilet only the Toilet Map has ranks a little lower in search when its record is old.

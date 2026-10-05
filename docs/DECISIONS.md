@@ -482,6 +482,11 @@ Update (D-064): the gritting routes now come from the council's "Gritting Routes
 
 **OpenStreetMap notes.** Open notes are people saying a path is blocked or steps have appeared, but also shop closures and StreetComplete's questions. `pnpm build:osm-notes` keeps those about the ground (paths, steps, kerbs, gates, bridges and so on: 28 in Edinburgh, 23 in London), at build time, so no route's area is sent to a third party (D-009). Up to three within 20 m of the best route are shown with it, dated and marked "Not checked by us". They never change the route: anyone can write a note, and many are stale.
 
+Update (2026-10-05, SMALL-13, ported from the overnight build, PR #36):
+- **A park's gate beats a neighbour's door.** The worker tried a building door that fits first for every venue, and every search result except a bus stop is a venue, so a park found by name could end at the door of a building across the road. Of 119 named Edinburgh parks with OS gates, 26 had a door within 50 m that fits a walker, a manual wheelchair or a powerchair (London 7 of 16, Newcastle 0 of 5). Now a park or garden we have gates for skips the door step and ends at its gate (`doorFirst` in `apps/web/src/lib/destination.ts`). Pins and other venues, a café in a park among them, keep door-first. `pnpm a11y` checks the route to a park.
+- **Fewer, fresher notes.** A note opened over 3 years ago with no comment since is left out, and so are StreetComplete's questions about a business ("What are the opening hours?", "Is this place still here?") (`scripts/osm-notes-lib.ts`). Rebuilt 2026-10-05: Edinburgh 27 kept, London 21, Newcastle none: one note in each city dropped for its age, and in London a business's own submission (onosm.org) too.
+- **The rest counted.** Past the three notes listed with a route, one line counts the others: "2 more places a mapper flagged on this route in OpenStreetMap. Not checked by us."
+
 ## D-049 The Toilet Map fills OSM's gaps
 
 **Decided.** 2026-10-04 (DATA-09). OSM knows many public toilets but often not whether they're accessible, need a RADAR key, or when they open. The Great British Public Toilet Map (CC BY 4.0) is exported daily with those facts and the date each was last checked.

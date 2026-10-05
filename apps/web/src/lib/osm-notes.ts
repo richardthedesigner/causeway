@@ -16,7 +16,7 @@ export interface OsmNotesFile {
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const when = (d: string) => `${MONTHS[Number(d.slice(5, 7)) - 1]} ${d.slice(0, 4)}`;
 
-/** Notes within `withinM` of the route's line, in order along it, as route notes. */
+/** Notes within `withinM` of the route's line, in order along it, as route notes. Past `max`, one line counts the rest (D-048). */
 export function osmNotesNear(file: OsmNotesFile | null, coords: [number, number][], withinM = 20, max = 3): string[] {
   if (!file?.notes.length || coords.length < 2) return [];
   const xs = coords.map((c) => c[0]),
@@ -40,5 +40,9 @@ export function osmNotesNear(file: OsmNotesFile | null, coords: [number, number]
     }
     if (best.d <= withinM) hits.push({ at: best.at, text: `An OpenStreetMap note near the route, from ${when(n.opened)}: "${n.text}" Not checked by us.` });
   }
-  return hits.sort((a, b) => a.at - b.at).slice(0, max).map((h) => h.text);
+  hits.sort((a, b) => a.at - b.at);
+  const out = hits.slice(0, max).map((h) => h.text);
+  const more = hits.length - out.length;
+  if (more > 0) out.push(`${more} more ${more === 1 ? "place" : "places"} a mapper flagged on this route in OpenStreetMap. Not checked by us.`);
+  return out;
 }

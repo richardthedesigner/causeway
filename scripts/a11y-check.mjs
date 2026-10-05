@@ -1,6 +1,6 @@
 /**
  * WCAG 2.2 AA check of the built app with axe-core, light and dark, on the
- * screens people use most: start, search results, a route with buses and
+ * screens people use most: start, a route to a park, search results, a route with buses and
  * toilets (every section open), first-visit setup, the device list and the
  * device settings, with a battery range and as a road scooter in mph and
  * km/h (FEAT-18), and the update prompt. Then the
@@ -40,6 +40,16 @@ for (const scheme of ["light", "dark"]) {
   await page.getByPlaceholder("Where to?").waitFor({ timeout: 60_000 });
   await page.waitForTimeout(1500);
   await check("start");
+
+  // A park: the route ends at a gate into it and says so (DATA-08, D-048). Then back to the start.
+  await page.getByPlaceholder("Where to?").fill("The Meadows");
+  await page.getByRole("option").first().click();
+  await page.getByText(/Ends at a gate into/).waitFor({ timeout: 60_000 });
+  await page.waitForTimeout(1000);
+  await check("route to a park");
+  await page.goto(url);
+  await page.getByPlaceholder("Where to?").waitFor({ timeout: 60_000 });
+  await page.waitForTimeout(1500);
 
   await page.getByRole("button", { name: "Accessible toilets" }).click();
   await page.getByRole("option").first().waitFor();
