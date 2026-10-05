@@ -27,22 +27,23 @@ const km = (m: number) => (m >= 1000 ? `${m / 1000} km` : `${m} m`);
  * the bottom of the screen, in reach, never across the top of the map.
  */
 export function TripSettings(p: Props) {
-  const row = "flex min-h-14 items-center justify-between gap-3 border-b border-line";
+  // Rows wrap and the grids hold their width, so 200% text on a 320 px phone stays on screen (STAB-12).
+  const row = "flex min-h-14 flex-wrap items-center justify-between gap-x-3 border-b border-line py-1";
   return (
-    <section aria-labelledby="trip-h" className="grid gap-1">
+    <section aria-labelledby="trip-h" className="grid grid-cols-1 gap-1">
       <h2 id="trip-h" className="m-0 px-1 pt-2 font-mono text-xs tracking-[0.08em] text-muted uppercase">
         This trip
       </h2>
-      <div className="grid px-1">
+      <div className="grid grid-cols-1 px-1">
         <button type="button" onClick={p.onDevice} className={cn(row, "text-left")}>
           <span>Getting around as</span>
-          <span className="flex min-w-0 items-center gap-1 font-bold">
+          <span className="ml-auto flex min-w-0 items-center gap-1 font-bold">
             <span className="truncate">{p.deviceLabel}</span>
             <ChevronRight aria-hidden className="size-5 shrink-0 text-muted" />
           </span>
         </button>
         <Leaving row={row} leaveAt={p.leaveAt} onLeave={p.onLeave} />
-        <fieldset className={cn(row, "m-0 flex-wrap border-x-0 border-t-0 p-0 py-2")}>
+        <fieldset className={cn(row, "m-0 min-w-0 flex-wrap border-x-0 border-t-0 p-0 py-2")}>
           <legend className="float-left">Ground</legend>
           <GroundPicker ground={p.ground} onGround={p.onGround} />
           <p className="m-0 basis-full text-sm text-muted">{p.groundNote}</p>
@@ -53,7 +54,7 @@ export function TripSettings(p: Props) {
         </label>
         <button type="button" onClick={p.onToilets} className={cn(row, "border-b-0 text-left")}>
           <span>Accessible toilet at least every</span>
-          <span className="flex items-center gap-1 font-bold">
+          <span className="ml-auto flex items-center gap-1 font-bold">
             {p.toiletEvery === null ? "Don't mind" : km(p.toiletEvery)}
             <ChevronRight aria-hidden className="size-5 shrink-0 text-muted" />
           </span>
@@ -66,7 +67,7 @@ export function TripSettings(p: Props) {
 /** Dry, wet or icy: three chips, the same wherever the ground can be changed. */
 export function GroundPicker({ ground, onGround, className }: { ground: Ground; onGround: (g: Ground) => void; className?: string }) {
   return (
-    <div role="radiogroup" aria-label="Ground" className={cn("flex gap-1.5", className)}>
+    <div role="radiogroup" aria-label="Ground" className={cn("flex flex-wrap gap-1.5", className)}>
       {(Object.keys(GROUND) as Ground[]).map((k) => {
         const G = GROUND[k];
         const on = ground === k;
@@ -99,7 +100,7 @@ function Leaving({ row, leaveAt, onLeave }: { row: string; leaveAt: Date | null;
   const chip = "inline-flex min-h-11 items-center rounded-full border px-3 text-sm font-bold";
   const set = leaveAt && label !== "now";
   return (
-    <fieldset className={cn(row, "m-0 flex-wrap border-x-0 border-t-0 p-0 py-2")}>
+    <fieldset className={cn(row, "m-0 min-w-0 flex-wrap border-x-0 border-t-0 p-0 py-2")}>
       <legend className="float-left">Leaving</legend>
       <span className="font-bold" aria-live="polite">
         {label === "now" ? "Now" : `${label.charAt(0).toUpperCase()}${label.slice(1)}`}
@@ -110,9 +111,10 @@ function Leaving({ row, leaveAt, onLeave }: { row: string; leaveAt: Date | null;
             {o.label}
           </button>
         ))}
-        <label className={cn(chip, "gap-2 font-normal", set ? "border-ink" : "border-line")}>
+        {/* The time field has a fixed width, so with large text "At" goes above it (STAB-12). */}
+        <label className={cn(chip, "max-w-full flex-wrap gap-x-2 rounded-[22px] px-[12px] font-normal", set ? "border-ink" : "border-line")}>
           <span className="font-bold">At</span>
-          <input type="time" value={set ? ukTime(leaveAt) : ""} onChange={(e) => onLeave(nextAt(e.target.value))} className="min-h-9 bg-transparent text-base" />
+          <input type="time" value={set ? ukTime(leaveAt) : ""} onChange={(e) => onLeave(nextAt(e.target.value))} className="min-h-9 min-w-0 bg-transparent text-base" />
         </label>
       </div>
       {set ? <p className="m-0 basis-full text-sm text-muted">Routes, bus waits, opening hours, daylight and the forecast are for {label}.</p> : null}

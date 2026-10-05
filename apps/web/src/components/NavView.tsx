@@ -155,8 +155,9 @@ export function NavView({ route, speedMps, roadSpeedMps, onEnd, onOffRoute, onPo
       <p className="sr-only" aria-live="assertive">
         {said}
       </p>
-      <section aria-label="Next instruction" className="absolute inset-x-2 top-[calc(0.5rem+env(safe-area-inset-top,0px))] z-30 grid gap-2 md:left-4 md:w-[440px]">
-        <div className="flex items-center gap-4 rounded-[var(--radius)] bg-nav p-4 text-nav-ink shadow-[0_8px_30px_rgb(0_0_0/0.3)]">
+      {/* Top and bottom each get at most half the screen and scroll past that, so neither hides the other under large text (STAB-12). */}
+      <section aria-label="Next instruction" className="absolute inset-x-2 top-[calc(0.5rem+env(safe-area-inset-top,0px))] z-30 grid max-h-[calc(50dvh-1rem-env(safe-area-inset-top,0px))] grid-cols-1 gap-2 overflow-y-auto md:left-4 md:w-[440px]">
+        <div className="flex items-center gap-[12px] rounded-[var(--radius)] bg-nav p-[16px] text-nav-ink shadow-[0_8px_30px_rgb(0_0_0/0.3)]">
           {p?.arrived ? (
             <p className="m-0 flex items-center gap-3 text-2xl font-bold">
               <Flag aria-hidden className="size-10" /> You&apos;ve arrived
@@ -165,10 +166,10 @@ export function NavView({ route, speedMps, roadSpeedMps, onEnd, onOffRoute, onPo
             <p className="m-0 text-xl font-bold">Off the route. Working out a new one…</p>
           ) : (
             <>
-              <Icon aria-hidden className="size-12 shrink-0" strokeWidth={2.4} />
+              <Icon aria-hidden className="size-[48px] shrink-0" strokeWidth={2.4} />
               <div className="min-w-0">
                 <p className="tabular m-0 text-[32px] leading-none font-bold">{fmt(p ? p.distanceToNext : (next?.at ?? 0))}</p>
-                <p className="m-0 mt-1 text-lg leading-snug">{next?.text ?? ""}</p>
+                <p className="m-0 mt-1 text-lg leading-snug [overflow-wrap:break-word]">{next?.text ?? ""}</p>
               </div>
             </>
           )}
@@ -176,7 +177,7 @@ export function NavView({ route, speedMps, roadSpeedMps, onEnd, onOffRoute, onPo
         {ahead && !p?.arrived ? (
           <div className={`flex items-start gap-3 rounded-2xl border-2 border-caution p-3 shadow-md ${p?.hazard ? "bg-caution text-surface" : "bg-caution-soft text-ink"}`}>
             <TriangleAlert aria-hidden className={`mt-0.5 size-6 shrink-0 ${p?.hazard ? "" : "text-caution"}`} />
-            <p className="m-0">
+            <p className="m-0 min-w-0 [overflow-wrap:break-word]">
               <span className="block font-bold">{hazardText(ahead)}</span>
               <span className="text-sm">{aheadIn > 5 ? `In ${fmt(aheadIn)}` : "Here now"}</span>
             </p>
@@ -184,7 +185,7 @@ export function NavView({ route, speedMps, roadSpeedMps, onEnd, onOffRoute, onPo
         ) : null}
       </section>
 
-      <section aria-label="Journey progress" className="absolute inset-x-0 bottom-0 z-30 grid gap-3 rounded-t-[var(--radius)] border-t border-line bg-surface px-4 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] shadow-[0_-8px_40px_rgb(0_0_0/0.18)] md:bottom-4 md:left-4 md:w-[440px] md:rounded-[var(--radius)] md:border">
+      <section aria-label="Journey progress" className="absolute inset-x-0 bottom-0 z-30 grid max-h-[50dvh] grid-cols-1 gap-3 overflow-y-auto rounded-t-[var(--radius)] border-t border-line bg-surface px-4 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] shadow-[0_-8px_40px_rgb(0_0_0/0.18)] md:bottom-4 md:left-4 md:w-[440px] md:rounded-[var(--radius)] md:border">
         <RouteStrip strip={route.strip} along={along} />
         {mode !== "live" ? (
           <p className="m-0 text-sm text-muted">{mode === "locating" ? "Finding your location…" : "Preview: moving along the route for you. Live location isn't available here."}</p>
@@ -213,14 +214,14 @@ export function NavView({ route, speedMps, roadSpeedMps, onEnd, onOffRoute, onPo
             </Button>
           </div>
         ) : null}
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           {device && device.others.length ? (
             <Button
               size="icon"
               aria-label={`Routes are for ${device.label}. Switch device`}
               aria-expanded={asking}
               onClick={() => setAsking((v) => !v)}
-              className="size-14 shrink-0 rounded-2xl"
+              className="size-[56px] shrink-0 rounded-2xl"
             >
               <Accessibility aria-hidden className="size-6" />
             </Button>
@@ -240,12 +241,13 @@ export function NavView({ route, speedMps, roadSpeedMps, onEnd, onOffRoute, onPo
               reportPace();
               onEnd();
             }}
-            className="rounded-2xl border-stop bg-stop px-8 text-stop-ink hover:brightness-110"
+            className="ml-auto rounded-2xl border-stop bg-stop px-[32px] text-stop-ink hover:brightness-110"
           >
             End
           </Button>
         </div>
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(7.5rem,1fr))] gap-2">
+        {/* Three across, or fewer when large text needs the room (STAB-12). */}
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,7.5rem),1fr))] gap-2">
           <Button aria-pressed={speak} onClick={() => setSpeak((v) => !v)} className={speak ? "rounded-2xl border-ink bg-ink px-2 text-surface" : "rounded-2xl px-2"}>
             {speak ? <Volume2 aria-hidden className="size-5 shrink-0" /> : <VolumeX aria-hidden className="size-5 shrink-0" />} Speak
           </Button>

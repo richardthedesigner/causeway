@@ -8,6 +8,15 @@ A running record of what was built, newest first. Each entry links the decision 
 - A road scooter goes at 8 mph on roads without mapped pavements, and at its own pavement pace elsewhere. Pace learning learns only the pavement pace.
 - Central Edinburgh journeys get 20 to 45% quicker, and routes move onto roads (Marchmont to Leith Walk: 48% to 91% on roads).
 
+## 2026-10-05 (late morning)
+
+**200% text on a small phone, everywhere else** (STAB-12)
+- At 320 by 640 with text at 200%, "This trip", the route's chips and sections, the start bar, navigation and the report sheet ran off the right edge. In navigation, the journey panel also covered the next instruction.
+- The cause, mostly: a grid grows to fit its widest child unless told otherwise, so one long chip row stretched a whole sheet. Grids now hold their width, chip rows and section headings wrap, and fieldsets can shrink.
+- Navigation's instruction and journey panel take at most half the screen each and scroll past that. Padding and icons that hold no text are in pixels, as in STAB-11.
+- `pnpm a11y` now checks start, search, a route with every section open, the note sheet, navigation and the report sheet at that size, and fails if anything runs off the side or the two navigation panels overlap. It caught a list in "Why this way?" the first time it ran.
+- Normal text at 390 px looks the same as before.
+
 ## 2026-10-05 (morning)
 
 Security and stability, from the roadmap's Now list.
