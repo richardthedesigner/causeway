@@ -4,7 +4,7 @@
   "type": "module",
   "packageManager": "pnpm@10.28.0",
   "engines": {
-    "node": ">=22"
+    "node": ">=24"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json --noEmit",
@@ -53,6 +53,9 @@
   "pnpm": {
     "overrides": {
       "next>postcss": "^8.5.28"
+    },
+    "patchedDependencies": {
+      "vaul@1.1.2": "patches/vaul@1.1.2.patch"
     }
   }
 }
