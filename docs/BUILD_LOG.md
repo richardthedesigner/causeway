@@ -2,6 +2,25 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
+## 2026-10-05 (night)
+
+Recovery, time limits, speech, contrast and saved places, from the roadmap's Now list.
+
+**The routing worker recovers** (STAB-07)
+- If routing crashes or goes silent for 60 s, a fresh worker starts with the last plan, and the sheet says so. After three crashes in two minutes it offers a reload. `pnpm e2e` crashes it on purpose.
+
+**Time limits for sharing and review** (STAB-14)
+- Calls to Supabase give up after 15 s (30 s for a photo upload), with the same error as the live feeds.
+
+**How often navigation speaks** (SMALL-03)
+- Off, hazards only, or every turn. Hazards only still says when you arrive, get off or leave the route. Kept on the phone.
+
+**A high-contrast map** (SMALL-05)
+- Plain ground, roads edged in ink, black or white labels and a wider route. On by itself for the low-vision device or when the phone asks for more contrast. A switch in the layers menu.
+
+**Saved places** (FEAT-04, D-060)
+- "Save this place" on a route: home, work, or a name of your own. Saved places come first in search with a verdict, and in "Starting from?". On the phone only, and in Your data.
+
 ## 2026-10-05 (evening)
 
 Large text, tests, copying a route, no signal and dead code, from the roadmap's Now list.

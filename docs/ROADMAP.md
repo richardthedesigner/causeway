@@ -50,11 +50,11 @@ The current direction: **fix and fill the pilot cities** with open data that nee
 
 The next five things to pick up, in order.
 
-1. **STAB-07**: the routing worker recovers if it crashes, and says so.
-2. **STAB-14**: time limits for the sharing and review calls to Supabase.
-3. **SMALL-03**: choose how often navigation speaks.
-4. **SMALL-05**: a high-contrast map style.
-5. **FEAT-04**: saved places (home, work, a friend's).
+1. **STAB-15**: step the e2e preview walk by distance, not time.
+2. **SMALL-02**: a miles or kilometres setting.
+3. **SPEED-02**: a router benchmark in CI.
+4. **FEAT-03**: "Report what's there" from "What we don't know".
+5. **SMALL-12**: a favicon and app icons.
 
 The rest of the pilot-city data (DATA-02, DATA-12 to DATA-20) is blocked on access, licences or keys. Research (RES) needs Richard and testers.
 
@@ -115,8 +115,8 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 |---|---|---|---|---|---|---|
 | FEAT-01 | Battery range per device (`maxRangeKm`), with a warning on long routes | M | next | done (2026-10-04) | Claude | D-043. Range engine from PR #26, and "Warn me about battery range" in the device editor |
 | FEAT-02 | Separate road and pavement speeds for road scooters | M | later | done (2026-10-05) | Claude | D-051. Road speed setting is FEAT-18 |
-| FEAT-03 | "Report what's there" from "What we don't know" on a route | M | next | todo | Claude | UX_ASSESSMENT open finding. Reports stay on the device until the backend is back on |
-| FEAT-04 | Saved places (home, work, a friend's) | M | now | doing | Claude | 2026-10-05, `claude/clever-fermat-ij543q` (PR #42). On the device, like devices (D-009) |
+| FEAT-03 | "Report what's there" from "What we don't know" on a route | M | now | todo | Claude | UX_ASSESSMENT open finding. Reports stay on the device until the backend is back on |
+| FEAT-04 | Saved places (home, work, a friend's) | M | now | done (2026-10-05) | Claude | PR #42. D-060. "Save this place" on a route; saved places come first in search, with a verdict. On the phone only, in Your data |
 | FEAT-05 | Arrive by a time, as well as leave at one | M | later | todo | Claude | D-040 built "Leaving later" |
 | FEAT-06 | Changing Places toilets as their own search and route option | M | later | blocked | Claude | Needs a licensed source first (DATA-01, §9) |
 | FEAT-07 | Rest points on the route for people with a rest limit (benches, seats) | M | later | todo | Claude | D-018 |
@@ -137,17 +137,18 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | ID | Task | Size | Priority | Status | Who | Notes |
 |---|---|---|---|---|---|---|
 | SMALL-01 | Opening hours that know bank holidays | S | now | done (2026-10-05) | Claude | PR #42, D-039. GOV.UK bank holidays for each city's nation, refreshed weekly. PH rules apply on the day |
-| SMALL-02 | Miles or kilometres setting | S | next | todo | Claude | |
-| SMALL-03 | Choose how often navigation speaks (every turn, hazards only, off) | S | now | doing | Claude | 2026-10-05, `claude/clever-fermat-ij543q` (PR #42) |
+| SMALL-02 | Miles or kilometres setting | S | now | todo | Claude | Speeds already follow "Show speeds in" (D-051); distances don't |
+| SMALL-03 | Choose how often navigation speaks (every turn, hazards only, off) | S | now | done (2026-10-05) | Claude | PR #42. One button cycles them, kept on the phone. Hazards only still says arrive, get off and off route |
 | SMALL-04 | Copy the route as text, for a carer or a message | S | now | done (2026-10-05) | Claude | PR #42. "Copy the route as text" in Route in words, never the device. Keyboard focus now opens the drawer fully (WCAG 2.4.11) |
-| SMALL-05 | A high-contrast map style | S | now | doing | Claude | 2026-10-05, `claude/clever-fermat-ij543q` (PR #42). For the low-vision profile |
+| SMALL-05 | A high-contrast map style | S | now | done (2026-10-05) | Claude | PR #42. In the layers menu. On by itself for the low-vision device or when the phone asks for more contrast |
 | SMALL-06 | A clear "no signal" state that says what still works offline | S | now | done (2026-10-05) | Claude | PR #42. A "No signal" notice on the sheet and in navigation, saying what still works and what's paused |
 | SMALL-07 | Print-friendly route | S | later | todo | Claude | |
 | SMALL-08 | Keyboard shortcuts on desktop (search, swap ends, start) | S | later | todo | Claude | |
 | SMALL-09 | "Why this way?" one tap from the navigation screen | S | later | todo | Claude | |
 | SMALL-10 | Recent journeys, not just recent places | S | later | todo | Claude | `recents.ts` |
 | SMALL-11 | Weather for trips more than 48 hours ahead | S | later | todo | Claude | D-040 falls back to today's |
-| SMALL-12 | A favicon and app icons (every page load asks for `/favicon.ico` and gets a 404) | S | later | todo | Claude | Found doing SEC-04 |
+| SMALL-12 | A favicon and app icons (every page load asks for `/favicon.ico` and gets a 404) | S | now | todo | Claude | Found doing SEC-04 |
+| SMALL-13 | Saved places on the map, and as a start as well as a destination from the route screen | S | later | todo | Claude | Found doing FEAT-04. Today they show in search, and as starts in "Starting from?" |
 
 ## Security and privacy
 
@@ -179,14 +180,15 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | STAB-04 | Router fuzz test: many random start and end points per city, no crashes, no impossible routes | M | now | done (2026-10-05) | Claude | PR #42. `packages/router/test/fuzz.test.ts`: 60 seeded journeys per city, 4 people, dry, wet and icy. About 14 s |
 | STAB-05 | Timeouts and fallbacks for every live adapter | S | now | done (2026-10-05) | Claude | D-052. `getJson` in `packages/live/src/http.ts`: 10 s for feeds, 6 s for live search. `pnpm e2e` hangs every feed in London and checks the fallbacks |
 | STAB-06 | Data refresh guard: fail the weekly PR if counts drop by more than a set amount | S | now | done (2026-10-05) | Claude | PR #42, D-033. Per-row limits on falls; past one, the refresh PR opens as a draft that says not to merge, and the run fails |
-| STAB-07 | The routing worker recovers if it crashes, and says so | S | now | doing | Claude | 2026-10-05, `claude/clever-fermat-ij543q` (PR #42). `router.worker.ts` |
+| STAB-07 | The routing worker recovers if it crashes, and says so | S | now | done (2026-10-05) | Claude | PR #42. A crash or a 60 s silence starts a fresh worker with the last plan; the sheet says so. Three crashes in two minutes offers a reload. `pnpm e2e` crashes the worker |
 | STAB-09 | A city opened from last time started from Edinburgh's Causewayside, 537 km from London | S | next | done (2026-10-04) | Claude | Found by STAB-01. `page.tsx` sets the saved city's start |
 | STAB-10 | End-to-end journeys for the device switcher, notes and Leaving later | S | now | done (2026-10-05) | Claude | PR #33. Two devices and a switch, leaving in an hour, a route and a note. Found and fixed the drawer's last 6% being unreachable |
 | STAB-11 | The device editor's header fills a 320 by 640 screen at 200% text | S | now | done (2026-10-05) | Claude | PR #33. Description scrolls with the content; bars, icon buttons and switches in pixels. `pnpm a11y` checks it |
 | STAB-12 | 200% text at 320 px on the other screens: route panel, navigation, search, note and report sheets | S | now | done (2026-10-05) | Claude | `pnpm a11y` checks six more screens. Grids hold their width, chip rows and section headings wrap, navigation's two panels take half the screen each and scroll |
 | STAB-13 | The city name at the top of the map is cut off at 200% text on a 320 px phone ("Edinbur", under the layers button) | S | now | done (2026-10-05) | Claude | PR #42. The bar over the map is sized in pixels. `pnpm a11y` checks the name neither spills nor runs under the layers button |
-| STAB-14 | Time limits for the sharing and review calls to Supabase | S | now | doing | Claude | 2026-10-05, `claude/clever-fermat-ij543q` (PR #42). Found doing STAB-05. `lib/sync.ts`, `lib/review.ts`. Sharing is off today (D-030), so nothing waits on them yet |
-| STAB-15 | The e2e preview walk runs at a fixed speed, so a slower runner can miss the 2-minute arrival limit (Edinburgh took 2 min 44 s on a 4-core box) | S | later | todo | Claude | Found doing SEC-06. `E2E_ARRIVE_MS` raises the limit locally; better to step the walk by distance, not time |
+| STAB-14 | Time limits for the sharing and review calls to Supabase | S | now | done (2026-10-05) | Claude | PR #42. `lib/timed-fetch.ts`: 15 s, 30 s for a photo upload, with the same timeout error as the live feeds |
+| STAB-15 | The e2e preview walk runs at a fixed speed, so a slower runner can miss the 2-minute arrival limit (Edinburgh took 2 min 44 s on a 4-core box) | S | now | todo | Claude | Found doing SEC-06. `E2E_ARRIVE_MS` raises the limit locally; better to step the walk by distance, not time |
+| STAB-16 | `pnpm a11y` checks the high-contrast map and the open "Save this place" form | S | later | todo | Claude | Found doing SMALL-05 and FEAT-04. Both were checked by hand at 320 px, light and dark |
 | STAB-08 | Offline test: load a city, cut the network, route | S | now | done (2026-10-05) | Claude | PR #42, with SMALL-06. `pnpm e2e` loads Edinburgh, cuts the network and routes. A reload offline (the service worker) isn't covered |
 
 ## Speed
@@ -194,7 +196,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | ID | Task | Size | Priority | Status | Who | Notes |
 |---|---|---|---|---|---|---|
 | SPEED-01 | Measure first load, city load and time to first route on a mid-range phone | S | next | todo | Claude | Numbers first, then targets |
-| SPEED-02 | Router benchmark in CI, failing if a journey gets much slower | S | next | todo | Claude | Uses the acceptance journeys |
+| SPEED-02 | Router benchmark in CI, failing if a journey gets much slower | S | now | todo | Claude | Uses the acceptance journeys |
 | SPEED-03 | Bundle-size and Lighthouse budgets in CI | S | later | todo | Claude | |
 | SPEED-04 | Load the `/review` page's code only for reviewers | S | later | todo | Claude | |
 | SPEED-05 | Smaller search index per city | S | later | todo | Claude | `data/places` |
@@ -265,6 +267,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 
 Newest first. One line per change: date, ID, what happened, link.
 
+- 2026-10-05: STAB-07, STAB-14, SMALL-03, SMALL-05 and FEAT-04 done in PR #42 (D-060). Added SMALL-13, STAB-16. Now: STAB-15, SMALL-02, SPEED-02, FEAT-03, SMALL-12.
 - 2026-10-05: STAB-13, STAB-04, SMALL-04, SMALL-06 and BLOAT-02 done in PR #42, and STAB-08 with SMALL-06. Now: STAB-07, STAB-14, SMALL-03, SMALL-05, FEAT-04.
 - 2026-10-05: STAB-06, SEC-06 and SMALL-01 done in PR #42 (STAB-12 was done in PR #41 alongside). Added STAB-15 (was STAB-14 here), SEC-15. Now: STAB-13, STAB-04, SMALL-04, SMALL-06, BLOAT-02.
 - 2026-10-05: FEAT-18 done: "Speed on the road" for road scooters (4 to 8 mph), and "Show speeds in: mph or km/h" per device (D-051).

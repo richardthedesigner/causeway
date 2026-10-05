@@ -43,7 +43,7 @@ describe("your data (SEC-06)", () => {
   });
 
   it("counts what's on this phone", () => {
-    expect(myDataSummary()).toEqual({ devices: 2, notes: 1, reports: 0, recents: 2, shared: false });
+    expect(myDataSummary()).toEqual({ devices: 2, notes: 1, reports: 0, recents: 2, saved: 0, shared: false });
   });
 
   it("exports everything the app keeps, but never the sign-in token", () => {

@@ -61,6 +61,7 @@ export function MyDataSheet({ open, onOpenChange }: { open: boolean; onOpenChang
                   <li>{plural(s.devices, "device")} and their limits</li>
                   <li>{plural(s.notes, "note")}</li>
                   <li>{plural(s.reports, "problem report")}</li>
+                  <li>{plural(s.saved, "saved place")}</li>
                   <li>{plural(s.recents, "recent place")}</li>
                   <li>Your city and settings</li>
                 </ul>
@@ -96,7 +97,7 @@ export function MyDataSheet({ open, onOpenChange }: { open: boolean; onOpenChang
                     <p className="m-0">We couldn&apos;t reach our server to delete what you shared, so nothing has been deleted yet. Try again when you have signal.</p>
                   ) : (
                     <p className="m-0">
-                      This can&apos;t be undone. Your devices, notes, reports, recent places and settings go from this phone{s?.shared ? ", and what you shared goes from our server" : ""}.
+                      This can&apos;t be undone. Your devices, notes, reports, saved and recent places and settings go from this phone{s?.shared ? ", and what you shared goes from our server" : ""}.
                     </p>
                   )}
                   <div className="flex flex-wrap gap-2">

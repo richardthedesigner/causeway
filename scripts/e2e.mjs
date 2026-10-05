@@ -212,6 +212,23 @@ for (const j of JOURNEYS) {
       await page.getByText("Saved. Thank you.").waitFor();
       await page.getByRole("button", { name: "Done" }).click();
     });
+    // FEAT-04: save the destination, and find it first in search next time.
+    await step("save the place as home", async () => {
+      const save = page.getByRole("button", { name: "Save this place" });
+      await save.scrollIntoViewIfNeeded();
+      await save.click();
+      await page.getByRole("button", { name: "Home", exact: true }).click();
+      await page.getByText("Saved as").waitFor();
+    });
+    await step("home comes first in search", async () => {
+      await page.goto(server.url);
+      await page.getByPlaceholder("Where to?").waitFor({ timeout: 60_000 });
+      await page.getByPlaceholder("Where to?").focus();
+      const first = page.getByRole("option").first();
+      await first.waitFor({ timeout: 30_000 });
+      const t = await first.innerText();
+      if (!/^Home\s+Hamilton Place/.test(t)) throw new Error(`first suggestion: ${t.replace(/\s+/g, " ")}`);
+    });
     await step("the note is kept on this phone, without the profile", async () => {
       const stored = await page.evaluate(() => Object.entries(localStorage).filter(([k]) => k.includes("note")).map(([, v]) => v).join(" "));
       if (!stored.includes("Kerb dropped on one side only.")) throw new Error("note not stored");
@@ -236,7 +253,7 @@ for (const j of JOURNEYS) {
         for await (const chunk of s) out += chunk;
         return out;
       });
-      for (const want of [DEVICE, "Kerb dropped on one side only."]) if (!text.includes(want)) throw new Error(`the copy lacks "${want}"`);
+      for (const want of [DEVICE, "Kerb dropped on one side only.", "causewayside.saved."]) if (!text.includes(want)) throw new Error(`the copy lacks "${want}"`);
       if (/access_token/.test(text)) throw new Error("the copy holds a sign-in token");
     });
     await step("delete everything, and start afresh", async () => {
@@ -245,7 +262,7 @@ for (const j of JOURNEYS) {
       await page.getByText("Deleted.").waitFor();
       await page.getByRole("button", { name: "Close and start afresh" }).click();
       await page.getByRole("button", { name: "Set up how you get around" }).first().waitFor({ timeout: 60_000 });
-      const left = await page.evaluate(() => Object.keys(localStorage).filter((k) => /devices|notes|reports|recents/.test(k)));
+      const left = await page.evaluate(() => Object.keys(localStorage).filter((k) => /devices|notes|reports|recents|saved/.test(k)));
       if (left.length) throw new Error(`still stored: ${left.join(", ")}`);
     });
   } catch (e) {

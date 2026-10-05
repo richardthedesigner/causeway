@@ -58,6 +58,8 @@ interface Props {
   toilets: ReturnType<typeof toiletsAlong> | null;
   /** Live bus departures exist for this city (TfL in London). */
   liveBuses: boolean;
+  /** Save the destination as home, work or a name (FEAT-04). */
+  save?: React.ReactNode;
   onStart: () => void;
   /** Notes on this device (separate from the graph), this device's author id, and the graph build the route came from. */
   notes: UserNote[];
@@ -193,6 +195,8 @@ export function RoutePanel(props: Props) {
       ) : (
         <p className="m-0 -mt-1 px-1 text-sm text-muted">Worked out for {groundWord(conditions)}.</p>
       )}
+
+      {props.save}
 
       {props.once ? (
         <div role="status" className="flex items-start gap-3 rounded-2xl border-2 border-caution bg-caution-soft p-3">

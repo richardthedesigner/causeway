@@ -28,6 +28,8 @@ import { CITIES, cityById, type City } from "@/lib/cities";
 import type { Place, PlannedRoute } from "@/lib/plan-types";
 import { activeDevice, deviceLabel, FIRST_VISIT, loadDeviceState, saveDeviceState, setTip, tipPending, withActive, withActiveName, withActiveProfile, withDeviceProfile, withFavourite, withoutDevice, withSetup, type DeviceState } from "@/lib/devices";
 import { addRecent, loadRecents } from "@/lib/recents";
+import { loadSaved, savePlace, unsavePlace, type SavedPlace } from "@/lib/saved-places";
+import { SavePlace } from "@/components/SavePlace";
 import { useNotes } from "@/lib/use-notes";
 import { hoursText, setBankHolidays } from "@/lib/opening-hours";
 import { toiletsAlong } from "@/lib/toilets";
@@ -124,13 +126,19 @@ export default function Home() {
   /** A limit stretched for this journey only. Never saved; cleared when the journey changes. */
   const [once, setOnce] = useState<{ patch: Partial<Profile>; what: string[] } | null>(null);
   const [recents, setRecents] = useState<Place[]>([]);
+  const [saved, setSaved] = useState<SavedPlace[]>([]);
   const wide = useWide();
 
   useEffect(() => {
     setDevices(loadDeviceState(undefined, { demo: new URLSearchParams(location.search).get("demo") === "devices" }));
     setTipShown(tipPending());
   }, []);
-  useEffect(() => setRecents(loadRecents(city.id)), [city]);
+  useEffect(() => {
+    setRecents(loadRecents(city.id));
+    setSaved(loadSaved(city.id));
+  }, [city]);
+  // Saved places come first in search; a recent that's also saved shows once, under its name.
+  const recentOnly = recents.filter((p) => !saved.some((s) => s.place.id === p.id));
   const shared = useNotes(city.id);
   const cityNotes = shared.notes;
   // Large text leaves little room at half height: open the sheet fully instead.
@@ -207,9 +215,9 @@ export default function Home() {
 
   // Recent places answer "can I get there?" before you search: a verdict for each from where you start.
   useEffect(() => {
-    if (!planner.ready || view !== "home" || !recents.length) return;
-    planner.check(from, recents, profile, conditions);
-  }, [planner.ready, view, recents, from, profile, conditions]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (!planner.ready || view !== "home" || !(recents.length || saved.length)) return;
+    planner.check(from, [...saved.map((s) => s.place), ...recentOnly], profile, conditions);
+  }, [planner.ready, view, recents, saved, from, profile, conditions]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const goTo = (p: Place) => {
     setTo(p);
@@ -309,37 +317,38 @@ export default function Home() {
     />
   );
 
+  const placeRow = (p: Place, title: string, sub: string, value: string) => {
+    const c = planner.checks[p.id];
+    return (
+      <CommandItem key={value} value={value} onSelect={() => goTo(p)}>
+        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-surface-2">
+          <PlaceIcon p={p} />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block truncate font-bold">{title}</span>
+          <span className="block truncate text-sm text-muted">{sub}</span>
+        </span>
+        {c ? (
+          <span className="grid shrink-0 justify-items-end gap-0.5">
+            <VerdictPill v={c.verdict} />
+            {c.minutes !== null ? <span className="tabular text-sm text-muted">{c.minutes} min</span> : null}
+          </span>
+        ) : null}
+      </CommandItem>
+    );
+  };
+  const groupHeading = (t: string) => <span className="block px-3 pt-2 pb-1 font-mono text-xs tracking-[0.08em] text-muted uppercase">{t}</span>;
   const recentItems = (
     <>
-      {recents.length ? (
-        <CommandGroup heading={<span className="block px-3 pt-2 pb-1 font-mono text-xs tracking-[0.08em] text-muted uppercase">Recent</span>}>
-          {recents.map((p) => {
-            const c = planner.checks[p.id];
-            return (
-              <CommandItem key={p.id} value={`recent:${p.id}`} onSelect={() => goTo(p)}>
-                <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-surface-2">
-                  <PlaceIcon p={p} />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate font-bold">{p.name}</span>
-                  <span className="block truncate text-sm text-muted">{p.kind}</span>
-                </span>
-                {c ? (
-                  <span className="grid shrink-0 justify-items-end gap-0.5">
-                    <VerdictPill v={c.verdict} />
-                    {c.minutes !== null ? <span className="tabular text-sm text-muted">{c.minutes} min</span> : null}
-                  </span>
-                ) : null}
-              </CommandItem>
-            );
-          })}
-        </CommandGroup>
+      {saved.length ? <CommandGroup heading={groupHeading("Saved")}>{saved.map((s) => placeRow(s.place, s.label, s.place.name, `saved:${s.place.id}`))}</CommandGroup> : null}
+      {recentOnly.length ? (
+        <CommandGroup heading={groupHeading("Recent")}>{recentOnly.map((p) => placeRow(p, p.name, p.kind, `recent:${p.id}`))}</CommandGroup>
       ) : null}
       {planner.ready ? (
         <CommandGroup heading={<span className="block px-3 pt-2 pb-1 font-mono text-xs tracking-[0.08em] text-muted uppercase">Places in {city.name}</span>}>
           {planner.ready.places
-            .filter((p) => p.kind !== "Street" && !recents.some((r) => r.id === p.id))
-            .slice(0, recents.length ? 4 : 8)
+            .filter((p) => p.kind !== "Street" && !recents.some((r) => r.id === p.id) && !saved.some((x) => x.place.id === p.id))
+            .slice(0, recents.length || saved.length ? 4 : 8)
             .map((p) => (
               <CommandItem key={p.id} value={p.id} onSelect={() => goTo(p)}>
                 <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-surface-2">
@@ -463,7 +472,7 @@ export default function Home() {
             key={`${city.id}-from`}
             label="Starting from?"
             index={index}
-            suggestions={planner.ready.places.filter((p) => p.kind !== "Street").slice(0, 8)}
+            suggestions={[...saved.map((x) => ({ ...x.place, kind: `Saved as ${x.label}` })), ...planner.ready.places.filter((p) => p.kind !== "Street" && !saved.some((x) => x.place.id === p.id))].slice(0, 8 + saved.length)}
             near={to ?? from}
             bbox={planner.ready.bbox}
             cityName={city.name}
@@ -511,6 +520,11 @@ export default function Home() {
           floods={planner.floods}
           worksCovered={!!city.works}
           liveBuses={city.liveLifts}
+          save={
+            to.id.startsWith("closest:") ? undefined : (
+              <SavePlace key={to.id} saved={saved.find((x) => x.place.id === to.id)} onSave={(label) => setSaved(savePlace(city.id, label, to))} onRemove={() => setSaved(unsavePlace(city.id, to.id))} />
+            )
+          }
           onStart={() => setNavigating(true)}
           notes={cityNotes}
           author={shared.author}

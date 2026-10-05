@@ -526,3 +526,9 @@ Update (BLOAT-02, 2026-10-05): CI also runs `pnpm knip` for unused files, export
 - **Delete everything** first removes what was shared, by the anonymous id the server knows (photos in the private bucket, flags, reports, notes), then every `causewayside.` key on the phone, then starts the app afresh. If the server can't be reached, nothing is deleted on the phone either, because the sign-in there is the only key to the shared data. It says so and offers to try again.
 - **Database:** migration `0006_my_data.sql` lets people read back and delete their own reports and flags, and read and delete their own photos. `db/test/my-data.test.sql` checks someone can delete all of theirs and nobody else's.
 - **Not covered:** a photo a reviewer approved is copied to the public bucket. Deleting the note hides it, but the copy stays until a reviewer removes it (OPEN_ITEMS).
+
+## D-060 Saved places stay on the phone
+
+**Decided.** 2026-10-05 (FEAT-04). Home, work or a friend's address says where someone lives and who they visit. Saved places are kept in this phone's storage only, one list per city, like devices (D-009). They are never shared, synced or sent with a note or report. They show in Your data, go in its copy, and go with "Delete everything". Home comes first, then work, then the rest. Saving a place or a name again replaces the old one.
+
+**To revisit** if accounts come back (deferred by Richard): syncing them would need consent, like the profile.

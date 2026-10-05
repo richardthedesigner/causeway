@@ -48,6 +48,7 @@ export interface MyDataSummary {
   notes: number;
   reports: number;
   recents: number;
+  saved: number;
   /** Notes or reports may be on our server too. */
   shared: boolean;
 }
@@ -61,6 +62,7 @@ export function myDataSummary(): MyDataSummary {
     notes: count(get("causewayside.notes.v1")),
     reports: count(get("causewayside.reports.v1")),
     recents: ks.filter((k) => k.startsWith("causewayside.recents.") && !k.endsWith(".backup")).reduce((n, k) => n + count(get(k)), 0),
+    saved: ks.filter((k) => k.startsWith("causewayside.saved.")).reduce((n, k) => n + count(get(k)), 0),
     shared: sharing && ks.includes("causewayside.session.v1"),
   };
 }
