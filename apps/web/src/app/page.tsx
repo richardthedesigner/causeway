@@ -74,8 +74,8 @@ export default function Home() {
   // Venues with an accessible toilet go to the router, so "Past more toilets" can use them (public ones are in the graph).
   useEffect(() => {
     if (!index) return;
-    // Venues with an accessible toilet, and Toilet Map toilets OSM hasn't mapped (OSM's public toilets are in the graph already).
-    const extra = (e: (typeof index.entries)[number]) => (e.cat !== "amenity=toilets" ? e.access?.["toilets:wheelchair"] === "yes" : e.place.id.startsWith("toiletmap:") && e.access?.wheelchair === "yes");
+    // Venues with an accessible toilet, and Toilet Map and TfL station toilets OSM hasn't mapped (OSM's public toilets are in the graph already). Toilets inside the ticket gates need a ticket, so they stay out.
+    const extra = (e: (typeof index.entries)[number]) => (e.cat !== "amenity=toilets" ? e.access?.["toilets:wheelchair"] === "yes" : /^(toiletmap|tfl-toilet):/.test(e.place.id) && e.access?.wheelchair === "yes" && e.access.access !== "customers");
     planner.sendToilets(index.entries.filter((e) => extra(e) && hoursText(e.access?.opening_hours, new Date())?.open !== false).map((e) => ({ lon: e.place.lon, lat: e.place.lat, name: e.place.name })));
   }, [index]); // eslint-disable-line react-hooks/exhaustive-deps
   // Server render and first paint use the first-visit default; the saved devices load on mount.

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import type { City } from "./cities";
 import type { Place } from "./plan-types";
 import { buildIndex, type Index, type PlacesFile } from "./search";
+import { mergeStationToilets, type NetworkFile } from "./station-toilets";
 import { mergeToiletMap, type ToiletMapFile } from "./toiletmap";
 
 /** Load a city's search index (places, addresses, postcodes) and merge in the street names from its graph. */
@@ -18,6 +19,18 @@ export function usePlaces(city: City, streets: Place[] | null): Index | null {
     fetch(new URL(city.toiletMap, document.baseURI), { signal: ctl.signal })
       .then((r) => (r.ok ? (r.json() as Promise<ToiletMapFile>) : null))
       .then(setLoos)
+      .catch(() => undefined);
+    return () => ctl.abort();
+  }, [city]);
+  // TfL station toilets (DATA-23), from the rail network file the router also loads.
+  const [network, setNetwork] = useState<NetworkFile | null>(null);
+  useEffect(() => {
+    setNetwork(null);
+    if (!city.network) return;
+    const ctl = new AbortController();
+    fetch(new URL(city.network, document.baseURI), { signal: ctl.signal })
+      .then((r) => (r.ok ? (r.json() as Promise<NetworkFile>) : null))
+      .then(setNetwork)
       .catch(() => undefined);
     return () => ctl.abort();
   }, [city]);
@@ -46,8 +59,9 @@ export function usePlaces(city: City, streets: Place[] | null): Index | null {
     if (file || failed) {
       const index = buildIndex(file, streets);
       mergeToiletMap(index, loos);
+      mergeStationToilets(index, network);
       setIndex(index);
     }
-  }, [file, failed, streets, loos]);
+  }, [file, failed, streets, loos, network]);
   return index;
 }

@@ -107,7 +107,7 @@ export const CITIES: City[] = [
       { id: "westminster-abbey", name: "Westminster Abbey", kind: "Westminster", lon: -0.1275, lat: 51.4994, venue: true },
       { id: "museum-docklands", name: "Museum of London Docklands", kind: "West India Quay", lon: -0.0235, lat: 51.5075, venue: true },
     ],
-    credit: `${OSM} Terrain: © Environment Agency, Open Government Licence v3.0. Lines, stations and lift status: Powered by TfL Open Data. Flood warnings: Environment Agency, Open Government Licence v3.0. Park gates: contains OS data © Crown copyright and database right.`,
+    credit: `${OSM} Terrain: © Environment Agency, Open Government Licence v3.0. Lines, stations, station toilets and lift status: Powered by TfL Open Data. Flood warnings: Environment Agency, Open Government Licence v3.0. Park gates: contains OS data © Crown copyright and database right.`,
   },
 ];
 

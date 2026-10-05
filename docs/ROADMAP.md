@@ -85,7 +85,7 @@ Fix and fill the pilot cities. DATA-01 to DATA-10 are in order of value per day 
 | DATA-19 | Tyne and Wear Metro lift status | M | later | blocked | Richard, Claude | Waits on Nexus. [#13](https://github.com/richardthedesigner/causeway/issues/13) |
 | DATA-20 | Live bus and tram departures in Edinburgh and Newcastle | M | later | blocked | Claude | [#8](https://github.com/richardthedesigner/causeway/issues/8). Lothian 403, Transport for Edinburgh 522, Nexus needs a key |
 | DATA-22 | Should the council's pavement surface win over OSM on streets drawn as one line? | S | next | blocked | Richard, Claude | D-046. They disagree on 2,822 of 6,341 edges; OSM wins today. A decision, then a one-line change |
-| DATA-23 | TfL station toilets in the toilet layer and search (65 at our stations, with RADAR and accessible flags) | S | now | todo | Claude | Data is already in `network.json` (DATA-03) |
+| DATA-23 | TfL station toilets in the toilet layer and search (65 at our stations, with RADAR and accessible flags) | S | now | doing | Claude | 2026-10-05, `claude/clever-fermat-ij543q`. Data is already in `network.json` (DATA-03) |
 | DATA-24 | Rebuild the council footway layer on the weekly refresh | S | later | done (2026-10-04) | Claude | Done by DATA-11 |
 | DATA-25 | Scotland's flood warnings (SEPA) for the Water of Leith walkway | M | later | todo | Claude | D-047. No open feed matching the EA's found yet; look again |
 | DATA-26 | Pavement gritting routes for Newcastle and London | S | later | todo | Claude | D-047. None open found; City of London has priority pavements (survey §2 #10) |
@@ -152,8 +152,8 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | SEC-01 | Security headers and a Content Security Policy in `apps/web/vercel.json` (a static export can't set them in Next) | S | now | done (2026-10-04) | Claude | D-041. `apps/web/vercel.json`. `pnpm a11y` and `pnpm e2e` serve the build with the same headers and fail on anything the policy blocks |
 | SEC-02 | `SECURITY.md`: how to report a vulnerability | S | next | done (2026-10-04) | Claude | `SECURITY.md`. Private reporting has to be turned on (SEC-14) |
 | SEC-03 | Pin GitHub Actions to commit SHAs and give each workflow the least permissions it needs | S | next | done (2026-10-04) | Claude | Pinned to the latest release in each major, version in a comment. CI has `contents: read` |
-| SEC-04 | `pnpm audit` in CI, failing on high severity | S | now | todo | Claude | |
-| SEC-05 | Check nothing leaks the profile (logs, URLs, error messages) | S | now | todo | Claude | D-009 |
+| SEC-04 | `pnpm audit` in CI, failing on high severity | S | now | doing | Claude | 2026-10-05, `claude/clever-fermat-ij543q` |
+| SEC-05 | Check nothing leaks the profile (logs, URLs, error messages) | S | now | doing | Claude | 2026-10-05, `claude/clever-fermat-ij543q`. D-009 |
 | SEC-06 | Export and delete everything about me, in one place | M | next | todo | Claude | UK GDPR. Needed with or without accounts |
 | SEC-07 | Review row-level security and storage bucket rules against a threat model | M | later | todo | Claude | `db/migrations`, `scripts/test-db.sh` |
 | SEC-08 | Harden `/review`: sign-in rate limits, session length | S | later | todo | Claude | |
@@ -176,8 +176,8 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | STAB-06 | Data refresh guard: fail the weekly PR if counts drop by more than a set amount | S | next | todo | Claude | D-033 |
 | STAB-07 | The routing worker recovers if it crashes, and says so | S | later | todo | Claude | `router.worker.ts` |
 | STAB-09 | A city opened from last time started from Edinburgh's Causewayside, 537 km from London | S | next | done (2026-10-04) | Claude | Found by STAB-01. `page.tsx` sets the saved city's start |
-| STAB-10 | End-to-end journeys for the device switcher, notes and Leaving later | S | now | todo | Claude | Extend `scripts/e2e.mjs` |
-| STAB-11 | The device editor's header fills a 320 by 640 screen at 200% text | S | now | todo | Claude | Found checking FEAT-01. Shrink or scroll the header with the content |
+| STAB-10 | End-to-end journeys for the device switcher, notes and Leaving later | S | now | doing | Claude | 2026-10-05, `claude/clever-fermat-ij543q`. Extend `scripts/e2e.mjs` |
+| STAB-11 | The device editor's header fills a 320 by 640 screen at 200% text | S | now | doing | Claude | 2026-10-05, `claude/clever-fermat-ij543q`. Found checking FEAT-01. Shrink or scroll the header with the content |
 | STAB-08 | Offline test: load a city, cut the network, route | S | later | todo | Claude | D-023 |
 
 ## Speed
