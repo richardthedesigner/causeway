@@ -77,7 +77,11 @@ export default function Home() {
     if (!index) return;
     // Venues with an accessible toilet, and Toilet Map and TfL station toilets OSM hasn't mapped (OSM's public toilets are in the graph already). Toilets inside the ticket gates need a ticket, so they stay out.
     const extra = (e: (typeof index.entries)[number]) => (e.cat !== "amenity=toilets" ? e.access?.["toilets:wheelchair"] === "yes" : /^(toiletmap|tfl-toilet):/.test(e.place.id) && e.access?.wheelchair === "yes" && e.access.access !== "customers");
-    planner.sendToilets(index.entries.filter((e) => extra(e) && hoursText(e.access?.opening_hours, new Date())?.open !== false).map((e) => ({ lon: e.place.lon, lat: e.place.lat, name: e.place.name })));
+    // Where OSM and the Toilet Map disagree on access, the toilet isn't counted on routes either way (D-065).
+    planner.sendToilets(
+      index.entries.filter((e) => !e.disputed && extra(e) && hoursText(e.access?.opening_hours, new Date())?.open !== false).map((e) => ({ lon: e.place.lon, lat: e.place.lat, name: e.place.name })),
+      index.entries.filter((e) => e.disputed).map((e) => ({ lon: e.place.lon, lat: e.place.lat })),
+    );
   }, [index]); // eslint-disable-line react-hooks/exhaustive-deps
   // Server render and first paint use the first-visit default; the saved devices load on mount.
   const [devices, setDevices] = useState<DeviceState>(FIRST_VISIT);

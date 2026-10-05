@@ -61,8 +61,20 @@ export class Router {
     this.indexToilets();
   }
 
-  /** Accessible toilets the graph didn't carry (venues, from the app's search index). Re-indexes. */
-  addToilets(points: { lon: number; lat: number; name: string }[]) {
+  /**
+   * Accessible toilets the graph didn't carry (venues, from the app's search index). Re-indexes.
+   * `disputed`: toilets whose sources disagree on access (OSM and the Toilet Map, D-065). The
+   * graph's toilet within 30 m of each stops counting as accessible on routes.
+   */
+  addToilets(points: { lon: number; lat: number; name: string }[], disputed: { lon: number; lat: number }[] = []) {
+    for (const d of disputed) {
+      const t = (this.graph.amenities ?? [])
+        .filter((a) => a.kind === "toilets" && a.osmId !== 0)
+        .map((a) => ({ a, m: haversine([a.lon, a.lat], [d.lon, d.lat]) }))
+        .filter((x) => x.m <= 30)
+        .sort((x, y) => x.m - y.m)[0]?.a;
+      if (t) t.wheelchair = { value: null, state: "unknown", source: "none", observedAt: null, method: "OpenStreetMap and the Toilet Map disagree" };
+    }
     let id = -1;
     for (const pt of points)
       (this.graph.amenities ??= []).push({

@@ -458,7 +458,7 @@ self.onmessage = async (ev: MessageEvent<WorkerRequest>) => {
       applyKeyedStates(graph, floodStates(m.warnings, floodAreas, m.fetchedAt));
       post({ type: "floods", here: floodsHere(m.warnings, floodAreas), fetchedAt: m.fetchedAt });
     }
-    else if (m.type === "toilets") router?.addToilets(m.points);
+    else if (m.type === "toilets") router?.addToilets(m.points, m.disputed);
     else if (m.type === "works-live") {
       liveWorks = { works: m.works, fetchedAt: m.fetchedAt };
       applyWorks();

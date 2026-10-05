@@ -54,6 +54,7 @@ These numbers shape routes but are our estimates, not evidence.
 - Street Manager's June 2026 activity archive is published truncated, so the build skips it; activities created or last changed only in June are missing until a later event brings them back ([D-027](DECISIONS.md#d-027-live-and-third-party-data-come-in-through-adapters)).
 - Whether a register entry closes the pavement is read from its free text. Check a sample of Edinburgh road closures on the ground or with testers (D-057).
 - Edinburgh's pavement gritting routes were last published in 2021. The route says so; check with the council whether they still hold before winter ([D-064](DECISIONS.md#d-064-gritting-routes-from-the-councils-licensed-layer-matched-by-direction-dated-2021)).
+- Toilet Map records over 2 years old still count on routes as stops; they only say they may be out of date. Whether they should count less is for research ([D-065](DECISIONS.md#d-065-when-osm-and-the-toilet-map-disagree-and-when-a-record-is-old)).
 
 ## Deferred by Richard
 

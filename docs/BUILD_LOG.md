@@ -6,6 +6,10 @@ A running record of what was built, newest first. Each entry links the decision 
 
 Richard chose main as the base; the overnight build's extras (PR #36) are ported by hand, smallest and safest first.
 
+**Toilet Map disputes and old records** (D-065, SMALL-14)
+- Where OSM and the Toilet Map disagree on whether a toilet is accessible, its first fact starts "Sources differ: OpenStreetMap says accessible, the Toilet Map says not accessible", and it no longer counts on routes. 5 in Edinburgh, 1 in Newcastle.
+- A record over 2 years old says "may be out of date" after any dispute, and a toilet only the Toilet Map has ranks a little lower in search when its record is old.
+
 **Council footways and gritting** (D-062, D-063, D-064, DATA-31, DATA-22)
 - `pnpm build:footways` reads both council layers in British National Grid. Asked for in WGS84, the council's server put them tens of metres off our streets (the gritting lines about 90 m west), so main's matches were often a neighbour's footway.
 - Footways matched along each edge every 5 m: width the 20th percentile across both sides, setts on a quarter of the points, nothing under half the points matched. Council surfaces on pavement edges 2,556 to 12,182, widths 6,976 to 12,069.

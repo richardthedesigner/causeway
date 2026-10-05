@@ -132,7 +132,7 @@ export type WorkerRequest =
   | { type: "floods"; warnings: FloodWarning[]; fetchedAt: string }
   | { type: "works-live"; works: WorksObservation[]; fetchedAt: string }
   /** Venues with an accessible toilet, from the search index, so routing can pass them. */
-  | { type: "toilets"; points: { lon: number; lat: number; name: string }[] }
+  | { type: "toilets"; points: { lon: number; lat: number; name: string }[]; disputed?: { lon: number; lat: number }[] }
   /** Lift outages, and TfL line and station disruptions where they could be fetched (DATA-04). */
   /** `outages` null: the lift feed failed, so the last ones stand until they expire. A disruption feed that failed is null (D-061). */
   | { type: "live"; outages: LiftOutageMsg[] | null; disruptions: { lines: RailDisruptionMsg[] | null; stations: RailDisruptionMsg[] | null; fetchedAt: string } }

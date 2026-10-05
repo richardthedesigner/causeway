@@ -154,7 +154,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | SMALL-11 | Weather for trips more than 48 hours ahead | S | later | todo | Claude | D-040 falls back to today's |
 | SMALL-12 | A favicon and app icons (every page load asks for `/favicon.ico` and gets a 404) | S | later | todo | Claude | Found doing SEC-04 |
 | SMALL-13 | Parks and OpenStreetMap notes: a park found by name ends at its gate, not a nearby building's door; old notes and business questions left out; "N more places a mapper flagged" | S | now | doing | Claude | D-048. Ported from PR #36. 2026-10-05, `claude/vibrant-heisenberg-3j1kl2` (PR #44) |
-| SMALL-14 | Toilet Map: say when OSM and the Toilet Map disagree, keep disputed toilets off routes, and say when a record is over 2 years old | S | now | doing | Claude | D-049. Ported from PR #36. 2026-10-05, `claude/vibrant-heisenberg-3j1kl2` (PR #44) |
+| SMALL-14 | Toilet Map: say when OSM and the Toilet Map disagree, keep disputed toilets off routes, and say when a record is over 2 years old | S | now | done (2026-10-05) | Claude | D-065. Ported from PR #36. 5 disputes in Edinburgh, 1 in Newcastle |
 
 ## Security and privacy
 
@@ -271,6 +271,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 
 Newest first. One line per change: date, ID, what happened, link.
 
+- 2026-10-05: SMALL-14 done: where OSM and the Toilet Map disagree on access the toilet says so first and stays off routes; old records say they may be out of date (D-065).
 - 2026-10-05: DATA-31 done: council footways and gritting matched along each edge in British National Grid, with the council's own dates; gritting from its licensed layer (D-062, D-064). DATA-22 done: on streets drawn as one line, the council's pavement surface beats the carriageway's (Richard, D-063).
 - 2026-10-05: DATA-30 done: TfL's lift, line and station feeds fetched apart, a failed feed's last answer held 15 minutes, the route card says which couldn't be checked, and "nothing fits" names the closure (D-061). Follows STAB-05.
 - 2026-10-05: DATA-29 done: the step and gap to the train held to each person's limits, with level-access doors in the spoken route (D-060).

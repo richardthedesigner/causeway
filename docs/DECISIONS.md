@@ -493,6 +493,8 @@ Update (D-064): the gritting routes now come from the council's "Gritting Routes
 - Weekly opening times become OSM opening hours, so "open when you pass" works for them too.
 - Credit in each city line: "Toilets: Great British Public Toilet Map, Public Convenience Ltd (CC BY 4.0)".
 
+Update (D-065): where OSM and the Toilet Map disagree on access, the first fact says so before anything else and the toilet doesn't count on routes. A record over 2 years old says it may be out of date, and an added one ranks a little lower in search.
+
 ## D-050 Dependency audit in CI, and MapLibre 6
 
 **Decided.** 2026-10-05 (SEC-04). CI runs `pnpm audit --audit-level high` after install: a known high or critical hole in any dependency fails the build. Moderate and low ones are left to Dependabot.
@@ -737,3 +739,19 @@ Where OSM draws a street as one line (a street proxy), our builder reads the pav
 **Numbers.** 1,648 pavement edges (64 km) are on a route, against 1,130 (32 km) before; only 264 are in both, since main's were matched against lines 90 m out. Routes in ice weren't part of the acceptance runs; dry routes don't change.
 
 **Conservative calls.** The council's routes are from 2021 and may have changed. The penalty stays the same either way: a 2021 route is still better evidence than none, and the reason says how old it is.
+
+## D-065 When OSM and the Toilet Map disagree, and when a record is old
+
+**Decided.** 2026-10-05 (SMALL-14, ported from the overnight build, PR #36, by hand into main's `mergeToiletMap`). Amends D-049. Code: `apps/web/src/lib/toiletmap.ts`, `toiletsAlong` in `apps/web/src/lib/toilets.ts`, `Router.addToilets`, `apps/web/src/app/page.tsx`.
+
+Main merged a Toilet Map record into the OSM toilet within 30 m and let OSM's tags win, silently. Where OSM said accessible and the Toilet Map said not, or the other way round, nobody was told, and the route counted OSM's word.
+
+- **Disputes said first.** Where OSM's `wheelchair` tag and the Toilet Map's accessible flag disagree, the toilet's first fact starts "Sources differ: OpenStreetMap says accessible, the Toilet Map says not accessible." It goes first because the search list shows only the first fact (two lines, D-053). The facts after it are still OSM's. "Partly accessible" in OSM against either answer counts as a dispute.
+- **Disputed toilets stay off routes.** They aren't sent to the router as stops, and the graph's own toilet within 30 m of one stops counting as accessible, so "Past more toilets" and "an accessible toilet at least every…" don't lean on it. The route's toilet list still shows it, with "Sources differ on access" first, and it doesn't close a gap there either.
+- **Old records.** A Toilet Map record last checked or updated over 2 years ago says so in the first fact, after any dispute: "Toilet Map last checked Sep 2021, may be out of date". Only where the record added something; an OSM toilet the Toilet Map adds nothing to says nothing about it. A toilet only the Toilet Map has ranks a little lower in name search when its record is old (3.1 against 2.6, lower first).
+
+**Numbers** (export of 2026-10-04, today's date): Edinburgh 5 disputes (three where OSM says accessible or partly and the Toilet Map disagrees), Newcastle 1, London none. Old records shown as such: Edinburgh 49, Newcastle 15, London 28.
+
+**Conservative calls.**
+- Neither source wins a dispute: the toilet counts as unknown on routes, and both views are shown.
+- Old Toilet Map toilets still count on routes, as before; only the words and the search order change. Whether an old record should count less on routes is a question for research (OPEN_ITEMS).

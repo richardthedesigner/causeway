@@ -120,8 +120,8 @@ export function usePlanner(city: City) {
   }, [city]);
 
   /** Hand the worker the venue toilets from the search index (once per city). */
-  const sendToilets = useCallback((points: { lon: number; lat: number; name: string }[]) => {
-    worker.current?.postMessage({ type: "toilets", points } satisfies WorkerRequest);
+  const sendToilets = useCallback((points: { lon: number; lat: number; name: string }[], disputed: { lon: number; lat: number }[] = []) => {
+    worker.current?.postMessage({ type: "toilets", points, disputed } satisfies WorkerRequest);
   }, []);
 
   const plan = useCallback((from: Place, to: Place, profile: Profile, c: Conditions, notes: UserNote[] = []) => {
