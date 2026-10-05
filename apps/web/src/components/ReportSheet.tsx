@@ -58,7 +58,8 @@ export function ReportSheet({ open, onOpenChange, where, city, sharing, onSaved 
           <div className="grid gap-5">
             <fieldset className="m-0 border-0 p-0">
               <legend className="mb-2 text-base font-bold">What&apos;s wrong?</legend>
-              <div role="radiogroup" aria-label="What's wrong?" className="grid grid-cols-2 gap-2">
+              {/* Two columns, or one when large text would clip the labels (STAB-12). */}
+              <div role="radiogroup" aria-label="What's wrong?" className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,9rem),1fr))] gap-2">
                 {REPORT_KINDS.map((k) => (
                   <button
                     key={k.kind}
@@ -66,7 +67,7 @@ export function ReportSheet({ open, onOpenChange, where, city, sharing, onSaved 
                     role="radio"
                     aria-checked={kind === k.kind}
                     onClick={() => setKind(k.kind)}
-                    className={kind === k.kind ? "min-h-14 rounded-2xl border border-ink bg-ink px-3 text-left text-surface" : "min-h-14 rounded-2xl border border-line px-3 text-left"}
+                    className={kind === k.kind ? "min-h-14 min-w-0 rounded-2xl border border-ink bg-ink px-3 py-2 text-left text-surface [overflow-wrap:anywhere]" : "min-h-14 min-w-0 rounded-2xl border border-line px-3 py-2 text-left [overflow-wrap:anywhere]"}
                   >
                     {k.label}
                   </button>

@@ -50,11 +50,11 @@ The current direction: **fix and fill the pilot cities** with open data that nee
 
 The next five things to pick up, in order.
 
-1. **STAB-12**: 200% text at 320 px on the other screens.
-2. **STAB-05**: timeouts and fallbacks for every live adapter.
-3. **STAB-06**: fail the weekly data refresh if counts drop too far.
-4. **SEC-06**: export and delete everything about me, in one place.
-5. **SMALL-01**: opening hours that know bank holidays.
+1. **STAB-05**: timeouts and fallbacks for every live adapter.
+2. **STAB-06**: fail the weekly data refresh if counts drop too far.
+3. **SEC-06**: export and delete everything about me, in one place.
+4. **SMALL-01**: opening hours that know bank holidays.
+5. **STAB-13**: the city name at the top of the map at 200% text.
 
 The rest of the pilot-city data (DATA-02, DATA-12 to DATA-20) is blocked on access, licences or keys. Research (RES) needs Richard and testers.
 
@@ -181,7 +181,8 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | STAB-09 | A city opened from last time started from Edinburgh's Causewayside, 537 km from London | S | next | done (2026-10-04) | Claude | Found by STAB-01. `page.tsx` sets the saved city's start |
 | STAB-10 | End-to-end journeys for the device switcher, notes and Leaving later | S | now | done (2026-10-05) | Claude | PR #33. Two devices and a switch, leaving in an hour, a route and a note. Found and fixed the drawer's last 6% being unreachable |
 | STAB-11 | The device editor's header fills a 320 by 640 screen at 200% text | S | now | done (2026-10-05) | Claude | PR #33. Description scrolls with the content; bars, icon buttons and switches in pixels. `pnpm a11y` checks it |
-| STAB-12 | 200% text at 320 px on the other screens: route panel, navigation, search, note and report sheets | S | now | todo | Claude | Found doing STAB-11. Extend the reflow check in `scripts/a11y-check.mjs` |
+| STAB-12 | 200% text at 320 px on the other screens: route panel, navigation, search, note and report sheets | S | now | done (2026-10-05) | Claude | `pnpm a11y` checks six more screens. Grids hold their width, chip rows and section headings wrap, navigation's two panels take half the screen each and scroll |
+| STAB-13 | The city name at the top of the map is cut off at 200% text on a 320 px phone ("Edinbur", under the layers button) | S | now | todo | Claude | Found doing STAB-12. `MapChrome.tsx`. Not caught by `pnpm a11y`: it's clipped, not off the side |
 | STAB-08 | Offline test: load a city, cut the network, route | S | later | todo | Claude | D-023 |
 
 ## Speed
@@ -261,6 +262,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 Newest first. One line per change: date, ID, what happened, link.
 
 - 2026-10-05: Added DATA-28 (presets on Inclusive Mobility values, ported from PR #36) and marked it done.
+- 2026-10-05: STAB-12 done. Added STAB-13. Now: STAB-05, STAB-06, SEC-06, SMALL-01, STAB-13.
 - 2026-10-05: Added DATA-27 (the remaining AllThePlaces-only places), found doing DATA-01 in a parallel session (closed PR #37).
 - 2026-10-05: DATA-23, SEC-04, SEC-05, STAB-10, STAB-11 done in PR #33, and UPD-02 with SEC-04. Added STAB-12, SMALL-12. Now: STAB-12, STAB-05, STAB-06, SEC-06, SMALL-01.
 - 2026-10-04: DATA-07 to DATA-11 done in PR #33, and DATA-24 with them. Added DATA-25, DATA-26. Now: DATA-23, SEC-04, SEC-05, STAB-10, STAB-11.
