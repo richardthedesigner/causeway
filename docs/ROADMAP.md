@@ -122,7 +122,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 |---|---|---|---|---|---|---|
 | FEAT-01 | Battery range per device (`maxRangeKm`), with a warning on long routes | M | next | done (2026-10-04) | Claude | D-043. Range engine from PR #26, and "Warn me about battery range" in the device editor |
 | FEAT-02 | Separate road and pavement speeds for road scooters | M | later | done (2026-10-05) | Claude | D-051. Road speed setting is FEAT-18 |
-| FEAT-03 | "Report what's there" from "What we don't know" on a route | M | now | todo | Claude | UX_ASSESSMENT open finding. Reports stay on the device until the backend is back on |
+| FEAT-03 | "Report what's there" from "What we don't know" on a route | M | now | doing | Claude | 2026-10-06, `claude/feat-03-report-whats-there`. UX_ASSESSMENT open finding. Reports stay on the device until the backend is back on |
 | FEAT-04 | Saved places (home, work, a friend's) | M | now | done (2026-10-05) | Claude | PR #42. D-060. "Save this place" on a route; saved places come first in search, with a verdict. On the phone only, in Your data |
 | FEAT-05 | Arrive by a time, as well as leave at one | M | later | todo | Claude | D-040 built "Leaving later" |
 | FEAT-06 | Changing Places toilets as their own search and route option | M | later | blocked | Claude | Needs a licensed source first (DATA-01, §9) |
