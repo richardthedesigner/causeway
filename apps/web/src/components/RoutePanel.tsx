@@ -173,11 +173,11 @@ export function RoutePanel(props: Props) {
   const why = !sel ? null : result?.status === "ok" && sel.id === result.routes[0]?.id ? result.headline : (selTitle?.why ?? null);
 
   return (
-    <div className="grid grid-cols-1 gap-3 [&>*]:min-w-0">
+    <div className="grid grid-cols-1 gap-[min(0.75rem,12px)] [&>*]:min-w-0">
       {/* Journey: two rows, swap on the side. Tap either to change it. */}
       <section aria-label="Journey" className="flex items-stretch gap-1">
         <div className="grid min-w-0 flex-1">
-          <button id="journey-from" type="button" onClick={props.onChangeFrom} className="flex min-h-11 min-w-0 items-center gap-3 rounded-xl px-1 text-left hover:bg-surface-2">
+          <button id="journey-from" type="button" onClick={props.onChangeFrom} className="flex min-h-[min(2.75rem,48px)] min-w-0 items-center gap-3 rounded-xl px-1 text-left hover:bg-surface-2">
             <span aria-hidden className="ml-1 size-3 shrink-0 rounded-full border-[3px] border-ink" />
             <span className="sr-only">Change start: </span>
             <span className="truncate">{from.name}</span>
@@ -191,7 +191,7 @@ export function RoutePanel(props: Props) {
       {/* The same bar as search: where to, and who the routes are for (D-036). No magnifier once there's a destination. */}
       <SearchBar
         main={
-          <button type="button" onClick={props.onChangeTo} className="flex min-h-12 min-w-0 flex-1 items-center gap-2 text-left">
+          <button type="button" onClick={props.onChangeTo} className="flex min-h-[min(3rem,48px)] min-w-0 flex-1 items-center gap-2 text-left">
             <MapPin aria-hidden className="size-5 shrink-0 text-accent" strokeWidth={2.6} />
             <span className="sr-only">Change destination: </span>
             <span className="truncate text-lg font-bold">{to.name}</span>
@@ -243,7 +243,7 @@ export function RoutePanel(props: Props) {
 
       {result?.status === "ok" && sel ? (
         <>
-          <section aria-labelledby="route-h" aria-live="polite" className="grid gap-3 rounded-[20px] border-2 border-ink p-4">
+          <section aria-labelledby="route-h" aria-live="polite" className="grid gap-3 rounded-[20px] border-2 border-ink p-4" data-route-card>
             <h2 id="route-h" className="sr-only">
               {selTitle?.title || "Best for you"}
             </h2>
@@ -311,7 +311,7 @@ export function RoutePanel(props: Props) {
 
           {(() => {
             const actions = (
-              <div className="flex gap-2">
+              <div className="flex gap-2 [&>*]:min-h-[min(3.5rem,64px)]">
                 <Button variant="primary" size="lg" onClick={props.onStart} className="min-w-0 flex-1 rounded-2xl">
                   Start
                 </Button>
@@ -324,7 +324,7 @@ export function RoutePanel(props: Props) {
             // The sheet is transformed while it snaps, so a fixed bar has to live outside it.
             return props.pinActions && typeof document !== "undefined"
               ? createPortal(
-                  <div className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-surface px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] shadow-[0_-4px_20px_rgb(0_0_0/0.08)]">{actions}</div>,
+                  <div className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-surface px-4 pt-[12px] pb-[calc(12px+env(safe-area-inset-bottom,0px))] shadow-[0_-4px_20px_rgb(0_0_0/0.08)]">{actions}</div>,
                   document.body,
                 )
               : actions;
