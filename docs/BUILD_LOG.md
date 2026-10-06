@@ -2,6 +2,13 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
+## 2026-10-06 (a custom domain)
+
+DEP-07, no code.
+- `causeway.richardthedesigner.com` added to the Vercel project. The `richardthedesigner.com` zone is on Vercel DNS, so it verified at once and needed no purchase.
+- Vercel login protection skips custom domains, so the app is public there. The `vercel.app` addresses still need a login.
+- Checked from outside: the page, HTTPS, the icons and every security header from `vercel.json` are served.
+
 ## 2026-10-06 (miles or kilometres)
 
 SMALL-02 (D-074), PR #56.
