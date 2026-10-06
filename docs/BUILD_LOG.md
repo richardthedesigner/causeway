@@ -9,7 +9,16 @@ FEAT-03, D-076, PR #65.
 - Saved on the phone in the reports list as `whats-there`, with the street, questions and answers. Your data counts them on their own line, and the copy and Delete everything include them.
 - The router's unknowns carry a point and each missing attribute (`RouteUnknown` in `plan-types.ts`).
 - Tests: `apps/web/test/reports.test.ts`, the Your data count. The e2e trip reports what's there by keyboard alone and finds it in Your data and the copy. The a11y run checks the sheet light, dark and at 320 px with 200% text. A new screenshot, `whats-there`.
-- Found: at 320 px with 200% text, "Another way" spills out of its box, so the route panel is 17 px too wide and a click could scroll it sideways (STAB-22). The a11y check opens the sheet by keyboard to stay clear of it. The answer buttons move with Tab, not the arrow keys (SMALL-20).
+- Found: at 320 px with 200% text, "Another way" spills out of its box, so the route panel is 17 px too wide and a click could scroll it sideways (STAB-22). The a11y check opens the sheet by keyboard to stay clear of it. The answer buttons move with Tab, not the arrow keys (SMALL-22).
+
+## 2026-10-06 (saved places on the map)
+
+SMALL-13, D-075.
+- Each saved place is a labelled button on the map: a pill with a star and its name, edged in ink on the surface colour, so it reads in light, dark and the high-contrast map without relying on colour.
+- Tapping or pressing one opens a card in the sheet: "Go here" and "Start from here", and Cancel. Focus moves to the card; Escape or Cancel puts it back on the marker. A tap on a marker drops no pin.
+- A marker is left off where the route already marks that place (the destination, or a start you chose).
+- A saved place was already a start in "Where are you starting from?" (D-073). `pnpm e2e` now checks that, and the markers by keyboard.
+- Open: a marker under the half-open sheet is out of reach for a finger (SMALL-20).
 
 ## 2026-10-06 (the route sheet at large text)
 

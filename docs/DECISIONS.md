@@ -928,6 +928,18 @@ A person who reads speeds in mph reads distances in miles, and a person who read
 - **Stored values stay as they are.** Rest and toilet intervals are kept in metres and battery range in km. In miles mode they are converted for display (an interval of 500 m reads "0.3 miles"), and the battery range steps in whole miles and is stored as km to a tenth. Nothing about routing changes.
 - **Defaults** are D-051's: scooters mph, everyone else km/h. Existing devices keep what they had.
 
+## D-075 Saved places on the map
+
+**Decided.** 2026-10-06 (SMALL-13). Builds on D-060 (saved places stay on the phone) and D-073 (destination first).
+
+- **Real buttons, not map layers.** Each saved place is a DOM marker: a `button` named "Home, saved place", so Tab reaches it and a screen reader reads it. A canvas layer can do neither. The list is at most 12 (D-060), so the cost is small.
+- **Always labelled.** The name is shown, with a star, edged in ink on the surface colour. It follows the page's light, dark and high-contrast colours and doesn't depend on colour alone. The label is cut with an ellipsis; the full name is in the button's name.
+- **Tapping opens a card in the sheet, not a pin.** "Go here" makes it the destination, with the same flow as any destination (D-073: your location is asked for only then). "Start from here" makes it the start, as a start picked by hand, and keeps any destination. Cancel, or Escape, closes it and returns focus to the marker. The card names the place and, if it differs, the address. Only the action that applies shows: no "Go here" on the destination, no "Start from here" on the start.
+- **Left off where the route marks it.** The destination's and a chosen start's own markers are used; the saved marker would sit under them.
+- **Not shown while navigating.**
+- **Privacy unchanged (D-009, D-060).** Saved places are read from this phone's storage and drawn locally. Nothing is sent.
+- **Not done (SMALL-20, SMALL-21):** panning the map so a marker under the half-open sheet can be tapped, and saving a chosen start as a place.
+
 ## D-076 Report what's there: one question per gap, kept on the phone
 
 **Decided.** 2026-10-06 (FEAT-03). The UX assessment left "What we don't know" with no way to say what's actually there.
