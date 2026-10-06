@@ -99,6 +99,9 @@ async function shoot(page, name, scheme, size) {
     return;
   }
   if (!existsSync(file)) {
+    // Keep the picture, so a new screen's baseline can come from CI's own browser (its diff artifact).
+    mkdirSync(DIFF, { recursive: true });
+    writeFileSync(join(DIFF, `${id}.actual.png`), png);
     failures.push(`${id}: no baseline (run pnpm screenshots --update)`);
     console.log(`  FAIL ${id}: no baseline`);
     return;
