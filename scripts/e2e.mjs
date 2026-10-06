@@ -157,6 +157,11 @@ for (const j of JOURNEYS) {
   };
   const marker = (label) => page.getByRole("button", { name: `${label}, saved place`, exact: true });
   const fromText = async () => (await page.getByRole("button", { name: /^Change start/ }).first().innerText()).replace(/^\s*Change start:\s*/, "").trim();
+  // By keyboard: with the sheet half open a marker can sit under it, where a tap can't reach.
+  const openMarker = async (label) => {
+    await marker(label).focus();
+    await page.keyboard.press("Enter");
+  };
   console.log(name);
   await page.goto(server.url);
   await page.getByPlaceholder("Where to?").waitFor({ timeout: 60_000 });
@@ -178,7 +183,7 @@ for (const j of JOURNEYS) {
     if (back !== "saved-marker-e2e-meadows") throw new Error(`focus went to "${back}", not back to the marker`);
   });
   await step("Start from here sets the start, and the marker gives way to the route's own", async () => {
-    await marker("Work").click();
+    await openMarker("Work");
     await page.getByRole("button", { name: "Start from here", exact: true }).click();
     await marker("Work").waitFor({ state: "detached" });
     await page.getByPlaceholder("Where to?").fill("Hamilton Place");
@@ -195,7 +200,7 @@ for (const j of JOURNEYS) {
   await step("Go here makes it the destination", async () => {
     await page.goto(server.url);
     await page.getByPlaceholder("Where to?").waitFor({ timeout: 60_000 });
-    await marker("Work").click();
+    await openMarker("Work");
     await page.getByRole("button", { name: "Go here", exact: true }).click();
     await page.getByRole("button", { name: /^Change destination: Bruntsfield Links/ }).waitFor();
   });
