@@ -2,8 +2,10 @@
  * End-to-end journey in the built app (STAB-01): search for a place, get a
  * route, start navigating, arrive, end. One per city, so each city's graph,
  * search index and base map are known to load and route together.
- * Navigation runs in preview mode (no location), and the test speeds up the
- * preview's half-second tick so the walk takes seconds, not minutes.
+ * Navigation runs in preview mode (no location), and the test runs the preview's
+ * half-second ticks in batches of about 500 m (STAB-15), so the walk takes seconds
+ * and a slow runner draws late, not less far. E2E_CPU=6 slows the page's CPU six
+ * times; E2E_ARRIVE_MS overrides the 2-minute arrival limit.
  *   pnpm web:build && pnpm e2e
  * Then one journey through the rest of the trip (STAB-10): set up two devices
  * and switch between them, leave later, copy the route as text, add a note,
@@ -52,6 +54,8 @@ for (const j of JOURNEYS) {
   const name = `${j.city} to ${j.to}`;
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const page = await context.newPage();
+  // E2E_CPU=6 slows the page's CPU six times, to prove the walk arrives on a slow runner.
+  if (process.env.E2E_CPU) await (await context.newCDPSession(page)).send("Emulation.setCPUThrottlingRate", { rate: Number(process.env.E2E_CPU) });
   const problems = [];
   watchCsp(page, problems);
   watchProfile(page, problems);
@@ -59,10 +63,12 @@ for (const j of JOURNEYS) {
   // No location: navigation falls back to its preview, which walks the route by itself.
   await page.addInitScript(() => {
     delete Navigator.prototype.geolocation;
-    // NavView's preview moves along the route every 500 ms. Take ten of its steps each 50 ms,
-    // a hundred times faster, so a 2 km route takes seconds.
+    // NavView's preview moves along the route by a fixed distance each 500 ms tick (four times
+    // walking speed, about 2.8 m). Run the ticks in batches, each covering about 500 m of the
+    // route, so the walk is a dozen or so batches however fast the machine is. The page only has to
+    // draw once per batch, and a slow runner draws late, not less far.
     const every = window.setInterval;
-    window.setInterval = (fn, ms, ...rest) => (ms === 500 ? every(() => { for (let i = 0; i < 10; i++) fn(...rest); }, 50) : every(fn, ms, ...rest));
+    window.setInterval = (fn, ms, ...rest) => (ms === 500 ? every(() => { for (let i = 0; i < 180; i++) fn(...rest); }, 50) : every(fn, ms, ...rest));
   });
   // The city the app opens in, as if picked last time (page.tsx CITY_KEY).
   await page.addInitScript((id) => localStorage.setItem("causewayside.city.v1", id), j.city);
@@ -101,10 +107,12 @@ for (const j of JOURNEYS) {
       await page.getByRole("button", { name: "End", exact: true }).waitFor();
     });
     await step("arrive", async () => {
+      const began = Date.now();
       const arrived = page.getByRole("region", { name: "Next instruction" }).getByText(/arrived/);
       await arrived.waitFor({ timeout: Number(process.env.E2E_ARRIVE_MS ?? 120_000) }).catch(async () => {
         throw new Error(`never arrived: ${await page.getByRole("region", { name: "Next instruction" }).innerText()}`);
       });
+      console.log(`       walked in ${((Date.now() - began) / 1000).toFixed(1)} s`);
     });
     await step("end", async () => {
       await page.getByRole("button", { name: "End", exact: true }).click();

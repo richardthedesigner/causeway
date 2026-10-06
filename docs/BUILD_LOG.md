@@ -10,6 +10,13 @@ FEAT-20, D-073. Richard found the "Starting from?" step odd on production.
 - Privacy: live search was biased towards your position once you'd used "Your location", so Photon got it. It now gets the city's start. `pnpm e2e` shares a location near each city's start (`hereIn` in `scripts/serve-out.mjs`) and fails if a request carries it; the profile check is unchanged. A new journey checks where you start: located, swapped, location off, outside the city.
 - `pnpm a11y` checks "Finding where you are" and "Where are you starting from?" light, dark and at 320 px with 200% text. `pnpm screenshots` adds `start-from`.
 
+## 2026-10-06 (the e2e walk by distance)
+
+STAB-15: `scripts/e2e.mjs` only. No app code changed.
+- The test runs the preview's half-second ticks in batches of 180 (about 500 m of route), where it ran ten every 50 ms. Drawing the page, not walking, was the cost: Edinburgh drew about 70 times at 400 ms each. It now draws about a dozen times.
+- Edinburgh arrives in 3.4 s (it took 2 min 44 s on a 4-core box), and in 9.5 s with the CPU slowed six times (`E2E_CPU=6`, Chrome's CPU throttling). The journey prints how long the walk took.
+- `E2E_ARRIVE_MS` stays as an override of the 2-minute limit.
+
 ## 2026-10-05 (the release and the docs sweep)
 
 REV-01, docs only.
