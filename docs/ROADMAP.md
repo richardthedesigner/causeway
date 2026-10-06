@@ -122,7 +122,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 |---|---|---|---|---|---|---|
 | FEAT-01 | Battery range per device (`maxRangeKm`), with a warning on long routes | M | next | done (2026-10-04) | Claude | D-043. Range engine from PR #26, and "Warn me about battery range" in the device editor |
 | FEAT-02 | Separate road and pavement speeds for road scooters | M | later | done (2026-10-05) | Claude | D-051. Road speed setting is FEAT-18 |
-| FEAT-03 | "Report what's there" from "What we don't know" on a route | M | now | done (2026-10-06) | Claude | D-075. PR #65. One question per gap, prefilled with the street and point. Kept on the phone in the reports list and in Your data until the backend is on (DEF-04) |
+| FEAT-03 | "Report what's there" from "What we don't know" on a route | M | now | done (2026-10-06) | Claude | D-076. PR #65. One question per gap, prefilled with the street and point. Kept on the phone in the reports list and in Your data until the backend is on (DEF-04) |
 | FEAT-04 | Saved places (home, work, a friend's) | M | now | done (2026-10-05) | Claude | PR #42. D-060. "Save this place" on a route; saved places come first in search, with a verdict. On the phone only, in Your data |
 | FEAT-05 | Arrive by a time, as well as leave at one | M | later | todo | Claude | D-040 built "Leaving later" |
 | FEAT-06 | Changing Places toilets as their own search and route option | M | later | blocked | Claude | Needs a licensed source first (DATA-01, §9) |
@@ -311,7 +311,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 
 Newest first. One line per change: date, ID, what happened, link.
 
-- 2026-10-06: FEAT-03 done in PR #65: "Report what's there" under each street in "What we don't know", one question per gap, kept on the phone and in Your data (D-075). Added STAB-22, SMALL-20. STAB-22 replaces it in Now.
+- 2026-10-06: FEAT-03 done in PR #65: "Report what's there" under each street in "What we don't know", one question per gap, kept on the phone and in Your data (D-076). Added STAB-22, SMALL-20. STAB-22 replaces it in Now.
 - 2026-10-06: DEP-07 done: `causeway.richardthedesigner.com` serves production and is public. SEC-25 unblocked (needs a browser). Added STAB-21. Batch 2 merged FEAT-20, SMALL-02, SMALL-12, STAB-15 and SPEED-01 (#56 to #61).
 - 2026-10-06: SMALL-02 done in PR #56: distances follow the per-device mph or km/h choice through one formatter, yards for short distances in miles mode (D-074). Added SMALL-18, SMALL-19. Now: SPEED-08, FEAT-03, SMALL-13, STAB-18, SMALL-18.
 - 2026-10-06: FEAT-20 done: destination first. "Where to?" alone, then From as "Your location", with location asked for only then; plain-words fallbacks ask where you're starting from (D-073). Added SMALL-17.

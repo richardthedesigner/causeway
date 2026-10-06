@@ -928,7 +928,7 @@ A person who reads speeds in mph reads distances in miles, and a person who read
 - **Stored values stay as they are.** Rest and toilet intervals are kept in metres and battery range in km. In miles mode they are converted for display (an interval of 500 m reads "0.3 miles"), and the battery range steps in whole miles and is stored as km to a tenth. Nothing about routing changes.
 - **Defaults** are D-051's: scooters mph, everyone else km/h. Existing devices keep what they had.
 
-## D-075 Report what's there: one question per gap, kept on the phone
+## D-076 Report what's there: one question per gap, kept on the phone
 
 **Decided.** 2026-10-06 (FEAT-03). The UX assessment left "What we don't know" with no way to say what's actually there.
 

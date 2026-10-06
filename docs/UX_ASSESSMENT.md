@@ -49,7 +49,7 @@ Severity: **critical** (blocks the task), **serious** (likely to cause errors or
 
 | Finding | Severity | Why open / next step |
 |---|---|---|
-| "What we don't know" has no "Report what's there" action yet. | Moderate | Fixed 2026-10-06 (FEAT-03, D-075): each street has "Report what's there", which asks about the things we lack. Kept on the phone until the backend is on. |
+| "What we don't know" has no "Report what's there" action yet. | Moderate | Fixed 2026-10-06 (FEAT-03, D-076): each street has "Report what's there", which asks about the things we lack. Kept on the phone until the backend is on. |
 | The map has no basemap (buildings, labels, water): it is drawn from our footway graph only. Legible, but not yet "a beautiful map". | Moderate | Protomaps basemap (D-007) in Phase 2b. |
 | The map colours don't switch live if the system theme changes mid-session. | Minor | Re-read tokens on `prefers-color-scheme` change. |
 | The mode sheet is long: eleven presets before the limits. | Minor | Fixed 2026-10-04: three groups (Walking, On wheels, Other needs); limits fold into one row that shows the key numbers and opens by itself once changed. |

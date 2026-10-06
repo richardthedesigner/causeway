@@ -4,7 +4,7 @@ A running record of what was built, newest first. Each entry links the decision 
 
 ## 2026-10-06 (report what's there)
 
-FEAT-03, D-075, PR #65.
+FEAT-03, D-076, PR #65.
 - "What we don't know" has "Report what's there" under each street. The sheet asks one short question for each thing we lack (kerbs, surface, width and so on), with the street and point already filled in. One answer is enough; a note and a photo are optional.
 - Saved on the phone in the reports list as `whats-there`, with the street, questions and answers. Your data counts them on their own line, and the copy and Delete everything include them.
 - The router's unknowns carry a point and each missing attribute (`RouteUnknown` in `plan-types.ts`).
