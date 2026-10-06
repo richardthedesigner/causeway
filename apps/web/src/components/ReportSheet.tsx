@@ -138,7 +138,7 @@ function Choices({ legend, hint, options, value, onChange }: { legend: string; h
   const hintId = useId();
   return (
     <fieldset className="m-0 min-w-0 border-0 p-0">
-      <legend className="mb-1 text-base font-bold">{legend}</legend>
+      <legend className={hint ? "mb-1 text-base font-bold" : "mb-2 text-base font-bold"}>{legend}</legend>
       {hint ? (
         <p id={hintId} className="m-0 mb-2 text-sm text-muted">
           {hint}
