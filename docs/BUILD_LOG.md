@@ -9,6 +9,12 @@ SMALL-18 (D-074), PR #64.
 - The "Where are you starting from?" suggestions never showed a distance, so nothing changed there.
 - Tests: `apps/web/test/search-distance.test.ts`, and an e2e step that searches in miles mode.
 
+## 2026-10-06 (e2e ignores outside errors)
+
+STAB-21, PR #63.
+- `scripts/e2e.mjs` fails a journey on a 4xx or 5xx only when the response is from the app's own origin. Any other host prints a `WARN` line and the run carries on. An Open-Meteo 429 had failed a run.
+- The icon check from SMALL-12 is unchanged. No app code touched.
+
 ## 2026-10-06 (a custom domain)
 
 DEP-07, no code.

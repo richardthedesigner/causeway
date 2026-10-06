@@ -35,7 +35,6 @@ const SHORTCUTS = ["Accessible toilets", "Step-free cafés", "Stations", "Pharma
 /** The query still starts with the one earlier results came from. */
 const continues = (query: string, from: string) => query.toLowerCase().startsWith(from.toLowerCase());
 
-
 function Icon({ p }: { p: Place }) {
   const k = p.kind;
   const cls = "size-5 shrink-0 text-muted";
