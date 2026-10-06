@@ -3,7 +3,7 @@ import { distanceUnit, learnPace, type Profile } from "@causeway/profile";
 import { conditionsFromOpenMeteo, forecastConditions, getJson, openMeteoUrl, riverHigh, type OpenMeteoResponse } from "@causeway/live";
 import { haversine } from "@causeway/graph";
 import { ChevronLeft } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MapChrome, type Ground } from "@/components/MapChrome";
 import { MapView } from "@/components/MapView";
 import { DeviceMenu } from "@/components/DeviceMenu";
@@ -88,6 +88,16 @@ export default function Home() {
   }, []);
   const planner = usePlanner(city);
   const index = usePlaces(city, planner.ready?.places ?? null);
+  // The base map waits for the graph and search index, so "Where to?" doesn't share the line with tiles (SPEED-08, D-075).
+  // It stays on once released for a city; a failed graph releases it too, so the map still draws.
+  // Right after a city switch, index and error still belong to the old city, so that run is skipped.
+  const [mapCity, setMapCity] = useState<string | null>(null);
+  const indexCity = useRef(city.id);
+  useEffect(() => {
+    const switched = indexCity.current !== city.id;
+    indexCity.current = city.id;
+    if (!switched && (index || planner.error)) setMapCity(city.id);
+  }, [index, planner.error, city.id]);
   // Venues with an accessible toilet go to the router, so "Past more toilets" can use them (public ones are in the graph).
   useEffect(() => {
     if (!index) return;
@@ -329,8 +339,8 @@ export default function Home() {
   const basemap = useMemo(() => {
     const b64 = !!process.env.NEXT_PUBLIC_GRAPH_B64;
     const u = (f: string) => new URL(b64 ? f.replace(/\.pmtiles$/, ".b64.txt") : f, document.baseURI).toString();
-    return typeof document === "undefined" ? null : { url: u(city.basemap), key: city.id, glyphs: u("fonts/glyphs.json"), center: [city.start.lon, city.start.lat] as [number, number] };
-  }, [city]); // eslint-disable-line react-hooks/exhaustive-deps
+    return typeof document === "undefined" || mapCity !== city.id ? null : { url: u(city.basemap), key: city.id, glyphs: u("fonts/glyphs.json"), center: [city.start.lon, city.start.lat] as [number, number] };
+  }, [city, mapCity]); // eslint-disable-line react-hooks/exhaustive-deps
   const selectedRoute = routes.find((r) => r.id === selected) ?? routes[0] ?? null;
   const toilets = useMemo(() => (index && selectedRoute && view === "route" ? toiletsAlong(index, selectedRoute.coords, 80, passingAt(selectedRoute, departure(conditions))) : null), [index, selectedRoute, view, conditions]);
   const entrances = useMemo(() => (result?.status === "ok" ? result.entrances.map((e) => ({ lon: e.lon, lat: e.lat, ok: e.verdict.passable })) : []), [result]);
