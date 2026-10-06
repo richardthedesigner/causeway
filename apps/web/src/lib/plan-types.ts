@@ -21,6 +21,17 @@ export interface Place {
   hours?: string;
 }
 
+/** A street or path on the route where some data is missing: what, how much, and a point on it to report from (FEAT-03). */
+export interface RouteUnknown {
+  name: string;
+  m: number;
+  what: string;
+  lon: number;
+  lat: number;
+  /** Each missing attribute once, with the router's words for it ("kerb at crossing not mapped"). */
+  attrs: { attr: string; detail: string }[];
+}
+
 export interface PlannedRoute {
   id: string;
   label: string;
@@ -40,7 +51,7 @@ export interface PlannedRoute {
   /** Bus legs, for the departures line: stop, route, buses an hour now (timetable). */
   busLegs: { stopId: string; stopName: string; route: string; headsign: string | null; perHour: number }[];
   /** Where the data is missing, by street, so the user can judge it. */
-  unknowns: { name: string; m: number; what: string }[];
+  unknowns: RouteUnknown[];
   /** Named stretches in route order, for notes: which ones the route passes, and what to attach a new note to. */
   stretches: (Stretch & { m: number })[];
   /** The route as one bar: slope bands and what's on the way, for the route strip. */

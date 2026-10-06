@@ -43,7 +43,12 @@ describe("your data (SEC-06)", () => {
   });
 
   it("counts what's on this phone", () => {
-    expect(myDataSummary()).toEqual({ devices: 2, notes: 1, reports: 0, recents: 2, saved: 0, shared: false });
+    expect(myDataSummary()).toEqual({ devices: 2, notes: 1, reports: 0, whatsThere: 0, recents: 2, saved: 0, shared: false });
+  });
+
+  it("counts what's-there reports apart from problem reports (FEAT-03)", () => {
+    local.setItem("causewayside.reports.v1", JSON.stringify([{ id: "r1", kind: "kerb" }, { id: "r2", kind: "whats-there", about: { place: "Jawbone Walk", answers: [] } }]));
+    expect(myDataSummary()).toMatchObject({ reports: 1, whatsThere: 1 });
   });
 
   it("exports everything the app keeps, but never the sign-in token", () => {

@@ -12,6 +12,15 @@ SPEED-08 (D-077), PR #67.
 - `perf:web --debug` prints when each file started and finished. Numbers and raw runs: `docs/perf/2026-10-06-speed-08.md`.
 - Checks: typecheck, unit tests, web typecheck, build, e2e and a11y pass.
 
+## 2026-10-06 (report what's there)
+
+FEAT-03, D-076, PR #65.
+- "What we don't know" has "Report what's there" under each street. The sheet asks one short question for each thing we lack (kerbs, surface, width and so on), with the street and point already filled in. One answer is enough; a note and a photo are optional.
+- Saved on the phone in the reports list as `whats-there`, with the street, questions and answers. Your data counts them on their own line, and the copy and Delete everything include them.
+- The router's unknowns carry a point and each missing attribute (`RouteUnknown` in `plan-types.ts`).
+- Tests: `apps/web/test/reports.test.ts`, the Your data count. The e2e trip reports what's there by keyboard alone and finds it in Your data and the copy. The a11y run checks the sheet light, dark and at 320 px with 200% text. A new screenshot, `whats-there`.
+- Found: at 320 px with 200% text, "Another way" spills out of its box, so the route panel is 17 px too wide and a click could scroll it sideways (STAB-22). The a11y check opens the sheet by keyboard to stay clear of it. The answer buttons move with Tab, not the arrow keys (SMALL-22).
+
 ## 2026-10-06 (saved places on the map)
 
 SMALL-13, D-075.

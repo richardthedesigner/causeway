@@ -25,7 +25,7 @@ import { Button } from "@/components/ui/button";
 import { CommandGroup, CommandItem } from "@/components/ui/command";
 import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
 import { CITIES, cityById, type City } from "@/lib/cities";
-import type { Place, PlannedRoute } from "@/lib/plan-types";
+import type { Place, PlannedRoute, RouteUnknown } from "@/lib/plan-types";
 import { activeDevice, deviceLabel, FIRST_VISIT, loadDeviceState, saveDeviceState, setTip, tipPending, withActive, withActiveName, withActiveProfile, withDeviceProfile, withFavourite, withoutDevice, withSetup, type DeviceState } from "@/lib/devices";
 import { addRecent, loadRecents } from "@/lib/recents";
 import { loadSaved, savedMarkers, savePlace, unsavePlace, type SavedPlace } from "@/lib/saved-places";
@@ -147,7 +147,7 @@ export default function Home() {
   const [pin, setPin] = useState<Place | null>(null);
   const [navigating, setNavigating] = useState(false);
   const [me, setMe] = useState<Me | null>(null);
-  const [reportAt, setReportAt] = useState<{ lon: number; lat: number; accuracyM: number | null; label: string } | null>(null);
+  const [reportAt, setReportAt] = useState<{ lon: number; lat: number; accuracyM: number | null; label: string; about?: RouteUnknown } | null>(null);
   const [noteChoices, setNoteChoices] = useState<NoteAbout[] | null>(null);
   /** A limit stretched for this journey only. Never saved; cleared when the journey changes. */
   const [once, setOnce] = useState<{ patch: Partial<Profile>; what: string[] } | null>(null);
@@ -649,6 +649,7 @@ export default function Home() {
           onFlagNote={shared.sharing === "off" ? undefined : shared.flag}
           builtAt={planner.ready.builtAt}
           onAddNote={setNoteChoices}
+          onReportWhatsThere={(u) => setReportAt({ lon: u.lon, lat: u.lat, accuracyM: null, label: u.name, about: u })}
           onDeleteNote={(id) => void shared.remove(id)}
           once={once}
           onAllowOnce={(patch, what) => setOnce({ patch, what })}
@@ -801,7 +802,7 @@ export default function Home() {
       />
       <NoteSheet choices={noteChoices} onOpenChange={(v) => !v && setNoteChoices(null)} city={city.id} preset={profile.preset} sharing={shared.sharing !== "off"} onSaved={shared.saved} />
       <MyDataSheet open={dataOpen} onOpenChange={setDataOpen} />
-      <ReportSheet open={reportAt !== null} onOpenChange={(v) => !v && setReportAt(null)} where={reportAt} city={city.id} sharing={shared.sharing !== "off"} onSaved={shared.saved} />
+      <ReportSheet open={reportAt !== null} onOpenChange={(v) => !v && setReportAt(null)} where={reportAt} about={reportAt?.about ?? null} city={city.id} sharing={shared.sharing !== "off"} onSaved={shared.saved} />
     </main>
   );
 }

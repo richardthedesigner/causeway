@@ -202,17 +202,22 @@ function toPlanned(r: Route, start: Parameters<typeof elevationProfile>[1], id: 
     if (s.eval.passable !== "unknown" && s.nodeEval.passable !== "unknown") continue;
     unknownCoords.push(s.forward ? s.edge.geometry : [...s.edge.geometry].reverse());
   }
-  const byName = new Map<string, { m: number; what: Set<string> }>();
+  const byName = new Map<string, { m: number; what: Set<string>; attrs: Map<string, string>; at: [number, number] }>();
   for (const s of r.steps) {
     const reasons = [...s.eval.reasons, ...s.nodeEval.reasons].filter((x) => x.kind === "unknown");
     if (!reasons.length) continue;
     const name = s.edge.name ?? "an unnamed path";
-    const cur = byName.get(name) ?? byName.set(name, { m: 0, what: new Set() }).get(name)!;
+    // Where to pin a "what's there" report (FEAT-03): the middle of the first stretch we lack data for.
+    const at = s.edge.geometry[Math.floor(s.edge.geometry.length / 2)]!;
+    const cur = byName.get(name) ?? byName.set(name, { m: 0, what: new Set(), attrs: new Map(), at: [at[0], at[1]] }).get(name)!;
     cur.m += s.edge.lengthM;
-    for (const x of reasons) cur.what.add(x.detail);
+    for (const x of reasons) {
+      cur.what.add(x.detail);
+      if (!cur.attrs.has(x.attr)) cur.attrs.set(x.attr, x.detail);
+    }
   }
   const unknowns = [...byName.entries()]
-    .map(([name, v]) => ({ name, m: Math.round(v.m), what: [...v.what].join(", ") }))
+    .map(([name, v]) => ({ name, m: Math.round(v.m), what: [...v.what].join(", "), lon: v.at[0], lat: v.at[1], attrs: [...v.attrs].map(([attr, detail]) => ({ attr, detail })) }))
     .sort((a, b) => b.m - a.m);
   const busLegs = r.steps
     .filter((s) => s.forward && s.edge.kind === "board" && s.edge.service?.mode === "bus")

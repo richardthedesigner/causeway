@@ -9,6 +9,7 @@
  *   pnpm web:build && pnpm e2e
  * Then one journey through the rest of the trip (STAB-10): set up two devices
  * and switch between them, leave later, copy the route as text, add a note,
+ * report what's there on a street we lack data for, by keyboard (FEAT-03),
  * then download a copy of your data and delete it all (SEC-06). One with no
  * signal (SMALL-06): the route still comes, and the app says what still works.
  * One where the routing worker crashes (STAB-07): it starts again and the route
@@ -354,6 +355,30 @@ for (const j of JOURNEYS) {
       await page.getByText("Saved. Thank you.").waitFor();
       await page.getByRole("button", { name: "Done" }).click();
     });
+    // FEAT-03: say what's there on a street we lack data for, by keyboard alone. Kept on the phone, with the street and the question.
+    await step("report what's there, by keyboard", async () => {
+      const gap = page.locator("details summary", { hasText: "What we don't know" }).first();
+      await gap.scrollIntoViewIfNeeded();
+      await gap.focus();
+      await page.keyboard.press("Enter");
+      const report = page.getByRole("button", { name: /^Report what's there on / }).first();
+      await report.focus();
+      await page.keyboard.press("Enter");
+      const sheet = page.getByRole("dialog", { name: "Report what's there" });
+      await sheet.waitFor();
+      const first = sheet.getByRole("radio").first();
+      await first.focus();
+      await page.keyboard.press("Space");
+      if ((await first.getAttribute("aria-checked")) !== "true") throw new Error("Space didn't choose an answer");
+      await sheet.getByRole("button", { name: "Save report" }).focus();
+      await page.keyboard.press("Enter");
+      await sheet.getByText("Saved. Thank you.").waitFor();
+      await sheet.getByRole("button", { name: "Done" }).click();
+      const saved = await page.evaluate(() => JSON.parse(localStorage.getItem("causewayside.reports.v1") ?? "[]"));
+      const r = saved.find((x) => x.kind === "whats-there");
+      if (!r?.about?.place || !r.about.answers?.[0]?.question || !r.about.answers[0].answer || typeof r.lon !== "number") throw new Error(`stored: ${JSON.stringify(r)?.slice(0, 120)}`);
+      for (const m of PROFILE_MARKERS.slice(1)) if (JSON.stringify(r).includes(m)) throw new Error(`report holds "${m}"`);
+    });
     // FEAT-04: save the destination, and find it first in search next time.
     await step("save the place as home", async () => {
       const save = page.getByRole("button", { name: "Save this place" });
@@ -396,6 +421,7 @@ for (const j of JOURNEYS) {
     };
     await step("download a copy of your data", async () => {
       await yourData();
+      await page.getByRole("dialog", { name: "Your data" }).getByText("1 report of what's there").waitFor();
       const download = page.waitForEvent("download");
       await page.getByRole("button", { name: "Download a copy" }).click();
       const text = await (await download).createReadStream().then(async (s) => {
@@ -403,7 +429,7 @@ for (const j of JOURNEYS) {
         for await (const chunk of s) out += chunk;
         return out;
       });
-      for (const want of [DEVICE, "Kerb dropped on one side only.", "causewayside.saved."]) if (!text.includes(want)) throw new Error(`the copy lacks "${want}"`);
+      for (const want of [DEVICE, "Kerb dropped on one side only.", "causewayside.saved.", "whats-there"]) if (!text.includes(want)) throw new Error(`the copy lacks "${want}"`);
       if (/access_token/.test(text)) throw new Error("the copy holds a sign-in token");
     });
     await step("delete everything, and start afresh", async () => {

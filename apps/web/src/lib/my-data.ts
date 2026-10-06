@@ -43,10 +43,22 @@ const count = (raw: string | null): number => {
   }
 };
 
+const whatsThere = (raw: string | null): number => {
+  try {
+    const v = JSON.parse(raw ?? "null");
+    return Array.isArray(v) ? v.filter((r) => r?.kind === "whats-there").length : 0;
+  } catch {
+    return 0;
+  }
+};
+
 export interface MyDataSummary {
   devices: number;
   notes: number;
+  /** Problem reports. */
   reports: number;
+  /** "What's there" answers from "What we don't know" (FEAT-03). They share the reports list. */
+  whatsThere: number;
   recents: number;
   saved: number;
   /** Notes or reports may be on our server too. */
@@ -60,7 +72,8 @@ export function myDataSummary(): MyDataSummary {
   return {
     devices: count(get("causewayside.devices.v1")),
     notes: count(get("causewayside.notes.v1")),
-    reports: count(get("causewayside.reports.v1")),
+    reports: count(get("causewayside.reports.v1")) - whatsThere(get("causewayside.reports.v1")),
+    whatsThere: whatsThere(get("causewayside.reports.v1")),
     recents: ks.filter((k) => k.startsWith("causewayside.recents.") && !k.endsWith(".backup")).reduce((n, k) => n + count(get(k)), 0),
     saved: ks.filter((k) => k.startsWith("causewayside.saved.")).reduce((n, k) => n + count(get(k)), 0),
     shared: sharing && ks.includes("causewayside.session.v1"),

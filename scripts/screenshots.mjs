@@ -1,7 +1,7 @@
 /**
  * Screenshot tests for the main screens (STAB-02): the map, search, where you
  * start from (FEAT-20), the route
- * panel, navigation, the device editor, the note and report sheets and Your
+ * panel, navigation, the device editor, the note, what's-there and report sheets and Your
  * data. Each is captured light and dark, at a phone size (390 by 844), at
  * 320 by 640 and at 320 by 640 with text at 200%, and compared with the
  * baseline in tests/screenshots/. It fails when a screen changes without its
@@ -171,6 +171,14 @@ for (const size of SIZES) {
     await page.getByRole("button", { name: "Add a note about this route" }).click();
     await page.getByRole("radio", { name: "Bad" }).waitFor();
     await shoot(page, "note", scheme, size);
+    await page.keyboard.press("Escape");
+
+    // "Report what's there" from "What we don't know" (FEAT-03).
+    await page.locator("details", { hasText: "What we don't know" }).first().evaluate((el) => (el.open = true));
+    await page.getByRole("button", { name: /^Report what's there on / }).first().focus();
+    await page.keyboard.press("Enter");
+    await page.getByRole("dialog", { name: "Report what's there" }).waitFor();
+    await shoot(page, "whats-there", scheme, size);
     await page.keyboard.press("Escape");
 
     await page.getByRole("button", { name: "Start", exact: true }).click();
