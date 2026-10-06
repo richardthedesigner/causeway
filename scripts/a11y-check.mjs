@@ -328,7 +328,7 @@ for (const [scheme, size, zoom] of [["light", { width: 390, height: 844 }, false
   if (shown.headline < 0) failures.push(`200% text / route sheet / the route card's headline is under the Start bar by ${-shown.headline} px`);
   await page.locator("details").evaluateAll((els) => els.forEach((el) => (el.open = true)));
   await reflow("route, all sections open");
-  // By keyboard: a click scrolls the route panel sideways at 200% text, where "Another way" spills out of its box (STAB-22).
+  // By keyboard: at 200% text "Another way" spills out of its box, and a click could scroll the route panel sideways (STAB-22).
   await page.getByRole("button", { name: /^Report what's there on / }).first().focus();
   await page.keyboard.press("Enter");
   await page.getByRole("dialog", { name: "Report what's there" }).waitFor();

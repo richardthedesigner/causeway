@@ -9,7 +9,7 @@ FEAT-03, D-076, PR #65.
 - Saved on the phone in the reports list as `whats-there`, with the street, questions and answers. Your data counts them on their own line, and the copy and Delete everything include them.
 - The router's unknowns carry a point and each missing attribute (`RouteUnknown` in `plan-types.ts`).
 - Tests: `apps/web/test/reports.test.ts`, the Your data count. The e2e trip reports what's there by keyboard alone and finds it in Your data and the copy. The a11y run checks the sheet light, dark and at 320 px with 200% text. A new screenshot, `whats-there`.
-- Found: at 320 px with 200% text, "Another way" spills out of its box, so a click in the route panel scrolls it sideways (STAB-22). The a11y check opens the sheet by keyboard until that is fixed. The answer buttons move with Tab, not the arrow keys (SMALL-20).
+- Found: at 320 px with 200% text, "Another way" spills out of its box, so the route panel is 17 px too wide and a click could scroll it sideways (STAB-22). The a11y check opens the sheet by keyboard to stay clear of it. The answer buttons move with Tab, not the arrow keys (SMALL-20).
 
 ## 2026-10-06 (the route sheet at large text)
 
