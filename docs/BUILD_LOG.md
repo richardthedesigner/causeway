@@ -2,6 +2,12 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
+## 2026-10-06 (e2e ignores outside errors)
+
+STAB-21, PR #63.
+- `scripts/e2e.mjs` fails a journey on a 4xx or 5xx only when the response is from the app's own origin. Any other host prints a `WARN` line and the run carries on. An Open-Meteo 429 had failed a run.
+- The icon check from SMALL-12 is unchanged. No app code touched.
+
 ## 2026-10-06 (a custom domain)
 
 DEP-07, no code.
