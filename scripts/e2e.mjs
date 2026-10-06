@@ -60,8 +60,13 @@ for (const j of JOURNEYS) {
   const problems = [];
   watchCsp(page, problems);
   watchProfile(page, problems);
-  // Nothing the app asks for may 404 (SMALL-12: /favicon.ico did).
-  page.on("response", (r) => r.status() >= 400 && problems.push(`${r.status()} for ${r.url()}`));
+  // Nothing the app itself serves may 4xx or 5xx (SMALL-12: /favicon.ico did). Outside services
+  // (Open-Meteo, TfL and so on) rate-limit and fail on their own, so those only warn (STAB-21).
+  page.on("response", (r) => {
+    if (r.status() < 400) return;
+    if (new URL(r.url()).origin === new URL(server.url).origin) problems.push(`${r.status()} for ${r.url()}`);
+    else console.log(`  WARN ${r.status()} from outside service ${r.url().split("?")[0]}`);
+  });
   page.on("pageerror", (e) => problems.push(`page error: ${e.message}`));
   // No location: navigation falls back to its preview, which walks the route by itself.
   await page.addInitScript(() => {
@@ -362,6 +367,14 @@ for (const j of JOURNEYS) {
       await first.waitFor({ timeout: 30_000 });
       const t = await first.innerText();
       if (!/^Home\s+Hamilton Place/.test(t)) throw new Error(`first suggestion: ${t.replace(/\s+/g, " ")}`);
+    });
+    await step("search distances follow miles (SMALL-18)", async () => {
+      // The device is still set to miles from the step above: a category search lists distances in yards or miles, never m or km.
+      await page.getByPlaceholder("Where to?").fill("toilet");
+      const first = page.getByRole("option").first();
+      await first.waitFor({ timeout: 30_000 });
+      const t = (await page.getByRole("option").allInnerTexts()).join(" ");
+      if (!/\d (yd|miles?)\b/.test(t) || /\d (m|km)\b/.test(t)) throw new Error(`search distances aren't in miles: ${t.replace(/\s+/g, " ").slice(0, 160)}`);
     });
     await step("the note is kept on this phone, without the profile", async () => {
       const stored = await page.evaluate(() => Object.entries(localStorage).filter(([k]) => k.includes("note")).map(([, v]) => v).join(" "));
