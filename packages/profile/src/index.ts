@@ -122,7 +122,7 @@ export function formatSpeed(mps: number, unit: SpeedUnit, long = false): string 
 
 /** Distances follow the same per-device choice as speeds (D-073): mph means miles and yards, km/h means kilometres and metres. */
 export type DistanceUnit = SpeedUnit;
-export const distanceUnit = speedUnit;
+export const distanceUnit = (p: Pick<Profile, "preset" | "speedUnit">): DistanceUnit => speedUnit(p);
 export const M_PER_MILE = 1609.344;
 export const M_PER_YARD = 0.9144;
 /** In miles mode, under this many yards a distance is said in yards (a quarter of a mile). */
