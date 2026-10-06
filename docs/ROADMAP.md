@@ -4,7 +4,7 @@ The one list of work for Causewayside: what's next, in what order, how big it is
 
 This file is the master copy. A read-only copy for sharing and comments lives in Google Drive: [Causewayside roadmap](https://docs.google.com/document/d/1T-RPq188B09LBahJIWPg_Hapm6m_vYbHB88pUzxJXV4/edit). Change this file, then update the Doc to match. Edits made only in the Doc are lost.
 
-Last updated: 2026-10-05.
+Last updated: 2026-10-06.
 
 - What's waiting on Richard, blocked, or a guess: [OPEN_ITEMS.md](OPEN_ITEMS.md)
 - What shipped and when: [BUILD_LOG.md](BUILD_LOG.md) and the phase reports
@@ -53,7 +53,7 @@ The next five things to pick up, in order.
 
 1. **STAB-15**: step the e2e preview walk by distance, not time.
 2. **SMALL-02**: a miles or kilometres setting.
-3. **SPEED-01**: measure first load, city load and time to first route on a mid-range phone.
+3. **SPEED-08**: load the graph and search index before the base map.
 4. **FEAT-03**: "Report what's there" from "What we don't know".
 5. **SMALL-12**: a favicon and app icons.
 
@@ -219,13 +219,18 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 
 | ID | Task | Size | Priority | Status | Who | Notes |
 |---|---|---|---|---|---|---|
-| SPEED-01 | Measure first load, city load and time to first route on a mid-range phone | S | now | doing | Claude | Numbers first, then targets. Claimed 2026-10-06, branch `claude/speed-01-measure` |
+| SPEED-01 | Measure first load, city load and time to first route on a mid-range phone | S | now | done (2026-10-06) | Claude | `pnpm perf:web`, [numbers and targets](perf/2026-10.md). Download is the cost: the whole base map races the graph. Worker is not slowed by the CPU throttle, and the GPU is software, so see SPEED-12 |
 | SPEED-02 | Router benchmark in CI, failing if a journey gets much slower | S | now | done (2026-10-05) | Claude | D-056, [PERF_BASELINE](plans/PERF_BASELINE.md). Ported from PR #36. `scripts/perf-budget.test.ts` in `pnpm test`; `pnpm perf:baseline` |
-| SPEED-03 | Bundle-size and Lighthouse budgets in CI | S | later | todo | Claude | |
+| SPEED-03 | Bundle-size and Lighthouse budgets in CI | S | later | todo | Claude | Start from the targets in [perf/2026-10.md](perf/2026-10.md). `perf:web` is too slow and noisy to gate CI as it is: budget bytes, not seconds |
 | SPEED-04 | Load the `/review` page's code only for reviewers | S | later | todo | Claude | |
-| SPEED-05 | Smaller search index per city | S | later | todo | Claude | `data/places` |
-| SPEED-06 | A compact binary graph format instead of gzipped JSON | L | later | todo | Claude | Only if SPEED-01 shows graph load matters |
+| SPEED-05 | Smaller search index per city | S | later | todo | Claude | `data/places`. SPEED-01: 1.3 to 1.5 MB, as big as the graph in Newcastle and London. Target 600 KB or less |
+| SPEED-06 | A compact binary graph format instead of gzipped JSON | L | later | todo | Claude | SPEED-01 says not yet: the graph is 5 to 25% of the download. Revisit after SPEED-08 and SPEED-09 if Edinburgh's worker setup (2.6 s, unslowed) is over 5 s on a real phone |
 | SPEED-07 | Speed budget follow-ups: a CI wall-time baseline from a few weeks of printed figures, and a re-baseline when the weekly refresh changes the graphs | S | later | todo | Claude | D-056. Settled nodes depend on the graph, so a refresh PR can trip the 10% check |
+| SPEED-08 | Load the graph and search index before the base map, so "Where to?" doesn't wait for tiles | S | now | todo | Claude | SPEED-01. Edinburgh 15.6 s to ready on Fast 4G with 4x CPU; target 6 s or less |
+| SPEED-09 | Read the base map in byte ranges, not whole, and fill the rest in the background for offline | M | next | todo | Claude | SPEED-01. Tiles are 49 to 71% of bytes. Target 2 MB or less before the map draws. Check the offline decisions first |
+| SPEED-10 | Cut the main-thread work after a route returns | S | next | todo | Claude | SPEED-01. Edinburgh 5.4 s at 4x against 3.4 s on desktop. Target 3 s or less. Trace first |
+| SPEED-11 | Trim JavaScript: see what is in the 650 to 680 KB and load later what the first screen doesn't need | M | later | todo | Claude | SPEED-01. MapLibre is the largest chunk. Pairs with SPEED-04 |
+| SPEED-12 | Measure on a real mid-range Android and a real CDN, plus repeat visits and city switching | S | next | todo | Richard and Claude | SPEED-01 limits: unslowed worker, software GPU, local server. Needs a phone or WebPageTest |
 
 ## Bloat reduction
 
@@ -298,6 +303,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 
 Newest first. One line per change: date, ID, what happened, link.
 
+- 2026-10-06: SPEED-01 done: `pnpm perf:web` and [the numbers](perf/2026-10.md). Download is the cost (Edinburgh 15.3 MB, graph ready in 15.6 s on Fast 4G with 4x CPU; the base map is 49 to 71% of bytes and races the graph). SPEED-06 not yet worth it. Added SPEED-08 to SPEED-12; SPEED-08 joins Now.
 - 2026-10-05: REV-01 sweep after the release (#42, #44, #38, #48, #49, #50, #55, #51, #54, #53). SEC-12 and SEC-23 done; SEC-25 added (score the headers, blocked on DEP-07); REL-01 recorded; REV-01 next 2026-11-05. Richard chose Glasgow, then Leeds, then cities by size (D-072, DEF-09, DEF-10).
 - 2026-10-05: STAB-02 done: `pnpm screenshots` captures 10 screens (40 pictures, 2.7 MB in `tests/screenshots/`): 390 px and 320 px in light, 320 px at 200% text in light and dark. CI runs it and uploads diffs on failure. Found STAB-18 to STAB-20.
 - 2026-10-05: UPD-03 and UPD-04 done in PR #54: Next.js 16.3 on webpack, Node 24 in CI and `engines`, static export unchanged (D-071). Added UPD-05 to UPD-07.
