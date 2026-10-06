@@ -11,7 +11,7 @@ import { chromium } from "playwright";
 
 const WEB = join(import.meta.dirname, "../apps/web");
 const OUT = join(WEB, "out");
-const TYPES = { ".html": "text/html", ".js": "text/javascript", ".mjs": "text/javascript", ".css": "text/css", ".json": "application/json", ".gz": "application/gzip", ".pmtiles": "application/octet-stream", ".webmanifest": "application/manifest+json" };
+const TYPES = { ".html": "text/html", ".js": "text/javascript", ".mjs": "text/javascript", ".css": "text/css", ".json": "application/json", ".gz": "application/gzip", ".pmtiles": "application/octet-stream", ".webmanifest": "application/manifest+json", ".ico": "image/x-icon", ".png": "image/png", ".svg": "image/svg+xml" };
 
 /** Headers from vercel.json rules that apply to every path ("/(.*)"). */
 function vercelHeaders() {

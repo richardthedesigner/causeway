@@ -10,6 +10,15 @@ FEAT-20, D-073. Richard found the "Starting from?" step odd on production.
 - Privacy: live search was biased towards your position once you'd used "Your location", so Photon got it. It now gets the city's start. `pnpm e2e` shares a location near each city's start (`hereIn` in `scripts/serve-out.mjs`) and fails if a request carries it; the profile check is unchanged. A new journey checks where you start: located, swapped, location off, outside the city.
 - `pnpm a11y` checks "Finding where you are" and "Where are you starting from?" light, dark and at 320 px with 200% text. `pnpm screenshots` adds `start-from`.
 
+## 2026-10-06 (favicon and app icons)
+
+SMALL-12.
+- Every page load asked for `/favicon.ico` and got a 404. There is now one mark, a route ending in a dot, white on the accent blue.
+- `apps/web/public/`: `favicon.ico` (16, 32, 48), `icon.svg` (dark mode swaps to the dark accent), `apple-touch-icon.png` (180), `icon-192/512.png` and `icon-maskable-192/512.png`. All under 13 KB. The manifest lists them.
+- The maskable icons fill the square and keep the mark inside the central 80%. Redraw them with `node scripts/make-icons.mjs`.
+- The CSP needed no change: icons are same-origin (`img-src 'self'`, `manifest-src 'self'`).
+- `pnpm e2e` now fails on any 4xx response in a journey and checks each icon is served as an image.
+
 ## 2026-10-06 (the e2e walk by distance)
 
 STAB-15: `scripts/e2e.mjs` only. No app code changed.

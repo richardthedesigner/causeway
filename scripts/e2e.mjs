@@ -59,6 +59,8 @@ for (const j of JOURNEYS) {
   const problems = [];
   watchCsp(page, problems);
   watchProfile(page, problems);
+  // Nothing the app asks for may 404 (SMALL-12: /favicon.ico did).
+  page.on("response", (r) => r.status() >= 400 && problems.push(`${r.status()} for ${r.url()}`));
   page.on("pageerror", (e) => problems.push(`page error: ${e.message}`));
   // No location: navigation falls back to its preview, which walks the route by itself.
   await page.addInitScript(() => {
@@ -487,6 +489,16 @@ for (const j of JOURNEYS) {
   await context.close();
 }
 
+// The icons are there and are images (SMALL-12). The manifest's icons too.
+{
+  const manifest = await (await fetch(`${server.url}manifest.webmanifest`)).json();
+  const paths = ["favicon.ico", "icon.svg", "apple-touch-icon.png", ...manifest.icons.map((i) => i.src)];
+  for (const path of new Set(paths)) {
+    const r = await fetch(new URL(path, server.url));
+    if (!r.ok || r.headers.get("content-type")?.startsWith("image/") !== true) failures.push(`icon ${path}: ${r.status} ${r.headers.get("content-type")}`);
+  }
+}
+
 // Where you start (FEAT-20, D-073): destination first, then your location, asked for only then. Swap ends. Location
 // turned off, and standing outside the city: both say so and ask where you're starting from, the city's start suggested.
 {
@@ -567,7 +579,6 @@ for (const j of JOURNEYS) {
   });
   for (const p of problems) failures.push(`${name}: ${p}`), console.log(`  FAIL ${p}`);
 }
-
 await browser.close();
 server.close();
 if (failures.length) {
