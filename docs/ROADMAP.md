@@ -157,13 +157,15 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | SMALL-10 | Recent journeys, not just recent places | S | later | todo | Claude | `recents.ts` |
 | SMALL-11 | Weather for trips more than 48 hours ahead | S | later | todo | Claude | D-040 falls back to today's |
 | SMALL-12 | A favicon and app icons (every page load asks for `/favicon.ico` and gets a 404) | S | now | done (2026-10-06) | Claude | PR #59. One mark (a route ending in a dot), `scripts/make-icons.mjs`. Found SMALL-16 |
-| SMALL-13 | Saved places on the map, and as a start as well as a destination from the route screen | S | now | doing | Claude | 2026-10-06, branch claude/small-13-saved-on-map. Found doing FEAT-04. Today they show in search, and as starts in "Starting from?" |
+| SMALL-13 | Saved places on the map, and as a start as well as a destination from the route screen | S | now | done (2026-10-06) | Claude | PR #68. D-075. Each saved place is a labelled button on the map; tapping it offers "Go here" and "Start from here". As a start on the route screen it was already in "Where are you starting from?" (D-073); `pnpm e2e` now checks it. Found SMALL-20, SMALL-21 |
 | SMALL-14 | Toilet Map: say when OSM and the Toilet Map disagree, keep disputed toilets off routes, and say when a record is over 2 years old | S | now | done (2026-10-05) | Claude | D-065. Ported from PR #36. 5 disputes in Edinburgh, 1 in Newcastle |
 | SMALL-15 | Parks and OpenStreetMap notes: a park found by name ends at its gate, not a nearby building's door; old notes and business questions left out; "N more places a mapper flagged" | S | now | done (2026-10-05) | Claude | D-048 update. Ported from PR #36. 26 of 119 named Edinburgh parks with gates had a fitting door within 50 m |
 | SMALL-16 | Pick the 404 and offline pages' look to match the app (`404.html` is Next's default) | S | later | todo | Claude | Found doing SMALL-12 |
 | SMALL-17 | Recent places as starts in "Where are you starting from?" | S | later | todo | Claude | Found doing FEAT-20 (D-073). Today it suggests the city's start, saved places and the city's places |
 | SMALL-18 | Search results and the "Where are you starting from?" suggestions show distance in metres or km only: follow the device's miles or kilometres (D-074) | S | now | done (2026-10-06) | Claude | Left out of SMALL-02 because FEAT-20 was changing the search flow. `metres()` in `PlaceSearch.tsx`. Done: results use `formatDistance` with the device's unit. The start suggestions never showed a distance, so only results changed. |
 | SMALL-19 | Gusts ("up to 50 km/h") follow the device's speed unit, and say mph for people who read mph | S | later | todo | Claude | Found doing SMALL-02. Weather text in `cost.ts`, `on-route.ts`, `area-status.ts`. Heights and climbs stay in metres (D-074) |
+| SMALL-20 | A saved place's marker can sit under the half-open sheet, out of tap range. Pan the map to bring it into view when it opens, or list saved places on the home sheet | S | later | todo | Claude | Found doing SMALL-13. Keyboard and screen reader users reach every marker; a finger can't when the sheet covers it |
+| SMALL-21 | Save a chosen start as a place too ("Save this place" is on the destination only) | S | later | todo | Claude | Found doing SMALL-13 |
 
 ## Security and privacy
 
@@ -308,6 +310,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 ## Log
 
 Newest first. One line per change: date, ID, what happened, link.
+- 2026-10-06: SMALL-13 done in PR #68: saved places are labelled buttons on the map with "Go here" and "Start from here" (D-075); `pnpm e2e` covers them by keyboard and as a start. Added SMALL-20, SMALL-21.
 - 2026-10-06: STAB-18 done in PR #66: at 320 px with 200% text the sheet shows 487 px above a slimmer Start bar, and a new route opens with its card at the top. `pnpm a11y` asserts the height. Route screenshot baselines taken from the CI artifact (local fonts differ).
 
 - 2026-10-06: SMALL-18 done in PR #64: distances beside search results follow the device's miles or kilometres (D-074).

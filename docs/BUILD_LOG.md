@@ -2,6 +2,15 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
+## 2026-10-06 (saved places on the map)
+
+SMALL-13, D-075.
+- Each saved place is a labelled button on the map: a pill with a star and its name, edged in ink on the surface colour, so it reads in light, dark and the high-contrast map without relying on colour.
+- Tapping or pressing one opens a card in the sheet: "Go here" and "Start from here", and Cancel. Focus moves to the card; Escape or Cancel puts it back on the marker. A tap on a marker drops no pin.
+- A marker is left off where the route already marks that place (the destination, or a start you chose).
+- A saved place was already a start in "Where are you starting from?" (D-073). `pnpm e2e` now checks that, and the markers by keyboard.
+- Open: a marker under the half-open sheet is out of reach for a finger (SMALL-20).
+
 ## 2026-10-06 (the route sheet at large text)
 
 STAB-18.
