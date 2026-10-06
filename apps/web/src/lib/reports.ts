@@ -6,9 +6,10 @@
  */
 import { loadStored, readList, saveStored, type StoredVersion } from "./stored";
 
-export type ReportKind = "blocked" | "kerb" | "surface" | "lift" | "steep" | "other";
+export type ReportKind = "blocked" | "kerb" | "surface" | "lift" | "steep" | "other" | "whats-there";
 
-export const REPORT_KINDS: { kind: ReportKind; label: string }[] = [
+/** The kinds on "Report a problem". "What's there" is reached from "What we don't know" instead (FEAT-03). */
+export const REPORT_KINDS: { kind: Exclude<ReportKind, "whats-there">; label: string }[] = [
   { kind: "blocked", label: "Pavement blocked" },
   { kind: "kerb", label: "No dropped kerb" },
   { kind: "surface", label: "Broken or rough surface" },
@@ -28,6 +29,8 @@ export interface Report {
   note: string;
   /** Small JPEG data URL, if the person added a photo. */
   photo: string | null;
+  /** For "what's there" (FEAT-03): the street, and each thing we didn't know with the answer given. */
+  about?: { place: string; answers: { attr: string; question: string; answer: string }[] };
   /** Set once the report has been sent for triage (only when sharing is on, D-030). */
   sentAt?: string;
 }
@@ -50,6 +53,49 @@ export function saveReport(r: Report): boolean {
 export function markSent(id: string): void {
   // If it doesn't save, it's tried again next time.
   saveStored(KEY, loadReports().map((r) => (r.id === id ? { ...r, sentAt: new Date().toISOString() } : r)));
+}
+
+export interface WhatsThereQuestion {
+  /** The router's attribute ("kerb", "surface"), kept with the answer so it can be matched to the graph later. */
+  attr: string;
+  /** What we didn't know, in the router's words. */
+  detail: string;
+  question: string;
+  answers: string[];
+}
+
+const QUESTIONS: Record<string, { question: string; answers: string[] }> = {
+  kerb: { question: "What are the kerbs like?", answers: ["Dropped, level with the road", "Dropped, with a small lip", "Raised, no dropped kerb"] },
+  pavement: { question: "Is there a pavement?", answers: ["Yes, on both sides", "On one side only", "No pavement"] },
+  surface: { question: "What's the surface like?", answers: ["Smooth: tarmac or paving", "Setts or cobbles", "Gravel or loose", "Grass or earth"] },
+  width: { question: "How wide is it?", answers: ["Wide enough to pass easily", "Narrow in places", "Too narrow to pass"] },
+  incline: { question: "How steep is it?", answers: ["Flat or gentle", "Steep", "Very steep"] },
+  steps: { question: "Are there steps?", answers: ["No steps", "One or two steps", "A flight of steps"] },
+  station: { question: "Is it step-free?", answers: ["Yes, step-free", "No, not step-free"] },
+  "bus-seat": { question: "Is there a seat at the stop?", answers: ["Yes, a seat", "No seat"] },
+};
+
+/**
+ * One question for each thing we don't know about a street (FEAT-03), in the
+ * order the router gave them. Things a person on the street can't see, such
+ * as live lift status or an operator's scooter rules, get no question; the
+ * note covers anything else.
+ */
+export function whatsThereQuestions(attrs: readonly { attr: string; detail: string }[]): WhatsThereQuestion[] {
+  const out: WhatsThereQuestion[] = [];
+  for (const { attr, detail } of attrs) {
+    // "Kerbs at side roads not mapped" comes from the pavement check, but it's a question about kerbs.
+    const key = attr === "pavement" && /kerb/.test(detail) ? "kerb" : attr;
+    const q = QUESTIONS[key];
+    if (q && !out.some((o) => o.attr === key)) out.push({ attr: key, detail, ...q });
+  }
+  return out;
+}
+
+/** A report in a line or two, for triage. */
+export function reportDetail(r: Pick<Report, "note" | "about">): string | null {
+  const about = r.about ? [`On ${r.about.place}.`, ...r.about.answers.map((a) => `${a.question} ${a.answer}.`)] : [];
+  return [...about, r.note].filter(Boolean).join(" ") || null;
 }
 
 /** Shrink a photo to at most 640 px on its long side, as JPEG, so it fits on the device. */

@@ -18,11 +18,11 @@ import { compareLine } from "@/lib/devices";
 import type { NoteAbout } from "@/components/NoteSheet";
 import { RouteStrip, VerdictPill } from "@/components/RouteStrip";
 import { Button } from "@/components/ui/button";
-import type { FloodHere, Place, PlannedRoute, PlanResult, WorksSummary } from "@/lib/plan-types";
+import type { FloodHere, Place, PlannedRoute, PlanResult, RouteUnknown, WorksSummary } from "@/lib/plan-types";
 import { departure, type Conditions, type LiveArea, type LiveHealthAlert, type LiveLifts } from "@/lib/use-planner";
 import { areaStatus, gustStatus, healthAlertStatus } from "@/lib/area-status";
 import { airItems, blockedLine, floodLine } from "@/lib/on-route";
-import { OnThisRoute } from "@/components/OnThisRoute";
+import { OnThisRoute, ReportWhatsThere } from "@/components/OnThisRoute";
 import { liveFailedLine } from "@/lib/live-status";
 import type { FlagReason } from "@/lib/sync";
 import { cn } from "@/lib/utils";
@@ -80,6 +80,8 @@ interface Props {
   /** Open the note sheet with these subjects to choose from, most likely first. */
   onAddNote: (choices: NoteAbout[]) => void;
   onDeleteNote: (id: string) => void;
+  /** Say what's there on a street we lack data for (FEAT-03). */
+  onReportWhatsThere?: (u: RouteUnknown) => void;
   /** Present when notes are shared: flag someone else's note. */
   onFlagNote?: (id: string, reason: FlagReason) => Promise<boolean>;
   /** A limit stretched for this journey only (never saved), and how to undo it. */
@@ -413,6 +415,7 @@ export function RoutePanel(props: Props) {
                         {u.name} <span className="tabular text-muted">/ {u.m} m</span>
                       </span>
                       <span className="text-sm text-muted">{u.what}</span>
+                      {props.onReportWhatsThere ? <ReportWhatsThere name={u.name} onReport={() => props.onReportWhatsThere!(u)} /> : null}
                       <PeopleSay notes={stretchNotes(u.name)} all={notes} author={author} onDelete={props.onDeleteNote} onFlag={props.onFlagNote} title="What people say (not checked by us)" className="mt-2" />
                     </li>
                   ))}

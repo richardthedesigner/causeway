@@ -8,7 +8,7 @@ import type { PlannedRoute } from "./plan-types";
 
 const DAY = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", day: "numeric", month: "short", year: "numeric" });
 
-export function routeText(from: { name: string }, to: { name: string }, r: Pick<PlannedRoute, "summary" | "segments" | "unknowns">, unit: DistanceUnit = "kmh", when = new Date()): string {
+export function routeText(from: { name: string }, to: { name: string }, r: Pick<PlannedRoute, "summary" | "segments"> & { unknowns: readonly { name: string }[] }, unit: DistanceUnit = "kmh", when = new Date()): string {
   const km = (m: number) => formatDistance(m, unit);
   const s = r.summary;
   const facts = [`About ${s.minutes} min, ${km(s.distanceM)}.`];

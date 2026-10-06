@@ -940,3 +940,13 @@ A person who reads speeds in mph reads distances in miles, and a person who read
 - **Privacy unchanged (D-009, D-060).** Saved places are read from this phone's storage and drawn locally. Nothing is sent.
 - **Not done (SMALL-20, SMALL-21):** panning the map so a marker under the half-open sheet can be tapped, and saving a chosen start as a place.
 
+## D-076 Report what's there: one question per gap, kept on the phone
+
+**Decided.** 2026-10-06 (FEAT-03). The UX assessment left "What we don't know" with no way to say what's actually there.
+
+- **Where.** Each street under "What we don't know" has a "Report what's there" button. Its name says which street, for screen readers ("Report what's there on Eyre Place").
+- **Prefilled.** The sheet already knows the street, a point on it (the middle of the first stretch we lack data for) and what's missing. The router's unknowns now carry that point and each missing attribute with its words.
+- **One question per gap.** Kerbs, pavement, surface, width, steepness, steps, step-free stations and bus stop seats each get a short question with three or four plain answers. "Kerbs at side roads not mapped" is asked as a kerb question. Live lift status and an operator's scooter rules get no question: nobody can see them from the street. Where no question fits, the note is the answer. One answer is enough to save.
+- **Same list as problem reports.** Saved as a report of kind `whats-there`, with the street and each question and answer. So it is in Your data (counted on its own line), in the copy and in Delete everything with no new storage. If sharing is ever on, it goes to triage like any report, with the answers in the detail line (D-030). It never carries the profile (D-009).
+- **On the phone only for now.** There is no Causewayside backend yet (DEF-04), so nothing is sent. The answers don't change routes yet: that waits until they can be checked by more than one person (DEF-06).
+
