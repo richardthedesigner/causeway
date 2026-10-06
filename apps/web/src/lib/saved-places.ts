@@ -46,3 +46,11 @@ export function savePlace(city: string, label: string, place: Place): SavedPlace
 export function unsavePlace(city: string, id: string): SavedPlace[] {
   return store(city, loadSaved(city).filter((s) => s.place.id !== id));
 }
+
+/**
+ * What the map shows for saved places (SMALL-13): each one, except where the route already marks the place
+ * (the destination or a chosen start). `hideIds` are those places' ids.
+ */
+export function savedMarkers(list: SavedPlace[], hideIds: (string | null | undefined)[]): { id: string; label: string; lon: number; lat: number }[] {
+  return list.filter((s) => !hideIds.includes(s.place.id)).map((s) => ({ id: s.place.id, label: s.label, lon: s.place.lon, lat: s.place.lat }));
+}

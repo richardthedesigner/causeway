@@ -22,7 +22,8 @@
  * journeys have no location, so they're asked where they're starting from and take the
  * city's suggested start; the others share a location, and no request may carry it. One
  * journey checks where you start: from your location, swapped, with location turned off,
- * and from outside the city.
+ * and from outside the city. One with saved places on the map (SMALL-13): a marker offers
+ * "Go here" and "Start from here", by keyboard too.
  * Exits 1 on any failed step, page error, profile leak, or anything the Content
  * Security Policy blocks. Runs in CI (.github/workflows/ci.yml). Set E2E_SHOT=<file.png>
  * to keep a screenshot of the trip journey when it fails.
@@ -125,6 +126,80 @@ for (const j of JOURNEYS) {
     console.log(`  FAIL ${e.message}`);
   }
   for (const p of problems) failures.push(`${name}: ${p}`), console.log(`  FAIL ${p}`);
+  await context.close();
+}
+
+// Saved places on the map (SMALL-13): each is a labelled button, reachable by keyboard. Tapping one offers "Go here" and
+// "Start from here"; a saved place is also a start from "Where are you starting from?".
+{
+  const name = "edinburgh: saved places on the map";
+  const problems = [];
+  const saved = [
+    { label: "Home", place: { id: "e2e-meadows", name: "The Meadows", kind: "Park", lon: -3.1894, lat: 55.9421 } },
+    { label: "Work", place: { id: "e2e-links", name: "Bruntsfield Links", kind: "Park", lon: -3.204, lat: 55.9398 } },
+  ];
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const page = await context.newPage();
+  watchCsp(page, problems);
+  page.on("pageerror", (e) => problems.push(`page error: ${e.message}`));
+  await page.addInitScript((list) => {
+    localStorage.setItem("causewayside.city.v1", "edinburgh");
+    localStorage.setItem("causewayside.saved.edinburgh.v1", JSON.stringify(list));
+  }, saved);
+  const step = async (label, fn) => {
+    try {
+      await fn();
+      console.log(`  ok   ${label}`);
+    } catch (e) {
+      failures.push(`${name}: ${label}: ${e.message.split("\n")[0]}`);
+      console.log(`  FAIL ${label}: ${e.message.split("\n")[0]}`);
+    }
+  };
+  const marker = (label) => page.getByRole("button", { name: `${label}, saved place`, exact: true });
+  const fromText = async () => (await page.getByRole("button", { name: /^Change start/ }).first().innerText()).replace(/^\s*Change start:\s*/, "").trim();
+  console.log(name);
+  await page.goto(server.url);
+  await page.getByPlaceholder("Where to?").waitFor({ timeout: 60_000 });
+  await step("each saved place is a button on the map", async () => {
+    await marker("Home").waitFor({ timeout: 60_000 });
+    await marker("Work").waitFor();
+  });
+  await step("a marker opens Go here and Start from here by keyboard, and drops no pin", async () => {
+    await marker("Home").focus();
+    await page.keyboard.press("Enter");
+    await page.getByRole("region", { name: "Saved place: Home" }).waitFor();
+    for (const b of ["Go here", "Start from here", "Cancel"]) await page.getByRole("button", { name: b, exact: true }).waitFor();
+    const focused = await page.evaluate(() => document.activeElement?.id);
+    if (focused !== "saved-pick") throw new Error(`focus is on "${focused}", not the saved place`);
+    if (await page.getByRole("region", { name: "Dropped pin" }).count()) throw new Error("a pin was dropped");
+    await page.keyboard.press("Escape");
+    await page.getByRole("region", { name: "Saved place: Home" }).waitFor({ state: "detached" });
+    const back = await page.evaluate(() => document.activeElement?.id);
+    if (back !== "saved-marker-e2e-meadows") throw new Error(`focus went to "${back}", not back to the marker`);
+  });
+  await step("Start from here sets the start, and the marker gives way to the route's own", async () => {
+    await marker("Work").click();
+    await page.getByRole("button", { name: "Start from here", exact: true }).click();
+    await marker("Work").waitFor({ state: "detached" });
+    await page.getByPlaceholder("Where to?").fill("Hamilton Place");
+    await page.getByRole("option").first().click();
+    await page.getByText("Why this way?").waitFor({ timeout: 60_000 });
+    if ((await fromText()) !== "Bruntsfield Links") throw new Error(`From says "${await fromText()}"`);
+  });
+  await step("on the route screen, another saved place is a start", async () => {
+    await page.getByRole("button", { name: /^Change start/ }).first().click();
+    await page.getByRole("option", { name: /Saved as Home/ }).first().click();
+    await page.getByText("Why this way?").waitFor({ timeout: 60_000 });
+    if ((await fromText()) !== "The Meadows") throw new Error(`From says "${await fromText()}"`);
+  });
+  await step("Go here makes it the destination", async () => {
+    await page.goto(server.url);
+    await page.getByPlaceholder("Where to?").waitFor({ timeout: 60_000 });
+    await marker("Work").click();
+    await page.getByRole("button", { name: "Go here", exact: true }).click();
+    await page.getByRole("button", { name: /^Change destination: Bruntsfield Links/ }).waitFor();
+  });
+  if (problems.length) failures.push(`${name}: ${problems.join("; ")}`);
   await context.close();
 }
 
