@@ -88,7 +88,7 @@ export default function Home() {
   }, []);
   const planner = usePlanner(city);
   const index = usePlaces(city, planner.ready?.places ?? null);
-  // The base map waits for the graph and search index, so "Where to?" doesn't share the line with tiles (SPEED-08, D-075).
+  // The base map waits for the graph and search index, so "Where to?" doesn't share the line with tiles (SPEED-08, D-076).
   // It stays on once released for a city; a failed graph releases it too, so the map still draws.
   // Right after a city switch, index and error still belong to the old city, so that run is skipped.
   const [mapCity, setMapCity] = useState<string | null>(null);

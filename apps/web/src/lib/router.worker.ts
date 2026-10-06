@@ -83,6 +83,16 @@ function applyWorks() {
 const post = (m: WorkerResponse) => self.postMessage(m);
 
 async function load(url: string, networkUrl: string | undefined, worksUrl: string | undefined, busUrl: string | undefined, footwaysUrl: string | undefined, floodsUrl: string | undefined, greenspaceUrl: string | undefined, osmNotesUrl: string | undefined, demo: Place[]) {
+  // The files that join the graph download alongside it, not one by one after it (SPEED-08, D-076).
+  // A bonus file that fails reads as null; the rail network still fails the load, as before.
+  const side = <T,>(u: string | undefined) => (u ? fetch(u).then((r) => r.json() as Promise<T>) : null);
+  const busP = side<BusNetwork>(busUrl);
+  const footwaysP = side<CouncilFootways>(footwaysUrl);
+  const osmNotesP = side<OsmNotesFile>(osmNotesUrl);
+  const greenspaceP = side<GreenspaceFile>(greenspaceUrl);
+  const floodsP = side<FloodAreas>(floodsUrl);
+  const networkP = side<TransitNetwork>(networkUrl);
+  for (const p of [busP, footwaysP, osmNotesP, greenspaceP, floodsP, networkP]) p?.catch(() => undefined);
   const res = await fetch(url);
   if (!res.ok || !res.body) throw new Error(`graph: HTTP ${res.status}`);
   // Hosts that won't serve .gz get the same bytes as base64 text (the private preview build).
@@ -93,7 +103,7 @@ async function load(url: string, networkUrl: string | undefined, worksUrl: strin
   let buses: { stops: number; lines: number; source: string } | null = null;
   if (busUrl) {
     try {
-      const net = (await (await fetch(busUrl)).json()) as BusNetwork;
+      const net = (await busP)!;
       buses = { ...addBus(graph, net), source: net.source };
     } catch {
       buses = null;
@@ -102,7 +112,7 @@ async function load(url: string, networkUrl: string | undefined, worksUrl: strin
   // Council footway surfaces and widths fill what OSM doesn't know (DATA-06). Missing: OSM alone, as before.
   if (footwaysUrl) {
     try {
-      applyCouncilFootways(graph, (await (await fetch(footwaysUrl)).json()) as CouncilFootways);
+      applyCouncilFootways(graph, (await footwaysP)!);
     } catch {
       /* the layer is a bonus */
     }
@@ -110,7 +120,7 @@ async function load(url: string, networkUrl: string | undefined, worksUrl: strin
   osmNotes = null;
   if (osmNotesUrl) {
     try {
-      osmNotes = (await (await fetch(osmNotesUrl)).json()) as OsmNotesFile;
+      osmNotes = await osmNotesP;
     } catch {
       /* no notes: nothing extra to say */
     }
@@ -118,7 +128,7 @@ async function load(url: string, networkUrl: string | undefined, worksUrl: strin
   greenspace = null;
   if (greenspaceUrl) {
     try {
-      greenspace = (await (await fetch(greenspaceUrl)).json()) as GreenspaceFile;
+      greenspace = await greenspaceP;
     } catch {
       /* no gates: parks end at their middle, as before */
     }
@@ -126,12 +136,12 @@ async function load(url: string, networkUrl: string | undefined, worksUrl: strin
   floodAreas = null;
   if (floodsUrl) {
     try {
-      floodAreas = (await (await fetch(floodsUrl)).json()) as FloodAreas;
+      floodAreas = await floodsP;
     } catch {
       /* no flood areas: warnings can't be placed, and the panel says nothing */
     }
   }
-  network = networkUrl ? ((await (await fetch(networkUrl)).json()) as TransitNetwork) : null;
+  network = networkP ? await networkP : null;
   // TfL's per-line step-free facts go on the board edges before the router indexes the graph (DATA-03).
   if (network) {
     applyStationAccess(graph, network);

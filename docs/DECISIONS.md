@@ -928,3 +928,13 @@ A person who reads speeds in mph reads distances in miles, and a person who read
 - **Stored values stay as they are.** Rest and toilet intervals are kept in metres and battery range in km. In miles mode they are converted for display (an interval of 500 m reads "0.3 miles"), and the battery range steps in whole miles and is stored as km to a tenth. Nothing about routing changes.
 - **Defaults** are D-051's: scooters mph, everyone else km/h. Existing devices keep what they had.
 
+
+## D-076 Load order: the graph first, then the search index, then the base map
+
+**Decided.** 2026-10-06 (SPEED-08). On a cold visit everything used to download at once, so the city graph shared the line with 2.7 to 9.2 MB of base map and "Where to?" waited for tiles. Now the order is set:
+
+1. **The graph and the files that join it.** The worker fetches the graph, buses, council footways, OSM notes, greenspace gates, flood areas and the rail network together, then joins them in the same order as before. They used to download one after another once the graph was in, which cost Edinburgh about 2 s of round trips.
+2. **The search index**, with the Toilet Map and TfL station toilets, once the graph is ready. Fetching it alongside the graph was measured and was slower: Edinburgh's graph was ready at 9.4 s against 7.5 s, because unzipping the index on the main thread held up the page. Until the index lands, the search box says "Loading places…" and makes no live lookups, as D-025 requires.
+3. **The base map**, once the search index is built, or at once if the graph fails, so the map still draws. Once released for a city it stays on.
+
+The trade: the map draws later on a cold visit (Edinburgh 18 s to about 23 s on Fast 4G with 4x CPU, in software). SPEED-09 (range reads) is the fix for that, not a change back. Caching is unchanged (D-023): the service worker still stores every file, and a repeat visit reads them from the cache in this order too. Nothing about routing changes.

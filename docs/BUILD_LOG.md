@@ -2,6 +2,16 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
+## 2026-10-06 (the graph first)
+
+SPEED-08 (D-076), PR #67.
+- Load order on a cold visit: the graph and the files that join it, together; then the search index, once the graph is ready; then the base map, once the index is built (or at once if the graph fails).
+- The router worker fetches buses, footways, notes, greenspace, floods and the rail network alongside the graph instead of one by one after it. That was about 2 s of Edinburgh's wait.
+- Edinburgh, Fast 4G with 4x CPU: graph ready 12.9 s to 7.6 s, "Where to?" (LCP) 13.9 s to 8.8 s. The 6 s target is not met: SPEED-13 (start the graph earlier) and SPEED-06 (a binary graph) are the rest. Newcastle and London 0.4 s quicker, and no longer download Edinburgh's search index on the way to their own.
+- The map draws 2.7 to 5 s later, as expected (SPEED-09). Destination to route is 0.3 to 0.7 s slower, cause not yet found (noted on SPEED-10).
+- `perf:web --debug` prints when each file started and finished. Numbers and raw runs: `docs/perf/2026-10-06-speed-08.md`.
+- Checks: typecheck, unit tests, web typecheck, build, e2e and a11y pass.
+
 ## 2026-10-06 (a custom domain)
 
 DEP-07, no code.
