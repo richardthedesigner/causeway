@@ -139,6 +139,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | FEAT-17 | Indoor and station routing (lifts, platforms, step-free interchanges) | XL | later | todo | Claude | Start with one big station |
 | FEAT-18 | Road speed setting for road scooters in the device editor | S | later | done (2026-10-05) | Claude | D-051. 4 to 8 mph, and a per-device mph or km/h choice for speeds |
 | FEAT-19 | "On this route": what a route went round, what may slow you and what's worth knowing, in one grouped list, each with its label, source and date; the route card says only what changed the route or needs doing | M | now | done (2026-10-05) | Claude | D-067. Ported from PR #36 (its D-041). Blocked from the explanation and one closure-blind search per plan, only when something is closed. TfL's informational station messages, the weather and health lines and mappers' notes moved into it |
+| FEAT-20 | Destination first: one "Where to?" search, then From prefilled with "Your location", asking for location only then | M | now | done (2026-10-06) | Claude | D-073. PR #57. Fallbacks say why (location off, no fix, outside the city) and ask "Where are you starting from?" with the city's start suggested. Photon no longer gets your position. `pnpm e2e` fails if a request carries it |
 
 ## Small features
 
@@ -160,6 +161,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | SMALL-14 | Toilet Map: say when OSM and the Toilet Map disagree, keep disputed toilets off routes, and say when a record is over 2 years old | S | now | done (2026-10-05) | Claude | D-065. Ported from PR #36. 5 disputes in Edinburgh, 1 in Newcastle |
 | SMALL-15 | Parks and OpenStreetMap notes: a park found by name ends at its gate, not a nearby building's door; old notes and business questions left out; "N more places a mapper flagged" | S | now | done (2026-10-05) | Claude | D-048 update. Ported from PR #36. 26 of 119 named Edinburgh parks with gates had a fitting door within 50 m |
 | SMALL-16 | Pick the 404 and offline pages' look to match the app (`404.html` is Next's default) | S | later | todo | Claude | Found doing SMALL-12 |
+| SMALL-17 | Recent places as starts in "Where are you starting from?" | S | later | todo | Claude | Found doing FEAT-20 (D-073). Today it suggests the city's start, saved places and the city's places |
 
 ## Security and privacy
 
@@ -304,6 +306,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 
 Newest first. One line per change: date, ID, what happened, link.
 
+- 2026-10-06: FEAT-20 done: destination first. "Where to?" alone, then From as "Your location", with location asked for only then; plain-words fallbacks ask where you're starting from (D-073). Added SMALL-17.
 - 2026-10-06: SMALL-12 done in PR #59: favicon.ico, SVG icon (follows dark mode), apple-touch-icon and manifest icons (standard and maskable), all from one mark. e2e now fails on any 4xx and checks the icons are served as images. Added SMALL-16.
 - 2026-10-06: STAB-15 done (PR #58): the e2e walk runs in 500 m batches, so arrival no longer depends on machine speed. STAB-18 joins Now.
 - 2026-10-06: SPEED-01 done: `pnpm perf:web` and [the numbers](perf/2026-10.md). Download is the cost (Edinburgh 15.3 MB, graph ready in 15.6 s on Fast 4G with 4x CPU; the base map is 49 to 71% of bytes and races the graph). SPEED-06 not yet worth it. Added SPEED-08 to SPEED-12; SPEED-08 joins Now.

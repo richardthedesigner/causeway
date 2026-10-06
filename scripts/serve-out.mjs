@@ -50,3 +50,26 @@ export function watchCsp(page, into) {
     if (m.type() === "error" && /Content Security Policy/i.test(m.text())) into.push(m.text());
   });
 }
+
+/**
+ * Where the phone says you are, per city: a few tens of metres from the city's start (apps/web/src/lib/cities.ts), so a
+ * request carrying your position can be told apart from one carrying the start (FEAT-20).
+ */
+export const HERE = {
+  edinburgh: { latitude: 55.9387, longitude: -3.1815 },
+  newcastle: { latitude: 54.9724, longitude: -1.6126 },
+  london: { latitude: 51.5009, longitude: -0.1266 },
+};
+
+/** Browser context options for a phone that shares its location, standing in `city`. */
+export const hereIn = (city) => ({ permissions: ["geolocation"], geolocation: HERE[city] });
+
+/** Collect any request whose address or body carries the position from `hereIn` (D-009: it never leaves the phone). */
+export function watchPosition(page, city, into) {
+  const { latitude, longitude } = HERE[city];
+  const marks = [latitude.toFixed(4), longitude.toFixed(4)];
+  page.on("request", (r) => {
+    const sent = `${r.url()} ${r.postData() ?? ""}`;
+    for (const m of marks) if (sent.includes(m)) into.push(`position leak: "${m}" sent to ${r.url().split("?")[0]}`);
+  });
+}

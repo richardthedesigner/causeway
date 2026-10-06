@@ -27,7 +27,7 @@ import { readFileSync, writeFileSync, existsSync, statSync, createReadStream } f
 import { createServer } from "node:http";
 import { extname, join, normalize } from "node:path";
 import { brotliCompressSync, constants } from "node:zlib";
-import { launchBrowser } from "./serve-out.mjs";
+import { hereIn, launchBrowser } from "./serve-out.mjs";
 
 const WEB = join(import.meta.dirname, "../apps/web");
 const OUT = join(WEB, "out");
@@ -177,7 +177,8 @@ const DRAWN_CALLS = 150;
 
 async function run(browser, server, city) {
   server.sent.clear();
-  const context = await browser.newContext(PHONE);
+  // The phone shares where it is, near the city's start, so the first route starts from "Your location" (FEAT-20).
+  const context = await browser.newContext({ ...PHONE, ...hereIn(city.id) });
   const page = await context.newPage();
   const cdp = await context.newCDPSession(page);
   await cdp.send("Emulation.setCPUThrottlingRate", { rate: CPU });

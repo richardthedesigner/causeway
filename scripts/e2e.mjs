@@ -18,13 +18,17 @@
  * round a lift out, from TfL's recorded feeds, and an Edinburgh route's
  * summary row. Every request any
  * journey makes is checked for the profile (SEC-05, D-009): the device's name,
- * its type and its limits must never leave the phone.
+ * its type and its limits must never leave the phone. Destination first (FEAT-20): the city
+ * journeys have no location, so they're asked where they're starting from and take the
+ * city's suggested start; the others share a location, and no request may carry it. One
+ * journey checks where you start: from your location, swapped, with location turned off,
+ * and from outside the city.
  * Exits 1 on any failed step, page error, profile leak, or anything the Content
  * Security Policy blocks. Runs in CI (.github/workflows/ci.yml). Set E2E_SHOT=<file.png>
  * to keep a screenshot of the trip journey when it fails.
  */
 import { readFileSync } from "node:fs";
-import { launchBrowser, serveOut, watchCsp } from "./serve-out.mjs";
+import { HERE, hereIn, launchBrowser, serveOut, watchCsp, watchPosition } from "./serve-out.mjs";
 
 const JOURNEYS = [
   { city: "edinburgh", start: "Causewayside", to: "Hamilton Place" },
@@ -89,6 +93,10 @@ for (const j of JOURNEYS) {
       await page.getByRole("option").first().waitFor({ timeout: 30_000 });
       await page.getByRole("option").first().click();
     });
+    await step(`no location, so it asks where you're starting from, with ${j.start} suggested`, async () => {
+      await page.getByText("This browser can't share where you are.").waitFor({ timeout: 10_000 });
+      await page.getByRole("option", { name: new RegExp(`^${j.start}\\s+Suggested start`) }).click();
+    });
     await step(`a route is found, from ${j.start}`, async () => {
       await page.getByText("Why this way?").waitFor({ timeout: 60_000 });
       // A city opened from last time starts at its own start, not another city's.
@@ -123,11 +131,12 @@ for (const j of JOURNEYS) {
 // The rest of the trip (STAB-10), in Edinburgh.
 {
   const name = "edinburgh: devices, leaving later, a note, and your data";
-  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, permissions: ["clipboard-read", "clipboard-write"] });
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, ...hereIn("edinburgh"), permissions: ["clipboard-read", "clipboard-write", "geolocation"] });
   const page = await context.newPage();
   const problems = [];
   watchCsp(page, problems);
   watchProfile(page, problems);
+  watchPosition(page, "edinburgh", problems);
   page.on("pageerror", (e) => problems.push(`page error: ${e.message}`));
   await page.addInitScript(() => localStorage.setItem("causewayside.city.v1", "edinburgh"));
   const step = async (label, fn) => {
@@ -290,11 +299,12 @@ for (const j of JOURNEYS) {
 // No signal (SMALL-06): a loaded city keeps routing, and the app says so.
 {
   const name = "edinburgh: no signal";
-  const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, ...hereIn("edinburgh") });
   const page = await context.newPage();
   const problems = [];
   watchCsp(page, problems);
   watchProfile(page, problems);
+  watchPosition(page, "edinburgh", problems);
   page.on("pageerror", (e) => problems.push(`page error: ${e.message}`));
   await page.addInitScript(() => localStorage.setItem("causewayside.city.v1", "edinburgh"));
   const step = async (label, fn) => {
@@ -338,11 +348,12 @@ for (const j of JOURNEYS) {
 // The routing worker crashes (STAB-07): it's started again, says so, and the route comes back.
 {
   const name = "edinburgh: the routing worker crashes";
-  const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, ...hereIn("edinburgh") });
   const page = await context.newPage();
   const problems = [];
   watchCsp(page, problems);
   watchProfile(page, problems);
+  watchPosition(page, "edinburgh", problems);
   page.on("pageerror", (e) => problems.push(`page error: ${e.message}`));
   await page.addInitScript(() => localStorage.setItem("causewayside.city.v1", "edinburgh"));
   console.log(name);
@@ -378,10 +389,11 @@ for (const j of JOURNEYS) {
 // Every live feed hangs (STAB-05): TfL, Open-Meteo (weather and air), the Environment Agency, UKHSA and SEPA never answer.
 {
   const name = "london: every live feed hangs";
-  const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, ...hereIn("london") });
   const page = await context.newPage();
   const problems = [];
   watchCsp(page, problems);
+  watchPosition(page, "london", problems);
   page.on("pageerror", (e) => problems.push(`page error: ${e.message}`));
   await page.route(/api\.tfl\.gov\.uk|open-meteo\.com|environment\.data\.gov\.uk|ukhsa-dashboard\.data\.gov\.uk|timeseries\.sepa\.org\.uk/, () => {});
   await page.addInitScript(() => localStorage.setItem("causewayside.city.v1", "london"));
@@ -412,10 +424,11 @@ for (const j of JOURNEYS) {
 // the escalator message at Canning Town under Worth knowing. Then Edinburgh: the list is there, closed, saying what's in it.
 {
   const name = "london: a lift out on the way, in On this route";
-  const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, ...hereIn("london") });
   const page = await context.newPage();
   const problems = [];
   watchCsp(page, problems);
+  watchPosition(page, "london", problems);
   page.on("pageerror", (e) => problems.push(`page error: ${e.message}`));
   const fixture = (f) => readFileSync(new URL(`../packages/live/test/fixtures/${f}`, import.meta.url), "utf8");
   await page.route(/open-meteo\.com|environment\.data\.gov\.uk|ukhsa-dashboard\.data\.gov\.uk/, (r) => r.abort());
@@ -451,7 +464,7 @@ for (const j of JOURNEYS) {
 }
 {
   const name = "edinburgh: On this route on a route with nothing blocked";
-  const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, ...hereIn("edinburgh") });
   const page = await context.newPage();
   const problems = [];
   page.on("pageerror", (e) => problems.push(`page error: ${e.message}`));
@@ -485,10 +498,91 @@ for (const j of JOURNEYS) {
     if (!r.ok || r.headers.get("content-type")?.startsWith("image/") !== true) failures.push(`icon ${path}: ${r.status} ${r.headers.get("content-type")}`);
   }
 }
+
+// Where you start (FEAT-20, D-073): destination first, then your location, asked for only then. Swap ends. Location
+// turned off, and standing outside the city: both say so and ask where you're starting from, the city's start suggested.
+{
+  const name = "edinburgh: where you start";
+  const problems = [];
+  const run = async (label, options, init, fn) => {
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 }, ...options });
+    const page = await context.newPage();
+    watchCsp(page, problems);
+    watchPosition(page, "edinburgh", problems);
+    page.on("pageerror", (e) => problems.push(`page error: ${e.message}`));
+    await page.addInitScript(() => localStorage.setItem("causewayside.city.v1", "edinburgh"));
+    // Count every time the app asks the phone where it is.
+    await page.addInitScript(() => {
+      const geo = navigator.geolocation;
+      if (!geo) return;
+      const get = geo.getCurrentPosition.bind(geo);
+      window.__asked = 0;
+      geo.getCurrentPosition = (...a) => {
+        window.__asked++;
+        return get(...a);
+      };
+    });
+    if (init) await page.addInitScript(init);
+    try {
+      await page.goto(server.url);
+      await page.getByPlaceholder("Where to?").waitFor({ timeout: 60_000 });
+      await page.getByText("Places in Edinburgh").waitFor({ timeout: 60_000 });
+      if (await page.evaluate(() => window.__asked)) throw new Error("asked for the location on page load");
+      if (await page.getByRole("button", { name: /^Change start/ }).count()) throw new Error("a From field before a destination");
+      await page.getByPlaceholder("Where to?").fill("Hamilton Place");
+      await page.getByRole("option").first().click();
+      await fn(page);
+      console.log(`  ok   ${label}`);
+    } catch (e) {
+      failures.push(`${name}: ${label}: ${e.message.split("\n")[0]}`);
+      console.log(`  FAIL ${label}: ${e.message.split("\n")[0]}`);
+    }
+    await context.close();
+  };
+  const fromText = async (page) => (await page.getByRole("button", { name: /^Change start/ }).first().innerText()).replace(/^\s*Change start:\s*/, "").trim();
+  console.log(name);
+  await run("from your location, focus on From, and swap", hereIn("edinburgh"), null, async (page) => {
+    await page.getByText("Why this way?").waitFor({ timeout: 60_000 });
+    if ((await fromText(page)) !== "Your location") throw new Error(`From says "${await fromText(page)}"`);
+    if (!(await page.evaluate(() => window.__asked))) throw new Error("never asked for the location");
+    const focused = await page.evaluate(() => document.activeElement?.id);
+    if (focused !== "journey-from") throw new Error(`focus is on "${focused}", not From`);
+    await page.getByRole("button", { name: "Swap start and destination" }).click();
+    await page.getByRole("button", { name: /^Change destination: Your location/ }).waitFor();
+    if ((await fromText(page)) !== "Hamilton Place") throw new Error(`after swapping, From says "${await fromText(page)}"`);
+    await page.getByText("Why this way?").waitFor({ timeout: 60_000 });
+    // Live search is biased to the city's start, never to you: watchPosition fails the run if a request carries it.
+    await page.getByRole("button", { name: /^Change destination/ }).click();
+    const photon = page.waitForRequest(/photon\.komoot\.io/, { timeout: 15_000 });
+    await page.getByPlaceholder("Where to?").fill("Qzxv Lane");
+    const u = new URL((await photon).url());
+    if (u.searchParams.get("lat") === String(HERE.edinburgh.latitude)) throw new Error("Photon was sent your position");
+  });
+  await run(
+    "location turned off: it says so, and asks where you're starting from",
+    {},
+    () => {
+      navigator.geolocation.getCurrentPosition = (_ok, fail) => setTimeout(() => fail({ code: 1, PERMISSION_DENIED: 1, message: "denied" }), 50);
+    },
+    async (page) => {
+      await page.getByText("Location is turned off for this site, so we can't tell where you are.").waitFor({ timeout: 10_000 });
+      const focused = await page.evaluate(() => document.activeElement?.getAttribute("placeholder"));
+      if (focused !== "Where are you starting from?") throw new Error(`focus is on "${focused}"`);
+      await page.getByRole("option", { name: /^Causewayside\s+Suggested start/ }).click();
+      await page.getByText("Why this way?").waitFor({ timeout: 60_000 });
+      if ((await fromText(page)) !== "Causewayside") throw new Error(`From says "${await fromText(page)}"`);
+    },
+  );
+  await run("outside the city: it says so, and asks where you're starting from", { ...hereIn("edinburgh"), geolocation: HERE.london }, null, async (page) => {
+    await page.getByText("You're outside the part of Edinburgh we have routes for.").waitFor({ timeout: 10_000 });
+    await page.getByPlaceholder("Where are you starting from?").waitFor();
+  });
+  for (const p of problems) failures.push(`${name}: ${p}`), console.log(`  FAIL ${p}`);
+}
 await browser.close();
 server.close();
 if (failures.length) {
   console.error(`\n${failures.length} end-to-end failure(s).`);
   process.exit(1);
 }
-console.log("\nEvery journey ran from search to arrival, no request carried the profile, and hung feeds fell back.");
+console.log("\nEvery journey ran from search to arrival, no request carried the profile or your position, and hung feeds fell back.");

@@ -12,6 +12,8 @@ interface Props {
   /** Shown before anything is typed. */
   suggestions: Place[];
   near: { lon: number; lat: number };
+  /** What live search (Photon) is biased towards, when it mustn't be `near`: never the person's own position (D-009). */
+  liveNear?: { lon: number; lat: number };
   bbox: [number, number, number, number];
   cityName: string;
   excludeId?: string;
@@ -53,7 +55,7 @@ function Icon({ p }: { p: Place }) {
  */
 export { Icon as PlaceIcon };
 
-export function PlaceSearch({ label, index, suggestions, near, bbox, cityName, excludeId, onPick, autoFocus, onUseLocation, trailing, emptyState, onFocus }: Props) {
+export function PlaceSearch({ label, index, suggestions, near, liveNear, bbox, cityName, excludeId, onPick, autoFocus, onUseLocation, trailing, emptyState, onFocus }: Props) {
   const [q, setQ] = useState("");
   const [live, setLive] = useState<{ q: string; places: Place[]; outside: number } | null>(null);
   const local = useMemo(() => (index && q.trim() ? search(index, q, near) : null), [index, q, near]);
@@ -72,7 +74,7 @@ export function PlaceSearch({ label, index, suggestions, near, bbox, cityName, e
     const ctl = new AbortController();
     const t = setTimeout(async () => {
       try {
-        const found = needPostcode ? [await lookupPostcode(pc!, ctl.signal)].filter((p): p is Place => !!p) : await photon(query, near, bbox, ctl.signal);
+        const found = needPostcode ? [await lookupPostcode(pc!, ctl.signal)].filter((p): p is Place => !!p) : await photon(query, liveNear ?? near, bbox, ctl.signal);
         const inside = found.filter((p) => inZones(index, p));
         setLive({ q: query, places: inside, outside: found.length - inside.length });
       } catch {
