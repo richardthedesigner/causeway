@@ -2,7 +2,7 @@
 
 What's outstanding on Causewayside: things waiting on Richard, things blocked outside the project, and guesses to check with users. Keep this up to date: add an item when it comes up, and move it to "Done" with the date when it's settled. Details live in the linked issue or decision. The order of work is in [ROADMAP.md](ROADMAP.md).
 
-Last updated: 2026-10-05.
+Last updated: 2026-10-06.
 
 ## Waiting on Richard
 
@@ -18,12 +18,12 @@ Last updated: 2026-10-05.
 | Ask Nexus for Tyne and Wear Metro lift status | Without it, Metro stations reached by lift are always "unknown" for step-free users | An email | [#13](https://github.com/richardthedesigner/causeway/issues/13) |
 | Decide whether chain-store websites scraped by AllThePlaces count as scraping under our rule | 348 places in search come only from AllThePlaces: mostly chain stores, parcel lockers and scout halls. Its Changing Places and NHS records are already out | A decision | ROADMAP DATA-27, [D-028](DECISIONS.md#d-028-overture-fills-search-gaps-osm-stays-the-source-of-access-facts) |
 | Turn on private vulnerability reporting: Settings, then Code security | `SECURITY.md` sends people there; until it's on they have nowhere private to report | 1 minute | [ROADMAP](ROADMAP.md) SEC-14 |
+| Score the security headers: open [securityheaders.com](https://securityheaders.com/?q=https%3A%2F%2Fcauseway.richardthedesigner.com%2F&followRedirects=on) and note the grade | The scorer refuses cloud sessions, so it needs a browser. The custom domain (DEP-07) unblocked it | 1 minute | [ROADMAP](ROADMAP.md) SEC-25 |
 
 ## Blocked outside the project
 
 | What | Blocker | Link |
 |---|---|---|
-| Score the security headers on securityheaders.com | Vercel login protection on `vercel.app` blocks the scorer. Waits on a custom domain (DEP-07) or relaxed protection | [ROADMAP](ROADMAP.md) SEC-25 |
 | Live bus and tram departures for Edinburgh and Newcastle | Lothian's API refuses (403), Transport for Edinburgh's open data is down (522), Nexus needs a key (401). Timetable frequencies are used meanwhile | [#8](https://github.com/richardthedesigner/causeway/issues/8) |
 
 ## Guesses to check with users (Phase 2 research)

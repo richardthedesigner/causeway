@@ -192,7 +192,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | SEC-22 | `BACKEND.md`: add `0006`, fix who can do what, add running Supabase's Security Advisor | S | next | todo | Claude | [Review](reviews/security-2026-10.md) L5 |
 | SEC-23 | Check branch protection on `main` and the production branch blocks direct pushes | S | next | done (2026-10-05) | Richard | [Review](reviews/security-2026-10.md) M3. Richard turned on rulesets on 2026-10-05. `main`: no deletion, no force push, PR required, `check` and `migrations` required. Production branch: no deletion, no force push. It can't require PRs until DEP-01, because the mirror pushes to it |
 | SEC-24 | Create PostGIS in the `extensions` schema in the migrations, as Supabase does, not in `public` | S | later | todo | Claude | Found in SEC-16. `0001_graph.sql` creates PostGIS in `public` when it isn't there; `0007` makes its tables read only, but Supabase's Security Advisor will still flag `spatial_ref_sys` |
-| SEC-25 | Score the headers on securityheaders.com | S | later | blocked | Richard, Claude | Split from SEC-12. Vercel login protection on `vercel.app` blocks the scorer, so it waits on DEP-07 (custom domain) or relaxed protection |
+| SEC-25 | Score the headers on securityheaders.com | S | later | todo | Richard | Split from SEC-12. Unblocked by DEP-07: score `causeway.richardthedesigner.com`. The scorer refuses cloud sessions (403), so it needs a browser. All six headers it grades are sent |
 | SEC-11 | Name the weekly reviewer for flags, photos and reports | S | later | blocked | Richard | [BACKEND.md](BACKEND.md). Only once sharing is on |
 
 ## Stability and testing
@@ -217,6 +217,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | STAB-18 | At 320 px with 200% text the route panel leaves about 145 px of the sheet in view above the Start bar, so the route cards can barely be read without dragging | S | next | todo | Claude | Found doing STAB-02 (`route.*.w320-200.png`). Check the sheet's resting height and whether the bar can shrink |
 | STAB-19 | Toilet labels ("WC") stack on top of each other along a route, unreadable at the zoom the route fits to | S | later | todo | Claude | Found doing STAB-02 (`navigation.*.phone.png`). Hide or cluster labels that collide |
 | STAB-20 | Screenshot baselines are Linux Chromium only; refresh them once after UPD-03 and UPD-04 (Next.js and Node) land, and whenever Playwright's Chromium changes | S | later | todo | Claude | STAB-02. `pnpm screenshots --update`, then look at the diffs |
+| STAB-21 | `pnpm e2e` fails on any 4xx, including from outside services (an Open-Meteo 429 failed a run during FEAT-20). Fail only on the app's own requests; log outside ones | S | next | todo | Claude | Found reviewing FEAT-20. Added by SMALL-12. Risks red CI that isn't ours |
 | STAB-17 | The sheet trapped keyboard focus and hid the map from screen readers: Tab never reached the city, layers or location buttons | S | now | done (2026-10-05) | Claude | D-069. Found doing STAB-13. vaul 1.1.2 never passed `modal={false}` on, so a `pnpm patch` does; Radix also looped Tab inside the sheet. The map menus open above the sheet, take focus and give it back. `pnpm a11y` checks it |
 | STAB-08 | Offline test: load a city, cut the network, route | S | now | done (2026-10-05) | Claude | PR #42, with SMALL-06. `pnpm e2e` loads Edinburgh, cuts the network and routes. A reload offline (the service worker) isn't covered |
 
@@ -270,7 +271,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | DEP-04 | A service worker update prompt, so nobody is stuck on an old build | S | next | done (2026-10-04) | Claude | D-045. `UpdatePrompt`: Reload or Later, never during navigation |
 | DEP-05 | Privacy-safe error reporting (no locations, no profile) | M | later | todo | Richard, Claude | Choose a tool and record it in DECISIONS |
 | DEP-06 | Release notes and version numbers users can see | S | later | todo | Claude | The build log is internal |
-| DEP-07 | A custom domain | S | later | blocked | Richard | Needs a name and payment |
+| DEP-07 | A custom domain | S | later | done (2026-10-06) | Richard, Claude | `causeway.richardthedesigner.com`, added to the Vercel project (the `richardthedesigner.com` zone is on Vercel DNS, so no purchase). The custom domain skips Vercel login protection, so the app is now public. The `vercel.app` addresses still need a login |
 | DEP-08 | Merge PR #44 on top of PR #42: conflicts, D-numbers and task IDs (PORT-44) | S | now | done (2026-10-05) | Claude | Merge commits only. No numbers collided. CSP checked for #44's new feeds |
 | REL-01 | Release check and runbook for 2026-10-05 | S | now | done (2026-10-05) | Claude | PR #48, [release check](releases/2026-10-05.md). #38, #42 and #44 released and checked on production |
 
@@ -308,6 +309,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 
 Newest first. One line per change: date, ID, what happened, link.
 
+- 2026-10-06: DEP-07 done: `causeway.richardthedesigner.com` serves production and is public. SEC-25 unblocked (needs a browser). Added STAB-21. Batch 2 merged FEAT-20, SMALL-02, SMALL-12, STAB-15 and SPEED-01 (#56 to #61).
 - 2026-10-06: SMALL-02 done in PR #56: distances follow the per-device mph or km/h choice through one formatter, yards for short distances in miles mode (D-074). Added SMALL-18, SMALL-19. Now: SPEED-08, FEAT-03, SMALL-13, STAB-18, SMALL-18.
 - 2026-10-06: FEAT-20 done: destination first. "Where to?" alone, then From as "Your location", with location asked for only then; plain-words fallbacks ask where you're starting from (D-073). Added SMALL-17.
 - 2026-10-06: SMALL-12 done in PR #59: favicon.ico, SVG icon (follows dark mode), apple-touch-icon and manifest icons (standard and maskable), all from one mark. e2e now fails on any 4xx and checks the icons are served as images. Added SMALL-16.
