@@ -2,6 +2,11 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
+## 2026-10-06 (SPEED-01, measuring load)
+
+- `pnpm perf:web` (`scripts/perf-web.mjs`): cold visits in the built app on an emulated Moto G Power, 4x CPU, Fast or Slow 4G. Reports paint times, map drawn, graph loaded, destination to route and bytes by kind, median and range per city. Own server with Vercel's headers and brotli.
+- [docs/perf/2026-10.md](perf/2026-10.md): the numbers, what they say, why SPEED-06 waits, and targets (SPEED-08 to SPEED-12). No app code changed.
+
 ## 2026-10-06 (favicon and app icons)
 
 SMALL-12.
