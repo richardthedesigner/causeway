@@ -1,7 +1,8 @@
 "use client";
-import { ChevronDown, CircleAlert, CircleX, Info, ListChecks } from "lucide-react";
+import { ChevronDown, CircleAlert, CircleX, Info, ListChecks, MapPinPlus } from "lucide-react";
 import type { OnRouteGroup, OnRouteItem } from "@causeway/router";
 import { GROUP_WORDS, itemMeta, onRouteAside, onRouteUrgent, whereText } from "@/lib/on-route";
+import { Button } from "@/components/ui/button";
 
 const ICON: Record<OnRouteGroup, React.ReactNode> = {
   blocked: <CircleX aria-hidden className="size-5 shrink-0 text-stop" />,
@@ -69,5 +70,17 @@ export function OnThisRoute({ items, routeId }: { items: readonly OnRouteItem[];
         )}
       </div>
     </details>
+  );
+}
+
+/**
+ * "Report what's there" (FEAT-03), under each street in "What we don't know".
+ * The sheet it opens already knows the street, the point and what's missing.
+ */
+export function ReportWhatsThere({ name, onReport }: { name: string; onReport: () => void }) {
+  return (
+    <Button size="md" onClick={onReport} aria-label={`Report what's there on ${name}`} className="mt-2 justify-self-start text-left">
+      <MapPinPlus aria-hidden className="size-5 shrink-0" /> Report what&apos;s there
+    </Button>
   );
 }

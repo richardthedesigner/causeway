@@ -7,8 +7,8 @@
  * setup and device settings sheets on a 320 by 640 phone at 200% text: the
  * header takes at most a third of the screen, and nothing runs off the side (STAB-11).
  * And the other screens at the same size: start with "This trip", search,
- * a route with every section open, the note sheet, navigation and the report
- * sheet. Nothing runs off the side, and in navigation the next instruction and
+ * a route with every section open, "Report what's there" (FEAT-03), the note sheet,
+ * navigation and the report sheet. Nothing runs off the side, and in navigation the next instruction and
  * the journey panel don't cover each other (STAB-12). Your data is checked too (SEC-06).
  * And a London route that goes round a lift out (TfL's recorded feeds), with
  * "On this route" open by itself, light, dark and at 320 px with 200% text (D-067).
@@ -75,6 +75,12 @@ for (const scheme of ["light", "dark"]) {
   await page.waitForTimeout(1500);
   await page.locator("details").evaluateAll((els) => els.forEach((el) => (el.open = true)));
   await check("route, all sections open");
+  // "Report what's there" from "What we don't know" (FEAT-03).
+  await page.getByRole("button", { name: /^Report what's there on / }).first().click();
+  await page.getByRole("dialog", { name: "Report what's there" }).waitFor();
+  await page.getByRole("dialog").getByRole("radio").first().click();
+  await check("report what's there");
+  await page.keyboard.press("Escape");
 
   // A first visit: the device button reads "Set up" and opens setup (D-036 step 5).
   await page.getByRole("button", { name: "Set up how you get around" }).first().click();
@@ -308,6 +314,10 @@ for (const [scheme, size, zoom] of [["light", { width: 390, height: 844 }, false
   await page.getByText("Why this way?").waitFor({ timeout: 60_000 });
   await page.locator("details").evaluateAll((els) => els.forEach((el) => (el.open = true)));
   await reflow("route, all sections open");
+  await page.getByRole("button", { name: /^Report what's there on / }).first().click();
+  await page.getByRole("dialog", { name: "Report what's there" }).waitFor();
+  await reflow("report what's there");
+  await page.keyboard.press("Escape");
   await page.getByRole("button", { name: "Add a note about this route" }).click();
   await page.getByRole("radio", { name: "Bad" }).waitFor();
   await reflow("note sheet");

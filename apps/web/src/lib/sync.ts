@@ -9,7 +9,7 @@
  * mobility profile is never sent (D-009).
  */
 import { fromPublicRow, toNoteRow, type NotePublicRow, type UserNote } from "@causeway/graph";
-import type { Report } from "./reports";
+import { reportDetail, type Report } from "./reports";
 import { timedFetch, UPLOAD_TIMEOUT_MS } from "./timed-fetch";
 
 const URL_ = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "") ?? "";
@@ -171,7 +171,7 @@ export async function pushReport(rep: Report): Promise<boolean> {
         id: rep.id,
         geom: `SRID=4326;POINT(${rep.lon} ${rep.lat})`,
         kind: rep.kind,
-        detail: rep.note || null,
+        detail: reportDetail(rep),
         area_id: rep.city,
         accuracy_m: rep.accuracyM,
         created_at: rep.at,

@@ -2,6 +2,14 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
+## 2026-10-06 (report what's there)
+
+FEAT-03, D-075.
+- "What we don't know" has "Report what's there" under each street. The sheet asks one short question for each thing we lack (kerbs, surface, width and so on), with the street and point already filled in. One answer is enough; a note and a photo are optional.
+- Saved on the phone in the reports list as `whats-there`, with the street, questions and answers. Your data counts them on their own line, and the copy and Delete everything include them.
+- The router's unknowns carry a point and each missing attribute (`RouteUnknown` in `plan-types.ts`).
+- Tests: `apps/web/test/reports.test.ts`, the Your data count. The e2e trip reports what's there by keyboard alone and finds it in Your data and the copy. The a11y run checks the sheet light, dark and at 320 px with 200% text. A new screenshot, `whats-there`.
+
 ## 2026-10-06 (a custom domain)
 
 DEP-07, no code.
