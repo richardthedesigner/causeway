@@ -112,7 +112,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | RES-06 | Measure gradients on the ground in each city, starting with West Bow and Victoria Terrace | M | next | todo | Richard | Validates LiDAR. Those two decide Cherry's Grassmarket route |
 | RES-07 | Accessibility testing on real devices: VoiceOver, TalkBack, Switch Control, Voice Control | M | next | todo | Richard, Claude | [UX_ASSESSMENT.md](UX_ASSESSMENT.md). axe catches about a third of WCAG issues |
 | RES-08 | Benchmark every acceptance journey against openrouteservice's wheelchair profile | M | later | todo | Claude | D-003 |
-| RES-09 | Choose where to go next with census disability data, Blue Badge statistics and station usage | M | later | done (2026-10-05) | Claude | §5. [where-next.md](research/where-next.md): Glasgow, then Leeds. Wales scores last, so DEF-09 needs a decision (OPEN_ITEMS) |
+| RES-09 | Choose where to go next with census disability data, Blue Badge statistics and station usage | M | later | done (2026-10-05) | Claude | §5. [where-next.md](research/where-next.md): Glasgow, then Leeds. Wales scores last. Richard chose Glasgow, then Leeds (D-072) |
 | RES-10 | Ask road scooter riders whether they want routes on roads, and whether to avoid busy ones | S | next | todo | Richard | D-051: routes now move onto roads at 8 mph |
 | RES-11 | Scottish council-level census disability and Blue Badge figures for Scotland and Wales; a proper data pass on Birmingham and Liverpool; then rerun the RES-09 scores | S | later | todo | Claude | [where-next.md](research/where-next.md), \"What the sources do not give us\". Scotland's UV303 tables need a browser download |
 
@@ -155,7 +155,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | SMALL-09 | "Why this way?" one tap from the navigation screen | S | later | todo | Claude | |
 | SMALL-10 | Recent journeys, not just recent places | S | later | todo | Claude | `recents.ts` |
 | SMALL-11 | Weather for trips more than 48 hours ahead | S | later | todo | Claude | D-040 falls back to today's |
-| SMALL-12 | A favicon and app icons (every page load asks for `/favicon.ico` and gets a 404) | S | now | todo | Claude | Found doing SEC-04 |
+| SMALL-12 | A favicon and app icons (every page load asks for `/favicon.ico` and gets a 404) | S | now | todo | Claude | Found doing SEC-04. Seen on production 2026-10-05 |
 | SMALL-13 | Saved places on the map, and as a start as well as a destination from the route screen | S | later | todo | Claude | Found doing FEAT-04. Today they show in search, and as starts in "Starting from?" |
 | SMALL-14 | Toilet Map: say when OSM and the Toilet Map disagree, keep disputed toilets off routes, and say when a record is over 2 years old | S | now | done (2026-10-05) | Claude | D-065. Ported from PR #36. 5 disputes in Edinburgh, 1 in Newcastle |
 | SMALL-15 | Parks and OpenStreetMap notes: a park found by name ends at its gate, not a nearby building's door; old notes and business questions left out; "N more places a mapper flagged" | S | now | done (2026-10-05) | Claude | D-048 update. Ported from PR #36. 26 of 119 named Edinburgh parks with gates had a fitting door within 50 m |
@@ -174,7 +174,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | SEC-08 | Harden `/review`: sign-in rate limits, session length | S | later | todo | Claude | |
 | SEC-09 | Cloudflare Turnstile on anonymous sign-up, before sharing goes live | S | later | blocked | Richard, Claude | D-030. Two scripted accounts can hide any note ([review](reviews/security-2026-10.md) M4) |
 | SEC-10 | Data protection impact assessment (DPIA), before wider launch | M | later | blocked | Richard | D-030 |
-| SEC-12 | Check the headers are live on production (`curl -I`), and score them on securityheaders.com | S | next | todo | Claude | D-041. Production has Vercel login protection on its `vercel.app` URLs, which may need Richard |
+| SEC-12 | Check the headers are live on production (`curl -I`) | S | next | done (2026-10-05) | Claude | D-041. Confirmed live on production by REL-01 and again after #54. Scoring them is SEC-25 |
 | SEC-13 | Drop `'unsafe-inline'` from the CSP's `script-src`: hashes for Next's inline scripts at build time | S | later | todo | Claude | D-041. They change every build |
 | SEC-14 | Turn on private vulnerability reporting (Settings, then Code security) | S | next | blocked | Richard | `SECURITY.md` points people to it |
 | SEC-15 | Remove a deleted note's approved photo from the public bucket | S | later | todo | Claude | D-059. Hidden once the note's gone, but the copy stays. A reviewer step or a server job, once sharing is on |
@@ -185,8 +185,9 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | SEC-20 | Size and file type limits on the photo buckets | S | later | todo | Claude | [Review](reviews/security-2026-10.md) L3. `0004_storage.sql` |
 | SEC-21 | Name the one Supabase host in the CSP instead of `*.supabase.co` | S | later | todo | Claude | [Review](reviews/security-2026-10.md) L4. Once the project exists. With SEC-13 |
 | SEC-22 | `BACKEND.md`: add `0006`, fix who can do what, add running Supabase's Security Advisor | S | next | todo | Claude | [Review](reviews/security-2026-10.md) L5 |
-| SEC-23 | Check branch protection on `main` and the production branch blocks direct pushes | S | next | blocked | Richard | [Review](reviews/security-2026-10.md) M3. Needs repo admin |
+| SEC-23 | Check branch protection on `main` and the production branch blocks direct pushes | S | next | done (2026-10-05) | Richard | [Review](reviews/security-2026-10.md) M3. Richard turned on rulesets on 2026-10-05. `main`: no deletion, no force push, PR required, `check` and `migrations` required. Production branch: no deletion, no force push. It can't require PRs until DEP-01, because the mirror pushes to it |
 | SEC-24 | Create PostGIS in the `extensions` schema in the migrations, as Supabase does, not in `public` | S | later | todo | Claude | Found in SEC-16. `0001_graph.sql` creates PostGIS in `public` when it isn't there; `0007` makes its tables read only, but Supabase's Security Advisor will still flag `spatial_ref_sys` |
+| SEC-25 | Score the headers on securityheaders.com | S | later | blocked | Richard, Claude | Split from SEC-12. Vercel login protection on `vercel.app` blocks the scorer, so it waits on DEP-07 (custom domain) or relaxed protection |
 | SEC-11 | Name the weekly reviewer for flags, photos and reports | S | later | blocked | Richard | [BACKEND.md](BACKEND.md). Only once sharing is on |
 
 ## Stability and testing
@@ -261,6 +262,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | DEP-06 | Release notes and version numbers users can see | S | later | todo | Claude | The build log is internal |
 | DEP-07 | A custom domain | S | later | blocked | Richard | Needs a name and payment |
 | DEP-08 | Merge PR #44 on top of PR #42: conflicts, D-numbers and task IDs (PORT-44) | S | now | done (2026-10-05) | Claude | Merge commits only. No numbers collided. CSP checked for #44's new feeds |
+| REL-01 | Release check and runbook for 2026-10-05 | S | now | done (2026-10-05) | Claude | PR #48, [release check](releases/2026-10-05.md). #38, #42 and #44 released and checked on production |
 
 ## Reviews
 
@@ -268,7 +270,7 @@ Repeat on the cadence shown. When one is done, set it back to `todo` with the ne
 
 | ID | Task | Size | Priority | Status | Who | Notes |
 |---|---|---|---|---|---|---|
-| REV-01 | Docs freshness: README status line, UX_ASSESSMENT, OPEN_ITEMS, this file | S | next | todo | Claude | Monthly |
+| REV-01 | Docs freshness: README status line, UX_ASSESSMENT, OPEN_ITEMS, this file | S | next | todo | Claude | Monthly. Next: 2026-11-05 |
 | REV-02 | Security review of the whole repo | M | next | todo | Claude | Quarterly. Next: January 2027. Last: 2026-10-05, [report](reviews/security-2026-10.md) |
 | REV-03 | Code review of the largest and most-changed files | S | next | todo | Claude | Monthly |
 | REV-04 | Decisions review: anything marked as a guess or "reconsider" (D-010, D-013, D-037, D-038) | S | later | todo | Richard, Claude | Quarterly |
@@ -289,13 +291,14 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 | DEF-06 | Crowd verification: several people confirming the same note | L | later | blocked | Claude | Needs DEF-04 |
 | DEF-07 | Optional accounts: sync devices and saved places between phones, encrypted on the device, sign in with a passkey or email code | L | later | blocked | Richard, Claude | Health data makes this a privacy decision first (D-009) |
 | DEF-08 | Opt-in surface sensing from the accelerometer | L | later | blocked | Claude | Needs DEF-01 and a privacy review |
-| DEF-09 | Beyond the pilot cities: Glasgow first (once DATA-13 is licensed), then Wales | XL | later | blocked | Richard, Claude | §5 |
-| DEF-10 | Leeds as the second expansion city: pull its open crossing, rights-of-way and café-licence data and run the England stack on it | XL | later | blocked | Claude | RES-09 ranks Leeds second. Needs a plan in `docs/plans/` and Richard's call on DEF-09 |
+| DEF-09 | Beyond the pilot cities: Glasgow first (once DATA-13 is licensed), then Leeds, then by city size (D-072) | XL | later | blocked | Richard, Claude | §5 |
+| DEF-10 | Leeds as the second expansion city: pull its open crossing, rights-of-way and café-licence data and run the England stack on it | XL | later | blocked | Claude | RES-09 ranks Leeds second. Richard chose Leeds second (D-072). Needs a plan in `docs/plans/` |
 
 ## Log
 
 Newest first. One line per change: date, ID, what happened, link.
 
+- 2026-10-05: REV-01 sweep after the release (#42, #44, #38, #48, #49, #50, #55, #51, #54, #53). SEC-12 and SEC-23 done; SEC-25 added (score the headers, blocked on DEP-07); REL-01 recorded; REV-01 next 2026-11-05. Richard chose Glasgow, then Leeds, then cities by size (D-072, DEF-09, DEF-10).
 - 2026-10-05: STAB-02 done: `pnpm screenshots` captures 10 screens (40 pictures, 2.7 MB in `tests/screenshots/`): 390 px and 320 px in light, 320 px at 200% text in light and dark. CI runs it and uploads diffs on failure. Found STAB-18 to STAB-20.
 - 2026-10-05: UPD-03 and UPD-04 done in PR #54: Next.js 16.3 on webpack, Node 24 in CI and `engines`, static export unchanged (D-071). Added UPD-05 to UPD-07.
 - 2026-10-05: RES-09 done: 14 UK cities scored on Census 2021 and 2022, Blue Badge and station usage, open data, licences and code reuse. Glasgow first, then Leeds, then Sheffield; Cardiff and Swansea last, so DEF-09's "then Wales" isn't supported. Follow-ups RES-11 and DEF-10 added ([report](research/where-next.md)).

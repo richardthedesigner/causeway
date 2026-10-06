@@ -17,13 +17,12 @@ Last updated: 2026-10-05.
 | Ask Nexus for Tyne and Wear Metro lift status | Without it, Metro stations reached by lift are always "unknown" for step-free users | An email | [#13](https://github.com/richardthedesigner/causeway/issues/13) |
 | Decide whether chain-store websites scraped by AllThePlaces count as scraping under our rule | 348 places in search come only from AllThePlaces: mostly chain stores, parcel lockers and scout halls. Its Changing Places and NHS records are already out | A decision | ROADMAP DATA-27, [D-028](DECISIONS.md#d-028-overture-fills-search-gaps-osm-stays-the-source-of-access-facts) |
 | Turn on private vulnerability reporting: Settings, then Code security | `SECURITY.md` sends people there; until it's on they have nowhere private to report | 1 minute | [ROADMAP](ROADMAP.md) SEC-14 |
-| Decide whether to change DEF-09 from "Glasgow, then Wales" to "Glasgow, then Leeds", and whether Glasgow starts before its licence is confirmed | RES-09 ranks Cardiff and Swansea last of 14 (no open roadworks, new terrain source, little council data). Glasgow's best layers are unlicensed, so DATA-13 is the one thing that can slow it | A decision | [where-next.md](research/where-next.md) |
-| Check branch protection on `main` and `claude/sleepy-johnson-mavbrs`: Settings, then Branches. Direct pushes from Actions should be blocked, except the mirror | A compromised package in the data refresh could otherwise push straight to production | 5 minutes | [ROADMAP](ROADMAP.md) SEC-23, [security review](reviews/security-2026-10.md) M3 |
 
 ## Blocked outside the project
 
 | What | Blocker | Link |
 |---|---|---|
+| Score the security headers on securityheaders.com | Vercel login protection on `vercel.app` blocks the scorer. Waits on a custom domain (DEP-07) or relaxed protection | [ROADMAP](ROADMAP.md) SEC-25 |
 | Live bus and tram departures for Edinburgh and Newcastle | Lothian's API refuses (403), Transport for Edinburgh's open data is down (522), Nexus needs a key (401). Timetable frequencies are used meanwhile | [#8](https://github.com/richardthedesigner/causeway/issues/8) |
 
 ## Guesses to check with users (Phase 2 research)
@@ -47,12 +46,12 @@ These numbers shape routes but are our estimates, not evidence.
 
 ## Known gaps
 
+- There is no Causeway Supabase project yet. When one is made, run db/migrations 0001 to 0007 in order. SEC-16 is merged, so this is now safe.
 - The profile has a gap limit for boarding trains (`maxGapMm`), but no setting in the app: everyone gets TfL's 85 mm level band. Add a setting once research says people want one ([D-068](DECISIONS.md#d-068-boarding-the-train-against-each-persons-limits)).
 - TfL's level-access doors are in the spoken route only, not on the visual route card ([D-068](DECISIONS.md#d-068-boarding-the-train-against-each-persons-limits)).
 - When someone deletes everything, a photo a reviewer had approved stays in the public bucket (hidden, as its note is gone) until a reviewer removes it. Worth a weekly clean-up step for the reviewer, or a server job, once sharing is on ([D-059](DECISIONS.md#d-059-your-data-a-copy-and-delete-everything)).
 - Weather beyond 48 hours ahead falls back to today's ([D-040](DECISIONS.md#d-040-leaving-later)).
 - The speed budget's timing checks hold 10% off CI. On a busy machine they can fail when nothing changed; run the test again before looking for a cause. A data refresh that rebuilds a graph can trip the settled-node check: re-baseline on purpose ([D-056](DECISIONS.md#d-056-a-speed-budget-the-tests-enforce), ROADMAP SPEED-07).
-- A guess to check on the next production deploy: Vercel serves MapLibre's worker (`/maplibre/6.12.0/maplibre-gl-worker.mjs`) as JavaScript, so the map draws. The local checks confirm it with our own server ([D-050](DECISIONS.md#d-050-dependency-audit-in-ci-and-maplibre-6)).
 - The Scottish Road Works Register is daily, but the data refresh is weekly, so new Edinburgh works can be up to a week late ([D-057](DECISIONS.md#d-057-edinburghs-works-from-the-scottish-road-works-register)).
 - Street Manager's June 2026 activity archive is published truncated, so the build skips it; activities created or last changed only in June are missing until a later event brings them back ([D-027](DECISIONS.md#d-027-live-and-third-party-data-come-in-through-adapters)).
 - Whether a register entry closes the pavement is read from its free text. Check a sample of Edinburgh road closures on the ground or with testers (D-057).
@@ -66,6 +65,9 @@ Not now, on purpose: a phone app, whole cities, a reports backend, app accounts.
 
 ## Done
 
+- 2026-10-05: Richard chose the next cities: Glasgow, then Leeds, then by built-up area population without asking again ([D-072](DECISIONS.md#d-072-which-city-next), ROADMAP DEF-09, DEF-10).
+- 2026-10-05: branch protection is on. `main` takes no deletion or force push, needs a PR, and requires `check` and `migrations`. The production branch takes no deletion or force push; it can't require PRs until DEP-01, because the mirror pushes to it (ROADMAP SEC-23).
+- 2026-10-05: the MapLibre worker guess is settled. Vercel serves `/maplibre/6.12.0/maplibre-gl-worker.mjs` as JavaScript and the map draws on production ([D-050](DECISIONS.md#d-050-dependency-audit-in-ci-and-maplibre-6)).
 - 2026-10-05: the migrations can run on Supabase (BACKEND.md step 3). `0007_supabase_grants.sql` takes back Supabase's default grants, so nobody signed out can delete notes or write the graph tables. Run all seven in one go (SEC-16, [D-070](DECISIONS.md#d-070-every-grant-by-name-row-level-security-on-every-table)).
 - 2026-10-05: TfL's informational station messages (a reduced escalator service) are shown, under Worth knowing in "On this route" on routes through the station ([D-067](DECISIONS.md#d-067-more-data-same-calm)).
 - 2026-10-05: the weather and health lines (alerts, gusts, air, the Water of Leith) moved from "Why this way?" into "On this route", with their source and time ([D-067](DECISIONS.md#d-067-more-data-same-calm)).

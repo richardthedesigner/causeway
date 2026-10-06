@@ -2,6 +2,14 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
+## 2026-10-05 (the release and the docs sweep)
+
+REV-01, docs only.
+- Shipped and live on production today: #38 (Actions bumps), #42 and #44 (the release, checked in [the release check](releases/2026-10-05.md), REL-01), #48 (release check), #49 (security review), #50 (STAB-17), #55 (SEC-16, SEC-19), #51 (RES-09), #54 (Next 16, Node 24), #53 (STAB-02 screenshot tests).
+- Headers confirmed live (SEC-12 done); scoring them is SEC-25, blocked on a custom domain. Branch rulesets are on (SEC-23 done).
+- D-072: Glasgow, then Leeds, then cities by built-up area population (Birmingham, Liverpool, Sheffield, Manchester, Bristol).
+- OPEN_ITEMS: the city question, branch protection and the MapLibre worker guess are Done; the Supabase line says no project exists yet.
+
 ## 2026-10-05 (screenshot tests)
 
 STAB-02: `pnpm screenshots` (`scripts/screenshots.mjs`) replaces hand-checked screenshots.
