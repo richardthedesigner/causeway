@@ -31,6 +31,9 @@ interface Props {
   focus?: { lon: number; lat: number; n: number } | null;
   /** The high-contrast map (SMALL-05): plain ground, edged roads, a wider route with an ink edge. */
   highContrast?: boolean;
+  /** Saved places (FEAT-04) drawn as labelled buttons (SMALL-13): reachable by keyboard and screen reader, unlike a canvas layer. */
+  saved?: { id: string; label: string; lon: number; lat: number }[];
+  onSavedPick?: (id: string) => void;
 }
 
 const css = (v: string) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
@@ -51,7 +54,7 @@ const point = (p: { lon: number; lat: number }, props: Record<string, unknown> =
  * Colours come from the page's CSS tokens and follow theme changes live.
  * The high-contrast map (SMALL-05) swaps the base map palette and widens the route.
  */
-export function MapView({ network, routes, selectedId, from, to, pin, showSlopes, entrances, onMapClick, me, basemap, toilets = [], blockers = [], preview = null, focus = null, highContrast = false }: Props) {
+export function MapView({ network, routes, selectedId, from, to, pin, showSlopes, entrances, onMapClick, me, basemap, toilets = [], blockers = [], preview = null, focus = null, highContrast = false, saved = [], onSavedPick }: Props) {
   const el = useRef<HTMLDivElement>(null);
   const map = useRef<MLMap | null>(null);
   const ready = useRef(false);
@@ -59,6 +62,8 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
   const redraw = useRef<() => void>(() => undefined);
   const clickRef = useRef(onMapClick);
   clickRef.current = onMapClick;
+  const savedPickRef = useRef(onSavedPick);
+  savedPickRef.current = onSavedPick;
 
   useEffect(() => {
     if (!el.current || map.current) return;
@@ -152,6 +157,40 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
 
   const [mapReady, setMapReady] = useState(false);
   const dark = useDark();
+
+  // Saved places (SMALL-13): real buttons, so Tab reaches them and a screen reader reads "Home, saved place".
+  // The label is always shown and edged in ink on the surface colour, so it reads in light, dark and high contrast without colour.
+  useEffect(() => {
+    const m = map.current;
+    if (!m || !mapReady) return;
+    const markers = saved.map((s) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.id = `saved-marker-${s.id}`;
+      b.setAttribute("aria-label", `${s.label}, saved place`);
+      b.setAttribute("aria-haspopup", "dialog");
+      b.className = "saved-marker";
+      const pill = document.createElement("span");
+      pill.className = "saved-marker-pill";
+      pill.setAttribute("aria-hidden", "true");
+      pill.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 2.5l2.9 6.2 6.6.7-4.9 4.5 1.4 6.6L12 17.2 6 20.5l1.4-6.6L2.5 9.4l6.6-.7z"/></svg>';
+      const text = document.createElement("span");
+      text.className = "saved-marker-text";
+      text.textContent = s.label;
+      pill.append(text);
+      const stem = document.createElement("span");
+      stem.className = "saved-marker-stem";
+      stem.setAttribute("aria-hidden", "true");
+      b.append(pill, stem);
+      // A tap on a marker is not a tap on the map: no pin is dropped.
+      b.addEventListener("click", (e) => {
+        e.stopPropagation();
+        savedPickRef.current?.(s.id);
+      });
+      return new maplibregl.Marker({ element: b, anchor: "bottom" }).setLngLat([s.lon, s.lat]).addTo(m);
+    });
+    return () => markers.forEach((mk) => mk.remove());
+  }, [saved, mapReady]);
 
   // Theme change while open: our own layers take their colours from CSS tokens, so read them again.
   useEffect(() => {

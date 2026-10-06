@@ -28,7 +28,7 @@ import { CITIES, cityById, type City } from "@/lib/cities";
 import type { Place, PlannedRoute } from "@/lib/plan-types";
 import { activeDevice, deviceLabel, FIRST_VISIT, loadDeviceState, saveDeviceState, setTip, tipPending, withActive, withActiveName, withActiveProfile, withDeviceProfile, withFavourite, withoutDevice, withSetup, type DeviceState } from "@/lib/devices";
 import { addRecent, loadRecents } from "@/lib/recents";
-import { loadSaved, savePlace, unsavePlace, type SavedPlace } from "@/lib/saved-places";
+import { loadSaved, savedMarkers, savePlace, unsavePlace, type SavedPlace } from "@/lib/saved-places";
 import { SavePlace } from "@/components/SavePlace";
 import { useNotes } from "@/lib/use-notes";
 import { hoursText, setBankHolidays } from "@/lib/opening-hours";
@@ -260,17 +260,33 @@ export default function Home() {
     setFocusFrom((n) => n + 1);
   };
 
-  const pick = (p: Place) => {
-    if (view === "from") {
-      setFrom(p);
-      setStart("chosen");
-      setGeoError(null);
-      setOnce(null);
-      setView(to ? "route" : "home");
-      open(SNAP.half);
-      if (to) setFocusFrom((n) => n + 1);
-    } else goTo(p);
+  const startFrom = (p: Place) => {
+    setFrom(p);
+    setStart("chosen");
+    setGeoError(null);
+    setOnce(null);
+    setView(to ? "route" : "home");
+    open(SNAP.half);
+    if (to) setFocusFrom((n) => n + 1);
   };
+
+  const pick = (p: Place) => (view === "from" ? startFrom(p) : goTo(p));
+
+  /** A saved place tapped on the map (SMALL-13): offer "Go here" and "Start from here". */
+  const [savedPick, setSavedPick] = useState<SavedPlace | null>(null);
+  useEffect(() => {
+    if (savedPick) document.getElementById("saved-pick")?.focus();
+  }, [savedPick]);
+  const closeSavedPick = () => {
+    const id = savedPick?.place.id;
+    setSavedPick(null);
+    if (id) requestAnimationFrame(() => document.getElementById(`saved-marker-${id}`)?.focus());
+  };
+  /** The marker is hidden where the route already marks the place. */
+  const savedOnMap = useMemo(
+    () => (navigating ? [] : savedMarkers(saved, [view === "route" ? to?.id : null, startKnown ? from.id : null])),
+    [saved, navigating, view, to, startKnown, from.id],
+  );
 
   const inArea = (lon: number, lat: number) => {
     if (!planner.ready) return false;
@@ -313,6 +329,7 @@ export default function Home() {
   // A stray tap must never wipe a route: a tap proposes a pin, and the user confirms it.
   const onMapClick = (lon: number, lat: number) => {
     if (!inArea(lon, lat)) return;
+    setSavedPick(null);
     setPin({ id: `pin:${lon.toFixed(5)},${lat.toFixed(5)}`, name: "Dropped pin", kind: `${lat.toFixed(4)}, ${lon.toFixed(4)}`, lon, lat });
     open(SNAP.half);
   };
@@ -429,6 +446,43 @@ export default function Home() {
             Reload
           </Button>
         </div>
+      ) : null}
+      {savedPick ? (
+        <section
+          aria-label={`Saved place: ${savedPick.label}`}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") closeSavedPick();
+          }}
+          className="mb-3 flex flex-wrap items-center gap-3 rounded-2xl border-2 border-accent p-3">
+          <p id="saved-pick" tabIndex={-1} className="m-0 min-w-0 flex-1 outline-offset-4">
+            <span className="font-bold">{savedPick.label}</span>
+            <span className="block text-sm text-muted">{savedPick.place.name === savedPick.label ? "Saved place" : `Saved place. ${savedPick.place.name}`}</span>
+          </p>
+          {to?.id === savedPick.place.id && view === "route" ? null : (
+            <Button
+              variant="primary"
+              onClick={() => {
+                goTo(savedPick.place);
+                setSavedPick(null);
+              }}
+            >
+              Go here
+            </Button>
+          )}
+          {startKnown && from.id === savedPick.place.id ? null : (
+            <Button
+              onClick={() => {
+                startFrom(savedPick.place);
+                setSavedPick(null);
+              }}
+            >
+              Start from here
+            </Button>
+          )}
+          <Button variant="ghost" onClick={closeSavedPick}>
+            Cancel
+          </Button>
+        </section>
       ) : null}
       {pin ? (
         <section aria-live="polite" aria-label="Dropped pin" className="mb-3 flex flex-wrap items-center gap-3 rounded-2xl border-2 border-accent p-3">
@@ -619,6 +673,12 @@ export default function Home() {
         preview={preview}
         focus={focus}
         highContrast={highContrast}
+        saved={savedOnMap}
+        onSavedPick={(id) => {
+          setPin(null);
+          setSavedPick(saved.find((x) => x.place.id === id) ?? null);
+          open(SNAP.half);
+        }}
       />
       <MapChrome
         city={city}
