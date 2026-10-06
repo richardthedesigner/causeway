@@ -28,7 +28,7 @@ import { CITIES, cityById, type City } from "@/lib/cities";
 import type { Place, PlannedRoute } from "@/lib/plan-types";
 import { activeDevice, deviceLabel, FIRST_VISIT, loadDeviceState, saveDeviceState, setTip, tipPending, withActive, withActiveName, withActiveProfile, withDeviceProfile, withFavourite, withoutDevice, withSetup, type DeviceState } from "@/lib/devices";
 import { addRecent, loadRecents } from "@/lib/recents";
-import { loadSaved, savePlace, unsavePlace, type SavedPlace } from "@/lib/saved-places";
+import { loadSaved, savedMarkers, savePlace, unsavePlace, type SavedPlace } from "@/lib/saved-places";
 import { SavePlace } from "@/components/SavePlace";
 import { useNotes } from "@/lib/use-notes";
 import { hoursText, setBankHolidays } from "@/lib/opening-hours";
@@ -88,7 +88,7 @@ export default function Home() {
   }, []);
   const planner = usePlanner(city);
   const index = usePlaces(city, planner.ready?.places ?? null);
-  // The base map waits for the graph and search index, so "Where to?" doesn't share the line with tiles (SPEED-08, D-076).
+  // The base map waits for the graph and search index, so "Where to?" doesn't share the line with tiles (SPEED-08, D-077).
   // It stays on once released for a city; a failed graph releases it too, so the map still draws.
   // Right after a city switch, index and error still belong to the old city, so that run is skipped.
   const [mapCity, setMapCity] = useState<string | null>(null);
@@ -168,9 +168,8 @@ export default function Home() {
   const shared = useNotes(city.id);
   const cityNotes = shared.notes;
   // Large text leaves little room at half height: open the sheet fully instead.
-  const [bigText, setBigText] = useState(false);
-  useEffect(() => setBigText(parseFloat(getComputedStyle(document.documentElement).fontSize) >= 20), []);
-  const open = (s: number) => setSnap(bigText ? SNAP.full : s);
+  // Read when the sheet opens, not once at load, so text enlarged after the page loaded counts too (STAB-18).
+  const open = (s: number) => setSnap(parseFloat(getComputedStyle(document.documentElement).fontSize) >= 20 ? SNAP.full : s);
 
   const ground: Ground = conditions.ice ? "ice" : conditions.wet ? "wet" : "dry";
   /** A saved device used for this journey only ("Use Lulu for this trip"); never saved. */
@@ -271,17 +270,33 @@ export default function Home() {
     setFocusFrom((n) => n + 1);
   };
 
-  const pick = (p: Place) => {
-    if (view === "from") {
-      setFrom(p);
-      setStart("chosen");
-      setGeoError(null);
-      setOnce(null);
-      setView(to ? "route" : "home");
-      open(SNAP.half);
-      if (to) setFocusFrom((n) => n + 1);
-    } else goTo(p);
+  const startFrom = (p: Place) => {
+    setFrom(p);
+    setStart("chosen");
+    setGeoError(null);
+    setOnce(null);
+    setView(to ? "route" : "home");
+    open(SNAP.half);
+    if (to) setFocusFrom((n) => n + 1);
   };
+
+  const pick = (p: Place) => (view === "from" ? startFrom(p) : goTo(p));
+
+  /** A saved place tapped on the map (SMALL-13): offer "Go here" and "Start from here". */
+  const [savedPick, setSavedPick] = useState<SavedPlace | null>(null);
+  useEffect(() => {
+    if (savedPick) document.getElementById("saved-pick")?.focus();
+  }, [savedPick]);
+  const closeSavedPick = () => {
+    const id = savedPick?.place.id;
+    setSavedPick(null);
+    if (id) requestAnimationFrame(() => document.getElementById(`saved-marker-${id}`)?.focus());
+  };
+  /** The marker is hidden where the route already marks the place. */
+  const savedOnMap = useMemo(
+    () => (navigating ? [] : savedMarkers(saved, [view === "route" ? to?.id : null, startKnown ? from.id : null])),
+    [saved, navigating, view, to, startKnown, from.id],
+  );
 
   const inArea = (lon: number, lat: number) => {
     if (!planner.ready) return false;
@@ -324,6 +339,7 @@ export default function Home() {
   // A stray tap must never wipe a route: a tap proposes a pin, and the user confirms it.
   const onMapClick = (lon: number, lat: number) => {
     if (!inArea(lon, lat)) return;
+    setSavedPick(null);
     setPin({ id: `pin:${lon.toFixed(5)},${lat.toFixed(5)}`, name: "Dropped pin", kind: `${lat.toFixed(4)}, ${lon.toFixed(4)}`, lon, lat });
     open(SNAP.half);
   };
@@ -441,6 +457,43 @@ export default function Home() {
           </Button>
         </div>
       ) : null}
+      {savedPick ? (
+        <section
+          aria-label={`Saved place: ${savedPick.label}`}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") closeSavedPick();
+          }}
+          className="mb-3 flex flex-wrap items-center gap-3 rounded-2xl border-2 border-accent p-3">
+          <p id="saved-pick" tabIndex={-1} className="m-0 min-w-0 flex-1 outline-offset-4">
+            <span className="font-bold">{savedPick.label}</span>
+            <span className="block text-sm text-muted">{savedPick.place.name === savedPick.label ? "Saved place" : `Saved place. ${savedPick.place.name}`}</span>
+          </p>
+          {to?.id === savedPick.place.id && view === "route" ? null : (
+            <Button
+              variant="primary"
+              onClick={() => {
+                goTo(savedPick.place);
+                setSavedPick(null);
+              }}
+            >
+              Go here
+            </Button>
+          )}
+          {startKnown && from.id === savedPick.place.id ? null : (
+            <Button
+              onClick={() => {
+                startFrom(savedPick.place);
+                setSavedPick(null);
+              }}
+            >
+              Start from here
+            </Button>
+          )}
+          <Button variant="ghost" onClick={closeSavedPick}>
+            Cancel
+          </Button>
+        </section>
+      ) : null}
       {pin ? (
         <section aria-live="polite" aria-label="Dropped pin" className="mb-3 flex flex-wrap items-center gap-3 rounded-2xl border-2 border-accent p-3">
           <p className="m-0 min-w-0 flex-1">
@@ -484,6 +537,7 @@ export default function Home() {
             liveNear={notMe(from)}
             bbox={planner.ready.bbox}
             cityName={city.name}
+            unit={distanceUnit(profile)}
             excludeId={from.id}
             onPick={pick}
             trailing={profileChip}
@@ -533,6 +587,7 @@ export default function Home() {
             liveNear={notMe(to ?? from)}
             bbox={planner.ready.bbox}
             cityName={city.name}
+            unit={distanceUnit(profile)}
             excludeId={to?.id}
             onPick={pick}
             onUseLocation={start === "unsupported" ? undefined : () => locate(true)}
@@ -628,6 +683,12 @@ export default function Home() {
         preview={preview}
         focus={focus}
         highContrast={highContrast}
+        saved={savedOnMap}
+        onSavedPick={(id) => {
+          setPin(null);
+          setSavedPick(saved.find((x) => x.place.id === id) ?? null);
+          open(SNAP.half);
+        }}
       />
       <MapChrome
         city={city}

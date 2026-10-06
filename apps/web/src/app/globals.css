@@ -101,3 +101,10 @@ h1, h2, h3 { text-wrap: balance; }
 .maplibregl-canvas-container.maplibregl-interactive { cursor: grab; }
 .maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right, .maplibregl-ctrl-top-left, .maplibregl-ctrl-top-right { position: absolute; pointer-events: none; z-index: 2; }
 .maplibregl-ctrl-attrib { display: none; }
+.maplibregl-marker { position: absolute; top: 0; left: 0; will-change: transform; }
+/* Saved places on the map (SMALL-13). Colours are the page tokens, so light, dark and the high-contrast map all follow. */
+.saved-marker { display: flex; flex-direction: column; align-items: center; min-height: 44px; min-width: 44px; justify-content: flex-end; padding: 0; border: 0; background: none; color: var(--ink); font: inherit; cursor: pointer; }
+.saved-marker-pill { display: flex; align-items: center; gap: 4px; max-width: 9rem; padding: 3px 8px; border: 2px solid var(--ink); border-radius: 999px; background: var(--surface); color: var(--ink); font-size: 0.8125rem; font-weight: 700; line-height: 1.2; }
+.saved-marker-pill svg { flex: none; color: var(--accent); }
+.saved-marker-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.saved-marker-stem { width: 3px; height: 8px; background: var(--ink); }

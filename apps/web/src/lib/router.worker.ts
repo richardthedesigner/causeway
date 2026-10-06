@@ -83,7 +83,7 @@ function applyWorks() {
 const post = (m: WorkerResponse) => self.postMessage(m);
 
 async function load(url: string, networkUrl: string | undefined, worksUrl: string | undefined, busUrl: string | undefined, footwaysUrl: string | undefined, floodsUrl: string | undefined, greenspaceUrl: string | undefined, osmNotesUrl: string | undefined, demo: Place[]) {
-  // The files that join the graph download alongside it, not one by one after it (SPEED-08, D-076).
+  // The files that join the graph download alongside it, not one by one after it (SPEED-08, D-077).
   // A bonus file that fails reads as null; the rail network still fails the load, as before.
   const side = <T,>(u: string | undefined) => (u ? fetch(u).then((r) => r.json() as Promise<T>) : null);
   const busP = side<BusNetwork>(busUrl);

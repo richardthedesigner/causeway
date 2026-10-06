@@ -923,13 +923,25 @@ A person who reads speeds in mph reads distances in miles, and a person who read
 - **Kilometres mode.** Metres to the nearest 10 under 1 km ("50 m", never less than 10 m), then "1.4 km", with one decimal under 10 km and none from 10. A whole metre when `precise` (the route in words, "Path, 27 m").
 - **Miles mode.** Yards under a quarter of a mile ("110 yd"), then "0.3 miles", "1 mile", "4.3 miles", "12 miles". Yards are to the nearest 10. Miles never show metres or kilometres.
 - **Spoken.** `long` gives "50 metres", "110 yards", "1.2 kilometres", "0.4 miles". Hazard text is built once with the short form ("for 30 yd") and `speakableDistances` expands it before it is said.
-- **Where it applies.** The route card, the route strip's words, the "not fully mapped" and setts lines, "Closest you can get", the elevation chart's distances along the route, battery range, rest and toilet intervals (setting buttons, route notes and "More benches" or "Past more toilets" trade-offs), "On this route" lines, navigation (distance to the next turn, remaining, "in 50 yards"), hazard warnings, and the copy-as-text route. The navigation plan carries its unit (`NavPlan.unit`), so the screen and the voice agree.
-- **What stays metric.** Heights and climbs ("6 m up overall", "12 m above sea level"), widths ("1.2 m wide"), kerb heights (cm and mm), and the distance shown beside a place in search (SMALL-18). These are measures of the ground, not journey lengths, and mixing feet in would be a bigger change.
+- **Where it applies.** The route card, the route strip's words, the "not fully mapped" and setts lines, "Closest you can get", the elevation chart's distances along the route, battery range, rest and toilet intervals (setting buttons, route notes and "More benches" or "Past more toilets" trade-offs), "On this route" lines, navigation (distance to the next turn, remaining, "in 50 yards"), hazard warnings, the distance beside each search result (SMALL-18), and the copy-as-text route. The navigation plan carries its unit (`NavPlan.unit`), so the screen and the voice agree.
+- **What stays metric.** Heights and climbs ("6 m up overall", "12 m above sea level"), widths ("1.2 m wide"), kerb heights (cm and mm). These are measures of the ground, not journey lengths, and mixing feet in would be a bigger change.
 - **Stored values stay as they are.** Rest and toilet intervals are kept in metres and battery range in km. In miles mode they are converted for display (an interval of 500 m reads "0.3 miles"), and the battery range steps in whole miles and is stored as km to a tenth. Nothing about routing changes.
 - **Defaults** are D-051's: scooters mph, everyone else km/h. Existing devices keep what they had.
 
+## D-075 Saved places on the map
 
-## D-076 Load order: the graph first, then the search index, then the base map
+**Decided.** 2026-10-06 (SMALL-13). Builds on D-060 (saved places stay on the phone) and D-073 (destination first).
+
+- **Real buttons, not map layers.** Each saved place is a DOM marker: a `button` named "Home, saved place", so Tab reaches it and a screen reader reads it. A canvas layer can do neither. The list is at most 12 (D-060), so the cost is small.
+- **Always labelled.** The name is shown, with a star, edged in ink on the surface colour. It follows the page's light, dark and high-contrast colours and doesn't depend on colour alone. The label is cut with an ellipsis; the full name is in the button's name.
+- **Tapping opens a card in the sheet, not a pin.** "Go here" makes it the destination, with the same flow as any destination (D-073: your location is asked for only then). "Start from here" makes it the start, as a start picked by hand, and keeps any destination. Cancel, or Escape, closes it and returns focus to the marker. The card names the place and, if it differs, the address. Only the action that applies shows: no "Go here" on the destination, no "Start from here" on the start.
+- **Left off where the route marks it.** The destination's and a chosen start's own markers are used; the saved marker would sit under them.
+- **Not shown while navigating.**
+- **Privacy unchanged (D-009, D-060).** Saved places are read from this phone's storage and drawn locally. Nothing is sent.
+- **Not done (SMALL-20, SMALL-21):** panning the map so a marker under the half-open sheet can be tapped, and saving a chosen start as a place.
+
+
+## D-077 Load order: the graph first, then the search index, then the base map
 
 **Decided.** 2026-10-06 (SPEED-08). On a cold visit everything used to download at once, so the city graph shared the line with 2.7 to 9.2 MB of base map and "Where to?" waited for tiles. Now the order is set:
 

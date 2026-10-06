@@ -29,6 +29,7 @@ const url = server.url;
 const browser = await launchBrowser();
 const csp = [];
 const failures = [];
+const MIN_SHEET_PX = 300;
 for (const scheme of ["light", "dark"]) {
   const page = await (await browser.newContext({ viewport: { width: 390, height: 844 }, colorScheme: scheme, ...hereIn("edinburgh") })).newPage();
   watchCsp(page, csp);
@@ -306,6 +307,17 @@ for (const [scheme, size, zoom] of [["light", { width: 390, height: 844 }, false
   await reflow("search");
   await page.getByRole("option").first().click();
   await page.getByText("Why this way?").waitFor({ timeout: 60_000 });
+  // How much of the sheet shows above the Start bar (STAB-18): at least a route card's headline, not a sliver.
+  await page.waitForTimeout(800);
+  const shown = await page.evaluate(() => {
+    const bar = document.querySelector("body > .fixed.z-30").getBoundingClientRect();
+    const sheet = document.querySelector("[data-vaul-drawer]").getBoundingClientRect();
+    const head = document.querySelector("[data-route-card] > div").getBoundingClientRect();
+    return { px: Math.round(bar.top - Math.max(sheet.top, 0)), headline: Math.round(bar.top - head.bottom) };
+  });
+  console.log(`200% text / route sheet above the Start bar: ${shown.px} px, headline clear by ${shown.headline} px`);
+  if (shown.px < MIN_SHEET_PX) failures.push(`200% text / route sheet / only ${shown.px} px above the Start bar (want ${MIN_SHEET_PX})`);
+  if (shown.headline < 0) failures.push(`200% text / route sheet / the route card's headline is under the Start bar by ${-shown.headline} px`);
   await page.locator("details").evaluateAll((els) => els.forEach((el) => (el.open = true)));
   await reflow("route, all sections open");
   await page.getByRole("button", { name: "Add a note about this route" }).click();

@@ -4,13 +4,44 @@ A running record of what was built, newest first. Each entry links the decision 
 
 ## 2026-10-06 (the graph first)
 
-SPEED-08 (D-076), PR #67.
+SPEED-08 (D-077), PR #67.
 - Load order on a cold visit: the graph and the files that join it, together; then the search index, once the graph is ready; then the base map, once the index is built (or at once if the graph fails).
 - The router worker fetches buses, footways, notes, greenspace, floods and the rail network alongside the graph instead of one by one after it. That was about 2 s of Edinburgh's wait.
 - Edinburgh, Fast 4G with 4x CPU: graph ready 12.9 s to 7.6 s, "Where to?" (LCP) 13.9 s to 8.8 s. The 6 s target is not met: SPEED-13 (start the graph earlier) and SPEED-06 (a binary graph) are the rest. Newcastle and London 0.4 s quicker, and no longer download Edinburgh's search index on the way to their own.
 - The map draws 2.7 to 5 s later, as expected (SPEED-09). Destination to route is 0.3 to 0.7 s slower, cause not yet found (noted on SPEED-10).
 - `perf:web --debug` prints when each file started and finished. Numbers and raw runs: `docs/perf/2026-10-06-speed-08.md`.
 - Checks: typecheck, unit tests, web typecheck, build, e2e and a11y pass.
+
+## 2026-10-06 (saved places on the map)
+
+SMALL-13, D-075.
+- Each saved place is a labelled button on the map: a pill with a star and its name, edged in ink on the surface colour, so it reads in light, dark and the high-contrast map without relying on colour.
+- Tapping or pressing one opens a card in the sheet: "Go here" and "Start from here", and Cancel. Focus moves to the card; Escape or Cancel puts it back on the marker. A tap on a marker drops no pin.
+- A marker is left off where the route already marks that place (the destination, or a start you chose).
+- A saved place was already a start in "Where are you starting from?" (D-073). `pnpm e2e` now checks that, and the markers by keyboard.
+- Open: a marker under the half-open sheet is out of reach for a finger (SMALL-20).
+
+## 2026-10-06 (the route sheet at large text)
+
+STAB-18.
+- The Start bar caps its button height and padding in px, so at 200% text it is 89 px tall, not 137.
+- The sheet checks the text size each time it opens, not once at load, so text enlarged after load still opens it fully.
+- The ground chips, the journey and destination rows and the gaps stop growing past a sensible size.
+- At large text a new route scrolls its card to the top of the list. The rows above are a scroll away.
+- `pnpm a11y` now fails if less than 300 px of the sheet shows above the Start bar or the card's headline is under it.
+
+## 2026-10-06 (miles in search)
+
+SMALL-18 (D-074), PR #64.
+- The distance beside each search result uses `formatDistance` with the device's unit: yards and miles in miles mode, metres and kilometres otherwise. `PlaceSearch` takes a `unit` prop.
+- The "Where are you starting from?" suggestions never showed a distance, so nothing changed there.
+- Tests: `apps/web/test/search-distance.test.ts`, and an e2e step that searches in miles mode.
+
+## 2026-10-06 (e2e ignores outside errors)
+
+STAB-21, PR #63.
+- `scripts/e2e.mjs` fails a journey on a 4xx or 5xx only when the response is from the app's own origin. Any other host prints a `WARN` line and the run carries on. An Open-Meteo 429 had failed a run.
+- The icon check from SMALL-12 is unchanged. No app code touched.
 
 ## 2026-10-06 (a custom domain)
 
@@ -24,7 +55,7 @@ DEP-07, no code.
 SMALL-02 (D-074), PR #56.
 - Distances follow the per-device "Show speeds and distances in" choice from D-051. No second setting. The editor's buttons now read "Miles, mph" and "Kilometres, km/h".
 - `formatDistance` in `@causeway/profile` is the one formatter: metres under a kilometre and kilometres above in km mode, yards under a quarter of a mile and miles above in miles mode, and full words for speech ("110 yards"). Behind it: the route card, strip and "On this route" lines, router notes and trade-offs, navigation (the plan carries its unit so what's shown and what's said agree), the elevation chart, rest and toilet intervals, battery range and the copy-as-text route.
-- Heights, widths and kerbs stay metric. Distances to places in search are still metric (SMALL-18).
+- Heights, widths and kerbs stay metric. Distances to places in search are still metric (SMALL-18, done later).
 - Tests: `packages/profile/test/distance.test.ts`, miles-mode navigation and range wording, route-text. The e2e journey switches a powerchair to miles and checks the card and the copied text. The a11y run checks the battery range in miles.
 - Screenshot baselines were not rewritten: they differ on this machine even on a clean `main` (fonts), so CI decides.
 ## 2026-10-06 (destination first)

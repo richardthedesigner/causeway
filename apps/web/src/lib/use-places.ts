@@ -8,7 +8,7 @@ import { mergeToiletMap, type ToiletMapFile } from "./toiletmap";
 
 /** Load a city's search index (places, addresses, postcodes) and merge in the street names from its graph. */
 export function usePlaces(city: City, streets: Place[] | null): Index | null {
-  // These downloads wait for the city's graph, so the graph has the line to itself and "Where to?" comes sooner (SPEED-08, D-076).
+  // These downloads wait for the city's graph, so the graph has the line to itself and "Where to?" comes sooner (SPEED-08, D-077).
   const graphIn = streets !== null;
   const [file, setFile] = useState<PlacesFile | null>(null);
   const [failed, setFailed] = useState(false);
