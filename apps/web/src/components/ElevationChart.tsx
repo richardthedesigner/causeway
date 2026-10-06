@@ -1,12 +1,15 @@
 "use client";
 import { useId, useMemo, useState } from "react";
+import { formatDistance, type DistanceUnit } from "@causeway/profile";
 
 /**
  * Elevation along the route. One series, one hue (accent), recessive grid,
  * labelled ends and highest point, hover/touch crosshair with a readout.
  * Unknown elevations are gaps, never zeros.
  */
-export function ElevationChart({ data, worstPct }: { data: { d: number; z: number | null }[]; worstPct: number | null }) {
+export function ElevationChart({ data, worstPct, unit = "kmh" }: { data: { d: number; z: number | null }[]; worstPct: number | null; unit?: DistanceUnit }) {
+  // Distances along the route follow the unit; heights stay in metres (D-073).
+  const along = (m: number) => formatDistance(m, unit, { precise: true });
   const id = useId();
   const [hover, setHover] = useState<number | null>(null);
   const W = 340,
@@ -75,7 +78,7 @@ export function ElevationChart({ data, worstPct }: { data: { d: number; z: numbe
         onPointerLeave={() => setHover(null)}
       >
         <desc id={`${id}-desc`}>
-          Starts at {Math.round(first.z)} m, highest {Math.round(geo.top.z)} m at {Math.round(geo.top.d)} m along, ends at {Math.round(last.z)} m.
+          Starts at {Math.round(first.z)} m, highest {Math.round(geo.top.z)} m at {along(geo.top.d)} along, ends at {Math.round(last.z)} m.
         </desc>
         {geo.ticks.map((t) => (
           <g key={t}>
@@ -89,10 +92,10 @@ export function ElevationChart({ data, worstPct }: { data: { d: number; z: numbe
         <path d={geo.lineD} fill="none" stroke="var(--accent)" strokeWidth={2} strokeLinejoin="round" />
         <circle cx={geo.x(geo.top.d)} cy={geo.y(geo.top.z)} r={3.5} fill="var(--accent)" stroke="var(--surface)" strokeWidth={2} />
         <text x={L} y={H - 6} fontSize={10} fill="var(--muted)">
-          0 m
+          {along(0)}
         </text>
         <text x={W - R} y={H - 6} fontSize={10} fill="var(--muted)" textAnchor="end" className="tabular">
-          {geo.dMax >= 1000 ? `${(geo.dMax / 1000).toFixed(1)} km` : `${Math.round(geo.dMax)} m`}
+          {along(geo.dMax)}
         </text>
         {h ? (
           <g pointerEvents="none">
@@ -102,7 +105,7 @@ export function ElevationChart({ data, worstPct }: { data: { d: number; z: numbe
         ) : null}
       </svg>
       <p className="tabular m-0 min-h-6 font-mono text-sm text-muted" aria-live="polite">
-        {h ? `${Math.round(h.d)} m along / ${Math.round(h.z)} m above sea level` : " "}
+        {h ? `${along(h.d)} along / ${Math.round(h.z)} m above sea level` : " "}
       </p>
     </figure>
   );

@@ -1,7 +1,7 @@
 "use client";
 import { ArrowUpDown, ChevronDown, CircleAlert, CircleCheck, CircleHelp, CircleX, Copy, DoorOpen, MapPin, MessageSquarePlus, Share2, Trees, Undo2 } from "lucide-react";
 import { entranceRef, notesForEntrance, notesForPlace, notesForStretch, type UserNote } from "@causeway/graph";
-import type { Profile } from "@causeway/profile";
+import { distanceUnit, formatDistance, type DistanceUnit, type Profile } from "@causeway/profile";
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import { BusDepartures } from "@/components/BusDepartures";
@@ -90,32 +90,33 @@ interface Props {
   pinActions?: boolean;
 }
 
-const dist = (m: number) => (m >= 1000 ? `${(m / 1000).toFixed(1)} km` : `${Math.round(m / 10) * 10} m`);
 const groundWord = (c: Conditions) => (c.ice ? "icy ground" : c.wet ? "wet ground" : "dry ground");
 
-const meta = (r: PlannedRoute) => {
+const meta = (r: PlannedRoute, unit: DistanceUnit) => {
   const s = r.summary;
   // With a train in the middle, the distance that matters is the bit you push, wheel or walk.
   const d = s.rides.length ? s.walkM : s.distanceM;
   const steep = s.worstInclinePct === null ? "slope not known" : `max ${Math.abs(s.worstInclinePct)}%`;
-  return `${dist(d)} · ${steep}`;
+  return `${formatDistance(d, unit)} · ${steep}`;
 };
 
 /** What else is on the way, in a few words: rides, lifts, steps, setts. */
-function extras(r: PlannedRoute): string[] {
+function extras(r: PlannedRoute, unit: DistanceUnit): string[] {
   const s = r.summary;
   return [
     s.rides.length ? s.rides.map((x) => `${x.line.replace(/ towards .*/, "")} to ${x.to}`).join(", then ") : null,
     s.movableBridges.length ? `${s.movableBridges.map((b) => b.name).join(", ")} (moving bridge)` : null,
     s.lifts ? `${s.lifts} lift${s.lifts > 1 ? "s" : ""}` : null,
     s.steps ? `${s.steps} flight${s.steps > 1 ? "s" : ""} of steps` : null,
-    (s.surfaceMix["setts"] ?? 0) > 20 ? `${s.surfaceMix["setts"]} m of setts` : null,
-    s.unknownM >= 10 ? `${dist(s.unknownM)} not fully mapped` : null,
+    (s.surfaceMix["setts"] ?? 0) > 20 ? `${formatDistance(s.surfaceMix["setts"] ?? 0, unit, { precise: true })} of setts` : null,
+    s.unknownM >= 10 ? `${formatDistance(s.unknownM, unit)} not fully mapped` : null,
   ].filter((x): x is string => !!x);
 }
 
 export function RoutePanel(props: Props) {
   const { from, to, profile, conditions, result, planning, selectedId, onSelect } = props;
+  const unit = distanceUnit(profile);
+  const dist = (m: number) => formatDistance(m, unit);
   const all: PlannedRoute[] = result?.status === "ok" ? [...result.routes, ...result.tradeoffs.flatMap((t) => (t.route ? [t.route] : []))] : [];
   const sel = all.find((r) => r.id === selectedId) ?? (result?.status === "ok" ? result.routes[0] : undefined);
   const { notes, author, builtAt } = props;
@@ -225,7 +226,7 @@ export function RoutePanel(props: Props) {
       ) : null}
 
       {result?.status === "none" ? (
-        <NoFit result={result} to={to} forLabel={props.forLabel} alternatives={props.alternatives ?? []} onUseForTrip={props.onUseForTrip} onAllowOnce={props.onAllowOnce} onGoClosest={props.onGoClosest} onOpenMode={props.onOpenMode} />
+        <NoFit unit={unit} result={result} to={to} forLabel={props.forLabel} alternatives={props.alternatives ?? []} onUseForTrip={props.onUseForTrip} onAllowOnce={props.onAllowOnce} onGoClosest={props.onGoClosest} onOpenMode={props.onOpenMode} />
       ) : null}
 
       {result?.status === "ok" && sel ? (
@@ -238,15 +239,15 @@ export function RoutePanel(props: Props) {
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
               <VerdictPill v={sel.summary.verdict} />
               <span className="tabular text-[28px] leading-none font-bold">{Math.round(sel.summary.minutes)} min</span>
-              <span className="tabular text-sm text-muted">{meta(sel)}</span>
+              <span className="tabular text-sm text-muted">{meta(sel, unit)}</span>
             </div>
             <ArrivalHours hours={to.hours} minutes={sel.summary.minutes} leave={conditions.leaveAt ?? null} />
-            <RouteStrip strip={sel.strip} />
+            <RouteStrip strip={sel.strip} unit={unit} />
             {props.compare && props.compare.label !== props.forLabel ? (
               <p className={cn("m-0 font-bold", props.compare.minutes === null || Math.round(sel.summary.minutes) < props.compare.minutes ? "text-ok" : "text-ink")}>{compareLine(Math.round(sel.summary.minutes), props.compare)}</p>
             ) : null}
             {why ? <p className="m-0">{why}</p> : null}
-            {extras(sel).length ? <p className="m-0 -mt-1 text-sm text-muted">{extras(sel).join(" · ")}</p> : null}
+            {extras(sel, unit).length ? <p className="m-0 -mt-1 text-sm text-muted">{extras(sel, unit).join(" · ")}</p> : null}
             {result.door ? (
               <p className="m-0 flex items-start gap-1.5 text-sm">
                 <DoorOpen aria-hidden className="mt-0.5 size-4 shrink-0" />
@@ -281,7 +282,7 @@ export function RoutePanel(props: Props) {
                     <span className="tabular text-lg font-bold">{Math.round(o.r.summary.minutes)} min</span>
                     <span className="min-w-0 flex-1">
                       <span className="block font-bold">{o.title || "Another way"}</span>
-                      <span className="tabular block text-sm text-muted">{meta(o.r)}</span>
+                      <span className="tabular block text-sm text-muted">{meta(o.r, unit)}</span>
                     </span>
                     <VerdictPill v={o.r.summary.verdict} />
                   </button>
@@ -354,7 +355,7 @@ export function RoutePanel(props: Props) {
                           </span>
                         </span>
                         <span className="pl-7 text-sm text-muted">
-                          {e.distanceM} m from the pin / {e.source}
+                          {formatDistance(e.distanceM, unit, { precise: true })} from the pin / {e.source}
                         </span>
                         <PeopleSay notes={notesForEntrance(notes, e.osmId)} all={notes} author={author} onDelete={props.onDeleteNote} onFlag={props.onFlagNote} className="pl-7" />
                       </li>
@@ -382,7 +383,7 @@ export function RoutePanel(props: Props) {
 
             <BusDepartures legs={sel.busLegs} live={props.liveBuses && leaveLabel(conditions.leaveAt ?? null) === "now"} />
 
-            {props.toilets ? <Toilets data={props.toilets} wantM={profile.maxToiletIntervalM} /> : null}
+            {props.toilets ? <Toilets data={props.toilets} wantM={profile.maxToiletIntervalM} unit={unit} /> : null}
 
             {sel.unknowns.length ? (
               <More title="What we don't know" aside={`${sel.unknowns.length} place${sel.unknowns.length === 1 ? "" : "s"}`}>
@@ -401,7 +402,7 @@ export function RoutePanel(props: Props) {
             ) : null}
 
             <More title="Hills" aside={sel.summary.worstInclinePct === null ? "Not known" : `Steepest ${Math.abs(sel.summary.worstInclinePct)}%`}>
-              <ElevationChart data={sel.elevation} worstPct={sel.summary.worstInclinePct} />
+              <ElevationChart data={sel.elevation} worstPct={sel.summary.worstInclinePct} unit={unit} />
             </More>
 
             <More title="Route in words" aside={`${sel.segments.length} parts`}>
@@ -410,7 +411,7 @@ export function RoutePanel(props: Props) {
                   <li key={i}>{s}</li>
                 ))}
               </ol>
-              <CopyRouteButton text={() => routeText(from, to, sel)} />
+              <CopyRouteButton text={() => routeText(from, to, sel, unit)} />
             </More>
 
             <More title="Where this comes from">
@@ -458,8 +459,9 @@ export function RoutePanel(props: Props) {
  * Nothing fits. Say what's in the way, then what you can do: go as close as
  * you can, or stretch a limit for this journey only. Never a dead end (D-035).
  */
-function NoFit({ result, to, forLabel, alternatives, onUseForTrip, onAllowOnce, onGoClosest, onOpenMode }: { result: Extract<PlanResult, { status: "none" }>; to: Place; forLabel?: string; alternatives: NonNullable<Props["alternatives"]>; onUseForTrip?: (id: string) => void; onAllowOnce: Props["onAllowOnce"]; onGoClosest: Props["onGoClosest"]; onOpenMode: () => void }) {
+function NoFit({ unit, result, to, forLabel, alternatives, onUseForTrip, onAllowOnce, onGoClosest, onOpenMode }: { unit: DistanceUnit; result: Extract<PlanResult, { status: "none" }>; to: Place; forLabel?: string; alternatives: NonNullable<Props["alternatives"]>; onUseForTrip?: (id: string) => void; onAllowOnce: Props["onAllowOnce"]; onGoClosest: Props["onGoClosest"]; onOpenMode: () => void }) {
   const b = result.blockers;
+  const dist = (m: number) => formatDistance(m, unit);
   const named = b.slice(0, 2).map((x) => `${x.detail} on ${x.name}`);
   const cl = result.closest;
   return (
@@ -502,7 +504,7 @@ function NoFit({ result, to, forLabel, alternatives, onUseForTrip, onAllowOnce, 
           <span className="text-sm text-muted">
             {cl.name}, {dist(cl.leftM)} from {to.name}. {Math.round(cl.summary.minutes)} min.
           </span>
-          <RouteStrip strip={cl.strip} className="my-1" />
+          <RouteStrip strip={cl.strip} unit={unit} className="my-1" />
           <span className="font-bold text-accent">Show this route</span>
         </button>
       ) : null}
@@ -640,10 +642,9 @@ function ShareButton({ to, minutes }: { to: string; minutes: number }) {
   );
 }
 
-const km = (m: number) => (m >= 1000 ? `${(m / 1000).toFixed(1)} km` : `${Math.round(m / 10) * 10} m`);
-
 /** Accessible toilets on the way, in route order, with what matters when you get there. */
-function Toilets({ data, wantM }: { data: NonNullable<Props["toilets"]>; wantM: number | null }) {
+function Toilets({ data, wantM, unit }: { data: NonNullable<Props["toilets"]>; wantM: number | null; unit: DistanceUnit }) {
+  const km = (m: number) => formatDistance(m, unit);
   const { toilets, longestGapM } = data;
   const short = wantM !== null && longestGapM > wantM;
   return (
@@ -665,7 +666,7 @@ function Toilets({ data, wantM }: { data: NonNullable<Props["toilets"]>; wantM: 
           ))}
         </ul>
       ) : (
-        <p className="m-0 text-sm text-muted">No accessible toilets are mapped within about 80 m of this route. Some won't be mapped.</p>
+        <p className="m-0 text-sm text-muted">No accessible toilets are mapped within about {formatDistance(80, unit)} of this route. Some won't be mapped.</p>
       )}
       <p className="m-0 mt-2 text-sm text-muted">From OpenStreetMap. Mapped by volunteers; check opening times.</p>
     </More>

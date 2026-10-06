@@ -205,7 +205,34 @@ for (const j of JOURNEYS) {
       const text = copied ? await page.evaluate(() => navigator.clipboard.readText()) : await page.getByLabel(/Select the text instead/).inputValue();
       if (!/^From .+ to Hamilton Place/.test(text) || !/\n1\. /.test(text)) throw new Error(`unexpected text: ${text.slice(0, 80)}`);
       if (text.includes(DEVICE)) throw new Error("the text names the device");
+      // A powerchair reads kilometres and metres, the default for its type (SMALL-02).
+      if (!/About [\d.]+ min, \d+(\.\d)? km\./.test(text) || /\b(miles?|yd)\b/.test(text)) throw new Error(`distance unit in the text: ${text.split("\n")[1]}`);
       await page.getByText("Route in words", { exact: true }).click();
+    });
+    await step("show distances in miles", async () => {
+      // The same per-device choice as speeds: the route card, the strip and the copied text all follow it.
+      await deviceButton().click();
+      await page.getByRole("menuitem", { name: /^Edit/ }).click();
+      await page.getByRole("dialog").filter({ hasText: "Your limits" }).waitFor();
+      await page.getByText("Your limits", { exact: true }).first().click();
+      await page.getByRole("radio", { name: /^Miles/ }).click();
+      await page.keyboard.press("Escape");
+      await page.getByText(/\d+(\.\d)? miles ·/).first().waitFor({ timeout: 60_000 });
+      if (await page.getByText(/\d+(\.\d)? km ·/).count()) throw new Error("a route card still shows kilometres");
+      const words = page.getByText("Route in words", { exact: true });
+      await words.scrollIntoViewIfNeeded();
+      await words.click();
+      // The card follows the unit at once, and the route in words once the route is planned again: read it until it does.
+      let text = "";
+      for (let tries = 0; tries < 30; tries++) {
+        await page.getByRole("button", { name: "Copy the route as text" }).click();
+        const done = page.getByText("Copied. Paste it into a message.");
+        await done.or(page.getByLabel(/Select the text instead/)).waitFor();
+        text = (await done.isVisible()) ? await page.evaluate(() => navigator.clipboard.readText()) : await page.getByLabel(/Select the text instead/).inputValue();
+        if (/About [\d.]+ min, \d+(\.\d)? miles\./.test(text) && !/\d (m|km)\b/.test(text)) break;
+        await page.waitForTimeout(1000);
+      }
+      if (!/About [\d.]+ min, \d+(\.\d)? miles\./.test(text) || /\d (m|km)\b/.test(text)) throw new Error(`the copied text isn't in miles: ${text.match(/.{0,40}\d (m|km)\b.{0,20}/)?.[0] ?? text.split("\n")[1]}`);
     });
     await step("add a note about the route", async () => {
       await page.getByRole("button", { name: "Add a note about this route" }).click();

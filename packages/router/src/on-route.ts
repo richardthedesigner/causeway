@@ -13,7 +13,7 @@
  * are added by the app with the same shape.
  */
 import { isKnown, type GraphEdge, type GraphNode, type LiveState } from "@causeway/graph";
-import type { Profile } from "@causeway/profile";
+import { distanceUnit, formatDistance, type Profile } from "@causeway/profile";
 import { darkCost, needsStepFree, type Conditions } from "./cost.js";
 import { placeName, type Avoided, type Route, type Router } from "./router.js";
 
@@ -192,19 +192,20 @@ export function onRoute(router: Router, r: Route, p: Profile, c: Conditions, opt
   // TfL's informational station messages, for everyone (escalators, a platform gap): never a reason to route.
   for (const st of stations) for (const n of opts.stationNotes?.get(st) ?? []) if (active(n, c.now)) add({ group: "info", text: n.message, label: "live", source: "TfL", date: n.at, until: n.validUntil && Date.parse(n.validUntil) - Date.parse(n.validFrom) !== DEFAULT_TFL_PERIOD_MS ? n.validUntil : null }, null);
   const builtAt = router.graph.meta.builtAt;
+  const dist = (m: number) => formatDistance(m, distanceUnit(p));
   if (round10(unknownM) >= 10) {
     const n = unknownNames.size;
-    add({ group: "info", text: `${round10(unknownM)} m not fully mapped, on ${n} ${n === 1 ? "street or path" : "streets and paths"}`, label: "static", source: "OpenStreetMap", date: builtAt, until: null }, null);
+    add({ group: "info", text: `${dist(unknownM)} not fully mapped, on ${n} ${n === 1 ? "street or path" : "streets and paths"}`, label: "static", source: "OpenStreetMap", date: builtAt, until: null }, null);
   }
   // Lighting after dark, only for people whose settings avoid unlit streets (D-038).
   if (round10(unlit) || round10(unmapped)) {
-    const parts = [round10(unlit) ? `${round10(unlit)} m not lit` : null, round10(unmapped) ? `lighting not mapped for ${round10(unmapped)} m` : null].filter(Boolean);
+    const parts = [round10(unlit) ? `${dist(unlit)} not lit` : null, round10(unmapped) ? `lighting not mapped for ${dist(unmapped)}` : null].filter(Boolean);
     add({ group: "info", text: `After dark: ${parts.join(", ")}`, label: "static", source: "OpenStreetMap", date: builtAt, until: null }, null);
   }
   if (gritting && round10(groundM) >= 10) {
     const g: { source: string; at: string | null } = gritting;
     const share = grittedM / groundM;
-    const text = grittedM < 10 ? "Icy: none of this route is on the council's first gritting routes for pavements" : share >= 0.95 ? "Icy: this route keeps to the council's first gritting routes for pavements" : `Icy: ${round10(grittedM)} m of this route is on the council's first gritting routes for pavements`;
+    const text = grittedM < 10 ? "Icy: none of this route is on the council's first gritting routes for pavements" : share >= 0.95 ? "Icy: this route keeps to the council's first gritting routes for pavements" : `Icy: ${dist(grittedM)} of this route is on the council's first gritting routes for pavements`;
     add({ group: "info", text, label: "static", source: g.source, date: g.at, until: null }, null);
   }
   if (c.healthAlert) {

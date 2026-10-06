@@ -1,4 +1,5 @@
 "use client";
+import { formatDistance, type DistanceUnit } from "@causeway/profile";
 import { ChevronRight } from "lucide-react";
 import { GROUND, type Ground } from "@/components/MapChrome";
 import { Switch } from "@/components/ui/switch";
@@ -14,12 +15,12 @@ interface Props {
   buses: boolean;
   onBuses: (v: boolean) => void;
   toiletEvery: number | null;
+  /** How this person reads distances. */
+  unit: DistanceUnit;
   onToilets: () => void;
   leaveAt: Date | null;
   onLeave: (d: Date | null) => void;
 }
-
-const km = (m: number) => (m >= 1000 ? `${m / 1000} km` : `${m} m`);
 
 /**
  * "This trip", at the foot of the sheet when it's swiped up (D-036 step 8):
@@ -55,7 +56,7 @@ export function TripSettings(p: Props) {
         <button type="button" onClick={p.onToilets} className={cn(row, "border-b-0 text-left")}>
           <span>Accessible toilet at least every</span>
           <span className="ml-auto flex items-center gap-1 font-bold">
-            {p.toiletEvery === null ? "Don't mind" : km(p.toiletEvery)}
+            {p.toiletEvery === null ? "Don't mind" : formatDistance(p.toiletEvery, p.unit)}
             <ChevronRight aria-hidden className="size-5 shrink-0 text-muted" />
           </span>
         </button>

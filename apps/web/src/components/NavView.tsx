@@ -2,6 +2,7 @@
 import { hazardText, Navigator, onRoadAt, secondsLeft, type Progress } from "@causeway/router";
 import { Accessibility, AlertTriangle, ArrowUp, CornerUpLeft, CornerUpRight, Flag, MessageSquarePlus, TrainFront, TriangleAlert, Volume2, VolumeX } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { formatDistance } from "@causeway/profile";
 import { RouteStrip } from "@/components/RouteStrip";
 import { Button } from "@/components/ui/button";
 import type { PlannedRoute } from "@/lib/plan-types";
@@ -34,8 +35,6 @@ interface Props {
   device?: { label: string; others: { id: string; label: string }[]; onSwitch: (id: string) => void };
 }
 
-const fmt = (m: number) => (m >= 1000 ? `${(m / 1000).toFixed(1)} km` : `${Math.max(0, Math.round(m / 10) * 10)} m`);
-
 /** How far ahead the "coming up" card looks: far enough to choose to stop or turn back. */
 const AHEAD_M = 300;
 
@@ -49,6 +48,8 @@ const AHEAD_M = 300;
  */
 export function NavView({ route, speedMps, roadSpeedMps, onEnd, onOffRoute, onPosition, onReport, onNote, onPace, device }: Props) {
   const online = useOnline();
+  const unit = route.nav.unit ?? "kmh";
+  const fmt = (m: number) => formatDistance(Math.max(0, m), unit);
   const [asking, setAsking] = useState(false);
   const nav = useRef(new Navigator(route.nav));
   const [p, setP] = useState<Progress | null>(null);
@@ -195,7 +196,7 @@ export function NavView({ route, speedMps, roadSpeedMps, onEnd, onOffRoute, onPo
       </section>
 
       <section aria-label="Journey progress" className="absolute inset-x-0 bottom-0 z-30 grid max-h-[50dvh] grid-cols-1 gap-3 overflow-y-auto rounded-t-[var(--radius)] border-t border-line bg-surface px-4 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] shadow-[0_-8px_40px_rgb(0_0_0/0.18)] md:bottom-4 md:left-4 md:w-[440px] md:rounded-[var(--radius)] md:border">
-        <RouteStrip strip={route.strip} along={along} />
+        <RouteStrip strip={route.strip} along={along} unit={unit} />
         {!online ? <NoSignal compact /> : null}
         {mode !== "live" ? (
           <p className="m-0 text-sm text-muted">{mode === "locating" ? "Finding your location…" : "Preview: moving along the route for you. Live location isn't available here."}</p>

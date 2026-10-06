@@ -5,7 +5,7 @@ const summary = { minutes: 23, distanceM: 1440, ascentM: 12, descentM: 4, worstI
 
 describe("the route as text (SMALL-04)", () => {
   it("says what it's like, what isn't known, and the way in numbered steps", () => {
-    const text = routeText({ name: "Causewayside" }, { name: "Hamilton Place" }, { summary, segments: ["Head north on Causewayside.", "Turn left onto Melville Drive."], unknowns: [{ name: "Jawbone Walk", m: 80, what: "surface" }, { name: "Jawbone Walk", m: 40, what: "width" }] }, new Date("2026-10-05T10:00:00Z"));
+    const text = routeText({ name: "Causewayside" }, { name: "Hamilton Place" }, { summary, segments: ["Head north on Causewayside.", "Turn left onto Melville Drive."], unknowns: [{ name: "Jawbone Walk", m: 80, what: "surface" }, { name: "Jawbone Walk", m: 40, what: "width" }] }, "kmh", new Date("2026-10-05T10:00:00Z"));
     expect(text).toBe(
       [
         "From Causewayside to Hamilton Place",
@@ -18,6 +18,13 @@ describe("the route as text (SMALL-04)", () => {
         "Planned with Causewayside on 5 Oct 2026. Things on the ground change, so check as you go.",
       ].join("\n"),
     );
+  });
+
+  it("says miles and yards for a device set to miles (SMALL-02)", () => {
+    const text = routeText({ name: "A" }, { name: "B" }, { summary, segments: [], unknowns: [{ name: "Jawbone Walk", m: 80, what: "surface" }] }, "mph");
+    expect(text).toContain("About 23 min, 0.9 miles.");
+    expect(text).toContain("Not known for 130 yd: Jawbone Walk.");
+    expect(text).not.toMatch(/\d (km|m)\b/);
   });
 
   it("never mentions the device or its limits", () => {
