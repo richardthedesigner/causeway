@@ -308,7 +308,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 ## Log
 
 Newest first. One line per change: date, ID, what happened, link.
-- 2026-10-06: STAB-18 done in PR #66: at 320 px with 200% text the sheet shows 487 px above a slimmer Start bar, and a new route opens with its card at the top. `pnpm a11y` asserts the height. Route screenshot baselines to regenerate in CI (local fonts differ).
+- 2026-10-06: STAB-18 done in PR #66: at 320 px with 200% text the sheet shows 487 px above a slimmer Start bar, and a new route opens with its card at the top. `pnpm a11y` asserts the height. Route screenshot baselines taken from the CI artifact (local fonts differ).
 
 - 2026-10-06: SMALL-18 done in PR #64: distances beside search results follow the device's miles or kilometres (D-074).
 - 2026-10-06: STAB-21 done in PR #63: `pnpm e2e` fails only on the app's own 4xx and 5xx. Outside services (Open-Meteo, TfL) that return an error print a `WARN` line and no longer fail the run.
