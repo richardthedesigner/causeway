@@ -179,8 +179,10 @@ for (const j of JOURNEYS) {
     if (await page.getByRole("region", { name: "Dropped pin" }).count()) throw new Error("a pin was dropped");
     await page.keyboard.press("Escape");
     await page.getByRole("region", { name: "Saved place: Home" }).waitFor({ state: "detached" });
-    const back = await page.evaluate(() => document.activeElement?.id);
-    if (back !== "saved-marker-e2e-meadows") throw new Error(`focus went to "${back}", not back to the marker`);
+    // Focus goes back on the next frame, so wait for it rather than reading it at once.
+    await page.waitForFunction(() => document.activeElement?.id === "saved-marker-e2e-meadows", null, { timeout: 5000 }).catch(async () => {
+      throw new Error(`focus went to "${await page.evaluate(() => document.activeElement?.id)}", not back to the marker`);
+    });
   });
   await step("Start from here sets the start, and the marker gives way to the route's own", async () => {
     await openMarker("Work");
