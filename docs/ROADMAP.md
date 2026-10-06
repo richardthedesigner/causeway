@@ -52,7 +52,7 @@ The current direction: **fix and fill the pilot cities** with open data that nee
 The next five things to pick up, in order.
 
 1. **SPEED-08**: load the graph and search index before the base map.
-2. **FEAT-03**: "Report what's there" from "What we don't know".
+2. **STAB-22**: at 320 px with 200% text, "Another way" spills out and the route panel scrolls sideways.
 3. **SMALL-13**: saved places on the map, and as a start as well as a destination.
 4. **STAB-18**: the route panel leaves too little of the sheet in view at 320 px with 200% text.
 5. **SMALL-18**: distances to places in search, in miles when the device is set to miles.
@@ -122,7 +122,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 |---|---|---|---|---|---|---|
 | FEAT-01 | Battery range per device (`maxRangeKm`), with a warning on long routes | M | next | done (2026-10-04) | Claude | D-043. Range engine from PR #26, and "Warn me about battery range" in the device editor |
 | FEAT-02 | Separate road and pavement speeds for road scooters | M | later | done (2026-10-05) | Claude | D-051. Road speed setting is FEAT-18 |
-| FEAT-03 | "Report what's there" from "What we don't know" on a route | M | now | doing | Claude | 2026-10-06, `claude/feat-03-report-whats-there`. UX_ASSESSMENT open finding. Reports stay on the device until the backend is back on |
+| FEAT-03 | "Report what's there" from "What we don't know" on a route | M | now | done (2026-10-06) | Claude | D-075. PR #65. One question per gap, prefilled with the street and point. Kept on the phone in the reports list and in Your data until the backend is on (DEF-04) |
 | FEAT-04 | Saved places (home, work, a friend's) | M | now | done (2026-10-05) | Claude | PR #42. D-060. "Save this place" on a route; saved places come first in search, with a verdict. On the phone only, in Your data |
 | FEAT-05 | Arrive by a time, as well as leave at one | M | later | todo | Claude | D-040 built "Leaving later" |
 | FEAT-06 | Changing Places toilets as their own search and route option | M | later | blocked | Claude | Needs a licensed source first (DATA-01, §9) |
@@ -164,6 +164,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | SMALL-17 | Recent places as starts in "Where are you starting from?" | S | later | todo | Claude | Found doing FEAT-20 (D-073). Today it suggests the city's start, saved places and the city's places |
 | SMALL-18 | Search results and the "Where are you starting from?" suggestions show distance in metres or km only: follow the device's miles or kilometres (D-074) | S | now | todo | Claude | Left out of SMALL-02 because FEAT-20 was changing the search flow. `metres()` in `PlaceSearch.tsx` |
 | SMALL-19 | Gusts ("up to 50 km/h") follow the device's speed unit, and say mph for people who read mph | S | later | todo | Claude | Found doing SMALL-02. Weather text in `cost.ts`, `on-route.ts`, `area-status.ts`. Heights and climbs stay in metres (D-074) |
+| SMALL-20 | Answer buttons in the report sheets (`role="radio"`) move with Tab, not the arrow keys. Use a roving tab index so a group is one Tab stop | S | later | todo | Claude | Found doing FEAT-03. `ReportSheet.tsx` `Choices`, also the note sheet |
 
 ## Security and privacy
 
@@ -218,6 +219,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | STAB-19 | Toilet labels ("WC") stack on top of each other along a route, unreadable at the zoom the route fits to | S | later | todo | Claude | Found doing STAB-02 (`navigation.*.phone.png`). Hide or cluster labels that collide |
 | STAB-20 | Screenshot baselines are Linux Chromium only; refresh them once after UPD-03 and UPD-04 (Next.js and Node) land, and whenever Playwright's Chromium changes | S | later | todo | Claude | STAB-02. `pnpm screenshots --update`, then look at the diffs |
 | STAB-21 | `pnpm e2e` fails on any 4xx, including from outside services (an Open-Meteo 429 failed a run during FEAT-20). Fail only on the app's own requests; log outside ones | S | next | todo | Claude | Found reviewing FEAT-20. Added by SMALL-12. Risks red CI that isn't ours |
+| STAB-22 | At 320 px with 200% text, an alternative route's title ("Another way") spills out of its box, so the route panel can scroll 17 px sideways and push the From and To bars off screen | S | next | todo | Claude | Found doing FEAT-03. A mouse click on anything in the panel sets it off. The a11y check opens "Report what's there" by keyboard until this is fixed |
 | STAB-17 | The sheet trapped keyboard focus and hid the map from screen readers: Tab never reached the city, layers or location buttons | S | now | done (2026-10-05) | Claude | D-069. Found doing STAB-13. vaul 1.1.2 never passed `modal={false}` on, so a `pnpm patch` does; Radix also looped Tab inside the sheet. The map menus open above the sheet, take focus and give it back. `pnpm a11y` checks it |
 | STAB-08 | Offline test: load a city, cut the network, route | S | now | done (2026-10-05) | Claude | PR #42, with SMALL-06. `pnpm e2e` loads Edinburgh, cuts the network and routes. A reload offline (the service worker) isn't covered |
 
@@ -309,6 +311,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 
 Newest first. One line per change: date, ID, what happened, link.
 
+- 2026-10-06: FEAT-03 done in PR #65: "Report what's there" under each street in "What we don't know", one question per gap, kept on the phone and in Your data (D-075). Added STAB-22, SMALL-20. STAB-22 replaces it in Now.
 - 2026-10-06: DEP-07 done: `causeway.richardthedesigner.com` serves production and is public. SEC-25 unblocked (needs a browser). Added STAB-21. Batch 2 merged FEAT-20, SMALL-02, SMALL-12, STAB-15 and SPEED-01 (#56 to #61).
 - 2026-10-06: SMALL-02 done in PR #56: distances follow the per-device mph or km/h choice through one formatter, yards for short distances in miles mode (D-074). Added SMALL-18, SMALL-19. Now: SPEED-08, FEAT-03, SMALL-13, STAB-18, SMALL-18.
 - 2026-10-06: FEAT-20 done: destination first. "Where to?" alone, then From as "Your location", with location asked for only then; plain-words fallbacks ask where you're starting from (D-073). Added SMALL-17.

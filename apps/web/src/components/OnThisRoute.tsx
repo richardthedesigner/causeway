@@ -79,7 +79,7 @@ export function OnThisRoute({ items, routeId }: { items: readonly OnRouteItem[];
  */
 export function ReportWhatsThere({ name, onReport }: { name: string; onReport: () => void }) {
   return (
-    <Button size="md" onClick={onReport} aria-label={`Report what's there on ${name}`} className="mt-2 justify-self-start text-left">
+    <Button size="md" onClick={onReport} aria-label={`Report what's there on ${name}`} className="mt-2 min-w-0 justify-self-start text-left [overflow-wrap:anywhere]">
       <MapPinPlus aria-hidden className="size-5 shrink-0" /> Report what&apos;s there
     </Button>
   );

@@ -76,7 +76,9 @@ for (const scheme of ["light", "dark"]) {
   await page.locator("details").evaluateAll((els) => els.forEach((el) => (el.open = true)));
   await check("route, all sections open");
   // "Report what's there" from "What we don't know" (FEAT-03).
-  await page.getByRole("button", { name: /^Report what's there on / }).first().click();
+  // By keyboard, as in the 200% text check below.
+  await page.getByRole("button", { name: /^Report what's there on / }).first().focus();
+  await page.keyboard.press("Enter");
   await page.getByRole("dialog", { name: "Report what's there" }).waitFor();
   await page.getByRole("dialog").getByRole("radio").first().click();
   await check("report what's there");
@@ -314,7 +316,9 @@ for (const [scheme, size, zoom] of [["light", { width: 390, height: 844 }, false
   await page.getByText("Why this way?").waitFor({ timeout: 60_000 });
   await page.locator("details").evaluateAll((els) => els.forEach((el) => (el.open = true)));
   await reflow("route, all sections open");
-  await page.getByRole("button", { name: /^Report what's there on / }).first().click();
+  // By keyboard: a click scrolls the route panel sideways at 200% text, where "Another way" spills out of its box (STAB-22).
+  await page.getByRole("button", { name: /^Report what's there on / }).first().focus();
+  await page.keyboard.press("Enter");
   await page.getByRole("dialog", { name: "Report what's there" }).waitFor();
   await reflow("report what's there");
   await page.keyboard.press("Escape");

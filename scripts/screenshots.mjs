@@ -175,7 +175,8 @@ for (const size of SIZES) {
 
     // "Report what's there" from "What we don't know" (FEAT-03).
     await page.locator("details", { hasText: "What we don't know" }).first().evaluate((el) => (el.open = true));
-    await page.getByRole("button", { name: /^Report what's there on / }).first().click();
+    await page.getByRole("button", { name: /^Report what's there on / }).first().focus();
+    await page.keyboard.press("Enter");
     await page.getByRole("dialog", { name: "Report what's there" }).waitFor();
     await shoot(page, "whats-there", scheme, size);
     await page.keyboard.press("Escape");
