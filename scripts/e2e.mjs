@@ -202,7 +202,10 @@ for (const j of JOURNEYS) {
     await page.getByPlaceholder("Where to?").waitFor({ timeout: 60_000 });
     await openMarker("Work");
     await page.getByRole("button", { name: "Go here", exact: true }).click();
-    await page.getByRole("button", { name: /^Change destination: Bruntsfield Links/ }).waitFor();
+    // No location here, so it asks where you're starting from (D-073): a saved place does for that too.
+    await page.getByPlaceholder("Where are you starting from?").waitFor();
+    await page.getByRole("option", { name: /Saved as Home/ }).first().click();
+    await page.getByRole("button", { name: /^Change destination: Bruntsfield Links/ }).waitFor({ timeout: 60_000 });
   });
   if (problems.length) failures.push(`${name}: ${problems.join("; ")}`);
   await context.close();
