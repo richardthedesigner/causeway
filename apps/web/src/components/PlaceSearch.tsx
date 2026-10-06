@@ -1,5 +1,6 @@
 "use client";
 import { Accessibility, Building2, Coffee, Hash, Home, MapPin, Navigation, Search, Signpost, Toilet, TrainFront } from "lucide-react";
+import { formatDistance, type DistanceUnit } from "@causeway/profile";
 import { useEffect, useMemo, useState } from "react";
 import { SearchBar } from "@/components/SearchBar";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
@@ -25,6 +26,8 @@ interface Props {
   /** Shown instead of the suggestions before anything is typed (recent places). */
   emptyState?: React.ReactNode;
   onFocus?: () => void;
+  /** The device's distance unit, for the distance beside each result (D-074). */
+  unit: DistanceUnit;
 }
 
 const SHORTCUTS = ["Accessible toilets", "Step-free cafés", "Stations", "Pharmacies"];
@@ -32,7 +35,6 @@ const SHORTCUTS = ["Accessible toilets", "Step-free cafés", "Stations", "Pharma
 /** The query still starts with the one earlier results came from. */
 const continues = (query: string, from: string) => query.toLowerCase().startsWith(from.toLowerCase());
 
-const metres = (m: number) => (m < 950 ? `${Math.max(10, Math.round(m / 10) * 10)} m` : `${(m / 1000).toFixed(1)} km`);
 
 function Icon({ p }: { p: Place }) {
   const k = p.kind;
@@ -55,7 +57,7 @@ function Icon({ p }: { p: Place }) {
  */
 export { Icon as PlaceIcon };
 
-export function PlaceSearch({ label, index, suggestions, near, liveNear, bbox, cityName, excludeId, onPick, autoFocus, onUseLocation, trailing, emptyState, onFocus }: Props) {
+export function PlaceSearch({ label, index, suggestions, near, liveNear, bbox, cityName, excludeId, onPick, autoFocus, onUseLocation, trailing, emptyState, onFocus, unit }: Props) {
   const [q, setQ] = useState("");
   const [live, setLive] = useState<{ q: string; places: Place[]; outside: number } | null>(null);
   const local = useMemo(() => (index && q.trim() ? search(index, q, near) : null), [index, q, near]);
@@ -148,7 +150,7 @@ export function PlaceSearch({ label, index, suggestions, near, liveNear, bbox, c
             <span className="min-w-0">
               <span className="block truncate">{h.place.name}</span>
               <span className="block truncate text-sm text-muted">
-                {h.place.kind} / {metres(h.metres)}
+                {h.place.kind} / {formatDistance(h.metres, unit)}
               </span>
               {h.place.facts ? (
                 <span className="flex items-start gap-1 text-sm text-muted">

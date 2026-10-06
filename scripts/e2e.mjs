@@ -278,6 +278,14 @@ for (const j of JOURNEYS) {
       const t = await first.innerText();
       if (!/^Home\s+Hamilton Place/.test(t)) throw new Error(`first suggestion: ${t.replace(/\s+/g, " ")}`);
     });
+    await step("search distances follow miles (SMALL-18)", async () => {
+      // The device is still set to miles from the step above: a category search lists distances in yards or miles, never m or km.
+      await page.getByPlaceholder("Where to?").fill("toilet");
+      const first = page.getByRole("option").first();
+      await first.waitFor({ timeout: 30_000 });
+      const t = (await page.getByRole("option").allInnerTexts()).join(" ");
+      if (!/\d (yd|miles?)\b/.test(t) || /\d (m|km)\b/.test(t)) throw new Error(`search distances aren't in miles: ${t.replace(/\s+/g, " ").slice(0, 160)}`);
+    });
     await step("the note is kept on this phone, without the profile", async () => {
       const stored = await page.evaluate(() => Object.entries(localStorage).filter(([k]) => k.includes("note")).map(([, v]) => v).join(" "));
       if (!stored.includes("Kerb dropped on one side only.")) throw new Error("note not stored");

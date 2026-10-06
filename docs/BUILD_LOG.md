@@ -2,6 +2,13 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
+## 2026-10-06 (miles in search)
+
+SMALL-18 (D-074), PR #64.
+- The distance beside each search result uses `formatDistance` with the device's unit: yards and miles in miles mode, metres and kilometres otherwise. `PlaceSearch` takes a `unit` prop.
+- The "Where are you starting from?" suggestions never showed a distance, so nothing changed there.
+- Tests: `apps/web/test/search-distance.test.ts`, and an e2e step that searches in miles mode.
+
 ## 2026-10-06 (a custom domain)
 
 DEP-07, no code.
@@ -14,7 +21,7 @@ DEP-07, no code.
 SMALL-02 (D-074), PR #56.
 - Distances follow the per-device "Show speeds and distances in" choice from D-051. No second setting. The editor's buttons now read "Miles, mph" and "Kilometres, km/h".
 - `formatDistance` in `@causeway/profile` is the one formatter: metres under a kilometre and kilometres above in km mode, yards under a quarter of a mile and miles above in miles mode, and full words for speech ("110 yards"). Behind it: the route card, strip and "On this route" lines, router notes and trade-offs, navigation (the plan carries its unit so what's shown and what's said agree), the elevation chart, rest and toilet intervals, battery range and the copy-as-text route.
-- Heights, widths and kerbs stay metric. Distances to places in search are still metric (SMALL-18).
+- Heights, widths and kerbs stay metric. Distances to places in search are still metric (SMALL-18, done later).
 - Tests: `packages/profile/test/distance.test.ts`, miles-mode navigation and range wording, route-text. The e2e journey switches a powerchair to miles and checks the card and the copied text. The a11y run checks the battery range in miles.
 - Screenshot baselines were not rewritten: they differ on this machine even on a clean `main` (fonts), so CI decides.
 ## 2026-10-06 (destination first)
