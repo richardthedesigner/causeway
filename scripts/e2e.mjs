@@ -150,14 +150,17 @@ for (const j of JOURNEYS) {
   await page.addInitScript((list) => {
     localStorage.setItem("causewayside.city.v1", "edinburgh");
     localStorage.setItem("causewayside.saved.edinburgh.v1", JSON.stringify(list));
+    // Location is off: answer at once, as a phone with it turned off does, so no run waits on a browser's own prompt.
+    if (navigator.geolocation) navigator.geolocation.getCurrentPosition = (_ok, fail) => setTimeout(() => fail({ code: 1, PERMISSION_DENIED: 1, message: "denied" }), 50);
   }, saved);
   const step = async (label, fn) => {
     try {
       await fn();
       console.log(`  ok   ${label}`);
     } catch (e) {
-      failures.push(`${name}: ${label}: ${e.message.split("\n")[0]}`);
-      console.log(`  FAIL ${label}: ${e.message.split("\n")[0]}`);
+      const why = e.message.split("\n").find((l) => /waiting for/.test(l))?.trim() ?? "";
+      failures.push(`${name}: ${label}: ${e.message.split("\n")[0]} ${why}`);
+      console.log(`  FAIL ${label}: ${e.message.split("\n")[0]} ${why}`);
     }
   };
   const marker = (label) => page.getByRole("button", { name: `${label}, saved place`, exact: true });
