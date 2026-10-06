@@ -2,6 +2,13 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
+## 2026-10-06 (the e2e walk by distance)
+
+STAB-15: `scripts/e2e.mjs` only. No app code changed.
+- The test runs the preview's half-second ticks in batches of 180 (about 500 m of route), where it ran ten every 50 ms. Drawing the page, not walking, was the cost: Edinburgh drew about 70 times at 400 ms each. It now draws about a dozen times.
+- Edinburgh arrives in 3.4 s (it took 2 min 44 s on a 4-core box), and in 9.5 s with the CPU slowed six times (`E2E_CPU=6`, Chrome's CPU throttling). The journey prints how long the walk took.
+- `E2E_ARRIVE_MS` stays as an override of the 2-minute limit.
+
 ## 2026-10-05 (the release and the docs sweep)
 
 REV-01, docs only.
