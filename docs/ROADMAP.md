@@ -51,11 +51,11 @@ The current direction: **fix and fill the pilot cities** with open data that nee
 
 The next five things to pick up, in order.
 
-1. **SPEED-08**: load the graph and search index before the base map.
-2. **STAB-22**: at 320 px with 200% text, "Another way" spills out and the route panel can scroll sideways.
-3. **SPEED-10**: cut the main-thread work after a route returns.
-4. **SEC-17**: the server sets the fields the client shouldn't.
-5. **SMALL-20**: pan the map so a saved place under the half-open sheet can be tapped.
+1. **STAB-22**: at 320 px with 200% text, "Another way" spills out and the route panel can scroll sideways.
+2. **SPEED-10**: cut the main-thread work after a route returns.
+3. **SEC-17**: the server sets the fields the client shouldn't.
+4. **SMALL-20**: pan the map so a saved place under the half-open sheet can be tapped.
+5. **SPEED-09**: read the base map in byte ranges, so the map draws sooner now that it loads last.
 
 The rest of the pilot-city data (DATA-12 to DATA-20) is blocked on access, licences or keys. Research (RES) needs Richard and testers.
 
@@ -236,11 +236,12 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | SPEED-05 | Smaller search index per city | S | later | todo | Claude | `data/places`. SPEED-01: 1.3 to 1.5 MB, as big as the graph in Newcastle and London. Target 600 KB or less |
 | SPEED-06 | A compact binary graph format instead of gzipped JSON | L | later | todo | Claude | SPEED-01 says not yet: the graph is 5 to 25% of the download. Revisit after SPEED-08 and SPEED-09 if Edinburgh's worker setup (2.6 s, unslowed) is over 5 s on a real phone |
 | SPEED-07 | Speed budget follow-ups: a CI wall-time baseline from a few weeks of printed figures, and a re-baseline when the weekly refresh changes the graphs | S | later | todo | Claude | D-056. Settled nodes depend on the graph, so a refresh PR can trip the 10% check |
-| SPEED-08 | Load the graph and search index before the base map, so "Where to?" doesn't wait for tiles | S | now | todo | Claude | SPEED-01. Edinburgh 15.6 s to ready on Fast 4G with 4x CPU; target 6 s or less |
+| SPEED-08 | Load the graph and search index before the base map, so "Where to?" doesn't wait for tiles | S | now | done (2026-10-06) | Claude | SPEED-01. D-077, [numbers](perf/2026-10-06-speed-08.md). Edinburgh ready 12.9 s to 7.6 s (LCP 13.9 s to 8.8 s) on Fast 4G with 4x CPU; 6 s missed, see SPEED-13 and SPEED-06. The map now draws later (SPEED-09) |
 | SPEED-09 | Read the base map in byte ranges, not whole, and fill the rest in the background for offline | M | next | todo | Claude | SPEED-01. Tiles are 49 to 71% of bytes. Target 2 MB or less before the map draws. Check the offline decisions first |
-| SPEED-10 | Cut the main-thread work after a route returns | S | next | todo | Claude | SPEED-01. Edinburgh 5.4 s at 4x against 3.4 s on desktop. Target 3 s or less. Trace first |
+| SPEED-10 | Cut the main-thread work after a route returns | S | next | todo | Claude | SPEED-01. Edinburgh 5.4 s at 4x against 3.4 s on desktop. Target 3 s or less. Trace first. After SPEED-08 it is 0.3 to 0.7 s slower in every city with the router unchanged, probably the base map still drawing; check that too |
 | SPEED-11 | Trim JavaScript: see what is in the 650 to 680 KB and load later what the first screen doesn't need | M | later | todo | Claude | SPEED-01. MapLibre is the largest chunk. Pairs with SPEED-04 |
 | SPEED-12 | Measure on a real mid-range Android and a real CDN, plus repeat visits and city switching | S | next | todo | Richard and Claude | SPEED-01 limits: unslowed worker, software GPU, local server. Needs a phone or WebPageTest |
+| SPEED-13 | Start the graph download before the page hydrates (it starts at 2.1 s in Edinburgh), and hand it to the router worker | M | next | todo | Claude | SPEED-08. The rest of the way to 6 s with SPEED-06: after it, Edinburgh's worker spends 1.6 s (unslowed) on the graph. Check the service worker (D-023) still caches it |
 
 ## Bloat reduction
 
@@ -312,7 +313,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 ## Log
 
 Newest first. One line per change: date, ID, what happened, link.
-
+- 2026-10-06: SPEED-08 done in PR #67: the graph and the files that join it download first and together, then the search index, then the base map (D-077). Edinburgh "Where to?" 13.9 s to 8.8 s on Fast 4G with 4x CPU ([numbers](perf/2026-10-06-speed-08.md)); 6 s not reached. Newcastle and London no longer download Edinburgh's search index. The map draws later. Added SPEED-13. Now: SPEED-09 replaces SPEED-08.
 - 2026-10-06: FEAT-03 done in PR #65: "Report what's there" under each street in "What we don't know", one question per gap, kept on the phone and in Your data (D-076). Added STAB-22, SMALL-22. Now: SPEED-08, STAB-22, SPEED-10, SEC-17, SMALL-20.
 - 2026-10-06: SMALL-13 done in PR #68: saved places are labelled buttons on the map with "Go here" and "Start from here" (D-075); `pnpm e2e` covers them by keyboard and as a start. Added SMALL-20, SMALL-21.
 - 2026-10-06: STAB-18 done in PR #66: at 320 px with 200% text the sheet shows 487 px above a slimmer Start bar, and a new route opens with its card at the top. `pnpm a11y` asserts the height. Route screenshot baselines taken from the CI artifact (local fonts differ).

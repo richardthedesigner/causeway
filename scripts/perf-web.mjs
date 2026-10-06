@@ -15,7 +15,7 @@
  *   --cpu 4             CPU slowdown on the page's main thread (default 4)
  *   --city edinburgh    only this city (repeat for more); edinburgh, newcastle, london
  *   --json out.json     also write every run as JSON
- *   --debug             print the draw-call frames the map-drawn time is read from
+ *   --debug             print the draw-call frames the map-drawn time is read from, and when each file loaded
  *
  * The CPU slowdown applies to the page's main thread only. The router and the graph
  * parse run in a worker, which Chromium does not slow (checked: a fixed loop takes the same
@@ -187,7 +187,7 @@ async function run(browser, server, city) {
   const finished = [];
   context.on("requestfinished", (req) => {
     const t = req.timing();
-    finished.push({ path: new URL(req.url()).pathname, end: t.startTime + t.responseEnd });
+    finished.push({ path: new URL(req.url()).pathname, start: t.startTime, end: t.startTime + t.responseEnd });
   });
   await page.addInitScript((id) => localStorage.setItem("causewayside.city.v1", id), city.id);
   await page.addInitScript(pageHooks);
@@ -216,6 +216,8 @@ async function run(browser, server, city) {
   if (r.error && r.route === null) throw new Error(`${city.id}: ${r.error}`);
   const drawn = r.frames.find(([t, n]) => r.baseEnd !== null && t >= r.baseEnd && n >= DRAWN_CALLS);
   if (DEBUG) console.log(`  base map ${r.baseStart?.toFixed(0)} to ${r.baseEnd?.toFixed(0)} ms; ready ${r.ready?.toFixed(0)}; frames:`, r.frames.slice(0, 40).map(([t, n]) => `${t.toFixed(0)}:${n}`).join(" "));
+  // Which files landed when, so the order of downloads before "ready" can be checked (SPEED-08).
+  if (DEBUG) console.log("  files:", finished.sort((a, b) => a.end - b.end).map((f) => `${(f.start - r.origin).toFixed(0)}-${(f.end - r.origin).toFixed(0)}:${f.path}`).join(" "));
   // The router worker's data: the graph and what joins it. After the last of it lands, the worker unzips,
   // parses and indexes it, then the page shows the city. Chromium doesn't slow workers, so this is desktop speed.
   const workerData = finished.filter((f) => /^\/(graph|live)\/|\/places\/[^/]*\.(greenspace|osm-notes)\./.test(f.path)).map((f) => f.end);
