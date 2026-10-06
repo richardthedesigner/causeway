@@ -217,7 +217,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | STAB-18 | At 320 px with 200% text the route panel leaves about 145 px of the sheet in view above the Start bar, so the route cards can barely be read without dragging | S | next | todo | Claude | Found doing STAB-02 (`route.*.w320-200.png`). Check the sheet's resting height and whether the bar can shrink |
 | STAB-19 | Toilet labels ("WC") stack on top of each other along a route, unreadable at the zoom the route fits to | S | later | todo | Claude | Found doing STAB-02 (`navigation.*.phone.png`). Hide or cluster labels that collide |
 | STAB-20 | Screenshot baselines are Linux Chromium only; refresh them once after UPD-03 and UPD-04 (Next.js and Node) land, and whenever Playwright's Chromium changes | S | later | todo | Claude | STAB-02. `pnpm screenshots --update`, then look at the diffs |
-| STAB-21 | `pnpm e2e` fails on any 4xx, including from outside services (an Open-Meteo 429 failed a run during FEAT-20). Fail only on the app's own requests; log outside ones | S | next | todo | Claude | Found reviewing FEAT-20. Added by SMALL-12. Risks red CI that isn't ours |
+| STAB-21 | `pnpm e2e` fails on any 4xx, including from outside services (an Open-Meteo 429 failed a run during FEAT-20). Fail only on the app's own requests; log outside ones | S | now | done (2026-10-06) | Claude | PR #63. Outside 4xx and 5xx print as `WARN` lines. Found reviewing FEAT-20. Added by SMALL-12 |
 | STAB-17 | The sheet trapped keyboard focus and hid the map from screen readers: Tab never reached the city, layers or location buttons | S | now | done (2026-10-05) | Claude | D-069. Found doing STAB-13. vaul 1.1.2 never passed `modal={false}` on, so a `pnpm patch` does; Radix also looped Tab inside the sheet. The map menus open above the sheet, take focus and give it back. `pnpm a11y` checks it |
 | STAB-08 | Offline test: load a city, cut the network, route | S | now | done (2026-10-05) | Claude | PR #42, with SMALL-06. `pnpm e2e` loads Edinburgh, cuts the network and routes. A reload offline (the service worker) isn't covered |
 
@@ -309,6 +309,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 
 Newest first. One line per change: date, ID, what happened, link.
 
+- 2026-10-06: STAB-21 done in PR #63: `pnpm e2e` fails only on the app's own 4xx and 5xx. Outside services (Open-Meteo, TfL) that return an error print a `WARN` line and no longer fail the run.
 - 2026-10-06: DEP-07 done: `causeway.richardthedesigner.com` serves production and is public. SEC-25 unblocked (needs a browser). Added STAB-21. Batch 2 merged FEAT-20, SMALL-02, SMALL-12, STAB-15 and SPEED-01 (#56 to #61).
 - 2026-10-06: SMALL-02 done in PR #56: distances follow the per-device mph or km/h choice through one formatter, yards for short distances in miles mode (D-074). Added SMALL-18, SMALL-19. Now: SPEED-08, FEAT-03, SMALL-13, STAB-18, SMALL-18.
 - 2026-10-06: FEAT-20 done: destination first. "Where to?" alone, then From as "Your location", with location asked for only then; plain-words fallbacks ask where you're starting from (D-073). Added SMALL-17.
