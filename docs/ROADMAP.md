@@ -54,7 +54,7 @@ The next five things to pick up, in order.
 1. **SMALL-02**: a miles or kilometres setting.
 2. **SPEED-08**: load the graph and search index before the base map.
 3. **FEAT-03**: "Report what's there" from "What we don't know".
-4. **SMALL-12**: a favicon and app icons.
+4. **SMALL-13**: saved places on the map, and as a start as well as a destination.
 5. **STAB-18**: the route panel leaves too little of the sheet in view at 320 px with 200% text.
 
 The rest of the pilot-city data (DATA-12 to DATA-20) is blocked on access, licences or keys. Research (RES) needs Richard and testers.
@@ -155,10 +155,11 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | SMALL-09 | "Why this way?" one tap from the navigation screen | S | later | todo | Claude | |
 | SMALL-10 | Recent journeys, not just recent places | S | later | todo | Claude | `recents.ts` |
 | SMALL-11 | Weather for trips more than 48 hours ahead | S | later | todo | Claude | D-040 falls back to today's |
-| SMALL-12 | A favicon and app icons (every page load asks for `/favicon.ico` and gets a 404) | S | now | todo | Claude | Found doing SEC-04. Seen on production 2026-10-05 |
-| SMALL-13 | Saved places on the map, and as a start as well as a destination from the route screen | S | later | todo | Claude | Found doing FEAT-04. Today they show in search, and as starts in "Starting from?" |
+| SMALL-12 | A favicon and app icons (every page load asks for `/favicon.ico` and gets a 404) | S | now | done (2026-10-06) | Claude | PR #59. One mark (a route ending in a dot), `scripts/make-icons.mjs`. Found SMALL-16 |
+| SMALL-13 | Saved places on the map, and as a start as well as a destination from the route screen | S | now | todo | Claude | Found doing FEAT-04. Today they show in search, and as starts in "Starting from?" |
 | SMALL-14 | Toilet Map: say when OSM and the Toilet Map disagree, keep disputed toilets off routes, and say when a record is over 2 years old | S | now | done (2026-10-05) | Claude | D-065. Ported from PR #36. 5 disputes in Edinburgh, 1 in Newcastle |
 | SMALL-15 | Parks and OpenStreetMap notes: a park found by name ends at its gate, not a nearby building's door; old notes and business questions left out; "N more places a mapper flagged" | S | now | done (2026-10-05) | Claude | D-048 update. Ported from PR #36. 26 of 119 named Edinburgh parks with gates had a fitting door within 50 m |
+| SMALL-16 | Pick the 404 and offline pages' look to match the app (`404.html` is Next's default) | S | later | todo | Claude | Found doing SMALL-12 |
 
 ## Security and privacy
 
@@ -303,6 +304,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 
 Newest first. One line per change: date, ID, what happened, link.
 
+- 2026-10-06: SMALL-12 done in PR #59: favicon.ico, SVG icon (follows dark mode), apple-touch-icon and manifest icons (standard and maskable), all from one mark. e2e now fails on any 4xx and checks the icons are served as images. Added SMALL-16.
 - 2026-10-06: STAB-15 done (PR #58): the e2e walk runs in 500 m batches, so arrival no longer depends on machine speed. STAB-18 joins Now.
 - 2026-10-06: SPEED-01 done: `pnpm perf:web` and [the numbers](perf/2026-10.md). Download is the cost (Edinburgh 15.3 MB, graph ready in 15.6 s on Fast 4G with 4x CPU; the base map is 49 to 71% of bytes and races the graph). SPEED-06 not yet worth it. Added SPEED-08 to SPEED-12; SPEED-08 joins Now.
 - 2026-10-05: REV-01 sweep after the release (#42, #44, #38, #48, #49, #50, #55, #51, #54, #53). SEC-12 and SEC-23 done; SEC-25 added (score the headers, blocked on DEP-07); REL-01 recorded; REV-01 next 2026-11-05. Richard chose Glasgow, then Leeds, then cities by size (D-072, DEF-09, DEF-10).
