@@ -474,6 +474,7 @@ export default function Home() {
             liveNear={notMe(from)}
             bbox={planner.ready.bbox}
             cityName={city.name}
+            unit={distanceUnit(profile)}
             excludeId={from.id}
             onPick={pick}
             trailing={profileChip}
@@ -523,6 +524,7 @@ export default function Home() {
             liveNear={notMe(to ?? from)}
             bbox={planner.ready.bbox}
             cityName={city.name}
+            unit={distanceUnit(profile)}
             excludeId={to?.id}
             onPick={pick}
             onUseLocation={start === "unsupported" ? undefined : () => locate(true)}

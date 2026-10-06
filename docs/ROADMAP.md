@@ -162,7 +162,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | SMALL-15 | Parks and OpenStreetMap notes: a park found by name ends at its gate, not a nearby building's door; old notes and business questions left out; "N more places a mapper flagged" | S | now | done (2026-10-05) | Claude | D-048 update. Ported from PR #36. 26 of 119 named Edinburgh parks with gates had a fitting door within 50 m |
 | SMALL-16 | Pick the 404 and offline pages' look to match the app (`404.html` is Next's default) | S | later | todo | Claude | Found doing SMALL-12 |
 | SMALL-17 | Recent places as starts in "Where are you starting from?" | S | later | todo | Claude | Found doing FEAT-20 (D-073). Today it suggests the city's start, saved places and the city's places |
-| SMALL-18 | Search results and the "Where are you starting from?" suggestions show distance in metres or km only: follow the device's miles or kilometres (D-074) | S | now | todo | Claude | Left out of SMALL-02 because FEAT-20 was changing the search flow. `metres()` in `PlaceSearch.tsx` |
+| SMALL-18 | Search results and the "Where are you starting from?" suggestions show distance in metres or km only: follow the device's miles or kilometres (D-074) | S | now | done (2026-10-06) | Claude | Left out of SMALL-02 because FEAT-20 was changing the search flow. `metres()` in `PlaceSearch.tsx`. Done: results use `formatDistance` with the device's unit. The start suggestions never showed a distance, so only results changed. |
 | SMALL-19 | Gusts ("up to 50 km/h") follow the device's speed unit, and say mph for people who read mph | S | later | todo | Claude | Found doing SMALL-02. Weather text in `cost.ts`, `on-route.ts`, `area-status.ts`. Heights and climbs stay in metres (D-074) |
 
 ## Security and privacy
@@ -309,6 +309,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 
 Newest first. One line per change: date, ID, what happened, link.
 
+- 2026-10-06: SMALL-18 done in PR #64: distances beside search results follow the device's miles or kilometres (D-074).
 - 2026-10-06: STAB-21 done in PR #63: `pnpm e2e` fails only on the app's own 4xx and 5xx. Outside services (Open-Meteo, TfL) that return an error print a `WARN` line and no longer fail the run.
 - 2026-10-06: DEP-07 done: `causeway.richardthedesigner.com` serves production and is public. SEC-25 unblocked (needs a browser). Added STAB-21. Batch 2 merged FEAT-20, SMALL-02, SMALL-12, STAB-15 and SPEED-01 (#56 to #61).
 - 2026-10-06: SMALL-02 done in PR #56: distances follow the per-device mph or km/h choice through one formatter, yards for short distances in miles mode (D-074). Added SMALL-18, SMALL-19. Now: SPEED-08, FEAT-03, SMALL-13, STAB-18, SMALL-18.
