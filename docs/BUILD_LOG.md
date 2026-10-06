@@ -10,6 +10,11 @@ FEAT-20, D-073. Richard found the "Starting from?" step odd on production.
 - Privacy: live search was biased towards your position once you'd used "Your location", so Photon got it. It now gets the city's start. `pnpm e2e` shares a location near each city's start (`hereIn` in `scripts/serve-out.mjs`) and fails if a request carries it; the profile check is unchanged. A new journey checks where you start: located, swapped, location off, outside the city.
 - `pnpm a11y` checks "Finding where you are" and "Where are you starting from?" light, dark and at 320 px with 200% text. `pnpm screenshots` adds `start-from`.
 
+## 2026-10-06 (SPEED-01, measuring load)
+
+- `pnpm perf:web` (`scripts/perf-web.mjs`): cold visits in the built app on an emulated Moto G Power, 4x CPU, Fast or Slow 4G. Reports paint times, map drawn, graph loaded, destination to route and bytes by kind, median and range per city. Own server with Vercel's headers and brotli.
+- [docs/perf/2026-10.md](perf/2026-10.md): the numbers, what they say, why SPEED-06 waits, and targets (SPEED-08 to SPEED-12). No app code changed.
+
 ## 2026-10-06 (favicon and app icons)
 
 SMALL-12.
