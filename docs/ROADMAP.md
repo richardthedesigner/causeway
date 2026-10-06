@@ -145,7 +145,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | ID | Task | Size | Priority | Status | Who | Notes |
 |---|---|---|---|---|---|---|
 | SMALL-01 | Opening hours that know bank holidays | S | now | done (2026-10-05) | Claude | PR #42, D-039. GOV.UK bank holidays for each city's nation, refreshed weekly. PH rules apply on the day |
-| SMALL-02 | Miles or kilometres setting | S | now | todo | Claude | Speeds already follow "Show speeds in" (D-051); distances don't |
+| SMALL-02 | Miles or kilometres setting | S | now | doing | Claude | Started 2026-10-06 on claude/small-02-distance-units. Speeds already follow "Show speeds in" (D-051); distances don't |
 | SMALL-03 | Choose how often navigation speaks (every turn, hazards only, off) | S | now | done (2026-10-05) | Claude | PR #42. One button cycles them, kept on the phone. Hazards only still says arrive, get off and off route |
 | SMALL-04 | Copy the route as text, for a carer or a message | S | now | done (2026-10-05) | Claude | PR #42. "Copy the route as text" in Route in words, never the device. Keyboard focus now opens the drawer fully (WCAG 2.4.11) |
 | SMALL-05 | A high-contrast map style | S | now | done (2026-10-05) | Claude | PR #42. In the layers menu. On by itself for the low-vision device or when the phone asks for more contrast |
