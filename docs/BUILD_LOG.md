@@ -2,6 +2,15 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
+## 2026-10-06 (the route sheet at large text)
+
+STAB-18.
+- The Start bar caps its button height and padding in px, so at 200% text it is 89 px tall, not 137.
+- The sheet checks the text size each time it opens, not once at load, so text enlarged after load still opens it fully.
+- The ground chips, the journey and destination rows and the gaps stop growing past a sensible size.
+- At large text a new route scrolls its card to the top of the list. The rows above are a scroll away.
+- `pnpm a11y` now fails if less than 300 px of the sheet shows above the Start bar or the card's headline is under it.
+
 ## 2026-10-06 (miles in search)
 
 SMALL-18 (D-074), PR #64.
