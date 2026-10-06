@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { PRESETS, distanceUnit, formatDistance, rangeInUnit, rangeToKm, speakableDistances, speedUnit } from "@causeway/profile";
 
-describe("distances in kilometres mode (SMALL-02, D-073)", () => {
+describe("distances in kilometres mode (SMALL-02, D-074)", () => {
   it("says metres, to the nearest 10, under a kilometre", () => {
     expect(formatDistance(0, "kmh")).toBe("0 m");
     expect(formatDistance(4, "kmh")).toBe("10 m");

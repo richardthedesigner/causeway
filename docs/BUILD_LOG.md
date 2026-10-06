@@ -4,12 +4,40 @@ A running record of what was built, newest first. Each entry links the decision 
 
 ## 2026-10-06 (miles or kilometres)
 
-SMALL-02 (D-073), PR #56.
+SMALL-02 (D-074), PR #56.
 - Distances follow the per-device "Show speeds and distances in" choice from D-051. No second setting. The editor's buttons now read "Miles, mph" and "Kilometres, km/h".
 - `formatDistance` in `@causeway/profile` is the one formatter: metres under a kilometre and kilometres above in km mode, yards under a quarter of a mile and miles above in miles mode, and full words for speech ("110 yards"). Behind it: the route card, strip and "On this route" lines, router notes and trade-offs, navigation (the plan carries its unit so what's shown and what's said agree), the elevation chart, rest and toilet intervals, battery range and the copy-as-text route.
-- Heights, widths and kerbs stay metric. Search results' distances wait for FEAT-20 (SMALL-16).
+- Heights, widths and kerbs stay metric. Distances to places in search are still metric (SMALL-18).
 - Tests: `packages/profile/test/distance.test.ts`, miles-mode navigation and range wording, route-text. The e2e journey switches a powerchair to miles and checks the card and the copied text. The a11y run checks the battery range in miles.
 - Screenshot baselines were not rewritten: they differ on this machine even on a clean `main` (fonts), so CI decides.
+## 2026-10-06 (destination first)
+
+FEAT-20, D-073. Richard found the "Starting from?" step odd on production.
+- The first screen is one "Where to?" search. Picking a destination shows From as "Your location", asks the phone where you are (never on page load) and moves focus to From. Swap works once the start is known.
+- While the phone answers: "Finding where you are…", with "Choose where you're starting from". If it can't help, the app says why (location off, no fix, no location in this browser, outside the mapped area) and asks "Where are you starting from?", with the city's start suggested first.
+- Privacy: live search was biased towards your position once you'd used "Your location", so Photon got it. It now gets the city's start. `pnpm e2e` shares a location near each city's start (`hereIn` in `scripts/serve-out.mjs`) and fails if a request carries it; the profile check is unchanged. A new journey checks where you start: located, swapped, location off, outside the city.
+- `pnpm a11y` checks "Finding where you are" and "Where are you starting from?" light, dark and at 320 px with 200% text. `pnpm screenshots` adds `start-from`.
+
+## 2026-10-06 (SPEED-01, measuring load)
+
+- `pnpm perf:web` (`scripts/perf-web.mjs`): cold visits in the built app on an emulated Moto G Power, 4x CPU, Fast or Slow 4G. Reports paint times, map drawn, graph loaded, destination to route and bytes by kind, median and range per city. Own server with Vercel's headers and brotli.
+- [docs/perf/2026-10.md](perf/2026-10.md): the numbers, what they say, why SPEED-06 waits, and targets (SPEED-08 to SPEED-12). No app code changed.
+
+## 2026-10-06 (favicon and app icons)
+
+SMALL-12.
+- Every page load asked for `/favicon.ico` and got a 404. There is now one mark, a route ending in a dot, white on the accent blue.
+- `apps/web/public/`: `favicon.ico` (16, 32, 48), `icon.svg` (dark mode swaps to the dark accent), `apple-touch-icon.png` (180), `icon-192/512.png` and `icon-maskable-192/512.png`. All under 13 KB. The manifest lists them.
+- The maskable icons fill the square and keep the mark inside the central 80%. Redraw them with `node scripts/make-icons.mjs`.
+- The CSP needed no change: icons are same-origin (`img-src 'self'`, `manifest-src 'self'`).
+- `pnpm e2e` now fails on any 4xx response in a journey and checks each icon is served as an image.
+
+## 2026-10-06 (the e2e walk by distance)
+
+STAB-15: `scripts/e2e.mjs` only. No app code changed.
+- The test runs the preview's half-second ticks in batches of 180 (about 500 m of route), where it ran ten every 50 ms. Drawing the page, not walking, was the cost: Edinburgh drew about 70 times at 400 ms each. It now draws about a dozen times.
+- Edinburgh arrives in 3.4 s (it took 2 min 44 s on a 4-core box), and in 9.5 s with the CPU slowed six times (`E2E_CPU=6`, Chrome's CPU throttling). The journey prints how long the walk took.
+- `E2E_ARRIVE_MS` stays as an override of the 2-minute limit.
 
 ## 2026-10-05 (the release and the docs sweep)
 

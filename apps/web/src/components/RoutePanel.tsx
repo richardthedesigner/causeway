@@ -39,6 +39,8 @@ interface Props {
   onChangeFrom: () => void;
   onChangeTo: () => void;
   onSwap: () => void;
+  /** Waiting for the phone to say where you are (FEAT-20): no route yet. */
+  locating?: boolean;
   onOpenMode: () => void;
   /** Who the routes are for: the device button, shown in the destination bar. */
   device?: React.ReactNode;
@@ -175,13 +177,13 @@ export function RoutePanel(props: Props) {
       {/* Journey: two rows, swap on the side. Tap either to change it. */}
       <section aria-label="Journey" className="flex items-stretch gap-1">
         <div className="grid min-w-0 flex-1">
-          <button type="button" onClick={props.onChangeFrom} className="flex min-h-11 min-w-0 items-center gap-3 rounded-xl px-1 text-left hover:bg-surface-2">
+          <button id="journey-from" type="button" onClick={props.onChangeFrom} className="flex min-h-11 min-w-0 items-center gap-3 rounded-xl px-1 text-left hover:bg-surface-2">
             <span aria-hidden className="ml-1 size-3 shrink-0 rounded-full border-[3px] border-ink" />
             <span className="sr-only">Change start: </span>
             <span className="truncate">{from.name}</span>
           </button>
         </div>
-        <Button variant="ghost" size="icon" onClick={props.onSwap} aria-label="Swap start and destination" className="self-center">
+        <Button variant="ghost" size="icon" onClick={props.onSwap} disabled={props.locating} aria-label="Swap start and destination" className="self-center">
           <ArrowUpDown aria-hidden className="size-6" />
         </Button>
       </section>
@@ -219,7 +221,17 @@ export function RoutePanel(props: Props) {
         </div>
       ) : null}
 
-      {planning && !result ? (
+      {props.locating ? (
+        <div className="grid justify-items-center gap-1 py-4">
+          <p role="status" className="m-0 text-muted">
+            Finding where you are…
+          </p>
+          {/* A permission prompt left unanswered waits for ever in some browsers: never a dead end. */}
+          <button type="button" onClick={props.onChangeFrom} className="min-h-11 px-2 font-bold text-accent underline underline-offset-4">
+            Choose where you&apos;re starting from
+          </button>
+        </div>
+      ) : planning && !result ? (
         <p className="m-0 py-6 text-center text-muted" aria-live="polite">
           Working out routes for your limits…
         </p>

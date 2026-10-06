@@ -120,7 +120,7 @@ export function formatSpeed(mps: number, unit: SpeedUnit, long = false): string 
   return `${n} ${unit === "mph" ? (long ? "miles per hour" : "mph") : long ? "kilometres per hour" : "km/h"}`;
 }
 
-/** Distances follow the same per-device choice as speeds (D-073): mph means miles and yards, km/h means kilometres and metres. */
+/** Distances follow the same per-device choice as speeds (D-074): mph means miles and yards, km/h means kilometres and metres. */
 export type DistanceUnit = SpeedUnit;
 export const distanceUnit = (p: Pick<Profile, "preset" | "speedUnit">): DistanceUnit => speedUnit(p);
 export const M_PER_MILE = 1609.344;

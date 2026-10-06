@@ -95,6 +95,8 @@ Proposal: **accept it, and publish the enriched footway graph under ODbL.** It f
 
 Update (SEC-05, 2026-10-05): checked. The app logs nothing; its only URL parameter is the demo switch; shared notes carry the opt-in mobility label only (D-030); reports, the share text and router errors carry no profile. `pnpm e2e` now watches every request in every journey and fails if one carries the device's name, type or limits.
 
+Update (FEAT-20, 2026-10-06): your position is held to the same rule. Before, live search was biased towards "Your location" once you'd used it, which sent your position to Photon; it now uses the city's start. `pnpm e2e` fails if a request carries the position it shares (D-073).
+
 ## D-010 Heavy jobs: GitHub Actions for Phase 0 and 1, then Fly.io or Cloud Run workers
 
 **Decided.** Graph builds, LiDAR sampling and imagery inference do not run in Vercel functions. Phase 0 and Phase 1 run builds as scheduled GitHub Actions jobs, which is enough for three cities rebuilt nightly. Minutely OSM diffs and Mapillary inference move to a container worker (Fly.io Machines or Cloud Run jobs) writing to Supabase PostGIS. Reconsider at Phase 3.
@@ -526,7 +528,7 @@ Update (BLOAT-02, 2026-10-05): CI also runs `pnpm knip` for unused files, export
 - Pace learning learns only the pavement pace: stretches driven at road speed (`NavPlan.roads`) don't count. Time left while navigating uses both speeds.
 - **Effect.** Central Edinburgh journeys get 20 to 45% quicker, and routes move onto roads. Marchmont to Leith Walk went from 48% to 91% on roads, with only 7% of the route kept. That fits the law, but some riders keep to pavements or avoid busy roads. Ask them (RES-10) before adding a "prefer pavements" or "avoid busy roads" option.
 - **In the editor** (FEAT-18, 2026-10-05): road scooters get "Speed on the road", 4 to 8 mph in half-mph steps. Below 4 mph the road isn't worth using (that's the pavement limit), and 8 mph is the legal top speed.
-- **Speed units** (FEAT-18): each device has "Show speeds in: mph or km/h" (`speedUnit`), used for pace and road speed. Scooters default to mph, the unit they're sold and regulated in; everyone else to km/h, as before. Distances follow the same choice (D-073).
+- **Speed units** (FEAT-18): each device has "Show speeds in: mph or km/h" (`speedUnit`), used for pace and road speed. Scooters default to mph, the unit they're sold and regulated in; everyone else to km/h, as before. Distances follow the same choice (D-074).
 
 ## D-052 Live feeds get a time limit
 
@@ -901,7 +903,17 @@ For comparison, Leeds is 536,280 and Newcastle upon Tyne 286,445. Scotland has n
 
 **Size, not score.** RES-09's weighted score ([where-next.md](research/where-next.md)) put Sheffield third, but Richard's rule is size, so size decides.
 
-## D-073 Distances follow the per-device speed choice
+## D-073 Destination first, starting from where you are
+
+**Decided.** 2026-10-06 (FEAT-20). Richard tried production and found the "Starting from?" step odd. Apple Maps and Google Maps ask where you're going first and assume you start where you are. We do the same.
+
+- **First screen.** One "Where to?" search. No From field and no start until a destination is picked. Recents and saved places show a verdict only once the start is known, since a verdict from a start nobody chose would mislead.
+- **Then From.** Picking a destination shows From as "Your location" and asks the phone where you are. That is the only time the app asks, apart from the map's "Start from your location" button. It never asks on page load. Keyboard and screen reader focus moves to From. While the phone answers, the route screen says "Finding where you are…" with a way to choose a start instead, because some browsers wait for ever on an unanswered prompt.
+- **From stays editable.** Tapping it opens "Where are you starting from?", with the city's start suggested first, then saved places and the city's places, and "Use my location". A start picked by hand stays for the next destination; your location is asked again each time, so it is fresh. Swap works once the start is known.
+- **When the phone can't help**, the app says why in plain words and asks "Where are you starting from?": location turned off, no fix in time, a browser with no location, or a position outside the part of the city we have routes for. The city's start is only a suggestion there.
+- **Privacy (D-009).** The position stays on the phone: routing runs on the device (D-017), and live search (Photon) is biased towards the city's start, never towards you. `pnpm e2e` shares a location a few tens of metres from each city's start and fails if any request carries it, as it does for the profile.
+
+## D-074 Distances follow the per-device speed choice
 
 **Decided.** 2026-10-06 (ROADMAP SMALL-02). Updates D-051.
 
@@ -912,7 +924,7 @@ A person who reads speeds in mph reads distances in miles, and a person who read
 - **Miles mode.** Yards under a quarter of a mile ("110 yd"), then "0.3 miles", "1 mile", "4.3 miles", "12 miles". Yards are to the nearest 10. Miles never show metres or kilometres.
 - **Spoken.** `long` gives "50 metres", "110 yards", "1.2 kilometres", "0.4 miles". Hazard text is built once with the short form ("for 30 yd") and `speakableDistances` expands it before it is said.
 - **Where it applies.** The route card, the route strip's words, the "not fully mapped" and setts lines, "Closest you can get", the elevation chart's distances along the route, battery range, rest and toilet intervals (setting buttons, route notes and "More benches" or "Past more toilets" trade-offs), "On this route" lines, navigation (distance to the next turn, remaining, "in 50 yards"), hazard warnings, and the copy-as-text route. The navigation plan carries its unit (`NavPlan.unit`), so the screen and the voice agree.
-- **What stays metric.** Heights and climbs ("6 m up overall", "12 m above sea level"), widths ("1.2 m wide"), kerb heights (cm and mm), and the distance to the pin for a place (search results, left to FEAT-20). These are measures of the ground, not journey lengths, and mixing feet in would be a bigger change.
+- **What stays metric.** Heights and climbs ("6 m up overall", "12 m above sea level"), widths ("1.2 m wide"), kerb heights (cm and mm), and the distance shown beside a place in search (SMALL-18). These are measures of the ground, not journey lengths, and mixing feet in would be a bigger change.
 - **Stored values stay as they are.** Rest and toilet intervals are kept in metres and battery range in km. In miles mode they are converted for display (an interval of 500 m reads "0.3 miles"), and the battery range steps in whole miles and is stored as km to a tenth. Nothing about routing changes.
 - **Defaults** are D-051's: scooters mph, everyone else km/h. Existing devices keep what they had.
 

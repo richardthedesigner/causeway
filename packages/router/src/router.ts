@@ -440,7 +440,7 @@ export interface RangeUse {
   /** Battery use as km on the flat: distance plus the climbs. */
   km: number;
   rangeKm: number;
-  /** How this person reads distances (D-073). */
+  /** How this person reads distances (D-074). */
   unit: DistanceUnit;
   /** Over the whole range, or over half of it (so the way back needs a charge). */
   level: "over" | "over-half" | "ok";

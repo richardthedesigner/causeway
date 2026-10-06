@@ -11,7 +11,7 @@ import { chromium } from "playwright";
 
 const WEB = join(import.meta.dirname, "../apps/web");
 const OUT = join(WEB, "out");
-const TYPES = { ".html": "text/html", ".js": "text/javascript", ".mjs": "text/javascript", ".css": "text/css", ".json": "application/json", ".gz": "application/gzip", ".pmtiles": "application/octet-stream", ".webmanifest": "application/manifest+json" };
+const TYPES = { ".html": "text/html", ".js": "text/javascript", ".mjs": "text/javascript", ".css": "text/css", ".json": "application/json", ".gz": "application/gzip", ".pmtiles": "application/octet-stream", ".webmanifest": "application/manifest+json", ".ico": "image/x-icon", ".png": "image/png", ".svg": "image/svg+xml" };
 
 /** Headers from vercel.json rules that apply to every path ("/(.*)"). */
 function vercelHeaders() {
@@ -48,5 +48,28 @@ export function launchBrowser() {
 export function watchCsp(page, into) {
   page.on("console", (m) => {
     if (m.type() === "error" && /Content Security Policy/i.test(m.text())) into.push(m.text());
+  });
+}
+
+/**
+ * Where the phone says you are, per city: a few tens of metres from the city's start (apps/web/src/lib/cities.ts), so a
+ * request carrying your position can be told apart from one carrying the start (FEAT-20).
+ */
+export const HERE = {
+  edinburgh: { latitude: 55.9387, longitude: -3.1815 },
+  newcastle: { latitude: 54.9724, longitude: -1.6126 },
+  london: { latitude: 51.5009, longitude: -0.1266 },
+};
+
+/** Browser context options for a phone that shares its location, standing in `city`. */
+export const hereIn = (city) => ({ permissions: ["geolocation"], geolocation: HERE[city] });
+
+/** Collect any request whose address or body carries the position from `hereIn` (D-009: it never leaves the phone). */
+export function watchPosition(page, city, into) {
+  const { latitude, longitude } = HERE[city];
+  const marks = [latitude.toFixed(4), longitude.toFixed(4)];
+  page.on("request", (r) => {
+    const sent = `${r.url()} ${r.postData() ?? ""}`;
+    for (const m of marks) if (sent.includes(m)) into.push(`position leak: "${m}" sent to ${r.url().split("?")[0]}`);
   });
 }

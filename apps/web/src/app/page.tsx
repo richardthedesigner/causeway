@@ -51,6 +51,12 @@ const PRESET_CONDITIONS: Record<Ground, Conditions> = {
 
 type View = "home" | "from" | "route";
 
+/**
+ * Where the journey starts (FEAT-20, D-073). Until someone picks a destination nobody has said: "ask". Then the phone is
+ * asked where you are ("locating", then "here"), or you pick a place ("chosen"). The rest say why the phone couldn't help.
+ */
+type Start = "ask" | "locating" | "here" | "chosen" | "denied" | "nofix" | "outside" | "unsupported";
+
 const CITY_KEY = "causewayside.city.v1";
 // full: change the 6dvh padding on the drawer body with it.
 const SNAP = { peek: 0.24, half: 0.52, full: 0.94 };
@@ -103,6 +109,10 @@ export default function Home() {
   const [from, setFrom] = useState<Place>(CITIES[0]!.start);
   const [to, setTo] = useState<Place | null>(null);
   const [view, setView] = useState<View>("home");
+  const [start, setStart] = useState<Start>("ask");
+  const startKnown = start === "here" || start === "chosen";
+  /** Bumped to move keyboard focus to the From field once the route screen is up. */
+  const [focusFrom, setFocusFrom] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [ground0, setConditions] = useState<Conditions>({ ...PRESET_CONDITIONS.dry, summary: "Checking the weather", source: "Open-Meteo" });
   // Leaving later: everything time-dependent follows it (D-040).
@@ -168,6 +178,8 @@ export default function Home() {
   const switchCity = (c: City) => {
     setCity(c);
     setFrom(c.start);
+    setStart("ask");
+    setGeoError(null);
     setTo(null);
     setPin(null);
     setOnce(null);
@@ -214,10 +226,10 @@ export default function Home() {
   const riverKey = riverHigh(planner.area.river);
   // Re-plan whenever the journey, the person or the ground changes.
   useEffect(() => {
-    if (!planner.ready || !to) return;
+    if (!planner.ready || !to || !startKnown) return;
     planner.plan(from, to, routeProfile, conditions, cityNotes);
     setSelected(null);
-  }, [planner.ready, from, to, routeProfile, conditions, planner.lifts, alertKey, riverKey, cityNotes]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [planner.ready, startKnown, from, to, routeProfile, conditions, planner.lifts, alertKey, riverKey, cityNotes]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Nothing fits for this device: would another saved device get there?
   const others = devices.devices.filter((d) => d.id !== routeDevice.id);
@@ -227,26 +239,37 @@ export default function Home() {
   }, [planner.result]); // eslint-disable-line react-hooks/exhaustive-deps
   const alternatives = planner.result?.status === "none" && planner.fitsResult ? others.flatMap((d) => (planner.fitsResult![d.id] != null ? [{ id: d.id, label: deviceLabel(d), minutes: planner.fitsResult![d.id]! }] : [])) : [];
 
-  // Recent places answer "can I get there?" before you search: a verdict for each from where you start.
+  // Recent places answer "can I get there?" before you search: a verdict for each, once we know where you start.
   useEffect(() => {
-    if (!planner.ready || view !== "home" || !(recents.length || saved.length)) return;
+    if (!planner.ready || !startKnown || view !== "home" || !(recents.length || saved.length)) return;
     planner.check(from, [...saved.map((s) => s.place), ...recentOnly], profile, conditions);
-  }, [planner.ready, view, recents, saved, from, profile, conditions]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [planner.ready, startKnown, view, recents, saved, from, profile, conditions]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // After a destination or a start is picked, keyboard and screen reader focus goes to From, the next thing to check.
+  useEffect(() => {
+    if (focusFrom) document.getElementById("journey-from")?.focus();
+  }, [focusFrom]);
+
+  // Destination first (FEAT-20): the start is where you are, unless you've picked one. The phone is asked only now.
   const goTo = (p: Place) => {
     setTo(p);
     setOnce(null);
     setRecents(addRecent(city.id, p));
     setView("route");
     open(SNAP.half);
+    if (start !== "chosen") locate(true);
+    setFocusFrom((n) => n + 1);
   };
 
   const pick = (p: Place) => {
     if (view === "from") {
       setFrom(p);
+      setStart("chosen");
+      setGeoError(null);
       setOnce(null);
       setView(to ? "route" : "home");
       open(SNAP.half);
+      if (to) setFocusFrom((n) => n + 1);
     } else goTo(p);
   };
 
@@ -256,32 +279,37 @@ export default function Home() {
     return lon >= x0 && lon <= x1 && lat >= y0 && lat <= y1;
   };
 
-  const locate = () => {
-    if (!navigator.geolocation) {
-      setGeoError("This browser can't share your location. Type where you're starting from instead.");
-      return;
-    }
-    setLocating(true);
+  /**
+   * Ask the phone where you are. For a journey (a destination is picked), a failure asks where you're starting from;
+   * from the map's button, it says why above the search. The position stays on this phone (D-009).
+   */
+  const locate = (forJourney = false) => {
+    const failed = (why: Exclude<Start, "ask" | "locating" | "here" | "chosen">) => {
+      setLocating(false);
+      setStart(why);
+      if (forJourney) setView((v) => (v === "home" ? v : "from"));
+      else setGeoError(startProblem(why, city.name));
+    };
     setGeoError(null);
+    if (!navigator.geolocation) return failed("unsupported");
+    setLocating(true);
+    setStart("locating");
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setLocating(false);
         const { longitude: lon, latitude: lat } = pos.coords;
-        if (!inArea(lon, lat)) {
-          setGeoError(`You're outside the part of ${city.name} we have routes for. Type where you're starting from instead.`);
-          return;
-        }
+        if (!inArea(lon, lat)) return failed("outside");
         setFrom({ id: "me", name: "Your location", kind: "Current location", lon, lat });
+        setStart("here");
         setFocus({ lon, lat, n: Date.now() });
-        if (view === "from") setView(to ? "route" : "home");
+        setView((v) => (v === "from" ? "route" : v));
       },
-      () => {
-        setLocating(false);
-        setGeoError("Couldn't get your location. Type where you're starting from instead.");
-      },
-      { enableHighAccuracy: true, timeout: 10_000 },
+      (e) => failed(e.code === e.PERMISSION_DENIED ? "denied" : "nofix"),
+      { enableHighAccuracy: true, timeout: 10_000, maximumAge: 30_000 },
     );
   };
+  /** Live search is biased towards a point. Never towards you: Photon gets the city's start instead (D-009). */
+  const notMe = (p: { lon: number; lat: number; id?: string }) => (/^me(:|$)/.test(p.id ?? "") ? city.start : p);
 
   // A stray tap must never wipe a route: a tap proposes a pin, and the user confirms it.
   const onMapClick = (lon: number, lat: number) => {
@@ -443,6 +471,7 @@ export default function Home() {
             index={index}
             suggestions={[]}
             near={from}
+            liveNear={notMe(from)}
             bbox={planner.ready.bbox}
             cityName={city.name}
             excludeId={from.id}
@@ -451,15 +480,7 @@ export default function Home() {
             emptyState={recentItems}
             onFocus={() => open(SNAP.full)}
           />
-          <p className="m-0 flex flex-wrap items-center gap-x-2 text-sm text-muted">
-            <span>
-              From <span className="font-bold text-ink">{from.name}</span>
-            </span>
-            <button type="button" onClick={() => setView("from")} className="min-h-10 font-bold text-accent">
-              Change
-            </button>
-          </p>
-          <p className="m-0 -mt-2 text-sm text-muted">Or tap the map to drop a pin.</p>
+          <p className="m-0 text-sm text-muted">Or tap the map to drop a pin.</p>
           <TripSettings
             deviceLabel={deviceLabel(routeDevice)}
             onDevice={() => setModeOpen(true)}
@@ -480,20 +501,31 @@ export default function Home() {
         </div>
       ) : view === "from" ? (
         <div className="grid gap-3 [&>*]:min-w-0">
-          <Button variant="ghost" onClick={() => setView(to ? "route" : "home")} className="justify-self-start px-2">
+          <Button variant="ghost" onClick={() => setView(to && startKnown ? "route" : "home")} className="justify-self-start px-2">
             <ChevronLeft aria-hidden className="size-5" /> Back
           </Button>
+          {start === "denied" || start === "nofix" || start === "outside" || start === "unsupported" ? (
+            <p role="status" className="m-0 rounded-2xl bg-caution-soft p-3 text-sm">
+              {startProblem(start, city.name)}
+            </p>
+          ) : null}
           <PlaceSearch
             key={`${city.id}-from`}
-            label="Starting from?"
+            label="Where are you starting from?"
             index={index}
-            suggestions={[...saved.map((x) => ({ ...x.place, kind: `Saved as ${x.label}` })), ...planner.ready.places.filter((p) => p.kind !== "Street" && !saved.some((x) => x.place.id === p.id))].slice(0, 8 + saved.length)}
+            // The city's own start is only a suggestion (FEAT-20), then saved places, then places to start from.
+            suggestions={[
+              { ...city.start, kind: `Suggested start / ${city.start.kind}` },
+              ...saved.filter((x) => x.place.id !== city.start.id).map((x) => ({ ...x.place, kind: `Saved as ${x.label}` })),
+              ...planner.ready.places.filter((p) => p.kind !== "Street" && p.id !== city.start.id && !saved.some((x) => x.place.id === p.id)),
+            ].slice(0, 9 + saved.length)}
             near={to ?? from}
+            liveNear={notMe(to ?? from)}
             bbox={planner.ready.bbox}
             cityName={city.name}
             excludeId={to?.id}
             onPick={pick}
-            onUseLocation={locate}
+            onUseLocation={start === "unsupported" ? undefined : () => locate(true)}
             autoFocus
             onFocus={() => open(SNAP.full)}
           />
@@ -501,12 +533,13 @@ export default function Home() {
       ) : to ? (
         <RoutePanel
           toilets={toilets}
-          from={from}
+          from={start === "locating" ? { ...from, id: "me", name: "Your location" } : from}
           to={to}
+          locating={start === "locating"}
           profile={routeProfile}
           conditions={conditions}
-          result={planner.result}
-          planning={planner.planning}
+          result={startKnown ? planner.result : null}
+          planning={startKnown && planner.planning}
           selectedId={selected}
           onSelect={setSelected}
           onChangeFrom={() => setView("from")}
@@ -515,8 +548,10 @@ export default function Home() {
             open(SNAP.full);
           }}
           onSwap={() => {
+            if (!startKnown) return;
             setFrom(to);
             setTo(from);
+            setStart("chosen");
           }}
           onOpenMode={() => setModeOpen(true)}
           device={profileChip}
@@ -570,7 +605,7 @@ export default function Home() {
         network={planner.ready?.network ?? null}
         routes={navigating && selectedRoute ? [selectedRoute] : routes}
         selectedId={selected}
-        from={from}
+        from={startKnown ? from : null}
         to={view === "route" ? to : null}
         pin={pin}
         showSlopes={showSlopes}
@@ -592,7 +627,7 @@ export default function Home() {
         onSlopes={setShowSlopes}
         highContrast={highContrast}
         onHighContrast={chooseContrast}
-        onLocate={locate}
+        onLocate={() => locate(to !== null && view !== "home")}
         locating={locating}
         credit={`${city.credit} Pavement data built ${planner.ready?.builtAt.slice(0, 10) ?? ""}.`}
         minimal={navigating}
@@ -698,6 +733,20 @@ export default function Home() {
       <ReportSheet open={reportAt !== null} onOpenChange={(v) => !v && setReportAt(null)} where={reportAt} city={city.id} sharing={shared.sharing !== "off"} onSaved={shared.saved} />
     </main>
   );
+}
+
+/** Why we can't start from where you are, in plain words (FEAT-20). The search under it asks where you're starting from. */
+function startProblem(why: Exclude<Start, "ask" | "locating" | "here" | "chosen">, city: string) {
+  switch (why) {
+    case "denied":
+      return "Location is turned off for this site, so we can't tell where you are.";
+    case "nofix":
+      return "Your phone couldn't tell us where you are just now.";
+    case "outside":
+      return `You're outside the part of ${city} we have routes for.`;
+    case "unsupported":
+      return "This browser can't share where you are.";
+  }
 }
 
 function useWide() {

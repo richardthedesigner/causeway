@@ -8,6 +8,7 @@ Last updated: 2026-10-05.
 
 | What | Why it matters | Effort | Link |
 |---|---|---|---|
+| Time the app on a real mid-range Android phone, or run it through WebPageTest (SPEED-12) | The container's numbers have an unslowed worker and a software GPU, so they are best cases | 15 minutes | [perf notes](perf/2026-10.md) |
 | Run the data refresh once by hand: Actions, then data-refresh, then Run workflow on `main` | Proves the weekly refresh works. It has never run, and this project's sessions can't start workflows | 1 minute | [#14](https://github.com/richardthedesigner/causeway/issues/14) |
 | Sign up for free API keys: National Rail, Met Office, Mapillary, BODS, Nexus | Each unlocks a data adapter (live trains, better weather, street photos, live buses) | About 30 minutes | [#9](https://github.com/richardthedesigner/causeway/issues/9) |
 | Decide whether to show OpenStreetMap access tags for named venues at public launch | Saying a named business is or isn't accessible carries reputational and legal risk | A decision | [#11](https://github.com/richardthedesigner/causeway/issues/11) |

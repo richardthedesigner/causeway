@@ -1,0 +1,179 @@
+{
+  "runs": 3,
+  "network": "none",
+  "cpu": 1,
+  "phone": {
+    "viewport": {
+      "width": 412,
+      "height": 914
+    },
+    "deviceScaleFactor": 1.75,
+    "isMobile": true,
+    "hasTouch": true,
+    "userAgent": "Mozilla/5.0 (Linux; Android 12; moto g power (2022)) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.36"
+  },
+  "results": [
+    {
+      "city": "edinburgh",
+      "fcp": 504,
+      "lcp": 5780,
+      "mapDrawn": 5346,
+      "graphReady": 5042.5,
+      "workerSetup": 1228.083984375,
+      "toRoute": 3362.100000000093,
+      "bytes": {
+        "js": 668469,
+        "graph": 3882006,
+        "tiles": 9469326,
+        "search index": 1298891,
+        "other city data": 303072,
+        "page and other": 9780
+      },
+      "wall": 16.377
+    },
+    {
+      "city": "edinburgh",
+      "fcp": 804,
+      "lcp": 5244,
+      "mapDrawn": 6996.800000000047,
+      "graphReady": 4713,
+      "workerSetup": 500.0458984375,
+      "toRoute": 2737.7000000001863,
+      "bytes": {
+        "js": 668469,
+        "graph": 3882006,
+        "tiles": 9469326,
+        "search index": 1298891,
+        "other city data": 303072,
+        "page and other": 9780
+      },
+      "wall": 15.982
+    },
+    {
+      "city": "edinburgh",
+      "fcp": 496,
+      "lcp": 6076,
+      "mapDrawn": 5634.699999999953,
+      "graphReady": 5258.600000000093,
+      "workerSetup": 1348.2490234375,
+      "toRoute": 3721.2000000001863,
+      "bytes": {
+        "js": 668469,
+        "graph": 3882006,
+        "tiles": 9469326,
+        "search index": 1298891,
+        "other city data": 303072,
+        "page and other": 9780
+      },
+      "wall": 17.973
+    },
+    {
+      "city": "newcastle",
+      "fcp": 712,
+      "lcp": 2596,
+      "mapDrawn": 5436.90000000014,
+      "graphReady": 2246.100000000093,
+      "workerSetup": 353.878173828125,
+      "toRoute": 913.8999999999069,
+      "bytes": {
+        "js": 696734,
+        "graph": 658526,
+        "tiles": 2773514,
+        "search index": 1509255,
+        "other city data": 30164,
+        "page and other": 9780
+      },
+      "wall": 11.689
+    },
+    {
+      "city": "newcastle",
+      "fcp": 1588,
+      "lcp": 3276,
+      "mapDrawn": 6563.800000000047,
+      "graphReady": 3127,
+      "workerSetup": 298.427978515625,
+      "toRoute": 1038.2000000001863,
+      "bytes": {
+        "js": 696734,
+        "graph": 658526,
+        "tiles": 2773514,
+        "search index": 1509255,
+        "other city data": 30164,
+        "page and other": 9780
+      },
+      "wall": 11.296
+    },
+    {
+      "city": "newcastle",
+      "fcp": 408,
+      "lcp": 2344,
+      "mapDrawn": 5293.699999999953,
+      "graphReady": 2131.899999999907,
+      "workerSetup": 422.05615234375,
+      "toRoute": 937.1999999999534,
+      "bytes": {
+        "js": 696734,
+        "graph": 658526,
+        "tiles": 2773514,
+        "search index": 1509255,
+        "other city data": 30164,
+        "page and other": 9780
+      },
+      "wall": 9.892
+    },
+    {
+      "city": "london",
+      "fcp": 480,
+      "lcp": 2088,
+      "mapDrawn": 4696,
+      "graphReady": 1961.6999999999534,
+      "workerSetup": 310.0390625,
+      "toRoute": 842.0999999998603,
+      "bytes": {
+        "js": 696734,
+        "graph": 411506,
+        "tiles": 6499645,
+        "search index": 1411102,
+        "other city data": 83068,
+        "page and other": 9780
+      },
+      "wall": 8.324
+    },
+    {
+      "city": "london",
+      "fcp": 420,
+      "lcp": 2192,
+      "mapDrawn": 4958.799999999814,
+      "graphReady": 1920.7999999998137,
+      "workerSetup": 399.781982421875,
+      "toRoute": 787.9000000001397,
+      "bytes": {
+        "js": 696734,
+        "graph": 411506,
+        "tiles": 6499645,
+        "search index": 1411102,
+        "other city data": 83068,
+        "page and other": 9780
+      },
+      "wall": 10.645
+    },
+    {
+      "city": "london",
+      "fcp": 516,
+      "lcp": 2076,
+      "mapDrawn": 5466.09999999986,
+      "graphReady": 1854.6999999999534,
+      "workerSetup": 371.448974609375,
+      "toRoute": 774.1999999999534,
+      "bytes": {
+        "js": 696734,
+        "graph": 411506,
+        "tiles": 6499645,
+        "search index": 1411102,
+        "other city data": 83068,
+        "page and other": 9780
+      },
+      "wall": 9.021
+    }
+  ]
+}

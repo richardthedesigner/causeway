@@ -51,11 +51,11 @@ The current direction: **fix and fill the pilot cities** with open data that nee
 
 The next five things to pick up, in order.
 
-1. **STAB-15**: step the e2e preview walk by distance, not time.
-2. **SPEED-01**: measure first load, city load and time to first route on a mid-range phone.
-3. **FEAT-03**: "Report what's there" from "What we don't know".
-4. **SMALL-12**: a favicon and app icons.
-5. **SMALL-16**: distances to places in search, in miles when the device is set to miles (after FEAT-20 merges).
+1. **SPEED-08**: load the graph and search index before the base map.
+2. **FEAT-03**: "Report what's there" from "What we don't know".
+3. **SMALL-13**: saved places on the map, and as a start as well as a destination.
+4. **STAB-18**: the route panel leaves too little of the sheet in view at 320 px with 200% text.
+5. **SMALL-18**: distances to places in search, in miles when the device is set to miles.
 
 The rest of the pilot-city data (DATA-12 to DATA-20) is blocked on access, licences or keys. Research (RES) needs Richard and testers.
 
@@ -139,13 +139,14 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | FEAT-17 | Indoor and station routing (lifts, platforms, step-free interchanges) | XL | later | todo | Claude | Start with one big station |
 | FEAT-18 | Road speed setting for road scooters in the device editor | S | later | done (2026-10-05) | Claude | D-051. 4 to 8 mph, and a per-device mph or km/h choice for speeds |
 | FEAT-19 | "On this route": what a route went round, what may slow you and what's worth knowing, in one grouped list, each with its label, source and date; the route card says only what changed the route or needs doing | M | now | done (2026-10-05) | Claude | D-067. Ported from PR #36 (its D-041). Blocked from the explanation and one closure-blind search per plan, only when something is closed. TfL's informational station messages, the weather and health lines and mappers' notes moved into it |
+| FEAT-20 | Destination first: one "Where to?" search, then From prefilled with "Your location", asking for location only then | M | now | done (2026-10-06) | Claude | D-073. PR #57. Fallbacks say why (location off, no fix, outside the city) and ask "Where are you starting from?" with the city's start suggested. Photon no longer gets your position. `pnpm e2e` fails if a request carries it |
 
 ## Small features
 
 | ID | Task | Size | Priority | Status | Who | Notes |
 |---|---|---|---|---|---|---|
 | SMALL-01 | Opening hours that know bank holidays | S | now | done (2026-10-05) | Claude | PR #42, D-039. GOV.UK bank holidays for each city's nation, refreshed weekly. PH rules apply on the day |
-| SMALL-02 | Miles or kilometres setting | S | now | done (2026-10-06) | Claude | D-073. Distances follow the per-device "Show speeds and distances in" (D-051); one formatter, yards for short distances in miles mode |
+| SMALL-02 | Miles or kilometres setting | S | now | done (2026-10-06) | Claude | D-074. Distances follow the per-device "Show speeds and distances in" (D-051); one formatter, yards for short distances in miles mode |
 | SMALL-03 | Choose how often navigation speaks (every turn, hazards only, off) | S | now | done (2026-10-05) | Claude | PR #42. One button cycles them, kept on the phone. Hazards only still says arrive, get off and off route |
 | SMALL-04 | Copy the route as text, for a carer or a message | S | now | done (2026-10-05) | Claude | PR #42. "Copy the route as text" in Route in words, never the device. Keyboard focus now opens the drawer fully (WCAG 2.4.11) |
 | SMALL-05 | A high-contrast map style | S | now | done (2026-10-05) | Claude | PR #42. In the layers menu. On by itself for the low-vision device or when the phone asks for more contrast |
@@ -155,12 +156,14 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | SMALL-09 | "Why this way?" one tap from the navigation screen | S | later | todo | Claude | |
 | SMALL-10 | Recent journeys, not just recent places | S | later | todo | Claude | `recents.ts` |
 | SMALL-11 | Weather for trips more than 48 hours ahead | S | later | todo | Claude | D-040 falls back to today's |
-| SMALL-12 | A favicon and app icons (every page load asks for `/favicon.ico` and gets a 404) | S | now | todo | Claude | Found doing SEC-04. Seen on production 2026-10-05 |
-| SMALL-13 | Saved places on the map, and as a start as well as a destination from the route screen | S | later | todo | Claude | Found doing FEAT-04. Today they show in search, and as starts in "Starting from?" |
+| SMALL-12 | A favicon and app icons (every page load asks for `/favicon.ico` and gets a 404) | S | now | done (2026-10-06) | Claude | PR #59. One mark (a route ending in a dot), `scripts/make-icons.mjs`. Found SMALL-16 |
+| SMALL-13 | Saved places on the map, and as a start as well as a destination from the route screen | S | now | todo | Claude | Found doing FEAT-04. Today they show in search, and as starts in "Starting from?" |
 | SMALL-14 | Toilet Map: say when OSM and the Toilet Map disagree, keep disputed toilets off routes, and say when a record is over 2 years old | S | now | done (2026-10-05) | Claude | D-065. Ported from PR #36. 5 disputes in Edinburgh, 1 in Newcastle |
 | SMALL-15 | Parks and OpenStreetMap notes: a park found by name ends at its gate, not a nearby building's door; old notes and business questions left out; "N more places a mapper flagged" | S | now | done (2026-10-05) | Claude | D-048 update. Ported from PR #36. 26 of 119 named Edinburgh parks with gates had a fitting door within 50 m |
-| SMALL-16 | Search results show how far a place is in metres or km only: follow the device's miles or kilometres (D-073) | S | now | todo | Claude | Left out of SMALL-02 because FEAT-20 is changing the search flow. One call to `formatDistance` in `PlaceSearch.tsx` |
-| SMALL-17 | Gusts ("up to 50 km/h") follow the device's speed unit, and say mph for people who read mph | S | later | todo | Claude | Found doing SMALL-02. Weather text in `cost.ts`, `on-route.ts`, `area-status.ts`. Heights and climbs stay in metres (D-073) |
+| SMALL-16 | Pick the 404 and offline pages' look to match the app (`404.html` is Next's default) | S | later | todo | Claude | Found doing SMALL-12 |
+| SMALL-17 | Recent places as starts in "Where are you starting from?" | S | later | todo | Claude | Found doing FEAT-20 (D-073). Today it suggests the city's start, saved places and the city's places |
+| SMALL-18 | Search results and the "Where are you starting from?" suggestions show distance in metres or km only: follow the device's miles or kilometres (D-074) | S | now | todo | Claude | Left out of SMALL-02 because FEAT-20 was changing the search flow. `metres()` in `PlaceSearch.tsx` |
+| SMALL-19 | Gusts ("up to 50 km/h") follow the device's speed unit, and say mph for people who read mph | S | later | todo | Claude | Found doing SMALL-02. Weather text in `cost.ts`, `on-route.ts`, `area-status.ts`. Heights and climbs stay in metres (D-074) |
 
 ## Security and privacy
 
@@ -209,7 +212,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | STAB-12 | 200% text at 320 px on the other screens: route panel, navigation, search, note and report sheets | S | now | done (2026-10-05) | Claude | `pnpm a11y` checks six more screens. Grids hold their width, chip rows and section headings wrap, navigation's two panels take half the screen each and scroll |
 | STAB-13 | The city name at the top of the map is cut off at 200% text on a 320 px phone ("Edinbur", under the layers button) | S | now | done (2026-10-05) | Claude | PR #42. The bar over the map is sized in pixels. `pnpm a11y` checks the name neither spills nor runs under the layers button |
 | STAB-14 | Time limits for the sharing and review calls to Supabase | S | now | done (2026-10-05) | Claude | PR #42. `lib/timed-fetch.ts`: 15 s, 30 s for a photo upload, with the same timeout error as the live feeds |
-| STAB-15 | The e2e preview walk runs at a fixed speed, so a slower runner can miss the 2-minute arrival limit (Edinburgh took 2 min 44 s on a 4-core box) | S | now | todo | Claude | Found doing SEC-06. `E2E_ARRIVE_MS` raises the limit locally; better to step the walk by distance, not time |
+| STAB-15 | The e2e preview walk runs at a fixed speed, so a slower runner can miss the 2-minute arrival limit (Edinburgh took 2 min 44 s on a 4-core box) | S | now | done (2026-10-06) | Claude | PR #58. The e2e runs the preview's ticks in batches of about 500 m, so the page draws a dozen times, not hundreds (drawing was the cost, not the walk). Edinburgh arrives in 3 s, 10 s with the CPU slowed six times (`E2E_CPU=6`). `E2E_ARRIVE_MS` stays as an override |
 | STAB-16 | `pnpm a11y` checks the high-contrast map and the open "Save this place" form | S | later | todo | Claude | Found doing SMALL-05 and FEAT-04. Both were checked by hand at 320 px, light and dark |
 | STAB-18 | At 320 px with 200% text the route panel leaves about 145 px of the sheet in view above the Start bar, so the route cards can barely be read without dragging | S | next | todo | Claude | Found doing STAB-02 (`route.*.w320-200.png`). Check the sheet's resting height and whether the bar can shrink |
 | STAB-19 | Toilet labels ("WC") stack on top of each other along a route, unreadable at the zoom the route fits to | S | later | todo | Claude | Found doing STAB-02 (`navigation.*.phone.png`). Hide or cluster labels that collide |
@@ -221,13 +224,18 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 
 | ID | Task | Size | Priority | Status | Who | Notes |
 |---|---|---|---|---|---|---|
-| SPEED-01 | Measure first load, city load and time to first route on a mid-range phone | S | now | todo | Claude | Numbers first, then targets |
+| SPEED-01 | Measure first load, city load and time to first route on a mid-range phone | S | now | done (2026-10-06) | Claude | `pnpm perf:web`, [numbers and targets](perf/2026-10.md). Download is the cost: the whole base map races the graph. Worker is not slowed by the CPU throttle, and the GPU is software, so see SPEED-12 |
 | SPEED-02 | Router benchmark in CI, failing if a journey gets much slower | S | now | done (2026-10-05) | Claude | D-056, [PERF_BASELINE](plans/PERF_BASELINE.md). Ported from PR #36. `scripts/perf-budget.test.ts` in `pnpm test`; `pnpm perf:baseline` |
-| SPEED-03 | Bundle-size and Lighthouse budgets in CI | S | later | todo | Claude | |
+| SPEED-03 | Bundle-size and Lighthouse budgets in CI | S | later | todo | Claude | Start from the targets in [perf/2026-10.md](perf/2026-10.md). `perf:web` is too slow and noisy to gate CI as it is: budget bytes, not seconds |
 | SPEED-04 | Load the `/review` page's code only for reviewers | S | later | todo | Claude | |
-| SPEED-05 | Smaller search index per city | S | later | todo | Claude | `data/places` |
-| SPEED-06 | A compact binary graph format instead of gzipped JSON | L | later | todo | Claude | Only if SPEED-01 shows graph load matters |
+| SPEED-05 | Smaller search index per city | S | later | todo | Claude | `data/places`. SPEED-01: 1.3 to 1.5 MB, as big as the graph in Newcastle and London. Target 600 KB or less |
+| SPEED-06 | A compact binary graph format instead of gzipped JSON | L | later | todo | Claude | SPEED-01 says not yet: the graph is 5 to 25% of the download. Revisit after SPEED-08 and SPEED-09 if Edinburgh's worker setup (2.6 s, unslowed) is over 5 s on a real phone |
 | SPEED-07 | Speed budget follow-ups: a CI wall-time baseline from a few weeks of printed figures, and a re-baseline when the weekly refresh changes the graphs | S | later | todo | Claude | D-056. Settled nodes depend on the graph, so a refresh PR can trip the 10% check |
+| SPEED-08 | Load the graph and search index before the base map, so "Where to?" doesn't wait for tiles | S | now | todo | Claude | SPEED-01. Edinburgh 15.6 s to ready on Fast 4G with 4x CPU; target 6 s or less |
+| SPEED-09 | Read the base map in byte ranges, not whole, and fill the rest in the background for offline | M | next | todo | Claude | SPEED-01. Tiles are 49 to 71% of bytes. Target 2 MB or less before the map draws. Check the offline decisions first |
+| SPEED-10 | Cut the main-thread work after a route returns | S | next | todo | Claude | SPEED-01. Edinburgh 5.4 s at 4x against 3.4 s on desktop. Target 3 s or less. Trace first |
+| SPEED-11 | Trim JavaScript: see what is in the 650 to 680 KB and load later what the first screen doesn't need | M | later | todo | Claude | SPEED-01. MapLibre is the largest chunk. Pairs with SPEED-04 |
+| SPEED-12 | Measure on a real mid-range Android and a real CDN, plus repeat visits and city switching | S | next | todo | Richard and Claude | SPEED-01 limits: unslowed worker, software GPU, local server. Needs a phone or WebPageTest |
 
 ## Bloat reduction
 
@@ -300,7 +308,11 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 
 Newest first. One line per change: date, ID, what happened, link.
 
-- 2026-10-06: SMALL-02 done in PR #56: distances follow the per-device mph or km/h choice through one formatter, yards for short distances in miles mode (D-073). Added SMALL-16, SMALL-17. Now: STAB-15, SPEED-01, FEAT-03, SMALL-12, SMALL-16.
+- 2026-10-06: SMALL-02 done in PR #56: distances follow the per-device mph or km/h choice through one formatter, yards for short distances in miles mode (D-074). Added SMALL-18, SMALL-19. Now: SPEED-08, FEAT-03, SMALL-13, STAB-18, SMALL-18.
+- 2026-10-06: FEAT-20 done: destination first. "Where to?" alone, then From as "Your location", with location asked for only then; plain-words fallbacks ask where you're starting from (D-073). Added SMALL-17.
+- 2026-10-06: SMALL-12 done in PR #59: favicon.ico, SVG icon (follows dark mode), apple-touch-icon and manifest icons (standard and maskable), all from one mark. e2e now fails on any 4xx and checks the icons are served as images. Added SMALL-16.
+- 2026-10-06: STAB-15 done (PR #58): the e2e walk runs in 500 m batches, so arrival no longer depends on machine speed. STAB-18 joins Now.
+- 2026-10-06: SPEED-01 done: `pnpm perf:web` and [the numbers](perf/2026-10.md). Download is the cost (Edinburgh 15.3 MB, graph ready in 15.6 s on Fast 4G with 4x CPU; the base map is 49 to 71% of bytes and races the graph). SPEED-06 not yet worth it. Added SPEED-08 to SPEED-12; SPEED-08 joins Now.
 - 2026-10-05: REV-01 sweep after the release (#42, #44, #38, #48, #49, #50, #55, #51, #54, #53). SEC-12 and SEC-23 done; SEC-25 added (score the headers, blocked on DEP-07); REL-01 recorded; REV-01 next 2026-11-05. Richard chose Glasgow, then Leeds, then cities by size (D-072, DEF-09, DEF-10).
 - 2026-10-05: STAB-02 done: `pnpm screenshots` captures 10 screens (40 pictures, 2.7 MB in `tests/screenshots/`): 390 px and 320 px in light, 320 px at 200% text in light and dark. CI runs it and uploads diffs on failure. Found STAB-18 to STAB-20.
 - 2026-10-05: UPD-03 and UPD-04 done in PR #54: Next.js 16.3 on webpack, Node 24 in CI and `engines`, static export unchanged (D-071). Added UPD-05 to UPD-07.

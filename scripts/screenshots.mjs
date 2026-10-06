@@ -1,5 +1,6 @@
 /**
- * Screenshot tests for the main screens (STAB-02): the map, search, the route
+ * Screenshot tests for the main screens (STAB-02): the map, search, where you
+ * start from (FEAT-20), the route
  * panel, navigation, the device editor, the note and report sheets and Your
  * data. Each is captured light and dark, at a phone size (390 by 844), at
  * 320 by 640 and at 320 by 640 with text at 200%, and compared with the
@@ -98,6 +99,9 @@ async function shoot(page, name, scheme, size) {
     return;
   }
   if (!existsSync(file)) {
+    // Keep the picture, so a new screen's baseline can come from CI's own browser (its diff artifact).
+    mkdirSync(DIFF, { recursive: true });
+    writeFileSync(join(DIFF, `${id}.actual.png`), png);
     failures.push(`${id}: no baseline (run pnpm screenshots --update)`);
     console.log(`  FAIL ${id}: no baseline`);
     return;
@@ -155,6 +159,11 @@ for (const size of SIZES) {
     await page.getByRole("option").first().waitFor({ timeout: 30_000 });
     await shoot(page, "search", scheme, size);
     await page.getByRole("option").first().click();
+    // No location here, so it asks where you're starting from, with the city's start suggested (FEAT-20).
+    await page.getByText("This browser can't share where you are.").waitFor({ timeout: 10_000 });
+    await page.getByPlaceholder("Where are you starting from?").blur();
+    await shoot(page, "start-from", scheme, size);
+    await page.getByRole("option", { name: /^Causewayside\s+Suggested start/ }).click();
     await page.getByText("Why this way?").waitFor({ timeout: 60_000 });
     await page.waitForTimeout(1500);
     await shoot(page, "route", scheme, size);

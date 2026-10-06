@@ -8,7 +8,7 @@ import { formatDistance, type DistanceUnit } from "@causeway/profile";
  * Unknown elevations are gaps, never zeros.
  */
 export function ElevationChart({ data, worstPct, unit = "kmh" }: { data: { d: number; z: number | null }[]; worstPct: number | null; unit?: DistanceUnit }) {
-  // Distances along the route follow the unit; heights stay in metres (D-073).
+  // Distances along the route follow the unit; heights stay in metres (D-074).
   const along = (m: number) => formatDistance(m, unit, { precise: true });
   const id = useId();
   const [hover, setHover] = useState<number | null>(null);

@@ -12,12 +12,15 @@
  * the journey panel don't cover each other (STAB-12). Your data is checked too (SEC-06).
  * And a London route that goes round a lift out (TfL's recorded feeds), with
  * "On this route" open by itself, light, dark and at 320 px with 200% text (D-067).
+ * And where you start (FEAT-20): the route screen while the phone finds you, and
+ * "Where are you starting from?" with location turned off, light, dark and at 320 px
+ * with 200% text. The other screens share a location in the city, as a phone would.
  *   pnpm web:build && pnpm a11y
  * Exits 1 on any violation, or anything the Content Security Policy blocks. Runs in CI (.github/workflows/ci.yml).
  */
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
-import { launchBrowser, serveOut, watchCsp } from "./serve-out.mjs";
+import { hereIn, launchBrowser, serveOut, watchCsp } from "./serve-out.mjs";
 
 const require = createRequire(import.meta.url);
 const AXE = readFileSync(require.resolve("axe-core/axe.min.js"), "utf8");
@@ -27,7 +30,7 @@ const browser = await launchBrowser();
 const csp = [];
 const failures = [];
 for (const scheme of ["light", "dark"]) {
-  const page = await (await browser.newContext({ viewport: { width: 390, height: 844 }, colorScheme: scheme })).newPage();
+  const page = await (await browser.newContext({ viewport: { width: 390, height: 844 }, colorScheme: scheme, ...hereIn("edinburgh") })).newPage();
   watchCsp(page, csp);
   const check = async (name) => {
     await page.addScriptTag({ content: AXE });
@@ -143,7 +146,7 @@ async function londonLiftOut(page) {
   await page.getByRole("heading", { name: /^Blocked/ }).waitFor();
 }
 for (const scheme of ["light", "dark"]) {
-  const page = await (await browser.newContext({ viewport: { width: 390, height: 844 }, colorScheme: scheme })).newPage();
+  const page = await (await browser.newContext({ viewport: { width: 390, height: 844 }, colorScheme: scheme, ...hereIn("london") })).newPage();
   watchCsp(page, csp);
   await londonLiftOut(page);
   await page.addScriptTag({ content: AXE });
@@ -156,7 +159,7 @@ for (const scheme of ["light", "dark"]) {
   }
 }
 {
-  const page = await (await browser.newContext({ viewport: { width: 320, height: 640 } })).newPage();
+  const page = await (await browser.newContext({ viewport: { width: 320, height: 640 }, ...hereIn("london") })).newPage();
   watchCsp(page, csp);
   await londonLiftOut(page);
   await page.addStyleTag({ content: "html { font-size: 200% !important }" });
@@ -173,9 +176,56 @@ for (const scheme of ["light", "dark"]) {
   console.log(`200% text / route with a lift out, every section open: ${off.length ? off.map((o) => `${o} runs off the side`).join("; ") : "fits"}`);
   for (const o of off) failures.push(`200% text / route with a lift out / ${o} runs off the side`);
 }
+// Where you start (FEAT-20). No answer from the phone yet: the route screen says it's finding you. Location turned off:
+// "Where are you starting from?", with why. Light and dark, then 320 px at 200% text.
+const offsideAt = (page) =>
+  page.evaluate(() => {
+    const all = [...document.querySelectorAll("body *")].filter((e) => {
+      if (e.closest(".maplibregl-map") || (e.closest("svg") && e.tagName !== "svg")) return false;
+      const b = e.getBoundingClientRect();
+      return b.width > 0 && b.height > 0 && (b.right > innerWidth + 1 || b.left < -1);
+    });
+    return all.filter((e) => !all.some((o) => o !== e && e.contains(o))).slice(0, 3).map((e) => `${e.tagName.toLowerCase()} "${(e.textContent ?? "").trim().slice(0, 30)}"`);
+  });
+const locationOff = () => {
+  navigator.geolocation.getCurrentPosition = (_ok, fail) => setTimeout(() => fail({ code: 1, PERMISSION_DENIED: 1, message: "denied" }), 50);
+};
+for (const [scheme, size, zoom] of [["light", { width: 390, height: 844 }, false], ["dark", { width: 390, height: 844 }, false], ["light", { width: 320, height: 640 }, true]]) {
+  for (const [name, init, ready] of [
+    ["finding where you are", () => (navigator.geolocation.getCurrentPosition = () => {}), "Finding where you are…"],
+    ["where are you starting from, location off", locationOff, "Location is turned off for this site, so we can't tell where you are."],
+  ]) {
+    const context = await browser.newContext({ viewport: size, colorScheme: scheme });
+    const page = await context.newPage();
+    watchCsp(page, csp);
+    await page.addInitScript(init);
+    await page.goto(url);
+    await page.getByPlaceholder("Where to?").waitFor({ timeout: 60_000 });
+    if (zoom) await page.addStyleTag({ content: "html { font-size: 200% !important }" });
+    await page.getByPlaceholder("Where to?").fill("Hamilton Place");
+    await page.getByRole("option").first().click();
+    await page.getByText(ready).waitFor({ timeout: 10_000 });
+    await page.waitForTimeout(500);
+    const label = `${zoom ? "200% text" : scheme} / ${name}`;
+    if (zoom) {
+      const off = await offsideAt(page);
+      console.log(`${label}: ${off.length ? off.map((o) => `${o} runs off the side`).join("; ") : "fits"}`);
+      for (const o of off) failures.push(`${label} / ${o} runs off the side`);
+    } else {
+      await page.addScriptTag({ content: AXE });
+      const violations = await page.evaluate(async () => (await window.axe.run(document, { runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"] } })).violations.map((v) => ({ id: v.id, impact: v.impact, help: v.help, targets: v.nodes.slice(0, 3).map((n) => n.target.join(" ")) })));
+      console.log(`${label}: ${violations.length} violation${violations.length === 1 ? "" : "s"}`);
+      for (const v of violations) {
+        console.log(`  [${v.impact}] ${v.id}: ${v.help}\n    ${v.targets.join("\n    ")}`);
+        failures.push(`${label} / ${v.id}`);
+      }
+    }
+    await context.close();
+  }
+}
 // Reflow (WCAG 1.4.4, 1.4.10): the device sheets at 320 by 640 with text at 200% (STAB-11).
 {
-  const page = await (await browser.newContext({ viewport: { width: 320, height: 640 } })).newPage();
+  const page = await (await browser.newContext({ viewport: { width: 320, height: 640 }, ...hereIn("edinburgh") })).newPage();
   watchCsp(page, csp);
   await page.goto(url);
   await page.getByPlaceholder("Where to?").waitFor({ timeout: 60_000 });
@@ -217,7 +267,7 @@ for (const scheme of ["light", "dark"]) {
 }
 // Reflow on the other screens at 320 by 640 with text at 200% (STAB-12). The map draws its own labels, so it's left out.
 {
-  const page = await (await browser.newContext({ viewport: { width: 320, height: 640 } })).newPage();
+  const page = await (await browser.newContext({ viewport: { width: 320, height: 640 }, ...hereIn("edinburgh") })).newPage();
   watchCsp(page, csp);
   await page.goto(url);
   await page.getByPlaceholder("Where to?").waitFor({ timeout: 60_000 });
@@ -273,7 +323,7 @@ for (const scheme of ["light", "dark"]) {
 // The map controls (STAB-13): reachable by keyboard while the sheet is open, menus take and return focus,
 // and at 320 px with text at 200% no city name is cut off or runs under the buttons.
 {
-  const page = await (await browser.newContext({ viewport: { width: 320, height: 640 } })).newPage();
+  const page = await (await browser.newContext({ viewport: { width: 320, height: 640 }, ...hereIn("edinburgh") })).newPage();
   watchCsp(page, csp);
   await page.goto(url);
   await page.getByPlaceholder("Where to?").waitFor({ timeout: 60_000 });

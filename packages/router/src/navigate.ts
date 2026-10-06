@@ -43,7 +43,7 @@ export interface NavPlan {
   rides?: { from: number; to: number; alight: string }[];
   /** Stretches a road-legal scooter drives on the carriageway, at road speed: [from, to] metres along. */
   roads?: { from: number; to: number }[];
-  /** How this person reads distances, so the plan and what is said use the same one (D-073). Absent: kilometres. */
+  /** How this person reads distances, so the plan and what is said use the same one (D-074). Absent: kilometres. */
   unit?: DistanceUnit;
 }
 
