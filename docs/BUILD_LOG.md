@@ -7,6 +7,13 @@ A running record of what was built, newest first. Each entry links the decision 
 - `pnpm perf:web` (`scripts/perf-web.mjs`): cold visits in the built app on an emulated Moto G Power, 4x CPU, Fast or Slow 4G. Reports paint times, map drawn, graph loaded, destination to route and bytes by kind, median and range per city. Own server with Vercel's headers and brotli.
 - [docs/perf/2026-10.md](perf/2026-10.md): the numbers, what they say, why SPEED-06 waits, and targets (SPEED-08 to SPEED-12). No app code changed.
 
+## 2026-10-06 (the e2e walk by distance)
+
+STAB-15: `scripts/e2e.mjs` only. No app code changed.
+- The test runs the preview's half-second ticks in batches of 180 (about 500 m of route), where it ran ten every 50 ms. Drawing the page, not walking, was the cost: Edinburgh drew about 70 times at 400 ms each. It now draws about a dozen times.
+- Edinburgh arrives in 3.4 s (it took 2 min 44 s on a 4-core box), and in 9.5 s with the CPU slowed six times (`E2E_CPU=6`, Chrome's CPU throttling). The journey prints how long the walk took.
+- `E2E_ARRIVE_MS` stays as an override of the 2-minute limit.
+
 ## 2026-10-05 (the release and the docs sweep)
 
 REV-01, docs only.

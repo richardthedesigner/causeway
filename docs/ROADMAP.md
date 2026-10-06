@@ -51,11 +51,11 @@ The current direction: **fix and fill the pilot cities** with open data that nee
 
 The next five things to pick up, in order.
 
-1. **STAB-15**: step the e2e preview walk by distance, not time.
-2. **SMALL-02**: a miles or kilometres setting.
-3. **SPEED-08**: load the graph and search index before the base map.
-4. **FEAT-03**: "Report what's there" from "What we don't know".
-5. **SMALL-12**: a favicon and app icons.
+1. **SMALL-02**: a miles or kilometres setting.
+2. **SPEED-08**: load the graph and search index before the base map.
+3. **FEAT-03**: "Report what's there" from "What we don't know".
+4. **SMALL-12**: a favicon and app icons.
+5. **STAB-18**: the route panel leaves too little of the sheet in view at 320 px with 200% text.
 
 The rest of the pilot-city data (DATA-12 to DATA-20) is blocked on access, licences or keys. Research (RES) needs Richard and testers.
 
@@ -207,7 +207,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | STAB-12 | 200% text at 320 px on the other screens: route panel, navigation, search, note and report sheets | S | now | done (2026-10-05) | Claude | `pnpm a11y` checks six more screens. Grids hold their width, chip rows and section headings wrap, navigation's two panels take half the screen each and scroll |
 | STAB-13 | The city name at the top of the map is cut off at 200% text on a 320 px phone ("Edinbur", under the layers button) | S | now | done (2026-10-05) | Claude | PR #42. The bar over the map is sized in pixels. `pnpm a11y` checks the name neither spills nor runs under the layers button |
 | STAB-14 | Time limits for the sharing and review calls to Supabase | S | now | done (2026-10-05) | Claude | PR #42. `lib/timed-fetch.ts`: 15 s, 30 s for a photo upload, with the same timeout error as the live feeds |
-| STAB-15 | The e2e preview walk runs at a fixed speed, so a slower runner can miss the 2-minute arrival limit (Edinburgh took 2 min 44 s on a 4-core box) | S | now | todo | Claude | Found doing SEC-06. `E2E_ARRIVE_MS` raises the limit locally; better to step the walk by distance, not time |
+| STAB-15 | The e2e preview walk runs at a fixed speed, so a slower runner can miss the 2-minute arrival limit (Edinburgh took 2 min 44 s on a 4-core box) | S | now | done (2026-10-06) | Claude | PR #58. The e2e runs the preview's ticks in batches of about 500 m, so the page draws a dozen times, not hundreds (drawing was the cost, not the walk). Edinburgh arrives in 3 s, 10 s with the CPU slowed six times (`E2E_CPU=6`). `E2E_ARRIVE_MS` stays as an override |
 | STAB-16 | `pnpm a11y` checks the high-contrast map and the open "Save this place" form | S | later | todo | Claude | Found doing SMALL-05 and FEAT-04. Both were checked by hand at 320 px, light and dark |
 | STAB-18 | At 320 px with 200% text the route panel leaves about 145 px of the sheet in view above the Start bar, so the route cards can barely be read without dragging | S | next | todo | Claude | Found doing STAB-02 (`route.*.w320-200.png`). Check the sheet's resting height and whether the bar can shrink |
 | STAB-19 | Toilet labels ("WC") stack on top of each other along a route, unreadable at the zoom the route fits to | S | later | todo | Claude | Found doing STAB-02 (`navigation.*.phone.png`). Hide or cluster labels that collide |
@@ -303,6 +303,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 
 Newest first. One line per change: date, ID, what happened, link.
 
+- 2026-10-06: STAB-15 done (PR #58): the e2e walk runs in 500 m batches, so arrival no longer depends on machine speed. STAB-18 joins Now.
 - 2026-10-06: SPEED-01 done: `pnpm perf:web` and [the numbers](perf/2026-10.md). Download is the cost (Edinburgh 15.3 MB, graph ready in 15.6 s on Fast 4G with 4x CPU; the base map is 49 to 71% of bytes and races the graph). SPEED-06 not yet worth it. Added SPEED-08 to SPEED-12; SPEED-08 joins Now.
 - 2026-10-05: REV-01 sweep after the release (#42, #44, #38, #48, #49, #50, #55, #51, #54, #53). SEC-12 and SEC-23 done; SEC-25 added (score the headers, blocked on DEP-07); REL-01 recorded; REV-01 next 2026-11-05. Richard chose Glasgow, then Leeds, then cities by size (D-072, DEF-09, DEF-10).
 - 2026-10-05: STAB-02 done: `pnpm screenshots` captures 10 screens (40 pictures, 2.7 MB in `tests/screenshots/`): 390 px and 320 px in light, 320 px at 200% text in light and dark. CI runs it and uploads diffs on failure. Found STAB-18 to STAB-20.
