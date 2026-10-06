@@ -2,6 +2,15 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
+## 2026-10-06 (favicon and app icons)
+
+SMALL-12.
+- Every page load asked for `/favicon.ico` and got a 404. There is now one mark, a route ending in a dot, white on the accent blue.
+- `apps/web/public/`: `favicon.ico` (16, 32, 48), `icon.svg` (dark mode swaps to the dark accent), `apple-touch-icon.png` (180), `icon-192/512.png` and `icon-maskable-192/512.png`. All under 13 KB. The manifest lists them.
+- The maskable icons fill the square and keep the mark inside the central 80%. Redraw them with `node scripts/make-icons.mjs`.
+- The CSP needed no change: icons are same-origin (`img-src 'self'`, `manifest-src 'self'`).
+- `pnpm e2e` now fails on any 4xx response in a journey and checks each icon is served as an image.
+
 ## 2026-10-05 (the release and the docs sweep)
 
 REV-01, docs only.
