@@ -11,6 +11,28 @@ FEAT-03, D-076, PR #65.
 - Tests: `apps/web/test/reports.test.ts`, the Your data count. The e2e trip reports what's there by keyboard alone and finds it in Your data and the copy. The a11y run checks the sheet light, dark and at 320 px with 200% text. A new screenshot, `whats-there`.
 - Found: at 320 px with 200% text, "Another way" spills out of its box, so a click in the route panel scrolls it sideways (STAB-22). The a11y check opens the sheet by keyboard until that is fixed. The answer buttons move with Tab, not the arrow keys (SMALL-20).
 
+## 2026-10-06 (the route sheet at large text)
+
+STAB-18.
+- The Start bar caps its button height and padding in px, so at 200% text it is 89 px tall, not 137.
+- The sheet checks the text size each time it opens, not once at load, so text enlarged after load still opens it fully.
+- The ground chips, the journey and destination rows and the gaps stop growing past a sensible size.
+- At large text a new route scrolls its card to the top of the list. The rows above are a scroll away.
+- `pnpm a11y` now fails if less than 300 px of the sheet shows above the Start bar or the card's headline is under it.
+
+## 2026-10-06 (miles in search)
+
+SMALL-18 (D-074), PR #64.
+- The distance beside each search result uses `formatDistance` with the device's unit: yards and miles in miles mode, metres and kilometres otherwise. `PlaceSearch` takes a `unit` prop.
+- The "Where are you starting from?" suggestions never showed a distance, so nothing changed there.
+- Tests: `apps/web/test/search-distance.test.ts`, and an e2e step that searches in miles mode.
+
+## 2026-10-06 (e2e ignores outside errors)
+
+STAB-21, PR #63.
+- `scripts/e2e.mjs` fails a journey on a 4xx or 5xx only when the response is from the app's own origin. Any other host prints a `WARN` line and the run carries on. An Open-Meteo 429 had failed a run.
+- The icon check from SMALL-12 is unchanged. No app code touched.
+
 ## 2026-10-06 (a custom domain)
 
 DEP-07, no code.
@@ -23,7 +45,7 @@ DEP-07, no code.
 SMALL-02 (D-074), PR #56.
 - Distances follow the per-device "Show speeds and distances in" choice from D-051. No second setting. The editor's buttons now read "Miles, mph" and "Kilometres, km/h".
 - `formatDistance` in `@causeway/profile` is the one formatter: metres under a kilometre and kilometres above in km mode, yards under a quarter of a mile and miles above in miles mode, and full words for speech ("110 yards"). Behind it: the route card, strip and "On this route" lines, router notes and trade-offs, navigation (the plan carries its unit so what's shown and what's said agree), the elevation chart, rest and toilet intervals, battery range and the copy-as-text route.
-- Heights, widths and kerbs stay metric. Distances to places in search are still metric (SMALL-18).
+- Heights, widths and kerbs stay metric. Distances to places in search are still metric (SMALL-18, done later).
 - Tests: `packages/profile/test/distance.test.ts`, miles-mode navigation and range wording, route-text. The e2e journey switches a powerchair to miles and checks the card and the copied text. The a11y run checks the battery range in miles.
 - Screenshot baselines were not rewritten: they differ on this machine even on a clean `main` (fonts), so CI decides.
 ## 2026-10-06 (destination first)

@@ -158,9 +158,8 @@ export default function Home() {
   const shared = useNotes(city.id);
   const cityNotes = shared.notes;
   // Large text leaves little room at half height: open the sheet fully instead.
-  const [bigText, setBigText] = useState(false);
-  useEffect(() => setBigText(parseFloat(getComputedStyle(document.documentElement).fontSize) >= 20), []);
-  const open = (s: number) => setSnap(bigText ? SNAP.full : s);
+  // Read when the sheet opens, not once at load, so text enlarged after the page loaded counts too (STAB-18).
+  const open = (s: number) => setSnap(parseFloat(getComputedStyle(document.documentElement).fontSize) >= 20 ? SNAP.full : s);
 
   const ground: Ground = conditions.ice ? "ice" : conditions.wet ? "wet" : "dry";
   /** A saved device used for this journey only ("Use Lulu for this trip"); never saved. */
@@ -474,6 +473,7 @@ export default function Home() {
             liveNear={notMe(from)}
             bbox={planner.ready.bbox}
             cityName={city.name}
+            unit={distanceUnit(profile)}
             excludeId={from.id}
             onPick={pick}
             trailing={profileChip}
@@ -523,6 +523,7 @@ export default function Home() {
             liveNear={notMe(to ?? from)}
             bbox={planner.ready.bbox}
             cityName={city.name}
+            unit={distanceUnit(profile)}
             excludeId={to?.id}
             onPick={pick}
             onUseLocation={start === "unsupported" ? undefined : () => locate(true)}
