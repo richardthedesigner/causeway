@@ -3,7 +3,7 @@
  * screens people use most: start, a route to a park, search results, a route with buses and
  * toilets (every section open), first-visit setup, the device list and the
  * device settings, with a battery range and as a road scooter in mph and
- * km/h (FEAT-18), and the update prompt. Then the
+ * km/h (FEAT-18, SMALL-02), and the update prompt. Then the
  * setup and device settings sheets on a 320 by 640 phone at 200% text: the
  * header takes at most a third of the screen, and nothing runs off the side (STAB-11).
  * And the other screens at the same size: start with "This trip", search,
@@ -105,6 +105,11 @@ for (const scheme of ["light", "dark"]) {
   await page.locator("[role=dialog] details").evaluateAll((els) => els.forEach((el) => (el.open = true)));
   await page.getByRole("slider", { name: "Speed on the road" }).waitFor();
   await check("device settings, road scooter, mph");
+  // Distances follow the same unit (SMALL-02): the battery range reads in miles here.
+  const range = page.getByRole("switch", { name: "Warn me about battery range" });
+  if ((await range.getAttribute("aria-checked")) !== "true") await range.click();
+  await page.getByRole("slider", { name: "Range on one charge" }).waitFor();
+  await check("device settings, road scooter, battery range in miles");
   await page.getByRole("radio", { name: "km/h" }).click();
   await check("device settings, road scooter, km/h");
 

@@ -127,3 +127,25 @@ describe("Navigator on a bus", () => {
     expect(nav.update(...at(2160, 100)).offRoute).toBe(true);
   });
 });
+
+describe("navigation in miles mode (SMALL-02)", () => {
+  const mph = { ...PRESETS["manual-wheelchair"], speedUnit: "mph" as const };
+  it("plans and says distances in yards and miles, never metres", () => {
+    const router = new Router(loadSnapshot(join(import.meta.dirname, "../../../data/snapshots/edinburgh-old-town.graph.json.gz")));
+    const j = EDINBURGH_JOURNEYS.find((x) => x.id === "royal-mile-victoria-street")!;
+    const r = router.route(router.snap(j.from.lon, j.from.lat, mph), router.snap(j.to.lon, j.to.lat, mph), mph)!;
+    const pl = buildNavPlan(r, mph);
+    expect(pl.unit).toBe("mph");
+    expect(plan.unit).toBe("kmh");
+    for (const h of pl.hazards) expect(h.detail).not.toMatch(/\d m\b/);
+    expect(pl.hazards.some((h) => /\d yd\b/.test(h.detail))).toBe(true);
+    const nav = new Navigator(pl);
+    const said: string[] = [];
+    for (const [lon, lat] of walk(pl)) {
+      const p = nav.update(lon, lat, 5);
+      if (p.announce) said.push(p.announce);
+    }
+    expect(said.some((s) => /^(Setts|Steep section) in \d+ yards/.test(s))).toBe(true);
+    for (const s of said) expect(s).not.toMatch(/\d+ (metres|m|km)\b/);
+  });
+});

@@ -1,5 +1,5 @@
 "use client";
-import { formatSpeed, hasBattery, kerbLimitText, MPS_PER_MPH, PRESETS, ROAD_MPH_MAX, ROAD_MPH_MIN, speedUnit, stepKerbCm, type MobilityPreset, type Profile, type SavedDevice, type SpeedUnit } from "@causeway/profile";
+import { formatDistance, formatSpeed, hasBattery, kerbLimitText, MPS_PER_MPH, PRESETS, rangeInUnit, rangeToKm, ROAD_MPH_MAX, ROAD_MPH_MIN, speedUnit, stepKerbCm, type MobilityPreset, type Profile, type SavedDevice, type SpeedUnit } from "@causeway/profile";
 import { useState } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Slider } from "@/components/ui/slider";
@@ -47,7 +47,7 @@ function limitsSummary(p: Profile, steps: number): string {
   const kerb = p.maxKerbCm === 0 ? "Flush kerbs" : `Kerb ${kerbLimitText(p.maxKerbCm)}`;
   const st = steps === 0 ? "No steps" : steps >= STEP_LIMIT ? "Any steps" : `Up to ${steps} steps`;
   const road = p.roadLegal && p.roadSpeedMps ? `${formatSpeed(halfMph(p.roadSpeedMps) * MPS_PER_MPH, speedUnit(p))} on roads` : null;
-  return [up, kerb, st, p.maxRangeKm ? `${p.maxRangeKm} km battery` : null, road].filter(Boolean).join(" / ");
+  return [up, kerb, st, p.maxRangeKm ? `${formatDistance(p.maxRangeKm * 1000, speedUnit(p))} battery` : null, road].filter(Boolean).join(" / ");
 }
 
 
@@ -70,6 +70,10 @@ export function DeviceEditor({ open, onOpenChange, device, onChange, onRename, o
   const roadMph = profile.roadSpeedMps ? halfMph(profile.roadSpeedMps) : ROAD_MPH_MAX;
   const setRoadMph = (mph: number) => set({ roadSpeedMps: clamp(mph, ROAD_MPH_MIN, ROAD_MPH_MAX) * MPS_PER_MPH });
   const range = profile.maxRangeKm ?? null;
+  // Battery range is kept in km. In miles mode it is shown and stepped in whole miles.
+  const rangeShown = range === null ? null : rangeInUnit(range, unit);
+  const [rangeMin, rangeMax] = [rangeInUnit(RANGE_MIN_KM, unit), rangeInUnit(RANGE_MAX_KM, unit)];
+  const setRange = (shown: number) => set({ maxRangeKm: rangeToKm(clamp(shown, rangeMin, rangeMax), unit) });
   const stepsAllowed = Number.isFinite(profile.maxSteps) ? Math.min(profile.maxSteps, STEP_LIMIT) : STEP_LIMIT;
 
   return (
@@ -218,7 +222,7 @@ export function DeviceEditor({ open, onOpenChange, device, onChange, onRename, o
                       onClick={() => set({ maxToiletIntervalM: m })}
                       className={cn("min-h-12 rounded-full border px-4 text-base", on ? "border-ink bg-ink text-surface" : "border-line bg-surface text-ink hover:border-ink")}
                     >
-                      {m === null ? "Don't mind" : m >= 1000 ? `${m / 1000} km` : `${m} m`}
+                      {m === null ? "Don't mind" : formatDistance(m, unit)}
                     </button>
                   );
                 })}
@@ -250,8 +254,8 @@ export function DeviceEditor({ open, onOpenChange, device, onChange, onRename, o
           </div>
 
           <fieldset className="m-0 grid gap-2 border-0 p-0">
-            <legend className="text-base">Show speeds in</legend>
-            <div role="radiogroup" aria-label="Show speeds in" className="flex flex-wrap gap-2">
+            <legend className="text-base">Show speeds and distances in</legend>
+            <div role="radiogroup" aria-label="Show speeds and distances in" className="flex flex-wrap gap-2">
               {(["mph", "kmh"] as SpeedUnit[]).map((u) => {
                 const on = unit === u;
                 return (
@@ -263,7 +267,7 @@ export function DeviceEditor({ open, onOpenChange, device, onChange, onRename, o
                     onClick={() => set({ speedUnit: u })}
                     className={cn("min-h-12 rounded-full border px-4 text-base", on ? "border-ink bg-ink text-surface" : "border-line bg-surface text-ink hover:border-ink")}
                   >
-                    {u === "mph" ? "mph" : "km/h"}
+                    {u === "mph" ? "Miles, mph" : "Kilometres, km/h"}
                   </button>
                 );
               })}
@@ -300,11 +304,11 @@ export function DeviceEditor({ open, onOpenChange, device, onChange, onRename, o
               {range !== null ? (
                 <Limit
                   label="Range on one charge"
-                  value={`${range} km`}
+                  value={formatDistance(range * 1000, unit)}
                   help="On the flat, from your manual or your own trips. We count each climb as extra distance, and warn when a trip uses over half."
-                  onStep={(d) => set({ maxRangeKm: clamp(range + d, RANGE_MIN_KM, RANGE_MAX_KM) })}
+                  onStep={(d) => setRange(rangeShown! + d)}
                 >
-                  <Slider thumbLabel="Range on one charge" valueText={`${range} kilometres`} min={RANGE_MIN_KM} max={RANGE_MAX_KM} step={1} value={[range]} onValueChange={([v]) => set({ maxRangeKm: v! })} />
+                  <Slider thumbLabel="Range on one charge" valueText={formatDistance(range * 1000, unit, { long: true })} min={rangeMin} max={rangeMax} step={1} value={[rangeShown!]} onValueChange={([v]) => setRange(v!)} />
                 </Limit>
               ) : (
                 <p className="m-0 text-sm text-muted">Off: we don&apos;t guess your battery.</p>

@@ -1,5 +1,5 @@
 "use client";
-import { learnPace, type Profile } from "@causeway/profile";
+import { distanceUnit, learnPace, type Profile } from "@causeway/profile";
 import { conditionsFromOpenMeteo, forecastConditions, getJson, openMeteoUrl, riverHigh, type OpenMeteoResponse } from "@causeway/live";
 import { haversine } from "@causeway/graph";
 import { ChevronLeft } from "lucide-react";
@@ -490,6 +490,7 @@ export default function Home() {
             buses={profile.buses !== false}
             onBuses={(v) => updateProfile({ ...profile, buses: v })}
             toiletEvery={profile.maxToiletIntervalM}
+            unit={distanceUnit(profile)}
             onToilets={() => setModeOpen(true)}
             leaveAt={leaveAt}
             onLeave={setLeaveAt}

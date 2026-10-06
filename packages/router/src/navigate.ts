@@ -5,7 +5,7 @@
  * British English, distances rounded to what a person can use.
  */
 import { haversine, isKnown, type GraphEdge, type GraphNode } from "@causeway/graph";
-import type { Profile } from "@causeway/profile";
+import { distanceUnit, formatDistance, speakableDistances, type DistanceUnit, type Profile } from "@causeway/profile";
 import { onRoad, surfaceLabel } from "./cost.js";
 import { placeName, toGeoJSON, type Route } from "./router.js";
 
@@ -26,7 +26,7 @@ export interface Hazard {
   length: number;
   /** "Steep section" */
   title: string;
-  /** "8% downhill for 30 m" */
+  /** "8% downhill for 30 m", or "for 30 yd" in miles mode */
   detail: string;
 }
 
@@ -43,6 +43,8 @@ export interface NavPlan {
   rides?: { from: number; to: number; alight: string }[];
   /** Stretches a road-legal scooter drives on the carriageway, at road speed: [from, to] metres along. */
   roads?: { from: number; to: number }[];
+  /** How this person reads distances, so the plan and what is said use the same one (D-074). Absent: kilometres. */
+  unit?: DistanceUnit;
 }
 
 const RAIL = new Set(["transit", "board", "interchange"]);
@@ -148,7 +150,8 @@ export function buildNavPlan(r: Route, p: Profile): NavPlan {
 
   // Hazards: what a person would want warning of before they reach it.
   const hazards: Hazard[] = [];
-  const len10 = (m: number) => `${Math.max(10, Math.round(m / 10) * 10)} m`;
+  const unit = distanceUnit(p);
+  const len10 = (m: number) => formatDistance(m, unit);
   const push = (h: Hazard) => {
     let last: Hazard | undefined;
     for (let k = hazards.length - 1; k >= 0; k--) if (hazards[k]!.kind === h.kind) {
@@ -158,7 +161,7 @@ export function buildNavPlan(r: Route, p: Profile): NavPlan {
     // Merge continuing stretches of the same thing (a long steep street split into several edges).
     // Both kerbs of one crossing are one warning.
     if (h.kind === "kerb" && last && h.at - last.at < 15 && last.title === h.title) return;
-    const head = (x: string) => x.replace(/(^| )?for \d+ m$/, "");
+    const head = (x: string) => x.replace(/(^| )?for [\d.]+ (?:m|yd|km|miles?)$/, "");
     if (last && last.kind === h.kind && h.length > 0 && h.at - (last.at + last.length) < 5 && head(last.detail) === head(h.detail)) {
       last.length = h.at + h.length - last.at;
       const hd = head(last.detail);
@@ -205,7 +208,7 @@ export function buildNavPlan(r: Route, p: Profile): NavPlan {
     if (last && Math.abs(last.to - from) < 0.5) last.to = to;
     else roads.push({ from, to });
   });
-  return { coords, cum, length, maneuvers, hazards, rides, roads };
+  return { coords, cum, length, maneuvers, hazards, rides, roads, unit };
 }
 
 /** On a stretch driven at road speed. Pace learning skips these: it learns the pavement pace. */
@@ -302,14 +305,15 @@ export class Navigator {
       // Everything starting at about the same place is said together: "Steep section in 50 metres: 7% downhill for 70 m. Setts for 70 m."
       const group = this.plan.hazards.filter((h) => Math.abs(h.at - ahead.at) <= 10 && !this.said.has(`h:${this.plan.hazards.indexOf(h)}`));
       for (const h of group) this.said.add(`h:${this.plan.hazards.indexOf(h)}`);
+      const unit = this.plan.unit ?? "kmh";
       const inM = Math.max(0, Math.round((ahead.at - this.along) / 10) * 10);
       const [first, ...others] = group;
       const rest = others.filter((h, i) => hazardText(h) !== hazardText(first!) && others.findIndex((o) => hazardText(o) === hazardText(h)) === i);
-      const lead = inM > 5 ? `${first!.title} in ${inM} metres${first!.detail ? (first!.detail.startsWith("for ") ? `, ${first!.detail}` : `: ${first!.detail}`) : ""}.` : `${hazardText(first!)}.`;
-      announce = [lead, ...rest.map((h) => `${hazardText(h)}.`)].join(" ");
+      const lead = inM > 5 ? `${first!.title} in ${formatDistance(inM, unit, { long: true })}${first!.detail ? (first!.detail.startsWith("for ") ? `, ${first!.detail}` : `: ${first!.detail}`) : ""}.` : `${hazardText(first!)}.`;
+      announce = speakableDistances([lead, ...rest.map((h) => `${hazardText(h)}.`)].join(" "));
       announceKind = "hazard";
     } else if (next && next.type !== "arrive" && distanceToNext <= MANEUVER_WARN_M && !this.said.has(`m:${next.at}`)) {
-      announce = distanceToNext > 10 ? `In ${Math.round(distanceToNext / 10) * 10} metres, ${next.text.charAt(0).toLowerCase()}${next.text.slice(1)}` : next.text;
+      announce = distanceToNext > 10 ? `In ${formatDistance(distanceToNext, this.plan.unit ?? "kmh", { long: true })}, ${next.text.charAt(0).toLowerCase()}${next.text.slice(1)}` : next.text;
       this.said.add(`m:${next.at}`);
       announceKind = "turn";
     }

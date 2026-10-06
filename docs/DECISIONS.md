@@ -528,7 +528,7 @@ Update (BLOAT-02, 2026-10-05): CI also runs `pnpm knip` for unused files, export
 - Pace learning learns only the pavement pace: stretches driven at road speed (`NavPlan.roads`) don't count. Time left while navigating uses both speeds.
 - **Effect.** Central Edinburgh journeys get 20 to 45% quicker, and routes move onto roads. Marchmont to Leith Walk went from 48% to 91% on roads, with only 7% of the route kept. That fits the law, but some riders keep to pavements or avoid busy roads. Ask them (RES-10) before adding a "prefer pavements" or "avoid busy roads" option.
 - **In the editor** (FEAT-18, 2026-10-05): road scooters get "Speed on the road", 4 to 8 mph in half-mph steps. Below 4 mph the road isn't worth using (that's the pavement limit), and 8 mph is the legal top speed.
-- **Speed units** (FEAT-18): each device has "Show speeds in: mph or km/h" (`speedUnit`), used for pace and road speed. Scooters default to mph, the unit they're sold and regulated in; everyone else to km/h, as before. Distances stay metric; a full miles or kilometres setting is SMALL-02.
+- **Speed units** (FEAT-18): each device has "Show speeds in: mph or km/h" (`speedUnit`), used for pace and road speed. Scooters default to mph, the unit they're sold and regulated in; everyone else to km/h, as before. Distances follow the same choice (D-074).
 
 ## D-052 Live feeds get a time limit
 
@@ -912,3 +912,19 @@ For comparison, Leeds is 536,280 and Newcastle upon Tyne 286,445. Scotland has n
 - **From stays editable.** Tapping it opens "Where are you starting from?", with the city's start suggested first, then saved places and the city's places, and "Use my location". A start picked by hand stays for the next destination; your location is asked again each time, so it is fresh. Swap works once the start is known.
 - **When the phone can't help**, the app says why in plain words and asks "Where are you starting from?": location turned off, no fix in time, a browser with no location, or a position outside the part of the city we have routes for. The city's start is only a suggestion there.
 - **Privacy (D-009).** The position stays on the phone: routing runs on the device (D-017), and live search (Photon) is biased towards the city's start, never towards you. `pnpm e2e` shares a location a few tens of metres from each city's start and fails if any request carries it, as it does for the profile.
+
+## D-074 Distances follow the per-device speed choice
+
+**Decided.** 2026-10-06 (ROADMAP SMALL-02). Updates D-051.
+
+A person who reads speeds in mph reads distances in miles, and a person who reads speeds in km/h reads them in kilometres. So there is no second setting: the one per-device choice (`speedUnit`) now covers both, and the editor's control reads "Show speeds and distances in: Miles, mph or Kilometres, km/h". Two settings would let someone pick "mph" and "km", and nobody asked for that. A device that wants a mix can be made later if testers say so (RES).
+
+**One formatter.** `formatDistance(metres, unit, { long?, precise? })` in `@causeway/profile` is the only place a distance becomes text. Everything that shows or says a distance uses it.
+- **Kilometres mode.** Metres to the nearest 10 under 1 km ("50 m", never less than 10 m), then "1.4 km", with one decimal under 10 km and none from 10. A whole metre when `precise` (the route in words, "Path, 27 m").
+- **Miles mode.** Yards under a quarter of a mile ("110 yd"), then "0.3 miles", "1 mile", "4.3 miles", "12 miles". Yards are to the nearest 10. Miles never show metres or kilometres.
+- **Spoken.** `long` gives "50 metres", "110 yards", "1.2 kilometres", "0.4 miles". Hazard text is built once with the short form ("for 30 yd") and `speakableDistances` expands it before it is said.
+- **Where it applies.** The route card, the route strip's words, the "not fully mapped" and setts lines, "Closest you can get", the elevation chart's distances along the route, battery range, rest and toilet intervals (setting buttons, route notes and "More benches" or "Past more toilets" trade-offs), "On this route" lines, navigation (distance to the next turn, remaining, "in 50 yards"), hazard warnings, and the copy-as-text route. The navigation plan carries its unit (`NavPlan.unit`), so the screen and the voice agree.
+- **What stays metric.** Heights and climbs ("6 m up overall", "12 m above sea level"), widths ("1.2 m wide"), kerb heights (cm and mm), and the distance shown beside a place in search (SMALL-18). These are measures of the ground, not journey lengths, and mixing feet in would be a bigger change.
+- **Stored values stay as they are.** Rest and toilet intervals are kept in metres and battery range in km. In miles mode they are converted for display (an interval of 500 m reads "0.3 miles"), and the battery range steps in whole miles and is stored as km to a tenth. Nothing about routing changes.
+- **Defaults** are D-051's: scooters mph, everyone else km/h. Existing devices keep what they had.
+

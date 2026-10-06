@@ -51,11 +51,11 @@ The current direction: **fix and fill the pilot cities** with open data that nee
 
 The next five things to pick up, in order.
 
-1. **SMALL-02**: a miles or kilometres setting.
-2. **SPEED-08**: load the graph and search index before the base map.
-3. **FEAT-03**: "Report what's there" from "What we don't know".
-4. **SMALL-13**: saved places on the map, and as a start as well as a destination.
-5. **STAB-18**: the route panel leaves too little of the sheet in view at 320 px with 200% text.
+1. **SPEED-08**: load the graph and search index before the base map.
+2. **FEAT-03**: "Report what's there" from "What we don't know".
+3. **SMALL-13**: saved places on the map, and as a start as well as a destination.
+4. **STAB-18**: the route panel leaves too little of the sheet in view at 320 px with 200% text.
+5. **SMALL-18**: distances to places in search, in miles when the device is set to miles.
 
 The rest of the pilot-city data (DATA-12 to DATA-20) is blocked on access, licences or keys. Research (RES) needs Richard and testers.
 
@@ -146,7 +146,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | ID | Task | Size | Priority | Status | Who | Notes |
 |---|---|---|---|---|---|---|
 | SMALL-01 | Opening hours that know bank holidays | S | now | done (2026-10-05) | Claude | PR #42, D-039. GOV.UK bank holidays for each city's nation, refreshed weekly. PH rules apply on the day |
-| SMALL-02 | Miles or kilometres setting | S | now | todo | Claude | Speeds already follow "Show speeds in" (D-051); distances don't |
+| SMALL-02 | Miles or kilometres setting | S | now | done (2026-10-06) | Claude | D-074. Distances follow the per-device "Show speeds and distances in" (D-051); one formatter, yards for short distances in miles mode |
 | SMALL-03 | Choose how often navigation speaks (every turn, hazards only, off) | S | now | done (2026-10-05) | Claude | PR #42. One button cycles them, kept on the phone. Hazards only still says arrive, get off and off route |
 | SMALL-04 | Copy the route as text, for a carer or a message | S | now | done (2026-10-05) | Claude | PR #42. "Copy the route as text" in Route in words, never the device. Keyboard focus now opens the drawer fully (WCAG 2.4.11) |
 | SMALL-05 | A high-contrast map style | S | now | done (2026-10-05) | Claude | PR #42. In the layers menu. On by itself for the low-vision device or when the phone asks for more contrast |
@@ -162,6 +162,8 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | SMALL-15 | Parks and OpenStreetMap notes: a park found by name ends at its gate, not a nearby building's door; old notes and business questions left out; "N more places a mapper flagged" | S | now | done (2026-10-05) | Claude | D-048 update. Ported from PR #36. 26 of 119 named Edinburgh parks with gates had a fitting door within 50 m |
 | SMALL-16 | Pick the 404 and offline pages' look to match the app (`404.html` is Next's default) | S | later | todo | Claude | Found doing SMALL-12 |
 | SMALL-17 | Recent places as starts in "Where are you starting from?" | S | later | todo | Claude | Found doing FEAT-20 (D-073). Today it suggests the city's start, saved places and the city's places |
+| SMALL-18 | Search results and the "Where are you starting from?" suggestions show distance in metres or km only: follow the device's miles or kilometres (D-074) | S | now | todo | Claude | Left out of SMALL-02 because FEAT-20 was changing the search flow. `metres()` in `PlaceSearch.tsx` |
+| SMALL-19 | Gusts ("up to 50 km/h") follow the device's speed unit, and say mph for people who read mph | S | later | todo | Claude | Found doing SMALL-02. Weather text in `cost.ts`, `on-route.ts`, `area-status.ts`. Heights and climbs stay in metres (D-074) |
 
 ## Security and privacy
 
@@ -306,6 +308,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 
 Newest first. One line per change: date, ID, what happened, link.
 
+- 2026-10-06: SMALL-02 done in PR #56: distances follow the per-device mph or km/h choice through one formatter, yards for short distances in miles mode (D-074). Added SMALL-18, SMALL-19. Now: SPEED-08, FEAT-03, SMALL-13, STAB-18, SMALL-18.
 - 2026-10-06: FEAT-20 done: destination first. "Where to?" alone, then From as "Your location", with location asked for only then; plain-words fallbacks ask where you're starting from (D-073). Added SMALL-17.
 - 2026-10-06: SMALL-12 done in PR #59: favicon.ico, SVG icon (follows dark mode), apple-touch-icon and manifest icons (standard and maskable), all from one mark. e2e now fails on any 4xx and checks the icons are served as images. Added SMALL-16.
 - 2026-10-06: STAB-15 done (PR #58): the e2e walk runs in 500 m batches, so arrival no longer depends on machine speed. STAB-18 joins Now.

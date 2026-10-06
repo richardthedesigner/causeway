@@ -47,12 +47,15 @@ describe("battery range (Picardy Place to the Grassmarket)", () => {
 
 describe("range wording", () => {
   it("is plain and never certain", () => {
-    expect(rangeNote({ km: 3.24, rangeKm: 12, level: "ok" })).toBeNull();
-    expect(rangeNote({ km: 7.04, rangeKm: 12, level: "over-half" })).toBe(
-      "About 7.0 km of battery, counting the climbs. That's over half your 12 km range, so you may need to charge before the way back.",
+    expect(rangeNote({ km: 3.24, rangeKm: 12, unit: "kmh", level: "ok" })).toBeNull();
+    expect(rangeNote({ km: 7.04, rangeKm: 12, unit: "kmh", level: "over-half" })).toBe(
+      "About 7 km of battery, counting the climbs. That's over half your 12 km range, so you may need to charge before the way back.",
     );
-    expect(rangeNote({ km: 14.6, rangeKm: 12, level: "over" })).toBe(
+    expect(rangeNote({ km: 14.6, rangeKm: 12, unit: "kmh", level: "over" })).toBe(
       "About 15 km of battery, counting the climbs. That's more than your 12 km range, so it may not fit on one charge.",
+    );
+    expect(rangeNote({ km: 7.04, rangeKm: 12, unit: "mph", level: "over-half" })).toBe(
+      "About 4.4 miles of battery, counting the climbs. That's over half your 7.5 miles range, so you may need to charge before the way back.",
     );
     expect(rangeNote(null)).toBeNull();
   });

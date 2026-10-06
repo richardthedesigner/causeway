@@ -1,5 +1,6 @@
 "use client";
 import { ArrowUpDown, Bus, CircleCheck, CircleHelp, CircleX, CornerRightDown, DoorOpen, Grid3x3, MoveDiagonal, Ship, TrendingUp } from "lucide-react";
+import { formatDistance, type DistanceUnit } from "@causeway/profile";
 import type { RouteStrip as Strip } from "@/lib/plan-types";
 import { cn } from "@/lib/utils";
 
@@ -37,7 +38,7 @@ function bandStyle(bin: number): React.CSSProperties {
  * pinned on it. Dashed is ground we don't know. It reads without colour:
  * every pinned thing has an icon and is listed in words for screen readers.
  */
-export function RouteStrip({ strip, along, className }: { strip: Strip; along?: number; className?: string }) {
+export function RouteStrip({ strip, along, className, unit = "kmh" }: { strip: Strip; along?: number; className?: string; unit?: DistanceUnit }) {
   const L = Math.max(1, strip.length);
   // Pins closer than 7% of the bar would overlap: keep the first (route order) and say the rest in words only.
   const shown: Strip["marks"] = [];
@@ -51,7 +52,7 @@ export function RouteStrip({ strip, along, className }: { strip: Strip; along?: 
   const words = [
     steepest >= 0 ? `Steepest part ${BAND_WORDS[steepest]}` : null,
     ...strip.marks.map((m) => m.text),
-    unknown >= 10 ? `${Math.round(unknown / 10) * 10} m we don't have full data for` : null,
+    unknown >= 10 ? `${formatDistance(unknown, unit)} we don't have full data for` : null,
   ].filter(Boolean);
   const me = along === undefined ? null : stripAt(strip, along) / L;
 

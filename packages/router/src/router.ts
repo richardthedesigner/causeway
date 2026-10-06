@@ -4,7 +4,7 @@
  * to be the reference the chosen engine is tested against (DECISIONS.md D-003).
  */
 import { confidence, haversine, isKnown, type Graph, type GraphEdge, type GraphNode, type NoteSignal } from "@causeway/graph";
-import type { Profile } from "@causeway/profile";
+import { distanceUnit, formatDistance, type DistanceUnit, type Profile } from "@causeway/profile";
 import { levelAccessAdvice } from "./boarding.js";
 import { baseSpeed, darkCost, DRY, entranceVerdict, evaluateEdge, evaluateNode, needsStepFree, surfaceLabel, type Conditions, type EdgeContext, type EntranceVerdict, type Evaluation, type Reason } from "./cost.js";
 
@@ -440,6 +440,8 @@ export interface RangeUse {
   /** Battery use as km on the flat: distance plus the climbs. */
   km: number;
   rangeKm: number;
+  /** How this person reads distances (D-074). */
+  unit: DistanceUnit;
   /** Over the whole range, or over half of it (so the way back needs a charge). */
   level: "over" | "over-half" | "ok";
 }
@@ -450,16 +452,17 @@ export function rangeUse(r: Route, p: Profile, now: Date = DRY.now): RangeUse | 
   if (!rangeKm || rangeKm <= 0) return null;
   const s = summarise(r, now);
   const km = (s.walkM + s.ascentM * CLIMB_FLAT_EQUIVALENT_M) / 1000;
-  return { km, rangeKm, level: km > rangeKm ? "over" : km > rangeKm / 2 ? "over-half" : "ok" };
+  return { km, rangeKm, unit: distanceUnit(p), level: km > rangeKm ? "over" : km > rangeKm / 2 ? "over-half" : "ok" };
 }
 
 /** Plain-English range note, or null when there's nothing to say. */
 export function rangeNote(u: RangeUse | null): string | null {
   if (!u || u.level === "ok") return null;
-  const km = `About ${u.km < 10 ? u.km.toFixed(1) : Math.round(u.km)} km of battery, counting the climbs.`;
+  const used = `About ${formatDistance(u.km * 1000, u.unit)} of battery, counting the climbs.`;
+  const range = formatDistance(u.rangeKm * 1000, u.unit);
   return u.level === "over"
-    ? `${km} That's more than your ${u.rangeKm} km range, so it may not fit on one charge.`
-    : `${km} That's over half your ${u.rangeKm} km range, so you may need to charge before the way back.`;
+    ? `${used} That's more than your ${range} range, so it may not fit on one charge.`
+    : `${used} That's over half your ${range} range, so you may need to charge before the way back.`;
 }
 
 export function summarise(r: Route, now: Date = DRY.now): RouteSummary {
@@ -643,12 +646,13 @@ export function explain(router: Router, chosen: Route, from: GraphNode, to: Grap
     const live = router.graph.meta.liveFeeds?.some((f) => f.endsWith("lifts"));
     notes.push(`Uses ${sum.lifts === 1 ? "a lift" : `${sum.lifts} lifts`}.${live ? "" : " We have no live lift status here, so check before you set off."}`);
   }
+  const dist = (m: number, precise = false) => formatDistance(m, distanceUnit(p), { precise });
   if (p.maxRestIntervalM) {
     const rs = restStats(router.graph, chosen);
     notes.push(
       rs.longestWithoutBenchM <= p.maxRestIntervalM
-        ? `A mapped bench at least every ${p.maxRestIntervalM} m (${rs.benches} along the way).`
-        : `Longest stretch without a mapped bench: ${Math.round(rs.longestWithoutBenchM / 10) * 10} m (you asked for ${p.maxRestIntervalM} m). Not every bench is mapped.`,
+        ? `A mapped bench at least every ${dist(p.maxRestIntervalM)} (${rs.benches} along the way).`
+        : `Longest stretch without a mapped bench: ${dist(rs.longestWithoutBenchM)} (you asked for ${dist(p.maxRestIntervalM)}). Not every bench is mapped.`,
     );
   }
   if (p.maxToiletIntervalM) {
@@ -660,7 +664,7 @@ export function explain(router: Router, chosen: Route, from: GraphNode, to: Grap
     notes.push(`Crosses ${b.name}, a ${verb} bridge. It closes for a few minutes while it moves for boats. We don't have its timetable yet.`);
   }
   const setts = (sum.surfaceMix["setts"] ?? 0) + (sum.surfaceMix["cobbles"] ?? 0);
-  if (setts > 20) notes.push(`${setts} m on setts or cobbles.`);
+  if (setts > 20) notes.push(`${dist(setts, true)} on setts or cobbles.`);
   if (c.dark && p.litAfterDarkPer100mS) {
     let unlit = 0,
       unmapped = 0;
@@ -670,14 +674,14 @@ export function explain(router: Router, chosen: Route, from: GraphNode, to: Grap
       else if (r) unmapped += s.edge.lengthM;
     }
     const [u, m] = [Math.round(unlit / 10) * 10, Math.round(unmapped / 10) * 10];
-    if (u || m) notes.push(`After dark: ${u ? `${u} m isn't lit` : "no stretch is mapped as unlit"}${m ? `, and lighting isn't mapped for ${m} m` : ""}.`);
+    if (u || m) notes.push(`After dark: ${u ? `${dist(u)} isn't lit` : "no stretch is mapped as unlit"}${m ? `, and lighting isn't mapped for ${dist(m)}` : ""}.`);
     else notes.push("After dark: every stretch of this route is mapped as lit.");
   }
   if (sum.worstInclinePct !== null && Math.abs(sum.worstInclinePct) >= p.comfortInclinePct)
     notes.push(`Steepest part ${Math.abs(sum.worstInclinePct)}% ${sum.worstInclinePct > 0 ? "uphill" : "downhill"}${sum.worstInclineAt ? ` on ${sum.worstInclineAt}` : ""}.`);
   const range = rangeNote(rangeUse(chosen, p, c.now));
   if (range) notes.push(range);
-  if (sum.unknownM > 0) notes.push(`${sum.unknownM} m where we don't have full data, shown dashed on the map.`);
+  if (sum.unknownM > 0) notes.push(`${dist(sum.unknownM, true)} where we don't have full data, shown dashed on the map.`);
 
   const top = avoided.filter((a) => a.reason.kind === "excluded").slice(0, 2);
   const penalties = avoided.filter((a) => a.reason.kind === "penalty").slice(0, 1);
@@ -712,7 +716,7 @@ export function describeSegments(r: Route, p?: Profile): string[] {
   const out: string[] = [];
   let walk: Step[] = [];
   const flush = () => {
-    if (walk.length) out.push(...describeWalk({ steps: walk, cost: 0, seconds: 0, lengthM: 0 }));
+    if (walk.length) out.push(...describeWalk({ steps: walk, cost: 0, seconds: 0, lengthM: 0 }, p ? distanceUnit(p) : "kmh"));
     walk = [];
   };
   const rides = ridesOf(r);
@@ -741,7 +745,7 @@ export function describeSegments(r: Route, p?: Profile): string[] {
   return out;
 }
 
-function describeWalk(r: Route): string[] {
+function describeWalk(r: Route, unit: DistanceUnit): string[] {
   type Seg = { name: string; kind: string; m: number; rise: number; surface: string | null; unknown: boolean };
   const segs: Seg[] = [];
   for (const s of r.steps) {
@@ -765,7 +769,7 @@ function describeWalk(r: Route): string[] {
       if (s.kind === "crossing") return `Cross ${s.name === "path" ? "the road" : s.name}.`;
       const g = s.m > 0 ? (s.rise / s.m) * 100 : 0;
       const slope = Math.abs(g) < 2 ? "level" : `${g > 0 ? "uphill" : "downhill"} about ${Math.abs(g).toFixed(0)}%`;
-      const bits = [`${s.name === "path" ? "Path" : s.name}, ${Math.round(s.m)} m`, slope];
+      const bits = [`${s.name === "path" ? "Path" : s.name}, ${formatDistance(s.m, unit, { precise: true })}`, slope];
       if (s.surface) bits.push(s.surface);
       if (s.unknown) bits.push("some details unknown");
       return bits.join(", ") + ".";
@@ -801,6 +805,7 @@ export interface Tradeoff {
  * cost on the chosen route, make it hard and see what that costs.
  */
 export function tradeoffs(router: Router, chosen: Route, from: GraphNode, to: GraphNode, p: Profile, c: Conditions = DRY): Tradeoff[] {
+  const dist = (m: number) => formatDistance(m, distanceUnit(p));
   const sum = summarise(chosen, c.now);
   const out: Tradeoff[] = [];
   const mins = (r: Route) => Math.max(0, Math.round((r.seconds - chosen.seconds) / 60));
@@ -852,8 +857,8 @@ export function tradeoffs(router: Router, chosen: Route, from: GraphNode, to: Gr
         message: !best
           ? `No way there has mapped benches closer together than this. Not every bench is mapped.`
           : best.gap <= p.maxRestIntervalM
-            ? `A mapped bench at least every ${p.maxRestIntervalM} m. Adds ${mins(best.r)} min.`
-            : `Longest stretch without a bench ${Math.round(best.gap / 10) * 10} m instead of ${Math.round(gap / 10) * 10} m. Adds ${mins(best.r)} min.`,
+            ? `A mapped bench at least every ${dist(p.maxRestIntervalM)}. Adds ${mins(best.r)} min.`
+            : `Longest stretch without a bench ${dist(best.gap)} instead of ${dist(gap)}. Adds ${mins(best.r)} min.`,
       });
     }
   }
@@ -876,8 +881,8 @@ export function tradeoffs(router: Router, chosen: Route, from: GraphNode, to: Gr
         message: !best
           ? "No way there passes mapped accessible toilets closer together than this. Not every toilet is mapped."
           : best.gap <= p.maxToiletIntervalM
-            ? `An accessible toilet at least every ${p.maxToiletIntervalM >= 1000 ? `${p.maxToiletIntervalM / 1000} km` : `${p.maxToiletIntervalM} m`}. Adds ${mins(best.r)} min.`
-            : `Longest stretch without one ${Math.round(best.gap / 10) * 10} m instead of ${Math.round(gap / 10) * 10} m. Adds ${mins(best.r)} min.`,
+            ? `An accessible toilet at least every ${dist(p.maxToiletIntervalM)}. Adds ${mins(best.r)} min.`
+            : `Longest stretch without one ${dist(best.gap)} instead of ${dist(gap)}. Adds ${mins(best.r)} min.`,
       });
     }
   }
@@ -885,7 +890,7 @@ export function tradeoffs(router: Router, chosen: Route, from: GraphNode, to: Gr
     const r = router.route(from, to, { ...p, uncertaintyTolerance: 0 }, c);
     const unknownM = r ? summarise(r, c.now).unknownM : Infinity;
     if (r && unknownM < sum.unknownM - 20) {
-      out.push({ id: "more-certain", label: "Fewer unknowns", route: r, message: `${unknownM} m unknown instead of ${sum.unknownM} m. Adds ${mins(r)} min.` });
+      out.push({ id: "more-certain", label: "Fewer unknowns", route: r, message: `${dist(unknownM)} unknown instead of ${dist(sum.unknownM)}. Adds ${mins(r)} min.` });
     }
   }
   return out;

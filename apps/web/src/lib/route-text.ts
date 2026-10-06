@@ -3,12 +3,13 @@
  * (SMALL-04). What the route is like and the directions in words. Never the
  * device or its limits: those stay on the phone (D-009).
  */
+import { formatDistance, type DistanceUnit } from "@causeway/profile";
 import type { PlannedRoute } from "./plan-types";
 
-const km = (m: number) => (m < 1000 ? `${Math.round(m / 10) * 10} m` : `${(m / 1000).toFixed(1)} km`);
 const DAY = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", day: "numeric", month: "short", year: "numeric" });
 
-export function routeText(from: { name: string }, to: { name: string }, r: Pick<PlannedRoute, "summary" | "segments" | "unknowns">, when = new Date()): string {
+export function routeText(from: { name: string }, to: { name: string }, r: Pick<PlannedRoute, "summary" | "segments" | "unknowns">, unit: DistanceUnit = "kmh", when = new Date()): string {
+  const km = (m: number) => formatDistance(m, unit);
   const s = r.summary;
   const facts = [`About ${s.minutes} min, ${km(s.distanceM)}.`];
   if (s.worstInclinePct !== null) facts.push(`Steepest ${Math.abs(s.worstInclinePct)}%${s.worstInclineAt ? ` on ${s.worstInclineAt}` : ""}.`);

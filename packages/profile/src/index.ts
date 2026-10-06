@@ -119,6 +119,55 @@ export function formatSpeed(mps: number, unit: SpeedUnit, long = false): string 
   const n = Number.isInteger(Math.round(v * 10) / 10) ? String(Math.round(v)) : (Math.round(v * 10) / 10).toFixed(1);
   return `${n} ${unit === "mph" ? (long ? "miles per hour" : "mph") : long ? "kilometres per hour" : "km/h"}`;
 }
+
+/** Distances follow the same per-device choice as speeds (D-074): mph means miles and yards, km/h means kilometres and metres. */
+export type DistanceUnit = SpeedUnit;
+export const distanceUnit = (p: Pick<Profile, "preset" | "speedUnit">): DistanceUnit => speedUnit(p);
+export const M_PER_MILE = 1609.344;
+export const M_PER_YARD = 0.9144;
+/** In miles mode, under this many yards a distance is said in yards (a quarter of a mile). */
+export const YARDS_BELOW = 440;
+export interface FormatDistanceOptions {
+  /** For screen readers and speech: "50 metres", "0.4 miles". */
+  long?: boolean;
+  /** Round short distances to the whole metre or yard, not the nearest 10. */
+  precise?: boolean;
+}
+const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
+/**
+ * One formatter for every distance shown or spoken (SMALL-02).
+ * Kilometres mode: metres under 1 km ("50 m"), else "1.2 km".
+ * Miles mode: yards under a quarter of a mile ("120 yd"), else "0.4 miles", "1 mile", "12 miles".
+ */
+export function formatDistance(m: number, unit: DistanceUnit, opts: FormatDistanceOptions = {}): string {
+  const { long = false, precise = false } = opts;
+  const step = precise ? 1 : 10;
+  const short = (n: number, s: string, l: string) => {
+    const v = n > 0 ? Math.max(step, Math.round(n / step) * step) : 0;
+    return `${v} ${long ? plural(v, l, `${l}s`) : s}`;
+  };
+  const big = (n: number, s: string, l: string, ls: string) => {
+    const v = n < 10 ? Math.round(n * 10) / 10 : Math.round(n);
+    return `${v} ${long ? (v === 1 ? l : ls) : s}`;
+  };
+  if (!(m > 0)) return short(0, unit === "mph" ? "yd" : "m", unit === "mph" ? "yard" : "metre");
+  if (unit === "mph") {
+    const yards = m / M_PER_YARD;
+    if (yards < YARDS_BELOW) return short(yards, "yd", "yard");
+    return big(m / M_PER_MILE, "miles", "mile", "miles").replace(/^1 miles$/, "1 mile");
+  }
+  if (Math.round(m / step) * step < 1000) return short(m, "m", "metre");
+  return big(m / 1000, "km", "kilometre", "kilometres");
+}
+/** Spoken text from a short one: "for 30 m" is said "for 30 metres" and "120 yd" "120 yards". */
+export const speakableDistances = (text: string): string =>
+  text.replace(/(\d(?:\.\d)?) (m|yd|km)\b/g, (_, n: string, u: string) => {
+    const one = Number(n) === 1;
+    return `${n} ${u === "m" ? (one ? "metre" : "metres") : u === "yd" ? (one ? "yard" : "yards") : one ? "kilometre" : "kilometres"}`;
+  });
+/** Battery range is kept in km. Shown in whole miles in miles mode. */
+export const rangeInUnit = (km: number, unit: DistanceUnit): number => (unit === "mph" ? Math.round((km * 1000) / M_PER_MILE) : km);
+export const rangeToKm = (shown: number, unit: DistanceUnit): number => (unit === "mph" ? Math.round(((shown * M_PER_MILE) / 1000) * 10) / 10 : shown);
 /** Road speed choices for a road-legal scooter, in mph: below the 4 mph pavement limit the road isn't worth it; 8 mph is the class 3 legal top speed. */
 export const ROAD_MPH_MIN = 4;
 export const ROAD_MPH_MAX = 8;
