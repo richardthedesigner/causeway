@@ -38,7 +38,7 @@ select pg_temp.check((select count(*) = 2 from note_flag where note_id = '111111
 update note set status = 'visible' where id = '11111111-0000-0000-0000-000000000001';
 update note set photo_status = 'approved' where id = '11111111-0000-0000-0000-000000000002';
 select pg_temp.check((select count(*) = 1 from note_public where id = '11111111-0000-0000-0000-000000000001'), 'a note put back is visible again');
-select pg_temp.check((select photo_path = 'a/2.jpg' from note_public where id = '11111111-0000-0000-0000-000000000002'), 'an approved photo shows in the public view');
+select pg_temp.check((select photo_path = 'aaaaaaaa-0000-0000-0000-000000000001/11111111-0000-0000-0000-000000000002.jpg' from note_public where id = '11111111-0000-0000-0000-000000000002'), 'an approved photo shows in the public view');
 do $$ begin
   update note set body = 'rewritten' where id = '11111111-0000-0000-0000-000000000002';
   raise exception 'FAILED: reviewer rewrote a note';

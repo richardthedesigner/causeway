@@ -2,7 +2,7 @@
 
 What's outstanding on Causewayside: things waiting on Richard, things blocked outside the project, and guesses to check with users. Keep this up to date: add an item when it comes up, and move it to "Done" with the date when it's settled. Details live in the linked issue or decision. The order of work is in [ROADMAP.md](ROADMAP.md).
 
-Last updated: 2026-10-06.
+Last updated: 2026-10-07.
 
 ## Waiting on Richard
 
@@ -47,7 +47,7 @@ These numbers shape routes but are our estimates, not evidence.
 
 ## Known gaps
 
-- There is no Causeway Supabase project yet. When one is made, run db/migrations 0001 to 0007 in order. SEC-16 is merged, so this is now safe.
+- There is no Causeway Supabase project yet. When one is made, run db/migrations 0001 to 0008 in order. SEC-16 is merged, so this is now safe. 0008 (SEC-17) makes the server set note and report fields the client used to choose.
 - The profile has a gap limit for boarding trains (`maxGapMm`), but no setting in the app: everyone gets TfL's 85 mm level band. Add a setting once research says people want one ([D-068](DECISIONS.md#d-068-boarding-the-train-against-each-persons-limits)).
 - TfL's level-access doors are in the spoken route only, not on the visual route card ([D-068](DECISIONS.md#d-068-boarding-the-train-against-each-persons-limits)).
 - When someone deletes everything, a photo a reviewer had approved stays in the public bucket (hidden, as its note is gone) until a reviewer removes it. Worth a weekly clean-up step for the reviewer, or a server job, once sharing is on ([D-059](DECISIONS.md#d-059-your-data-a-copy-and-delete-everything)).
