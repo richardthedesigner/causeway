@@ -1,13 +1,15 @@
 /**
  * Base map: a Protomaps vector extract per city (scripts/basemap-extract.py),
- * loaded whole into memory, so it works offline and inside the preview host,
- * styled with Causewayside's own palette. Fonts are bundled the same way.
+ * read in byte ranges so the map draws before the whole file has arrived, then
+ * filled in whole in the background so it works offline (D-079). Styled with
+ * Causewayside's own palette. Fonts are bundled glyphs.
  * Map data © OpenStreetMap contributors; schema and layer logic Protomaps (BSD-3).
  */
 import { layers, namedFlavor, type Flavor } from "@protomaps/basemaps";
 import * as maplibregl from "maplibre-gl";
 import type { LayerSpecification } from "maplibre-gl";
-import { PMTiles, Protocol, type RangeResponse, type Source } from "pmtiles";
+import { PMTiles, Protocol } from "pmtiles";
+import { RangeSource } from "./basemap-source";
 import { HIGH_CONTRAST } from "./map-contrast";
 
 /** Recolour a Protomaps flavour to our tokens: warm-neutral ground, soft water, quiet roads, ink labels. */
@@ -66,16 +68,6 @@ export function basemapLayers(dark: boolean, highContrast = false): LayerSpecifi
   return (layers("basemap", causewaysideFlavor(dark, highContrast), { lang: "en" }) as LayerSpecification[]).filter((l) => l.id !== "pois");
 }
 
-class BufferSource implements Source {
-  constructor(private readonly buf: ArrayBuffer, private readonly key: string) {}
-  getKey() {
-    return this.key;
-  }
-  async getBytes(offset: number, length: number): Promise<RangeResponse> {
-    return { data: this.buf.slice(offset, offset + length) };
-  }
-}
-
 const protocol = new Protocol();
 let registered = false;
 let glyphs: Promise<Record<string, string>> | null = null;
@@ -98,13 +90,34 @@ export function registerProtocols(glyphsUrl: string) {
   });
 }
 
-/** Fetch a city's basemap (a .pmtiles file, or base64 text on hosts that won't serve binary) and make it available as pmtiles://<key>. */
+const sources = new Map<string, RangeSource>();
+
+/**
+ * Make a city's basemap available as pmtiles://<key>, reading it in ranges (D-079). Resolves
+ * once its header has arrived, so a missing file still fails here. On hosts that won't serve
+ * binary the file is base64 text, which can only be fetched whole.
+ */
 export async function loadBasemap(url: string, key: string): Promise<string> {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`basemap: HTTP ${res.status}`);
-  const buf = url.endsWith(".b64.txt") ? b64ToBuf(await res.text()) : await res.arrayBuffer();
-  protocol.add(new PMTiles(new BufferSource(buf, key)));
+  let source = sources.get(key);
+  if (!source) {
+    if (url.endsWith(".b64.txt")) {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`basemap: HTTP ${res.status}`);
+      source = new RangeSource(url, key, b64ToBuf(await res.text()));
+    } else source = new RangeSource(url, key);
+    const pm = new PMTiles(source);
+    await pm.getHeader();
+    sources.set(key, source);
+    protocol.add(pm);
+  }
   return `pmtiles://${key}`;
+}
+
+/** Fetch the rest of a city's basemap in the background, once the map in view has drawn, so it works offline. */
+export function fillBasemap(key: string) {
+  sources.get(key)?.fill().catch(() => {
+    /* Tried again next time the map settles; the ranges already read keep working. */
+  });
 }
 
 export const GLYPHS = "causeway-glyphs://{fontstack}/{range}.pbf";

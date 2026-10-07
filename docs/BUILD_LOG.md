@@ -10,7 +10,33 @@ SPEED-10, PR #69.
 - `Router.alternatives` shares one edge and node cost memo across its searches: the same routes and settled counts, about a third faster.
 - Edinburgh, Fast 4G with 4x CPU: 5.55 s to 2.99 s (target 3 s). Newcastle 1.80 to 1.63 s, London 1.95 to 1.62 s. Numbers: `docs/perf/2026-10-07-speed-10.md`.
 - SPEED-08's 0.3 to 0.7 s slowdown: the base map is still loading tiles and repainting when the route is asked for, and the network re-send competed with it. All three cities are now at or under their SPEED-01 times.
-- Found: routing is now most of the wait (SPEED-14); the route request waits about 1 s for the phone's position (SPEED-15). The speed budget baseline is now about a third loose; SPEED-14 re-baselines it.
+- Found: routing is now most of the wait (SPEED-15); the route request waits about 1 s for the phone's position (SPEED-16). The speed budget baseline is now about a third loose; SPEED-15 re-baselines it.
+
+## 2026-10-07 (the base map in ranges)
+
+SPEED-09 (D-079), PR #70.
+- The base map is read in byte ranges: header, directories and the tiles in view. 234 to 430 KB of it downloads before the map draws, against 2.3 to 8.8 MB.
+- Once the map has drawn and settled, the whole file downloads in the background. The service worker caches it, and answers range reads from it with the network off. Checked in Chromium: offline reload, map drawn, every range a `206` from the service worker.
+- Falls back to the whole file when a host ignores Range, a range read fails, or on the base64 preview host. Vercel serves ranges with a strong ETag (checked on production).
+- Map drawn on Fast 4G with 4x CPU: Edinburgh 26.9 s to 20.0 s, London 14.9 s to 9.9 s, Newcastle 11.3 s to 10.7 s. Edinburgh's remaining wait is main-thread work after the search index (SPEED-14).
+- `perf:web` and the e2e server now serve byte ranges like Vercel, and `perf:web` prints what had downloaded when the map drew. Numbers and raw runs: `docs/perf/2026-10-07-speed-09.md`.
+- Tests: `apps/web/test/basemap-source.test.ts`.
+- Checks: typecheck, unit tests, web typecheck, build, e2e and a11y pass. Offline checked by hand in Chromium, as above.
+
+## 2026-10-07 (saved places above the sheet)
+
+SMALL-20 (D-081), PR #71.
+- On a phone, saved place markers that sat under the half-open sheet are now framed above it, once when they load and again when the base map swaps in. Reduced motion makes it instant. Wide screens are unchanged.
+- `pnpm e2e` has a third saved place about 1.1 km south of the city's start and checks that every marker's centre is a tap on the marker, not the sheet. It fails without the change.
+- Chose framing over a list on the home sheet: one small effect, no new copy, and it fixes the marker itself (D-081).
+
+## 2026-10-07 (another way, wrapped)
+
+STAB-22, PR #73.
+- The title beside each alternative route had a zero flex basis in a wrapping row, so at 320 px with 200% text it shrank to nothing and "Another" spilled out. It now has a basis of 9rem, wraps onto its own line and breaks long words.
+- The route panel was 50 px wider than its box before; it is 0 now.
+- The a11y check measures the route panel's sideways scroll at 200% text and fails if it is above zero. The two keyboard workarounds for "Report what's there" are gone.
+- Checks: a11y passes. The check fails without the fix (50 px).
 
 ## 2026-10-07 (server fields)
 
