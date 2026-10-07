@@ -51,11 +51,10 @@ The current direction: **fix and fill the pilot cities** with open data that nee
 
 The next five things to pick up, in order.
 
-1. **STAB-22**: at 320 px with 200% text, "Another way" spills out and the route panel can scroll sideways.
-2. **SPEED-10**: cut the main-thread work after a route returns.
-3. **SEC-17**: the server sets the fields the client shouldn't.
-4. **SMALL-20**: pan the map so a saved place under the half-open sheet can be tapped.
-5. **SPEED-09**: read the base map in byte ranges, so the map draws sooner now that it loads last.
+1. **SPEED-10**: cut the main-thread work after a route returns.
+2. **SEC-17**: the server sets the fields the client shouldn't.
+3. **SMALL-20**: pan the map so a saved place under the half-open sheet can be tapped.
+4. **SPEED-09**: read the base map in byte ranges, so the map draws sooner now that it loads last.
 
 The rest of the pilot-city data (DATA-12 to DATA-20) is blocked on access, licences or keys. Research (RES) needs Richard and testers.
 
@@ -221,7 +220,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | STAB-19 | Toilet labels ("WC") stack on top of each other along a route, unreadable at the zoom the route fits to | S | later | todo | Claude | Found doing STAB-02 (`navigation.*.phone.png`). Hide or cluster labels that collide |
 | STAB-20 | Screenshot baselines are Linux Chromium only; refresh them once after UPD-03 and UPD-04 (Next.js and Node) land, and whenever Playwright's Chromium changes | S | later | todo | Claude | STAB-02. `pnpm screenshots --update`, then look at the diffs |
 | STAB-21 | `pnpm e2e` fails on any 4xx, including from outside services (an Open-Meteo 429 failed a run during FEAT-20). Fail only on the app's own requests; log outside ones | S | now | done (2026-10-06) | Claude | PR #63. Outside 4xx and 5xx print as `WARN` lines. Found reviewing FEAT-20. Added by SMALL-12 |
-| STAB-22 | At 320 px with 200% text, an alternative route's title ("Another way") spills out of its box, so the route panel is 17 px wider than its box and can scroll sideways, pushing the From and To bars off screen | S | next | doing (2026-10-07, claude/stab-22-another-way-overflow) | Claude | Found doing FEAT-03: before STAB-18 a click in the panel scrolled it. Still 335 px of content in 318 after STAB-18. The a11y check opens "Report what's there" by keyboard to stay clear of it |
+| STAB-22 | At 320 px with 200% text, an alternative route's title ("Another way") spills out of its box, so the route panel is 17 px wider than its box and can scroll sideways, pushing the From and To bars off screen | S | next | done (2026-10-07) | Claude | Found doing FEAT-03: before STAB-18 a click in the panel scrolled it. Still 335 px of content in 318 after STAB-18. Fixed in PR #73: the title item had a zero flex basis so it shrank to nothing; it now wraps. The a11y check fails if the route panel scrolls sideways, and opens "Report what's there" by click again |
 | STAB-17 | The sheet trapped keyboard focus and hid the map from screen readers: Tab never reached the city, layers or location buttons | S | now | done (2026-10-05) | Claude | D-069. Found doing STAB-13. vaul 1.1.2 never passed `modal={false}` on, so a `pnpm patch` does; Radix also looped Tab inside the sheet. The map menus open above the sheet, take focus and give it back. `pnpm a11y` checks it |
 | STAB-08 | Offline test: load a city, cut the network, route | S | now | done (2026-10-05) | Claude | PR #42, with SMALL-06. `pnpm e2e` loads Edinburgh, cuts the network and routes. A reload offline (the service worker) isn't covered |
 
@@ -313,6 +312,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 ## Log
 
 Newest first. One line per change: date, ID, what happened, link.
+- 2026-10-07: STAB-22 done in PR #73: alternative route titles wrap at 320 px with 200% text, so the route panel no longer scrolls sideways (50 px over before, 0 now). The a11y check fails if it does.
 - 2026-10-06: SPEED-08 done in PR #67: the graph and the files that join it download first and together, then the search index, then the base map (D-077). Edinburgh "Where to?" 13.9 s to 8.8 s on Fast 4G with 4x CPU ([numbers](perf/2026-10-06-speed-08.md)); 6 s not reached. Newcastle and London no longer download Edinburgh's search index. The map draws later. Added SPEED-13. Now: SPEED-09 replaces SPEED-08.
 - 2026-10-06: FEAT-03 done in PR #65: "Report what's there" under each street in "What we don't know", one question per gap, kept on the phone and in Your data (D-076). Added STAB-22, SMALL-22. Now: SPEED-08, STAB-22, SPEED-10, SEC-17, SMALL-20.
 - 2026-10-06: SMALL-13 done in PR #68: saved places are labelled buttons on the map with "Go here" and "Start from here" (D-075); `pnpm e2e` covers them by keyboard and as a start. Added SMALL-20, SMALL-21.
