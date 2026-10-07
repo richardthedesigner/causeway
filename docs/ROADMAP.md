@@ -51,11 +51,11 @@ The current direction: **fix and fill the pilot cities** with open data that nee
 
 The next five things to pick up, in order.
 
-1. **SPEED-10**: cut the main-thread work after a route returns.
-2. **SEC-17**: the server sets the fields the client shouldn't.
-3. **SMALL-20**: pan the map so a saved place under the half-open sheet can be tapped.
-4. **SPEED-13**: start the graph download before the page hydrates, so "Where to?" comes sooner.
-5. **SPEED-14**: draw Edinburgh's map sooner after the search index, now that the base map's download is small.
+1. **SPEED-14**: draw Edinburgh's map sooner after the search index, now that the base map's download is small.
+2. **SPEED-13**: start the graph download before the page hydrates, so "Where to?" comes sooner.
+3. **SPEED-15**: faster route searches, now most of the wait for a route.
+4. **SPEED-11**: trim JavaScript, and load later what the first screen doesn't need.
+5. **SPEED-12**: measure on a real mid-range Android and a real CDN.
 
 The rest of the pilot-city data (DATA-12 to DATA-20) is blocked on access, licences or keys. Research (RES) needs Richard and testers.
 
@@ -238,11 +238,13 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | SPEED-07 | Speed budget follow-ups: a CI wall-time baseline from a few weeks of printed figures, and a re-baseline when the weekly refresh changes the graphs | S | later | todo | Claude | D-056. Settled nodes depend on the graph, so a refresh PR can trip the 10% check |
 | SPEED-08 | Load the graph and search index before the base map, so "Where to?" doesn't wait for tiles | S | now | done (2026-10-06) | Claude | SPEED-01. D-077, [numbers](perf/2026-10-06-speed-08.md). Edinburgh ready 12.9 s to 7.6 s (LCP 13.9 s to 8.8 s) on Fast 4G with 4x CPU; 6 s missed, see SPEED-13 and SPEED-06. The map now draws later (SPEED-09) |
 | SPEED-09 | Read the base map in byte ranges, not whole, and fill the rest in the background for offline | M | next | done (2026-10-07) | Claude | SPEED-01. D-079, [numbers](perf/2026-10-07-speed-09.md). 234 to 430 KB of base map before the map draws (was 2.3 to 8.8 MB). Map drawn: Edinburgh 26.9 s to 20.0 s, London 14.9 s to 9.9 s, Newcastle 11.3 s to 10.7 s, on Fast 4G with 4x CPU. Works offline as before |
-| SPEED-14 | Draw Edinburgh's map sooner after the search index: the main thread is busy for about 10 s first | M | next | todo | Claude | SPEED-09. After the index lands: about 4.5 s building it, about 2.3 s posting the footway network to MapLibre's worker (`MapView` re-sends it on every redraw, see SPEED-10), React and style layers. Profile first. Target: Edinburgh map drawn in 12 s or less |
-| SPEED-10 | Cut the main-thread work after a route returns | S | next | todo | Claude | SPEED-01. Edinburgh 5.4 s at 4x against 3.4 s on desktop. Target 3 s or less. Trace first. After SPEED-08 it is 0.3 to 0.7 s slower in every city with the router unchanged, probably the base map still drawing; check that too |
+| SPEED-14 | Draw Edinburgh's map sooner after the search index: the main thread is busy for about 10 s first | M | next | todo | Claude | SPEED-09. After the index lands: about 4.5 s building it, about 2.3 s posting the footway network to MapLibre's worker (SPEED-10 stopped the re-sends on every redraw; measure what is left), React and style layers. Profile first. Target: Edinburgh map drawn in 12 s or less |
+| SPEED-10 | Cut the main-thread work after a route returns | S | next | done (2026-10-07) | Claude | SPEED-01. [Numbers](perf/2026-10-07-speed-10.md). Edinburgh 5.55 s to 2.99 s on Fast 4G with 4x CPU, Newcastle 1.80 to 1.63 s, London 1.95 to 1.62 s. On `main` after SPEED-09: Edinburgh 6.20 to 3.10 s (0.1 s over target), and the map draws 0.9 to 2.9 s sooner. The map sent the whole network to MapLibre again on every journey change; `alternatives` costed each edge once per search. SPEED-08's slowdown was the base map still loading during the wait. `perf:web --trace` |
 | SPEED-11 | Trim JavaScript: see what is in the 650 to 680 KB and load later what the first screen doesn't need | M | later | todo | Claude | SPEED-01. MapLibre is the largest chunk. Pairs with SPEED-04 |
 | SPEED-12 | Measure on a real mid-range Android and a real CDN, plus repeat visits and city switching | S | next | todo | Richard and Claude | SPEED-01 limits: unslowed worker, software GPU, local server. Needs a phone or WebPageTest |
 | SPEED-13 | Start the graph download before the page hydrates (it starts at 2.1 s in Edinburgh), and hand it to the router worker | M | next | todo | Claude | SPEED-08. The rest of the way to 6 s with SPEED-06: after it, Edinburgh's worker spends 1.6 s (unslowed) on the graph. Check the service worker (D-023) still caches it |
+| SPEED-15 | Faster route searches: arrays in place of maps in the A*, and fewer searches in `explain` and the trade-offs. Then re-baseline the speed budget (PERF_BASELINE), which SPEED-10 left about a third loose | M | next | todo | Claude | SPEED-10. Routing is now about 1.5 s of Edinburgh's 3 s wait, unslowed, so more on a phone |
+| SPEED-16 | The route request waits about 1 s after choosing a destination, for the phone's position on a main thread busy repainting the map | S | later | todo | Claude | SPEED-10. Check whether the position callback or the map frames are the cost on a real phone (SPEED-12) first |
 
 ## Bloat reduction
 
@@ -314,6 +316,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 ## Log
 
 Newest first. One line per change: date, ID, what happened, link.
+- 2026-10-07: SPEED-10 done in PR #69: destination to route in Edinburgh 5.55 s to 2.99 s on Fast 4G with 4x CPU ([numbers](perf/2026-10-07-speed-10.md)); Newcastle and London 0.2 to 0.3 s quicker. On `main` after SPEED-09, Edinburgh 6.20 to 3.10 s, and Edinburgh's map draws 2.9 s sooner. The map no longer sends the whole network to MapLibre on every journey change, and `alternatives` costs each edge once. `perf:web --trace` added. Added SPEED-15, SPEED-16. Now: SPEED-15, SPEED-11 and SPEED-12 replace SPEED-10, SEC-17 and SMALL-20, which are done.
 - 2026-10-07: SPEED-09 done in PR #70: the base map is read in byte ranges and filled in whole in the background for offline (D-079). 234 to 430 KB of it before the map draws; Edinburgh's map 26.9 s to 20.0 s, London's 14.9 s to 9.9 s on Fast 4G with 4x CPU ([numbers](perf/2026-10-07-speed-09.md)). Vercel serves ranges, nothing to change there. Added SPEED-14. Now: SPEED-13 and SPEED-14 join, SPEED-09 leaves.
 - 2026-10-07: SMALL-20 done in PR #71: on a phone the map frames saved places above the half-open sheet, so a finger can reach every marker (D-081). `pnpm e2e` checks it.
 - 2026-10-07: STAB-22 done in PR #73: alternative route titles wrap at 320 px with 200% text, so the route panel no longer scrolls sideways (50 px over before, 0 now). The a11y check fails if it does.

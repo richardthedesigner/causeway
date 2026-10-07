@@ -30,6 +30,12 @@ export interface Route {
   lengthM: number;
 }
 
+/** Edge costs keyed by edge id and direction, node costs by node id and whether it was reached by a crossing. Valid for one profile and one set of conditions. */
+export interface CostMemo {
+  edges: Map<number, Evaluation>;
+  nodes: Map<number, Evaluation>;
+}
+
 export class Router {
   readonly nodes = new Map<number, GraphNode>();
   readonly out = new Map<number, Arc[]>();
@@ -183,6 +189,8 @@ export class Router {
     p: Profile,
     c: Conditions = DRY,
     edgePenalty?: Map<number, number>,
+    /** Edge and node costs already worked out for this profile and these conditions, shared by searches that repeat (`alternatives`). */
+    memo?: CostMemo,
   ): Route | null {
     const vmax = this.fastest(p);
     const h = (n: GraphNode) => haversine([n.lon, n.lat], [to.lon, to.lat]) / vmax;
@@ -200,10 +208,21 @@ export class Router {
       const gu = g.get(u)!;
       for (const a of this.out.get(u) ?? []) {
         if (closed.has(a.to)) continue;
-        const ev = evaluateEdge(a.edge, a.forward, p, c, this.edgeContext(a.edge.id));
+        const ek = a.edge.id * 2 + (a.forward ? 1 : 0);
+        let ev = memo?.edges.get(ek);
+        if (!ev) {
+          ev = evaluateEdge(a.edge, a.forward, p, c, this.edgeContext(a.edge.id));
+          memo?.edges.set(ek, ev);
+        }
         if (ev.cost === Infinity) continue;
         const v = this.nodes.get(a.to)!;
-        const nv = evaluateNode(v, a.edge.kind === "crossing", p, c);
+        const crossing = a.edge.kind === "crossing";
+        const nk = a.to * 2 + (crossing ? 1 : 0);
+        let nv = memo?.nodes.get(nk);
+        if (!nv) {
+          nv = evaluateNode(v, crossing, p, c);
+          memo?.nodes.set(nk, nv);
+        }
         if (nv.cost === Infinity) continue;
         const pen = edgePenalty?.get(a.edge.id) ?? 1;
         const cost = gu + ev.cost * pen + nv.cost;
@@ -321,13 +340,15 @@ export class Router {
    * less than 70% of their length with every route already accepted.
    */
   alternatives(from: GraphNode, to: GraphNode, p: Profile, c: Conditions = DRY, k = 3): Route[] {
-    const best = this.route(from, to, p, c);
+    // Every search here has the same person and conditions, so each edge and node is costed once, not once per search (SPEED-10).
+    const memo: CostMemo = { edges: new Map(), nodes: new Map() };
+    const best = this.route(from, to, p, c, undefined, memo);
     if (!best) return [];
     const routes = [best];
     const penalty = new Map<number, number>();
     for (let i = 0; i < k * 3 && routes.length < k; i++) {
       for (const r of routes) for (const s of r.steps) penalty.set(s.edge.id, (penalty.get(s.edge.id) ?? 1) * 1.6);
-      const r = this.route(from, to, p, c, penalty);
+      const r = this.route(from, to, p, c, penalty, memo);
       if (!r) break;
       // r.cost is the true cost (penalties only steer the search). Short trips get an absolute allowance.
       if (r.cost > Math.max(best.cost * 1.6, best.cost + 300)) break;

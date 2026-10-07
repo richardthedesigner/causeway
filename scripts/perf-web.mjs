@@ -16,6 +16,8 @@
  *   --city edinburgh    only this city (repeat for more); edinburgh, newcastle, london
  *   --json out.json     also write every run as JSON
  *   --debug             print the draw-call frames the map-drawn time is read from, and when each file loaded
+ *   --trace dir         record a Chrome trace of each run from choosing the destination to the route, into dir,
+ *                       and print where the main thread and the worker spent that time (SPEED-10)
  *
  * The CPU slowdown applies to the page's main thread only. The router and the graph
  * parse run in a worker, which Chromium does not slow (checked: a fixed loop takes the same
@@ -42,6 +44,7 @@ const NETWORK = opt("network", "fast4g");
 const CPU = Number(opt("cpu", 4));
 const DEBUG = args.includes("--debug");
 const JSON_OUT = opt("json", null);
+const TRACE = opt("trace", null);
 const ONLY = args.flatMap((a, i) => (a === "--city" ? [args[i + 1]] : []));
 
 /** Chrome DevTools' presets. Bytes per second is what the protocol takes. */
@@ -158,13 +161,19 @@ function pageHooks() {
   requestAnimationFrame(tick);
   new MutationObserver(() => {
     if (perf.ready === null && document.querySelector('input[placeholder="Where to?"]')) perf.ready = performance.now();
-    if (perf.chosen !== null && perf.route === null && document.body.textContent.includes("Why this way?")) perf.route = performance.now();
+    if (perf.chosen !== null && perf.route === null && document.body.textContent.includes("Why this way?")) {
+      perf.route = performance.now();
+      performance.mark("perf:route");
+    }
     if (perf.route === null && document.querySelector('[role="alert"]')) perf.error = document.querySelector('[role="alert"]').textContent;
   }).observe(document, { subtree: true, childList: true, characterData: true });
   document.addEventListener(
     "click",
     (e) => {
-      if (perf.chosen === null && e.target instanceof Element && e.target.closest('[role="option"]')) perf.chosen = performance.now();
+      if (perf.chosen === null && e.target instanceof Element && e.target.closest('[role="option"]')) {
+        perf.chosen = performance.now();
+        performance.mark("perf:chosen");
+      }
     },
     true,
   );
@@ -219,14 +228,21 @@ async function run(browser, server, city) {
   await input.fill(city.to);
   const option = page.getByRole("option").first();
   await option.waitFor({ timeout: 60_000 });
+  if (TRACE) await startTrace(cdp);
   await option.click();
   await wait(() => window.__perf.route !== null || window.__perf.error, "the first route");
+  const trace = TRACE ? await stopTrace(cdp) : null;
   const r = await page.evaluate(() => {
     const base = performance.getEntriesByType("resource").find((e) => e.name.endsWith(".pmtiles"));
     return { ...window.__perf, origin: performance.timeOrigin, baseEnd: base?.responseEnd ?? null, baseStart: base?.startTime ?? null };
   });
   await Promise.all(sizing);
   await context.close();
+  if (trace) {
+    const file = join(TRACE, `${city.id}-${Date.now()}.json`);
+    writeFileSync(file, JSON.stringify({ traceEvents: trace }));
+    printTrace(trace, file);
+  }
   if (r.error && r.route === null) throw new Error(`${city.id}: ${r.error}`);
   const drawn = r.frames.find(([t, n]) => r.baseEnd !== null && t >= r.baseEnd && n >= DRAWN_CALLS);
   if (DEBUG) console.log(`  base map ${r.baseStart?.toFixed(0)} to ${r.baseEnd?.toFixed(0)} ms; ready ${r.ready?.toFixed(0)}; frames:`, r.frames.slice(0, 40).map(([t, n]) => `${t.toFixed(0)}:${n}`).join(" "));
@@ -256,6 +272,83 @@ async function run(browser, server, city) {
     bytes,
     wall: (Date.now() - t0) / 1000,
   };
+}
+
+// ---- Tracing the time from choosing a destination to the route (SPEED-10).
+
+const TRACE_CATEGORIES = ["devtools.timeline", "disabled-by-default-devtools.timeline", "v8.execute", "blink.user_timing", "disabled-by-default-v8.cpu_profiler", "v8"];
+
+async function startTrace(cdp) {
+  await cdp.send("Tracing.start", { traceConfig: { includedCategories: TRACE_CATEGORIES }, transferMode: "ReportEvents" });
+}
+
+async function stopTrace(cdp) {
+  const events = [];
+  const onData = (e) => events.push(...e.value);
+  cdp.on("Tracing.dataCollected", onData);
+  const done = new Promise((r) => cdp.once("Tracing.tracingComplete", r));
+  await cdp.send("Tracing.end");
+  await done;
+  cdp.off("Tracing.dataCollected", onData);
+  return events;
+}
+
+/**
+ * Where the time went between choosing the destination and the route showing (the page's "perf:chosen" and
+ * "perf:route" marks): per thread, the busy time in top-level tasks, then the busiest functions from the
+ * CPU profile (self time). Workers are told apart by the script they started from.
+ */
+function printTrace(events, file) {
+  const mark = (n) => events.find((e) => e.name === n)?.ts;
+  const from = mark("perf:chosen");
+  const to = mark("perf:route");
+  if (from === undefined || to === undefined) return console.log(`  trace ${file}: no perf marks`);
+  const inWindow = (ts, dur = 0) => ts + dur > from && ts < to;
+  const clip = (ts, dur) => Math.min(ts + dur, to) - Math.max(ts, from);
+  const threads = new Map();
+  for (const e of events) if (e.ph === "M" && e.name === "thread_name") threads.set(`${e.pid}:${e.tid}`, e.args.name);
+  // A worker's thread is named after the script it runs.
+  for (const e of events) {
+    const url = e.name === "EvaluateScript" || e.name === "v8.compile" ? e.args?.data?.url : null;
+    const k = `${e.pid}:${e.tid}`;
+    if (url && /Worker/.test(threads.get(k) ?? "")) threads.set(k, `worker ${url.split("/").pop().replace(/\?.*/, "").slice(0, 40)}`);
+  }
+  const name = (e) => (threads.get(`${e.pid}:${e.tid}`) ?? `${e.pid}:${e.tid}`).replace("DedicatedWorker thread", "worker");
+  console.log(`  trace ${file}: ${((to - from) / 1e6).toFixed(2)} s from destination to route`);
+  const busy = new Map();
+  for (const e of events) {
+    if (e.ph !== "X" || e.name !== "RunTask" || !inWindow(e.ts, e.dur)) continue;
+    busy.set(name(e), (busy.get(name(e)) ?? 0) + clip(e.ts, e.dur));
+  }
+  for (const [k, v] of [...busy].sort((a, b) => b[1] - a[1]).slice(0, 8)) console.log(`    busy ${(v / 1000).toFixed(0).padStart(6)} ms  ${k}`);
+  // Profiles: a "Profile" event names the thread; its chunks carry the samples.
+  const profileThread = new Map();
+  const clocks = new Map();
+  for (const e of events)
+    if (e.name === "Profile") {
+      profileThread.set(`${e.pid}:${e.id}`, name(e));
+      clocks.set(`${e.pid}:${e.id}`, e.args?.data?.startTime ?? e.ts);
+    }
+  const frames = new Map();
+  const self = new Map();
+  for (const e of events) {
+    if (e.name !== "ProfileChunk") continue;
+    const key = `${e.pid}:${e.id}`;
+    const thread = profileThread.get(key) ?? "?";
+    const c = e.args?.data?.cpuProfile ?? {};
+    for (const n of c.nodes ?? []) frames.set(`${key}:${n.id}`, n.callFrame);
+    let t = clocks.get(key) ?? 0;
+    const deltas = e.args?.data?.timeDeltas ?? [];
+    (c.samples ?? []).forEach((s, i) => {
+      t += deltas[i] ?? 0;
+      const f = frames.get(`${key}:${s}`);
+      if (!f || !inWindow(t) || f.functionName === "(idle)") return;
+      const k = `${thread.slice(0, 22).padEnd(22)}  ${f.functionName || "(anonymous)"} ${f.url ? f.url.split("/").pop() : ""}:${f.lineNumber}:${f.columnNumber}`;
+      self.set(k, (self.get(k) ?? 0) + (deltas[i + 1] ?? deltas[i] ?? 0));
+    });
+    clocks.set(key, t);
+  }
+  for (const [k, v] of [...self].sort((a, b) => b[1] - a[1]).slice(0, 30)) console.log(`    self ${(v / 1000).toFixed(0).padStart(6)} ms  ${k}`);
 }
 
 // ---- Report.

@@ -1,0 +1,317 @@
+{
+  "runs": 5,
+  "network": "fast4g",
+  "cpu": 4,
+  "phone": {
+    "viewport": {
+      "width": 412,
+      "height": 914
+    },
+    "deviceScaleFactor": 1.75,
+    "isMobile": true,
+    "hasTouch": true,
+    "userAgent": "Mozilla/5.0 (Linux; Android 12; moto g power (2022)) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.36"
+  },
+  "results": [
+    {
+      "city": "edinburgh",
+      "fcp": 928,
+      "lcp": 10280,
+      "mapDrawn": 20784.199999999983,
+      "graphReady": 9082.299999999988,
+      "workerSetup": 362.68115234375,
+      "toRoute": 6889.899999999994,
+      "beforeMap": 7072526,
+      "tilesBeforeMap": 440226,
+      "bytes": {
+        "js": 675951,
+        "graph": 3882006,
+        "tiles": 10383818,
+        "search index": 1298891,
+        "other city data": 303072,
+        "page and other": 10435
+      },
+      "wall": 39.87
+    },
+    {
+      "city": "edinburgh",
+      "fcp": 608,
+      "lcp": 9288,
+      "mapDrawn": 17159.20000000001,
+      "graphReady": 8054,
+      "workerSetup": 476.906005859375,
+      "toRoute": 5651.100000000006,
+      "beforeMap": 7073424,
+      "tilesBeforeMap": 440226,
+      "bytes": {
+        "js": 675951,
+        "graph": 3882006,
+        "tiles": 10505213,
+        "search index": 1298891,
+        "other city data": 303072,
+        "page and other": 10435
+      },
+      "wall": 30.883
+    },
+    {
+      "city": "edinburgh",
+      "fcp": 560,
+      "lcp": 8132,
+      "mapDrawn": 18596.400000000023,
+      "graphReady": 7157.5,
+      "workerSetup": 305.5771484375,
+      "toRoute": 6476.700000000012,
+      "beforeMap": 7073429,
+      "tilesBeforeMap": 440226,
+      "bytes": {
+        "js": 675951,
+        "graph": 3882006,
+        "tiles": 10505213,
+        "search index": 1298891,
+        "other city data": 303072,
+        "page and other": 10435
+      },
+      "wall": 34.284
+    },
+    {
+      "city": "edinburgh",
+      "fcp": 596,
+      "lcp": 8660,
+      "mapDrawn": 16729.20000000001,
+      "graphReady": 7528.400000000023,
+      "workerSetup": 274.852783203125,
+      "toRoute": 5823.899999999965,
+      "beforeMap": 7073387,
+      "tilesBeforeMap": 440226,
+      "bytes": {
+        "js": 675951,
+        "graph": 3882006,
+        "tiles": 10507618,
+        "search index": 1298891,
+        "other city data": 303072,
+        "page and other": 10435
+      },
+      "wall": 30.829
+    },
+    {
+      "city": "edinburgh",
+      "fcp": 628,
+      "lcp": 8576,
+      "mapDrawn": 16483.29999999999,
+      "graphReady": 7544.5,
+      "workerSetup": 389.5458984375,
+      "toRoute": 6195.299999999988,
+      "beforeMap": 7073434,
+      "tilesBeforeMap": 440226,
+      "bytes": {
+        "js": 675951,
+        "graph": 3882006,
+        "tiles": 10383818,
+        "search index": 1298891,
+        "other city data": 303072,
+        "page and other": 10435
+      },
+      "wall": 30.812
+    },
+    {
+      "city": "newcastle",
+      "fcp": 712,
+      "lcp": 4332,
+      "mapDrawn": 9109.299999999988,
+      "graphReady": 3974.4000000000233,
+      "workerSetup": 281.948974609375,
+      "toRoute": 1983.5999999999767,
+      "beforeMap": 2286465,
+      "tilesBeforeMap": 240104,
+      "bytes": {
+        "js": 704631,
+        "graph": 658526,
+        "tiles": 3113537,
+        "search index": 210364,
+        "other city data": 27136,
+        "page and other": 10435
+      },
+      "wall": 18.608
+    },
+    {
+      "city": "newcastle",
+      "fcp": 668,
+      "lcp": 4340,
+      "mapDrawn": 9800.700000000012,
+      "graphReady": 4023.4000000000233,
+      "workerSetup": 409.364013671875,
+      "toRoute": 2224,
+      "beforeMap": 2287089,
+      "tilesBeforeMap": 240104,
+      "bytes": {
+        "js": 704631,
+        "graph": 658526,
+        "tiles": 3030002,
+        "search index": 210364,
+        "other city data": 27136,
+        "page and other": 10435
+      },
+      "wall": 19.223
+    },
+    {
+      "city": "newcastle",
+      "fcp": 628,
+      "lcp": 4640,
+      "mapDrawn": 9696.199999999953,
+      "graphReady": 4265.299999999988,
+      "workerSetup": 402.285888671875,
+      "toRoute": 1925.4000000000233,
+      "beforeMap": 2287091,
+      "tilesBeforeMap": 240104,
+      "bytes": {
+        "js": 704631,
+        "graph": 658526,
+        "tiles": 3113537,
+        "search index": 210364,
+        "other city data": 27136,
+        "page and other": 10435
+      },
+      "wall": 18.505
+    },
+    {
+      "city": "newcastle",
+      "fcp": 576,
+      "lcp": 3556,
+      "mapDrawn": 8495.800000000047,
+      "graphReady": 3249.5,
+      "workerSetup": 136.303955078125,
+      "toRoute": 2212.2000000000116,
+      "beforeMap": 2286889,
+      "tilesBeforeMap": 240104,
+      "bytes": {
+        "js": 704631,
+        "graph": 658526,
+        "tiles": 3194436,
+        "search index": 210364,
+        "other city data": 27136,
+        "page and other": 10435
+      },
+      "wall": 17.87
+    },
+    {
+      "city": "newcastle",
+      "fcp": 700,
+      "lcp": 4016,
+      "mapDrawn": 8661.200000000012,
+      "graphReady": 3658,
+      "workerSetup": 369.42822265625,
+      "toRoute": 2075.600000000035,
+      "beforeMap": 2287047,
+      "tilesBeforeMap": 240104,
+      "bytes": {
+        "js": 704631,
+        "graph": 658526,
+        "tiles": 3277971,
+        "search index": 210364,
+        "other city data": 27136,
+        "page and other": 10435
+      },
+      "wall": 18.236
+    },
+    {
+      "city": "london",
+      "fcp": 600,
+      "lcp": 3532,
+      "mapDrawn": 9139.900000000023,
+      "graphReady": 3342.600000000035,
+      "workerSetup": -65.197021484375,
+      "toRoute": 2011.399999999965,
+      "beforeMap": 2150932,
+      "tilesBeforeMap": 378142,
+      "bytes": {
+        "js": 704631,
+        "graph": 411506,
+        "tiles": 7608437,
+        "search index": 112211,
+        "other city data": 80040,
+        "page and other": 10435
+      },
+      "wall": 16.963
+    },
+    {
+      "city": "london",
+      "fcp": 640,
+      "lcp": 3168,
+      "mapDrawn": 8441.099999999977,
+      "graphReady": 2976.7999999999884,
+      "workerSetup": -73.7578125,
+      "toRoute": 1906.4000000000233,
+      "beforeMap": 2150957,
+      "tilesBeforeMap": 378142,
+      "bytes": {
+        "js": 704631,
+        "graph": 411506,
+        "tiles": 7608437,
+        "search index": 112211,
+        "other city data": 80040,
+        "page and other": 10435
+      },
+      "wall": 15.954
+    },
+    {
+      "city": "london",
+      "fcp": 548,
+      "lcp": 3528,
+      "mapDrawn": 8928,
+      "graphReady": 3360.899999999965,
+      "workerSetup": -69.552978515625,
+      "toRoute": 2051.5,
+      "beforeMap": 2151302,
+      "tilesBeforeMap": 378142,
+      "bytes": {
+        "js": 704631,
+        "graph": 411506,
+        "tiles": 7608437,
+        "search index": 112211,
+        "other city data": 80040,
+        "page and other": 10435
+      },
+      "wall": 17.644
+    },
+    {
+      "city": "london",
+      "fcp": 596,
+      "lcp": 3572,
+      "mapDrawn": 8347.899999999965,
+      "graphReady": 3332.2999999999884,
+      "workerSetup": -77.013916015625,
+      "toRoute": 2372.2999999999884,
+      "beforeMap": 2151146,
+      "tilesBeforeMap": 378142,
+      "bytes": {
+        "js": 704631,
+        "graph": 411506,
+        "tiles": 7608437,
+        "search index": 112211,
+        "other city data": 80040,
+        "page and other": 10435
+      },
+      "wall": 16.67
+    },
+    {
+      "city": "london",
+      "fcp": 3208,
+      "lcp": 6320,
+      "mapDrawn": 11268,
+      "graphReady": 6055.200000000012,
+      "workerSetup": -73.154296875,
+      "toRoute": 1929.5999999999767,
+      "beforeMap": 2150962,
+      "tilesBeforeMap": 378142,
+      "bytes": {
+        "js": 704631,
+        "graph": 411506,
+        "tiles": 7608437,
+        "search index": 112211,
+        "other city data": 80040,
+        "page and other": 10435
+      },
+      "wall": 18.43
+    }
+  ]
+}
