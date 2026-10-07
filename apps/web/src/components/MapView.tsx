@@ -3,7 +3,7 @@ import * as maplibregl from "maplibre-gl";
 import type { GeoJSONSource, Map as MLMap } from "maplibre-gl";
 import type * as GeoJSON from "geojson";
 import { useEffect, useRef, useState } from "react";
-import { basemapLayers, GLYPHS, loadBasemap, registerProtocols } from "@/lib/basemap";
+import { basemapLayers, fillBasemap, GLYPHS, loadBasemap, registerProtocols } from "@/lib/basemap";
 import type { Place, PlannedRoute } from "@/lib/plan-types";
 
 interface Props {
@@ -237,6 +237,8 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
         for (const l of basemapLayers(dark, highContrast)) if (l.type !== "background") m.addLayer(l, "network");
         if (shownKey.current !== basemap.key) m.jumpTo({ center: basemap.center, zoom: 14 });
         shownKey.current = basemap.key;
+        // Once the tiles in view have drawn, fetch the rest of the file for offline (D-079).
+        m.once("idle", () => fillBasemap(basemap.key));
       })
       .catch(() => {
         /* No basemap: the footway network still draws the map. */
