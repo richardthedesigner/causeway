@@ -2,6 +2,16 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
+## 2026-10-07 (server fields)
+
+SEC-17, PR #72. Security review M1 and L1.
+- New migration `db/migrations/0008_server_fields.sql`. On insert into `note`, the server sets `created_at` to now, `status` to visible and `photo_status` from the photo, and moves an `observed_at` in the future back to now. A `photo_path` must be `<your id>/<note id>.jpg`, the path the app uploads to; anything else is refused. It replaces the `note_photo_pending` trigger.
+- On insert into `report`, `status` is always `new` and `verified_by` empty. A report keeps the client's `created_at`, since it is when the problem was seen and nothing counts reports by it.
+- Triggers, not column grants: the app sends whole rows, and a trigger still holds if a later migration grants a new column.
+- Tests: `db/test/server-fields.test.sql`. 40 backdated notes now stop at 30; a note can't claim another person's photo or another note's; a report sent as `fixed` arrives `new`. Without the migration, the first check fails as the review found. The test photos in the sharing and review tests now use the app's path.
+- No live database yet: the migration runs with the rest when the Supabase project is made (OPEN_ITEMS).
+- Checks: typecheck, unit tests, web typecheck and the database rules pass.
+
 ## 2026-10-06 (the graph first)
 
 SPEED-08 (D-077), PR #67.
