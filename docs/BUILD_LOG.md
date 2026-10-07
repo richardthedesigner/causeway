@@ -2,6 +2,16 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
+## 2026-10-07 (the base map in ranges)
+
+SPEED-09 (D-079), PR #70.
+- The base map is read in byte ranges: header, directories and the tiles in view. 234 to 430 KB of it downloads before the map draws, against 2.3 to 8.8 MB.
+- Once the map has drawn and settled, the whole file downloads in the background. The service worker caches it, and answers range reads from it with the network off. Checked in Chromium: offline reload, map drawn, every range a `206` from the service worker.
+- Falls back to the whole file when a host ignores Range, a range read fails, or on the base64 preview host. Vercel serves ranges with a strong ETag (checked on production).
+- Map drawn on Fast 4G with 4x CPU: Edinburgh 26.9 s to 20.0 s, London 14.9 s to 9.9 s, Newcastle 11.3 s to 10.7 s. Edinburgh's remaining wait is main-thread work after the search index (SPEED-14).
+- `perf:web` and the e2e server now serve byte ranges like Vercel, and `perf:web` prints what had downloaded when the map drew. Numbers and raw runs: `docs/perf/2026-10-07-speed-09.md`.
+- Tests: `apps/web/test/basemap-source.test.ts`.
+
 ## 2026-10-06 (the graph first)
 
 SPEED-08 (D-077), PR #67.
