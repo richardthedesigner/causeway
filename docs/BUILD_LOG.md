@@ -2,6 +2,16 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
+## 2026-10-07 (the wait for a route)
+
+SPEED-10, PR #69.
+- Traced the wait from choosing a destination to the route with a new `perf:web --trace`, which saves a Chrome trace per run and prints busy time per thread and the busiest functions.
+- The map sent the city's whole footway network to MapLibre again whenever the journey changed (the destination, your position, the route). That was seconds of main-thread serialising in Edinburgh, plus re-tiling in MapLibre's worker. `MapView` now draws the network in its own effect, only when the network, slopes or contrast change.
+- `Router.alternatives` shares one edge and node cost memo across its searches: the same routes and settled counts, about a third faster.
+- Edinburgh, Fast 4G with 4x CPU: 5.55 s to 2.99 s (target 3 s). Newcastle 1.80 to 1.63 s, London 1.95 to 1.62 s. Numbers: `docs/perf/2026-10-07-speed-10.md`.
+- SPEED-08's 0.3 to 0.7 s slowdown: the base map is still loading tiles and repainting when the route is asked for, and the network re-send competed with it. All three cities are now at or under their SPEED-01 times.
+- Found: routing is now most of the wait (SPEED-14); the route request waits about 1 s for the phone's position (SPEED-15). The speed budget baseline is now about a third loose; SPEED-14 re-baselines it.
+
 ## 2026-10-06 (the graph first)
 
 SPEED-08 (D-077), PR #67.
