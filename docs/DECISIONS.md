@@ -938,7 +938,7 @@ A person who reads speeds in mph reads distances in miles, and a person who read
 - **Left off where the route marks it.** The destination's and a chosen start's own markers are used; the saved marker would sit under them.
 - **Not shown while navigating.**
 - **Privacy unchanged (D-009, D-060).** Saved places are read from this phone's storage and drawn locally. Nothing is sent.
-- **Not done (SMALL-20, SMALL-21):** panning the map so a marker under the half-open sheet can be tapped, and saving a chosen start as a place.
+- **Not done (SMALL-21):** saving a chosen start as a place. Markers under the half-open sheet are D-081.
 
 ## D-076 Report what's there: one question per gap, kept on the phone
 
@@ -959,3 +959,14 @@ A person who reads speeds in mph reads distances in miles, and a person who read
 3. **The base map**, once the search index is built, or at once if the graph fails, so the map still draws. Once released for a city it stays on.
 
 The trade: the map draws later on a cold visit (Edinburgh 18 s to about 23 s on Fast 4G with 4x CPU, in software). SPEED-09 (range reads) is the fix for that, not a change back. Caching is unchanged (D-023): the service worker still stores every file, and a repeat visit reads them from the cache in this order too. Nothing about routing changes.
+
+## D-081 Saved places are framed above the half-open sheet
+
+**Decided.** 2026-10-07 (SMALL-20). Follows D-075: a saved place's marker could sit under the half-open sheet, where a finger can't tap it. Keyboard and screen reader users were never affected.
+
+- **Pan the map, don't list the places.** The two options were framing the map or listing saved places on the home sheet. Framing is the simpler and more robust: it is one small effect in `MapView`, needs no new screen or copy, and fixes the marker itself, which is what the person is looking for. A list would repeat what search already shows under "Saved" and leave the markers unreachable.
+- **When.** On a phone only (under 768 px wide), on the home screen only (no route, destination, dropped pin, position or locate focus). It runs when the saved places load, and again when the base map swaps in, because that resets the view to the city's start.
+- **What it does.** If any saved place is under the sheet or off the screen, the map fits them all into the top 48% of the screen. It never zooms in, and zooms out at most two steps, so a place far away may still need a pan. Where the places already show, nothing moves.
+- **Reduced motion.** With `prefers-reduced-motion` the move is instant.
+- **Wide screens.** The sheet is a side panel and covers no marker, so nothing moves.
+- **Not done.** Re-framing when the sheet is dragged to another height, or after the person has panned. It only frames when the places load or the city changes.
