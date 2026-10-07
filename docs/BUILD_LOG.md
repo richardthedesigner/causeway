@@ -2,6 +2,14 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
+## 2026-10-07 (another way, wrapped)
+
+STAB-22, PR #73.
+- The title beside each alternative route had a zero flex basis in a wrapping row, so at 320 px with 200% text it shrank to nothing and "Another" spilled out. It now has a basis of 9rem, wraps onto its own line and breaks long words.
+- The route panel was 50 px wider than its box before; it is 0 now.
+- The a11y check measures the route panel's sideways scroll at 200% text and fails if it is above zero. The two keyboard workarounds for "Report what's there" are gone.
+- Checks: a11y passes. The check fails without the fix (50 px).
+
 ## 2026-10-07 (server fields)
 
 SEC-17, PR #72. Security review M1 and L1.

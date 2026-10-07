@@ -77,9 +77,7 @@ for (const scheme of ["light", "dark"]) {
   await page.locator("details").evaluateAll((els) => els.forEach((el) => (el.open = true)));
   await check("route, all sections open");
   // "Report what's there" from "What we don't know" (FEAT-03).
-  // By keyboard, as in the 200% text check below.
-  await page.getByRole("button", { name: /^Report what's there on / }).first().focus();
-  await page.keyboard.press("Enter");
+  await page.getByRole("button", { name: /^Report what's there on / }).first().click();
   await page.getByRole("dialog", { name: "Report what's there" }).waitFor();
   await page.getByRole("dialog").getByRole("radio").first().click();
   await check("report what's there");
@@ -328,9 +326,14 @@ for (const [scheme, size, zoom] of [["light", { width: 390, height: 844 }, false
   if (shown.headline < 0) failures.push(`200% text / route sheet / the route card's headline is under the Start bar by ${-shown.headline} px`);
   await page.locator("details").evaluateAll((els) => els.forEach((el) => (el.open = true)));
   await reflow("route, all sections open");
-  // By keyboard: at 200% text "Another way" spills out of its box, and a click could scroll the route panel sideways (STAB-22).
-  await page.getByRole("button", { name: /^Report what's there on / }).first().focus();
-  await page.keyboard.press("Enter");
+  // The route panel must not scroll sideways (STAB-22): "Another way" used to spill out of its box.
+  const wide = await page.evaluate(() => {
+    const p = document.querySelector("[data-route-panel]");
+    return p.scrollWidth - p.clientWidth;
+  });
+  console.log(`200% text / route panel width excess: ${wide} px, other ways: ${await page.locator("[aria-label=\"Other ways\"] li").count()}`);
+  if (wide > 0) failures.push(`200% text / route panel / scrolls sideways by ${wide} px`);
+  await page.getByRole("button", { name: /^Report what's there on / }).first().click();
   await page.getByRole("dialog", { name: "Report what's there" }).waitFor();
   await reflow("report what's there");
   await page.keyboard.press("Escape");
