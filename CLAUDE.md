@@ -42,7 +42,7 @@ UI changes: also `pnpm web:build && pnpm a11y`, and check light, dark, 320 px wi
 ## Pull requests and CI
 
 - The GitHub Actions checks (`check`, `migrations`) are the ones that matter.
-- Vercel doesn't build `claude/*` branches (`apps/web/vercel.json`), except the production branch. A failed Vercel preview saying "Resource is limited" (`api-deployments-free-per-day`) is the free plan's daily limit, not a code problem. Say so once on the PR and move on.
+- Vercel doesn't build `claude/*` branches (`apps/web/vercel.json`). `main` is the production branch. A failed Vercel preview saying "Resource is limited" (`api-deployments-free-per-day`) is the free plan's daily limit, not a code problem. Say so once on the PR and move on.
 
 ## Writing style for docs and UI copy
 

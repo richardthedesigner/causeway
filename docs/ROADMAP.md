@@ -273,9 +273,9 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 
 | ID | Task | Size | Priority | Status | Who | Notes |
 |---|---|---|---|---|---|---|
-| DEP-01 | Make `main` the default and production branch, and retire the mirror workflow | S | next | blocked | Richard | GitHub and Vercel settings. See `mirror-production.yml` |
+| DEP-01 | Make `main` the default and production branch, and retire the mirror workflow | S | next | done (2026-10-08) | Richard, Claude | GitHub default and Vercel production branch set to `main` (2026-10-07). Mirror workflow deleted; `main` skip rule removed from `vercel-ignore.sh`; CI runs on `main` only |
 | DEP-02 | Stay under Vercel's free limit of 100 deployments a day | S | next | done (2026-10-04) | Claude | `apps/web/vercel.json` turns off `claude/*` previews (3decc02) |
-| DEP-03 | Skip Vercel builds for docs-only changes on `main` | S | later | done (2026-10-04) | Claude | D-042. `ignoreCommand` in `apps/web/vercel.json`: also skips `main`, which mirrors production |
+| DEP-03 | Skip Vercel builds for docs-only changes on `main` | S | later | done (2026-10-04) | Claude | D-042. `ignoreCommand` in `apps/web/vercel.json`. Skipped `main` while it mirrored production, until DEP-01 |
 | DEP-04 | A service worker update prompt, so nobody is stuck on an old build | S | next | done (2026-10-04) | Claude | D-045. `UpdatePrompt`: Reload or Later, never during navigation |
 | DEP-05 | Privacy-safe error reporting (no locations, no profile) | M | later | todo | Richard, Claude | Choose a tool and record it in DECISIONS |
 | DEP-06 | Release notes and version numbers users can see | S | later | todo | Claude | The build log is internal |
@@ -316,6 +316,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 ## Log
 
 Newest first. One line per change: date, ID, what happened, link.
+- 2026-10-08: DEP-01 done. `main` is the default and production branch; the mirror workflow is retired. Open: delete `claude/sleepy-johnson-mavbrs` once its branch protection rule is lifted (OPEN_ITEMS).
 - 2026-10-07: SPEED-10 done in PR #69: destination to route in Edinburgh 5.55 s to 2.99 s on Fast 4G with 4x CPU ([numbers](perf/2026-10-07-speed-10.md)); Newcastle and London 0.2 to 0.3 s quicker. On `main` after SPEED-09, Edinburgh 6.20 to 3.10 s, and Edinburgh's map draws 2.9 s sooner. The map no longer sends the whole network to MapLibre on every journey change, and `alternatives` costs each edge once. `perf:web --trace` added. Added SPEED-15, SPEED-16. Now: SPEED-15, SPEED-11 and SPEED-12 replace SPEED-10, SEC-17 and SMALL-20, which are done.
 - 2026-10-07: SPEED-09 done in PR #70: the base map is read in byte ranges and filled in whole in the background for offline (D-079). 234 to 430 KB of it before the map draws; Edinburgh's map 26.9 s to 20.0 s, London's 14.9 s to 9.9 s on Fast 4G with 4x CPU ([numbers](perf/2026-10-07-speed-09.md)). Vercel serves ranges, nothing to change there. Added SPEED-14. Now: SPEED-13 and SPEED-14 join, SPEED-09 leaves.
 - 2026-10-07: SMALL-20 done in PR #71: on a phone the map frames saved places above the half-open sheet, so a finger can reach every marker (D-081). `pnpm e2e` checks it.
