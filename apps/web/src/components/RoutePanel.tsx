@@ -301,7 +301,7 @@ export function RoutePanel(props: Props) {
                   >
                     <span className="sr-only">Switch to </span>
                     <span className="tabular text-lg font-bold">{Math.round(o.r.summary.minutes)} min</span>
-                    <span className="min-w-0 flex-1">
+                    <span className="min-w-0 flex-[1_1_9rem] [overflow-wrap:anywhere]">
                       <span className="block font-bold">{o.title || "Another way"}</span>
                       <span className="tabular block text-sm text-muted">{meta(o.r, unit)}</span>
                     </span>
