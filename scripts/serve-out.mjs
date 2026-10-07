@@ -32,7 +32,18 @@ export async function serveOut() {
     if (path.endsWith("/")) path += "index.html";
     const file = join(OUT, path);
     if (!file.startsWith(OUT) || !existsSync(file) || !statSync(file).isFile()) return res.writeHead(404).end();
-    res.writeHead(200, { ...headers, "content-type": TYPES[extname(file)] ?? "application/octet-stream" });
+    const type = TYPES[extname(file)] ?? "application/octet-stream";
+    const size = statSync(file).size;
+    // Byte ranges, as Vercel serves them, so the base map is read the way it is in production (D-079).
+    const range = /^bytes=(\d+)-(\d*)$/.exec(req.headers.range ?? "");
+    if (range) {
+      const start = Number(range[1]);
+      const end = Math.min(range[2] ? Number(range[2]) : size - 1, size - 1);
+      if (start > end) return res.writeHead(416, { ...headers, "content-range": `bytes */${size}` }).end();
+      res.writeHead(206, { ...headers, "content-type": type, etag: `"${size}"`, "accept-ranges": "bytes", "content-range": `bytes ${start}-${end}/${size}`, "content-length": end - start + 1 });
+      return createReadStream(file, { start, end }).pipe(res);
+    }
+    res.writeHead(200, { ...headers, "content-type": type, etag: `"${size}"`, "accept-ranges": "bytes" });
     createReadStream(file).pipe(res);
   });
   await new Promise((r) => server.listen(0, "127.0.0.1", r));

@@ -103,8 +103,18 @@ async function serve() {
       return res.writeHead(200, { ...base, "content-encoding": "br", "content-length": body.length, vary: "Accept-Encoding" }).end(body);
     }
     const size = statSync(file).size;
+    // Byte ranges, as Vercel serves them (D-079): one "bytes=a-b" range, a 206 and a strong ETag.
+    const range = /^bytes=(\d+)-(\d*)$/.exec(req.headers.range ?? "");
+    if (range) {
+      const start = Number(range[1]);
+      const end = Math.min(range[2] ? Number(range[2]) : size - 1, size - 1);
+      if (start > end) return res.writeHead(416, { ...base, "content-range": `bytes */${size}` }).end();
+      count(end - start + 1);
+      res.writeHead(206, { ...base, etag: `"${size}"`, "accept-ranges": "bytes", "content-range": `bytes ${start}-${end}/${size}`, "content-length": end - start + 1 });
+      return createReadStream(file, { start, end }).pipe(res);
+    }
     count(size);
-    res.writeHead(200, { ...base, "content-length": size });
+    res.writeHead(200, { ...base, etag: `"${size}"`, "accept-ranges": "bytes", "content-length": size });
     createReadStream(file).pipe(res);
   });
   await new Promise((r) => server.listen(0, "127.0.0.1", r));
@@ -185,9 +195,12 @@ async function run(browser, server, city) {
   if (NETWORK !== "none") await cdp.send("Network.emulateNetworkConditions", { offline: false, ...NETWORKS[NETWORK] });
   // When each file finished downloading, in epoch ms, including the worker's own fetches.
   const finished = [];
+  const sizing = [];
   context.on("requestfinished", (req) => {
     const t = req.timing();
-    finished.push({ path: new URL(req.url()).pathname, start: t.startTime, end: t.startTime + t.responseEnd });
+    const f = { path: new URL(req.url()).pathname, start: t.startTime, end: t.startTime + t.responseEnd, bytes: 0 };
+    finished.push(f);
+    sizing.push(req.sizes().then((z) => (f.bytes = z.responseBodySize), () => undefined));
   });
   await page.addInitScript((id) => localStorage.setItem("causewayside.city.v1", id), city.id);
   await page.addInitScript(pageHooks);
@@ -212,6 +225,7 @@ async function run(browser, server, city) {
     const base = performance.getEntriesByType("resource").find((e) => e.name.endsWith(".pmtiles"));
     return { ...window.__perf, origin: performance.timeOrigin, baseEnd: base?.responseEnd ?? null, baseStart: base?.startTime ?? null };
   });
+  await Promise.all(sizing);
   await context.close();
   if (r.error && r.route === null) throw new Error(`${city.id}: ${r.error}`);
   const drawn = r.frames.find(([t, n]) => r.baseEnd !== null && t >= r.baseEnd && n >= DRAWN_CALLS);
@@ -222,6 +236,11 @@ async function run(browser, server, city) {
   // parses and indexes it, then the page shows the city. Chromium doesn't slow workers, so this is desktop speed.
   const workerData = finished.filter((f) => /^\/(graph|live)\/|\/places\/[^/]*\.(greenspace|osm-notes)\./.test(f.path)).map((f) => f.end);
   const workerSetup = workerData.length ? r.origin + r.ready - Math.max(...workerData) : null;
+  // What had downloaded by the time the map drew (D-079's target is 2 MB or less), and how much of it was base map.
+  const drawnAt = drawn ? r.origin + drawn[0] : null;
+  const landed = drawnAt === null ? [] : finished.filter((f) => f.end <= drawnAt);
+  const beforeMap = drawnAt === null ? null : landed.reduce((s, f) => s + f.bytes, 0);
+  const tilesBeforeMap = drawnAt === null ? null : landed.filter((f) => f.path.endsWith(".pmtiles")).reduce((s, f) => s + f.bytes, 0);
   const bytes = Object.fromEntries(KINDS.map((k) => [k, 0]));
   for (const [path, n] of server.sent) bytes[kindOf(path)] += n;
   return {
@@ -232,6 +251,8 @@ async function run(browser, server, city) {
     graphReady: r.ready,
     workerSetup,
     toRoute: r.route - r.chosen,
+    beforeMap,
+    tilesBeforeMap,
     bytes,
     wall: (Date.now() - t0) / 1000,
   };
@@ -267,6 +288,7 @@ try {
     console.log(`  city graph loaded        ${ms(col("graphReady"))}`);
     console.log(`  destination to route     ${ms(col("toRoute"))}`);
     console.log(`  worker setup after download ${ms(col("workerSetup"))} (the part of graph loaded that ran in the unslowed worker)`);
+    console.log(`  before the map drew      ${kb(median(col("beforeMap")))}, of which base map ${kb(median(col("tilesBeforeMap")))}`);
     const total = runs.map((x) => KINDS.reduce((s, k) => s + x.bytes[k], 0));
     console.log(`  transferred              ${kb(median(total))}: ${KINDS.map((k) => `${k} ${kb(median(runs.map((x) => x.bytes[k])))}`).join(", ")}\n`);
   }
