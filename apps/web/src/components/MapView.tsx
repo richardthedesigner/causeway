@@ -58,8 +58,17 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
   const el = useRef<HTMLDivElement>(null);
   const map = useRef<MLMap | null>(null);
   const ready = useRef(false);
-  /** Draws our layers from the latest props; called again once the map loads and on a theme change. */
-  const redraw = useRef<() => void>(() => undefined);
+  /**
+   * Draw our layers from the latest props; called again once the map loads and on a theme change. The city's
+   * network is drawn on its own: it is large, and sending it to MapLibre again on every route took seconds on a
+   * slow phone (SPEED-10).
+   */
+  const drawNetwork = useRef<() => void>(() => undefined);
+  const drawRoutes = useRef<() => void>(() => undefined);
+  const redraw = useRef(() => {
+    drawNetwork.current();
+    drawRoutes.current();
+  });
   const clickRef = useRef(onMapClick);
   clickRef.current = onMapClick;
   const savedPickRef = useRef(onSavedPick);
@@ -137,6 +146,17 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
         fc((network ?? []).map((n) => line(n.coords, { bin: n.bin, c: showSlopes && n.bin >= 0 && n.bin < 5 ? ramp[n.bin] : n.bin === -1 && showSlopes ? css("--unknown") : neutral }))),
       );
       m.setPaintProperty("network", "line-opacity", showSlopes ? 0.9 : highContrast ? 0.5 : 0.22);
+    };
+    draw();
+    drawNetwork.current = draw;
+  }, [network, showSlopes, highContrast]);
+
+  useEffect(() => {
+    const m = map.current;
+    if (!m) return;
+    const draw = () => {
+      if (!ready.current) return;
+      const ramp = ["--g0", "--g1", "--g2", "--g3", "--g4"].map(css);
       const sel = routes.find((r) => r.id === selectedId) ?? routes[0];
       (m.getSource("route") as GeoJSONSource).setData(fc(sel ? [line(sel.coords)] : preview ? [line(preview.coords)] : []));
       const bandColour = (bin: number) => (bin >= 0 && bin < 5 ? ramp[bin]! : bin === 6 ? css("--accent") : css("--unknown"));
@@ -152,8 +172,8 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
       (m.getSource("entrances") as GeoJSONSource).setData(fc(entrances.map((e) => point(e, { c: ec[e.ok] }))));
     };
     draw();
-    redraw.current = draw;
-  }, [network, routes, selectedId, from, to, pin, showSlopes, entrances, toilets, blockers, preview, highContrast]);
+    drawRoutes.current = draw;
+  }, [routes, selectedId, from, to, pin, entrances, toilets, blockers, preview, highContrast]);
 
   const [mapReady, setMapReady] = useState(false);
   const dark = useDark();
