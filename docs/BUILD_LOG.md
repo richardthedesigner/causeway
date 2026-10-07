@@ -2,6 +2,13 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
+## 2026-10-07 (saved places above the sheet)
+
+SMALL-20 (D-081), PR #71.
+- On a phone, saved place markers that sat under the half-open sheet are now framed above it, once when they load and again when the base map swaps in. Reduced motion makes it instant. Wide screens are unchanged.
+- `pnpm e2e` has a third saved place about 1.1 km south of the city's start and checks that every marker's centre is a tap on the marker, not the sheet. It fails without the change.
+- Chose framing over a list on the home sheet: one small effect, no new copy, and it fixes the marker itself (D-081).
+
 ## 2026-10-07 (another way, wrapped)
 
 STAB-22, PR #73.
