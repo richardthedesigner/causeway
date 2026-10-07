@@ -960,6 +960,20 @@ A person who reads speeds in mph reads distances in miles, and a person who read
 
 The trade: the map draws later on a cold visit (Edinburgh 18 s to about 23 s on Fast 4G with 4x CPU, in software). SPEED-09 (range reads) is the fix for that, not a change back. Caching is unchanged (D-023): the service worker still stores every file, and a repeat visit reads them from the cache in this order too. Nothing about routing changes.
 
+## D-079 The base map in byte ranges, filled in whole for offline
+
+**Decided.** 2026-10-07 (SPEED-09). Code: `apps/web/src/lib/basemap-source.ts`, `apps/web/public/sw.js`.
+
+Since D-077 the base map loads last, so on a cold visit the map waited for the whole city file (2.3 to 8.8 MB) after everything else. Now it is read in byte ranges, as PMTiles is designed to be: the header, the directories and the tiles in view, 234 to 430 KB before the map draws. Once the map has drawn and settled, the whole file is fetched in the background and kept in memory, and later reads come from there.
+
+- **Offline is unchanged (D-023).** The background fetch of the whole file is what the service worker caches. A range request is answered from that cached file as a `206` when it is there, offline too, and otherwise goes to the network uncached, since a partial response can't be stored.
+- **Fallbacks.** A host that ignores Range (a `200` with the whole file), a range read that fails, and the base64 preview host all use the whole file, as before.
+- **A data refresh mid-visit.** Reads carry the file's ETag; if it changes, PMTiles reads the header again rather than mixing two versions.
+- **Hosting.** Vercel serves static files in ranges with a strong ETag (checked on the production deployment), so nothing changes there. D-024's "object storage with range requests" for whole-country coverage now needs only a different address.
+- **Order (D-077) is unchanged**: graph, then search index, then base map.
+
+The trade: a visit downloads the ranges read first and then the whole file, about 0.2 to 0.4 MB more in all. Edinburgh's map now draws at 20 s, not 27 s, on Fast 4G with 4x CPU; what is left is main-thread work, not download ([numbers](perf/2026-10-07-speed-09.md), SPEED-14).
+
 ## D-081 Saved places are framed above the half-open sheet
 
 **Decided.** 2026-10-07 (SMALL-20). Follows D-075: a saved place's marker could sit under the half-open sheet, where a finger can't tap it. Keyboard and screen reader users were never affected.
