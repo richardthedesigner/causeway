@@ -19,7 +19,7 @@ set role authenticated;
 select set_config('request.jwt.claim.sub', :a, false);
 insert into note (id, area_id, target_kind, target_name, osm_way_ids, geom, sentiment, body, photo_path, mobility_label, ground, observed_at)
 values ('11111111-0000-0000-0000-000000000001', 'edinburgh', 'way', 'Victoria Street', '{100}', st_setsrid(st_point(-3.1937, 55.9484), 4326),
-        'bad', 'Setts are fine in the dry, lethal when wet.', 'a/1.jpg', 'manual wheelchair', 'wet', now());
+        'bad', 'Setts are fine in the dry, lethal when wet.', 'aaaaaaaa-0000-0000-0000-000000000001/11111111-0000-0000-0000-000000000001.jpg', 'manual wheelchair', 'wet', now());
 select pg_temp.check((select own and photo_path is null and author_key is not null from note_public where id = '11111111-0000-0000-0000-000000000001'),
   'author sees their note as their own, photo held back until checked');
 
@@ -31,7 +31,7 @@ do $$ begin
 exception when insufficient_privilege then raise notice 'ok: cannot write a note as someone else';
 end $$;
 insert into note (id, area_id, target_kind, target_name, place_ref, geom, sentiment, body, photo_path, observed_at)
-values ('11111111-0000-0000-0000-000000000002', 'edinburgh', 'place', 'Museum', 'nms', st_setsrid(st_point(-3.19, 55.947), 4326), 'good', 'Step-free side entrance', 'a/2.jpg', now());
+values ('11111111-0000-0000-0000-000000000002', 'edinburgh', 'place', 'Museum', 'nms', st_setsrid(st_point(-3.19, 55.947), 4326), 'good', 'Step-free side entrance', 'aaaaaaaa-0000-0000-0000-000000000001/11111111-0000-0000-0000-000000000002.jpg', now());
 select pg_temp.check((select photo_status = 'pending' from note where id = '11111111-0000-0000-0000-000000000002'), 'a new photo always starts pending');
 
 -- B reads A's note through the public view only, and can't delete it.
