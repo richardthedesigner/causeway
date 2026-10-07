@@ -440,6 +440,7 @@ export default function Home() {
   // (WCAG 2.4.11). A tap doesn't: it would jump the sheet under the finger.
   const body = (
     <div
+      data-route-panel
       onFocusCapture={(e) => {
         if (snap !== SNAP.full && (e.target as HTMLElement).matches?.(":focus-visible")) setSnap(SNAP.full);
       }}

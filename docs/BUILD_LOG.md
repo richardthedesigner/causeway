@@ -13,6 +13,21 @@ SPEED-09 (D-079), PR #70.
 - Tests: `apps/web/test/basemap-source.test.ts`.
 - Checks: typecheck, unit tests, web typecheck, build, e2e and a11y pass. Offline checked by hand in Chromium, as above.
 
+## 2026-10-07 (saved places above the sheet)
+
+SMALL-20 (D-081), PR #71.
+- On a phone, saved place markers that sat under the half-open sheet are now framed above it, once when they load and again when the base map swaps in. Reduced motion makes it instant. Wide screens are unchanged.
+- `pnpm e2e` has a third saved place about 1.1 km south of the city's start and checks that every marker's centre is a tap on the marker, not the sheet. It fails without the change.
+- Chose framing over a list on the home sheet: one small effect, no new copy, and it fixes the marker itself (D-081).
+
+## 2026-10-07 (another way, wrapped)
+
+STAB-22, PR #73.
+- The title beside each alternative route had a zero flex basis in a wrapping row, so at 320 px with 200% text it shrank to nothing and "Another" spilled out. It now has a basis of 9rem, wraps onto its own line and breaks long words.
+- The route panel was 50 px wider than its box before; it is 0 now.
+- The a11y check measures the route panel's sideways scroll at 200% text and fails if it is above zero. The two keyboard workarounds for "Report what's there" are gone.
+- Checks: a11y passes. The check fails without the fix (50 px).
+
 ## 2026-10-07 (server fields)
 
 SEC-17, PR #72. Security review M1 and L1.

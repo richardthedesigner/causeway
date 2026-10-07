@@ -64,6 +64,10 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
   clickRef.current = onMapClick;
   const savedPickRef = useRef(onSavedPick);
   savedPickRef.current = onSavedPick;
+  // SMALL-20: true while nothing else has framed the map, so saved places may.
+  const homeRef = useRef(true);
+  homeRef.current = !routes.length && !to && !pin && !me && !focus;
+  const fitSaved = useRef<() => void>(() => {});
 
   useEffect(() => {
     if (!el.current || map.current) return;
@@ -189,6 +193,21 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
       });
       return new maplibregl.Marker({ element: b, anchor: "bottom" }).setLngLat([s.lon, s.lat]).addTo(m);
     });
+    // SMALL-20: on a phone the half-open sheet covers the lower half, so a marker under it can't be tapped.
+    // Bring them all above it. Zoom out at most two steps, never in, and no animation if motion is reduced.
+    fitSaved.current = () => {
+      if (!saved.length || !homeRef.current || window.innerWidth >= 768) return;
+      const room = Math.round(window.innerHeight * 0.52);
+      const hidden = saved.some((s) => {
+        const p = m.project([s.lon, s.lat]);
+        return p.x < 20 || p.x > window.innerWidth - 20 || p.y < 60 || p.y > window.innerHeight - room;
+      });
+      if (!hidden) return;
+      const b = saved.reduce((bb, s) => bb.extend([s.lon, s.lat]), new maplibregl.LngLatBounds([saved[0].lon, saved[0].lat], [saved[0].lon, saved[0].lat]));
+      const cam = m.cameraForBounds(b, { padding: { top: 80, bottom: room + 20, left: 40, right: 40 }, maxZoom: m.getZoom() });
+      if (cam?.center) m.easeTo({ center: cam.center, zoom: Math.max(cam.zoom ?? m.getZoom(), m.getZoom() - 2), duration: matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 500 });
+    };
+    fitSaved.current();
     return () => markers.forEach((mk) => mk.remove());
   }, [saved, mapReady]);
 
@@ -235,7 +254,10 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
         if (m.getSource("basemap")) m.removeSource("basemap");
         m.addSource("basemap", { type: "vector", url, attribution: "© OpenStreetMap contributors, Protomaps" });
         for (const l of basemapLayers(dark, highContrast)) if (l.type !== "background") m.addLayer(l, "network");
-        if (shownKey.current !== basemap.key) m.jumpTo({ center: basemap.center, zoom: 14 });
+        if (shownKey.current !== basemap.key) {
+          m.jumpTo({ center: basemap.center, zoom: 14 });
+          fitSaved.current();
+        }
         shownKey.current = basemap.key;
         // Once the tiles in view have drawn, fetch the rest of the file for offline (D-079).
         m.once("idle", () => fillBasemap(basemap.key));

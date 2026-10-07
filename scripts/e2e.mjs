@@ -143,6 +143,8 @@ for (const j of JOURNEYS) {
   const saved = [
     { label: "Home", place: { id: "e2e-meadows", name: "The Meadows", kind: "Park", lon: -3.1894, lat: 55.9421 } },
     { label: "Work", place: { id: "e2e-links", name: "Bruntsfield Links", kind: "Park", lon: -3.204, lat: 55.9398 } },
+    // About 1.1 km south of the city's start: under the half-open sheet until the map pans (SMALL-20).
+    { label: "Flat", place: { id: "e2e-flat", name: "Morningside", kind: "Suburb", lon: -3.1812, lat: 55.9285 } },
   ];
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const page = await context.newPage();
@@ -177,6 +179,21 @@ for (const j of JOURNEYS) {
   await step("each saved place is a button on the map", async () => {
     await marker("Home").waitFor({ timeout: 60_000 });
     await marker("Work").waitFor();
+  });
+  await step("every saved place can be tapped, not hidden under the sheet", async () => {
+    // Under the sheet the marker's centre hits the sheet, not the marker. The map pans over half a second, so wait for it.
+    const tappable = () =>
+      page.evaluate(() =>
+        [...document.querySelectorAll(".saved-marker")].every((el) => {
+          const r = el.getBoundingClientRect();
+          const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+          return r.top >= 0 && r.bottom <= innerHeight && hit && el.contains(hit);
+        }),
+      );
+    await page.waitForFunction(() => document.querySelectorAll(".saved-marker").length === 3);
+    const until = Date.now() + 5000;
+    while (!(await tappable()) && Date.now() < until) await page.waitForTimeout(100);
+    if (!(await tappable())) throw new Error("a saved place is under the sheet, out of tap range");
   });
   await step("a marker opens Go here and Start from here by keyboard, and drops no pin", async () => {
     await marker("Home").focus();

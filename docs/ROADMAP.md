@@ -51,11 +51,11 @@ The current direction: **fix and fill the pilot cities** with open data that nee
 
 The next five things to pick up, in order.
 
-1. **STAB-22**: at 320 px with 200% text, "Another way" spills out and the route panel can scroll sideways.
-2. **SPEED-10**: cut the main-thread work after a route returns.
-3. **SEC-17**: the server sets the fields the client shouldn't.
-4. **SMALL-20**: pan the map so a saved place under the half-open sheet can be tapped.
-5. **SPEED-13**: start the graph download before the page hydrates, so "Where to?" comes sooner.
+1. **SPEED-10**: cut the main-thread work after a route returns.
+2. **SEC-17**: the server sets the fields the client shouldn't.
+3. **SMALL-20**: pan the map so a saved place under the half-open sheet can be tapped.
+4. **SPEED-13**: start the graph download before the page hydrates, so "Where to?" comes sooner.
+5. **SPEED-14**: draw Edinburgh's map sooner after the search index, now that the base map's download is small.
 
 The rest of the pilot-city data (DATA-12 to DATA-20) is blocked on access, licences or keys. Research (RES) needs Richard and testers.
 
@@ -164,7 +164,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | SMALL-17 | Recent places as starts in "Where are you starting from?" | S | later | todo | Claude | Found doing FEAT-20 (D-073). Today it suggests the city's start, saved places and the city's places |
 | SMALL-18 | Search results and the "Where are you starting from?" suggestions show distance in metres or km only: follow the device's miles or kilometres (D-074) | S | now | done (2026-10-06) | Claude | Left out of SMALL-02 because FEAT-20 was changing the search flow. `metres()` in `PlaceSearch.tsx`. Done: results use `formatDistance` with the device's unit. The start suggestions never showed a distance, so only results changed. |
 | SMALL-19 | Gusts ("up to 50 km/h") follow the device's speed unit, and say mph for people who read mph | S | later | todo | Claude | Found doing SMALL-02. Weather text in `cost.ts`, `on-route.ts`, `area-status.ts`. Heights and climbs stay in metres (D-074) |
-| SMALL-20 | A saved place's marker can sit under the half-open sheet, out of tap range. Pan the map to bring it into view when it opens, or list saved places on the home sheet | S | later | todo | Claude | Found doing SMALL-13. Keyboard and screen reader users reach every marker; a finger can't when the sheet covers it |
+| SMALL-20 | A saved place's marker can sit under the half-open sheet, out of tap range. Pan the map to bring it into view when it opens, or list saved places on the home sheet | S | later | done (2026-10-07) | Claude | PR #71. D-081. On a phone the map frames every saved place above the half-open sheet, once when it loads and again when the base map swaps in. `pnpm e2e` checks that each marker's centre is tappable |
 | SMALL-21 | Save a chosen start as a place too ("Save this place" is on the destination only) | S | later | todo | Claude | Found doing SMALL-13 |
 | SMALL-22 | Answer buttons in the report sheets (`role="radio"`) move with Tab, not the arrow keys. Use a roving tab index so a group is one Tab stop | S | later | todo | Claude | Found doing FEAT-03. `ReportSheet.tsx` `Choices`, also the note sheet |
 
@@ -221,7 +221,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | STAB-19 | Toilet labels ("WC") stack on top of each other along a route, unreadable at the zoom the route fits to | S | later | todo | Claude | Found doing STAB-02 (`navigation.*.phone.png`). Hide or cluster labels that collide |
 | STAB-20 | Screenshot baselines are Linux Chromium only; refresh them once after UPD-03 and UPD-04 (Next.js and Node) land, and whenever Playwright's Chromium changes | S | later | todo | Claude | STAB-02. `pnpm screenshots --update`, then look at the diffs |
 | STAB-21 | `pnpm e2e` fails on any 4xx, including from outside services (an Open-Meteo 429 failed a run during FEAT-20). Fail only on the app's own requests; log outside ones | S | now | done (2026-10-06) | Claude | PR #63. Outside 4xx and 5xx print as `WARN` lines. Found reviewing FEAT-20. Added by SMALL-12 |
-| STAB-22 | At 320 px with 200% text, an alternative route's title ("Another way") spills out of its box, so the route panel is 17 px wider than its box and can scroll sideways, pushing the From and To bars off screen | S | next | todo | Claude | Found doing FEAT-03: before STAB-18 a click in the panel scrolled it. Still 335 px of content in 318 after STAB-18. The a11y check opens "Report what's there" by keyboard to stay clear of it |
+| STAB-22 | At 320 px with 200% text, an alternative route's title ("Another way") spills out of its box, so the route panel is 17 px wider than its box and can scroll sideways, pushing the From and To bars off screen | S | next | done (2026-10-07) | Claude | Found doing FEAT-03: before STAB-18 a click in the panel scrolled it. Still 335 px of content in 318 after STAB-18. Fixed in PR #73: the title item had a zero flex basis so it shrank to nothing; it now wraps. The a11y check fails if the route panel scrolls sideways, and opens "Report what's there" by click again |
 | STAB-17 | The sheet trapped keyboard focus and hid the map from screen readers: Tab never reached the city, layers or location buttons | S | now | done (2026-10-05) | Claude | D-069. Found doing STAB-13. vaul 1.1.2 never passed `modal={false}` on, so a `pnpm patch` does; Radix also looped Tab inside the sheet. The map menus open above the sheet, take focus and give it back. `pnpm a11y` checks it |
 | STAB-08 | Offline test: load a city, cut the network, route | S | now | done (2026-10-05) | Claude | PR #42, with SMALL-06. `pnpm e2e` loads Edinburgh, cuts the network and routes. A reload offline (the service worker) isn't covered |
 
@@ -314,7 +314,9 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 ## Log
 
 Newest first. One line per change: date, ID, what happened, link.
-- 2026-10-07: SPEED-09 done in PR #70: the base map is read in byte ranges and filled in whole in the background for offline (D-079). 234 to 430 KB of it before the map draws; Edinburgh's map 26.9 s to 20.0 s, London's 14.9 s to 9.9 s on Fast 4G with 4x CPU ([numbers](perf/2026-10-07-speed-09.md)). Vercel serves ranges, nothing to change there. Added SPEED-14. Now: SPEED-13 replaces SPEED-09.
+- 2026-10-07: SPEED-09 done in PR #70: the base map is read in byte ranges and filled in whole in the background for offline (D-079). 234 to 430 KB of it before the map draws; Edinburgh's map 26.9 s to 20.0 s, London's 14.9 s to 9.9 s on Fast 4G with 4x CPU ([numbers](perf/2026-10-07-speed-09.md)). Vercel serves ranges, nothing to change there. Added SPEED-14. Now: SPEED-13 and SPEED-14 join, SPEED-09 leaves.
+- 2026-10-07: SMALL-20 done in PR #71: on a phone the map frames saved places above the half-open sheet, so a finger can reach every marker (D-081). `pnpm e2e` checks it.
+- 2026-10-07: STAB-22 done in PR #73: alternative route titles wrap at 320 px with 200% text, so the route panel no longer scrolls sideways (50 px over before, 0 now). The a11y check fails if it does.
 - 2026-10-07: SEC-17 done in PR #72: `0008_server_fields.sql` makes the server set a note's `created_at`, `status` and `photo_status`, keeps `observed_at` from the future, refuses a `photo_path` that isn't your own photo for that note, and starts every report `new` and unverified. Review M1 and L1 fixed; `db/test/server-fields.test.sql` repeats the review's proof.
 - 2026-10-06: SPEED-08 done in PR #67: the graph and the files that join it download first and together, then the search index, then the base map (D-077). Edinburgh "Where to?" 13.9 s to 8.8 s on Fast 4G with 4x CPU ([numbers](perf/2026-10-06-speed-08.md)); 6 s not reached. Newcastle and London no longer download Edinburgh's search index. The map draws later. Added SPEED-13. Now: SPEED-09 replaces SPEED-08.
 - 2026-10-06: FEAT-03 done in PR #65: "Report what's there" under each street in "What we don't know", one question per gap, kept on the phone and in Your data (D-076). Added STAB-22, SMALL-22. Now: SPEED-08, STAB-22, SPEED-10, SEC-17, SMALL-20.
