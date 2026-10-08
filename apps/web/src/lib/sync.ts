@@ -12,8 +12,20 @@ import { fromPublicRow, isCategory, toNoteRow, VOTE_KINDS, type CommunityReport,
 import { reportDetail, type Report } from "./reports";
 import { timedFetch, UPLOAD_TIMEOUT_MS } from "./timed-fetch";
 
-const URL_ = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "") ?? "";
-const KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
+/**
+ * The end-to-end checks run the app on localhost against a stand-in backend (scripts/e2e.mjs), since the build they
+ * test has no keys. Only ever on localhost, and only a *.supabase.co address gets past the page's CSP anyway.
+ */
+const testBackend = ((): { url: string; key: string } | null => {
+  try {
+    const t = (globalThis as { __CAUSEWAY_TEST_BACKEND__?: { url: string; key: string } }).__CAUSEWAY_TEST_BACKEND__;
+    return t && /^(127\.0\.0\.1|localhost)$/.test(location.hostname) ? t : null;
+  } catch {
+    return null;
+  }
+})();
+const URL_ = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? testBackend?.url)?.replace(/\/$/, "") ?? "";
+const KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? testBackend?.key ?? "";
 const SESSION_KEY = "causewayside.session.v1";
 const PHOTO_BUCKET = "note-photos";
 /** Approved photos are copied here by a reviewer; this bucket is public. */

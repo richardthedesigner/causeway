@@ -2,12 +2,14 @@
 
 What's outstanding on Causewayside: things waiting on Richard, things blocked outside the project, and guesses to check with users. Keep this up to date: add an item when it comes up, and move it to "Done" with the date when it's settled. Details live in the linked issue or decision. The order of work is in [ROADMAP.md](ROADMAP.md).
 
-Last updated: 2026-10-07.
+Last updated: 2026-10-08.
 
 ## Waiting on Richard
 
 | What | Why it matters | Effort | Link |
 |---|---|---|---|
+| Make the Causeway Supabase project, run migrations 0001 to 0009, turn on anonymous sign-ins and Turnstile, and set the two Vercel variables (FEAT-25) | Community reports, notes and votes stay on each phone until then. Your Supabase organisation already has two free projects, so a third needs one paused or a paid plan | About 30 minutes, with Cowork | [handoff](handoff/COWORK_COMMUNITY_REPORTS.md) |
+| Name who checks flagged community reports and photos each week (SEC-11) | Photos stay hidden and flagged reports stay down until someone looks | A decision | [BACKEND.md](BACKEND.md) |
 | Time the app on a real mid-range Android phone, or run it through WebPageTest (SPEED-12) | The container's numbers have an unslowed worker and a software GPU, so they are best cases | 15 minutes | [perf notes](perf/2026-10.md) |
 | Run the data refresh once by hand: Actions, then data-refresh, then Run workflow on `main` | Proves the weekly refresh works. It has never run, and this project's sessions can't start workflows | 1 minute | [#14](https://github.com/richardthedesigner/causeway/issues/14) |
 | Sign up for free API keys: National Rail, Met Office, Mapillary, BODS, Nexus | Each unlocks a data adapter (live trains, better weather, street photos, live buses) | About 30 minutes | [#9](https://github.com/richardthedesigner/causeway/issues/9) |
@@ -47,7 +49,9 @@ These numbers shape routes but are our estimates, not evidence.
 
 ## Known gaps
 
-- There is no Causeway Supabase project yet. When one is made, run db/migrations 0001 to 0008 in order. SEC-16 is merged, so this is now safe. 0008 (SEC-17) makes the server set note and report fields the client used to choose.
+- There is no Causeway Supabase project yet. When one is made, run db/migrations 0001 to 0009 in order. SEC-16 is merged, so this is now safe. 0008 (SEC-17) makes the server set note and report fields the client used to choose; 0009 adds community reports (D-083).
+- Community report confidence (confirmed at three fresh voices, half-lives from 5 days to 5 years) and the routing penalties are our guesses. Check with testers and real use (FEAT-31, D-083).
+- The per-network limit for community reports reads the address from the headers Supabase passes on. Check on the real project that `request.headers` carries `x-forwarded-for` or `cf-connecting-ip`; if not, only the per-person limits apply ([D-083](DECISIONS.md#d-083-community-reports-categories-votes-and-confidence-that-decays)).
 - The profile has a gap limit for boarding trains (`maxGapMm`), but no setting in the app: everyone gets TfL's 85 mm level band. Add a setting once research says people want one ([D-068](DECISIONS.md#d-068-boarding-the-train-against-each-persons-limits)).
 - TfL's level-access doors are in the spoken route only, not on the visual route card ([D-068](DECISIONS.md#d-068-boarding-the-train-against-each-persons-limits)).
 - When someone deletes everything, a photo a reviewer had approved stays in the public bucket (hidden, as its note is gone) until a reviewer removes it. Worth a weekly clean-up step for the reviewer, or a server job, once sharing is on ([D-059](DECISIONS.md#d-059-your-data-a-copy-and-delete-everything)).
@@ -62,10 +66,11 @@ These numbers shape routes but are our estimates, not evidence.
 
 ## Deferred by Richard
 
-Not now, on purpose: a phone app, whole cities, a reports backend, app accounts.
+Not now, on purpose: a phone app, whole cities, app accounts. (The reports backend came back on 2026-10-08 with community reports, FEAT-25.)
 
 ## Done
 
+- 2026-10-08: Richard asked for community content: public reports by category with votes and decaying confidence (FEAT-25, [D-083](DECISIONS.md#d-083-community-reports-categories-votes-and-confidence-that-decays)). That takes the reports backend (DEF-04) and crowd verification (DEF-06) off the deferred list.
 - 2026-10-08: DEP-01. Richard set Vercel's production branch to `main`; GitHub's default branch is `main`. Still open for Richard: lift the no-deletion rule on `claude/sleepy-johnson-mavbrs` so the old branch can be deleted, and point the production-branch protection at `main` only.
 - 2026-10-05: Richard chose the next cities: Glasgow, then Leeds, then by built-up area population without asking again ([D-072](DECISIONS.md#d-072-which-city-next), ROADMAP DEF-09, DEF-10).
 - 2026-10-05: branch protection is on. `main` takes no deletion or force push, needs a PR, and requires `check` and `migrations`. The production branch takes no deletion or force push; it can't require PRs until DEP-01, because the mirror pushes to it (ROADMAP SEC-23).

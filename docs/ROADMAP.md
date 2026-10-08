@@ -45,7 +45,7 @@ Keep rows to one line. Detail goes in an issue, a plan, a decision or the Notes 
 | 3 | Live data and the other cities: Newcastle and Gateshead, London zones, weather, TfL lifts | Done ([report](PHASE3_REPORT.md)) |
 | 4 | Navigation and the loop: turn-by-turn, report a problem, offline | First pass done ([report](PHASE4_REPORT.md)) |
 
-The current direction: **fix and fill the pilot cities** with open data that needs no permission, then **check our guesses with real people**. A phone app, whole cities, a reports backend and accounts are deferred by Richard (see **Deferred by Richard**).
+The current direction: **fix and fill the pilot cities** with open data that needs no permission, then **check our guesses with real people**. A phone app, whole cities and accounts are deferred by Richard (see **Deferred by Richard**). Community reports are on (FEAT-25, D-083), waiting on a Supabase project to be shared.
 
 ## Now
 
@@ -144,7 +144,13 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | FEAT-22 | Named, saved mobility profiles: create, name, pick and edit them; the current settings become the first one | M | now | done (2026-10-08) | Claude | D-082. PR #75. Saved devices (D-034) already were these; now shown by name and type on the route, and "Edit and name" for an unnamed one. On the phone only |
 | FEAT-23 | Route details as an expressive summary, not nine identical accordions: key facts inline, a gradient strip, steps listed, "Unsure" explained, the rest behind disclosure | M | now | done (2026-10-08) | Claude | D-082. PR #75. "At a glance" tiles; Getting in, Route in words, Hills and Toilets shown open; three sections still fold. [Plan](plans/ROUTE_PANEL_PROFILES.md) |
 | FEAT-24 | Check the new route screen and "Routes are for" line with testers: do the tiles and the open sections help, or is it too long on a phone? | S | next | todo | Richard, Claude | D-082. With RES work |
-| FEAT-25 | Community reports: tag good or bad access on the map by category (missing dropped kerb, steps, broken lift, good ramp, accessible toilet), with an optional short review and photo; others agree, disagree or say "still there?"; confidence decays, and well-confirmed reports change routes. Map filters by category and good or bad | XL | now | doing | Claude | Richard's brief 2026-10-08. Takes in DEF-04 and DEF-06. Branch `claude/community-reports`, 2026-10-08. [Plan](plans/COMMUNITY_REPORTS.md) |
+| FEAT-25 | Community reports: tag good or bad access on the map by category (missing dropped kerb, steps, broken lift, good ramp, accessible toilet), with an optional short review and photo; others agree, disagree or say "still there?"; confidence decays, and well-confirmed reports change routes. Map filters by category and good or bad | XL | now | done (2026-10-08) | Claude | D-083. PR #78. Richard's brief 2026-10-08. Takes in DEF-04 and DEF-06. [Plan](plans/COMMUNITY_REPORTS.md). On the phone until the Supabase project exists ([handoff](handoff/COWORK_COMMUNITY_REPORTS.md)) |
+| FEAT-26 | A Community tab in `/review`: hidden community reports and their flags, photos to approve | M | next | todo | Claude | D-083. Until then, the SQL in BACKEND.md |
+| FEAT-27 | Routes use confirmed accessible toilets and seats from community reports (toilet and rest limits) | S | next | todo | Claude | D-083. Shown on the map already; `Router.addToilets` re-indexes, so add them once per city load, not per plan |
+| FEAT-28 | Privacy page: a paragraph on community reports (what others see, rounding, deleting) | S | next | todo | Richard, Claude | D-083. With the DPIA (SEC-10) |
+| FEAT-29 | Clean-up job: delete reports faded for a year, removed ones, and their photos | S | later | todo | Claude | D-083. A scheduled Supabase function or a GitHub Action with the service key |
+| FEAT-30 | Send confirmed structural reports to OpenStreetMap as OSM Notes, after a terms-of-use sentence on sharing | L | later | todo | Richard, Claude | D-083, D-008. Plan in [COMMUNITY_REPORTS.md](plans/COMMUNITY_REPORTS.md#openstreetmap-later-plan-only). Replaces DEF-05 |
+| FEAT-31 | Check the categories, the three-tap add and the confidence thresholds with testers | S | next | todo | Richard, Claude | D-083. With RES work |
 
 ## Small features
 
@@ -310,9 +316,9 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 | DEF-01 | Native app (Expo): lock-screen progress, background location, haptics | XL | later | blocked | Richard, Claude | D-004. Needs Apple and Google developer accounts |
 | DEF-02 | Whole cities, starting with all of Edinburgh | L | later | blocked | Richard, Claude | D-014. Needs a build worker (DEF-03) |
 | DEF-03 | Graph builds on a worker (Fly.io or Cloud Run) with normal network access | M | later | blocked | Richard, Claude | D-010 |
-| DEF-04 | Reports backend: store and moderate public reports | L | later | blocked | Richard, Claude | D-022, D-030 |
-| DEF-05 | Send fixes back to OpenStreetMap from reports and notes | L | later | blocked | Richard, Claude | D-008. Needs DEF-04 |
-| DEF-06 | Crowd verification: several people confirming the same note | L | later | blocked | Claude | Needs DEF-04 |
+| DEF-04 | Reports backend: store and moderate public reports | L | later | done (2026-10-08) | Richard, Claude | D-022, D-030. Richard asked for it with FEAT-25 (D-083). Live once the Supabase project exists |
+| DEF-05 | Send fixes back to OpenStreetMap from reports and notes | L | later | blocked | Richard, Claude | D-008. Planned as FEAT-30 |
+| DEF-06 | Crowd verification: several people confirming the same note | L | later | done (2026-10-08) | Claude | For community reports, in FEAT-25 (D-083): agree, disagree, still there. Notes still count corroboration by matching (D-026) |
 | DEF-07 | Optional accounts: sync devices and saved places between phones, encrypted on the device, sign in with a passkey or email code | L | later | blocked | Richard, Claude | Health data makes this a privacy decision first (D-009) |
 | DEF-08 | Opt-in surface sensing from the accelerometer | L | later | blocked | Claude | Needs DEF-01 and a privacy review |
 | DEF-09 | Beyond the pilot cities: Glasgow first (once DATA-13 is licensed), then Leeds, then by city size (D-072) | XL | later | blocked | Richard, Claude | §5 |
@@ -321,6 +327,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 ## Log
 
 Newest first. One line per change: date, ID, what happened, link.
+- 2026-10-08: FEAT-25 done in PR #78 (D-083): community reports. Tag good or bad access by category in three taps, agree, disagree or "still there?", confidence that decays per category, confirmed problems close edges for the people they stop, map filters. Migration 0009 with per-person and per-network limits. Takes in DEF-04 and DEF-06. Added FEAT-26 to FEAT-31. [Plan](plans/COMMUNITY_REPORTS.md), [handoff](handoff/COWORK_COMMUNITY_REPORTS.md).
 - 2026-10-08: FEAT-21, FEAT-22 and FEAT-23 done in PR #75 (D-082), from Richard's feedback on the route screen: who the route is for, saved profiles by name, and route details at a glance. Added FEAT-24.
 - 2026-10-08: DEP-01 done. `main` is the default and production branch; the mirror workflow is retired. Open: delete `claude/sleepy-johnson-mavbrs` once its branch protection rule is lifted (OPEN_ITEMS).
 - 2026-10-07: SPEED-10 done in PR #69: destination to route in Edinburgh 5.55 s to 2.99 s on Fast 4G with 4x CPU ([numbers](perf/2026-10-07-speed-10.md)); Newcastle and London 0.2 to 0.3 s quicker. On `main` after SPEED-09, Edinburgh 6.20 to 3.10 s, and Edinburgh's map draws 2.9 s sooner. The map no longer sends the whole network to MapLibre on every journey change, and `alternatives` costs each edge once. `perf:web --trace` added. Added SPEED-15, SPEED-16. Now: SPEED-15, SPEED-11 and SPEED-12 replace SPEED-10, SEC-17 and SMALL-20, which are done.

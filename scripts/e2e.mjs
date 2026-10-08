@@ -24,7 +24,8 @@
  * city's suggested start; the others share a location, and no request may carry it. One
  * journey checks where you start: from your location, swapped, with location turned off,
  * and from outside the city. One with saved places on the map (SMALL-13): a marker offers
- * "Go here" and "Start from here", by keyboard too.
+ * "Go here" and "Start from here", by keyboard too. And community reports (FEAT-25), against a stand-in
+ * backend: add one in three taps, move its pin by keyboard, filter the map, and agree with one.
  * Exits 1 on any failed step, page error, profile leak, or anything the Content
  * Security Policy blocks. Runs in CI (.github/workflows/ci.yml). Set E2E_SHOT=<file.png>
  * to keep a screenshot of the trip journey when it fails.
@@ -749,6 +750,114 @@ for (const j of JOURNEYS) {
     await page.getByPlaceholder("Where are you starting from?").waitFor();
   });
   for (const p of problems) failures.push(`${name}: ${p}`), console.log(`  FAIL ${p}`);
+}
+// Community reports (FEAT-25, D-083), against a stand-in backend (the build has no keys; sync.ts takes one on localhost
+// only). Add a report in three taps at your location, move a pin by keyboard, filter the map, and agree with someone
+// else's report, which makes it confirmed. Reports carry a place on purpose (the thing reported), never the profile.
+{
+  const name = "edinburgh: community reports";
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, ...hereIn("edinburgh") });
+  const page = await context.newPage();
+  const problems = [];
+  watchCsp(page, problems);
+  watchProfile(page, problems);
+  page.on("pageerror", (e) => problems.push(`page error: ${e.message}`));
+  const now = new Date().toISOString();
+  const theirs = [
+    { id: "0e2e0000-0000-4000-8000-000000000001", area_id: "edinburgh", category: "broken-lift", lon: -3.1835, lat: 55.9395, body: "Out since Monday", photo_path: null, observed_at: now, votes: [{ kind: "agree", at: now }], my_vote: null, own: false },
+    { id: "0e2e0000-0000-4000-8000-000000000002", area_id: "edinburgh", category: "seat", lon: -3.1795, lat: 55.9380, body: null, photo_path: null, observed_at: now, votes: [], my_vote: null, own: false },
+  ];
+  const posted = { reports: [], votes: [] };
+  await page.addInitScript(() => {
+    window.__CAUSEWAY_TEST_BACKEND__ = { url: "https://e2e.supabase.co", key: "e2e-anon" };
+    localStorage.setItem("causewayside.city.v1", "edinburgh");
+  });
+  await page.route(/open-meteo\.com|environment\.data\.gov\.uk|ukhsa-dashboard\.data\.gov\.uk|timeseries\.sepa\.org\.uk/, (r) => r.abort());
+  await page.route(/e2e\.supabase\.co/, (r) => {
+    const req = r.request();
+    const u = new URL(req.url());
+    const json = (body, status = 200) => r.fulfill({ status, contentType: "application/json", body: JSON.stringify(body) });
+    if (u.pathname.startsWith("/auth/v1/")) return json({ access_token: "e2e", refresh_token: "e2e", expires_in: 3600, user: { id: "0e2e0000-0000-4000-8000-0000000000ff" } });
+    if (u.pathname === "/rest/v1/community_report_public") return json(theirs);
+    if (req.method() === "GET") return json([]);
+    if (u.pathname === "/rest/v1/community_report") posted.reports.push(JSON.parse(req.postData() ?? "{}"));
+    if (u.pathname === "/rest/v1/community_vote") posted.votes.push(JSON.parse(req.postData() ?? "{}"));
+    return r.fulfill({ status: 201, body: "" });
+  });
+  console.log(name);
+  const step = async (label, fn) => {
+    try {
+      await fn();
+    } catch (e) {
+      throw new Error(`${label}: ${e.message.split("\n")[0]}`);
+    }
+    console.log(`  ok   ${label}`);
+  };
+  try {
+    await page.goto(server.url);
+    await page.getByPlaceholder("Where to?").waitFor({ timeout: 60_000 });
+    await step("add a report in three taps, at your location", async () => {
+      await page.getByRole("button", { name: "Add a report", exact: true }).click(); // 1
+      const sheet = page.getByRole("dialog", { name: "Add a report" });
+      await sheet.getByText(/^Your location/).waitFor({ timeout: 15_000 });
+      await sheet.getByRole("radio", { name: "No dropped kerb" }).click(); // 2
+      await sheet.getByRole("button", { name: "Save: No dropped kerb" }).click(); // 3
+      await sheet.getByText("Saved. Thank you.").waitFor();
+      await sheet.getByRole("button", { name: "Done" }).click();
+      await page.waitForFunction(() => document.querySelector('[aria-label^="No dropped kerb, a problem"]'), null, { timeout: 15_000 });
+      const sent = posted.reports[0];
+      if (!sent || sent.category !== "no-dropped-kerb" || sent.area_id !== "edinburgh") throw new Error(`sent: ${JSON.stringify(sent)}`);
+      const [, lon, lat] = /POINT\(([-\d.]+) ([-\d.]+)\)/.exec(sent.geom) ?? [];
+      if (Math.abs(Number(lon) - HERE.edinburgh.longitude) > 1e-4 || Math.abs(Number(lat) - HERE.edinburgh.latitude) > 1e-4) throw new Error(`not at your location: ${sent.geom}`);
+    });
+    await step("move the pin with the keyboard, then back to the sheet", async () => {
+      await page.getByRole("button", { name: "Add a report", exact: true }).click();
+      const sheet = page.getByRole("dialog", { name: "Add a report" });
+      await sheet.getByText(/^Your location/).waitFor({ timeout: 15_000 });
+      await sheet.getByRole("button", { name: "Move the pin" }).click();
+      const pin = page.getByRole("button", { name: /^Report pin/ });
+      await pin.waitFor();
+      await pin.focus();
+      for (let i = 0; i < 3; i++) await page.keyboard.press("ArrowUp");
+      await page.getByRole("button", { name: "Done", exact: true }).click();
+      await sheet.getByText("Where you put the pin").waitFor();
+      await page.keyboard.press("Escape");
+      await sheet.waitFor({ state: "detached" });
+    });
+    await step("filter the map: problems off, then on", async () => {
+      const bad = page.locator('[aria-label^="Broken lift, a problem"]');
+      const good = page.locator('[aria-label^="Somewhere to sit, good for access"]');
+      await bad.waitFor();
+      await good.waitFor();
+      await page.getByRole("button", { name: "Map layers" }).click();
+      await page.getByRole("menuitemcheckbox", { name: /Problems/ }).click();
+      await bad.waitFor({ state: "detached" });
+      if (!(await good.count())) throw new Error("good things went too");
+      await page.getByRole("menuitemcheckbox", { name: /Problems/ }).click();
+      await bad.waitFor();
+      await page.keyboard.press("Escape");
+    });
+    await step("agree with someone else's report: it becomes confirmed", async () => {
+      // By keyboard: on a phone this one is under the half-open sheet, and a marker is a real button.
+      await page.locator('[aria-label^="Broken lift, a problem"]').focus();
+      await page.keyboard.press("Enter");
+      const sheet = page.getByRole("dialog", { name: "Broken lift" });
+      await sheet.getByText("Not confirmed yet").waitFor();
+      await sheet.getByRole("button", { name: "Agree", exact: true }).click();
+      await sheet.getByText("Confirmed", { exact: true }).waitFor();
+      if ((await sheet.getByRole("button", { name: "Agree", exact: true }).getAttribute("aria-pressed")) !== "true") throw new Error("Agree isn't shown as chosen");
+      for (let i = 0; i < 50 && !posted.votes.length; i++) await page.waitForTimeout(100);
+      if (posted.votes[0]?.kind !== "agree" || posted.votes[0]?.report_id !== theirs[0].id) throw new Error(`vote sent: ${JSON.stringify(posted.votes[0])}`);
+      await sheet.getByRole("button", { name: "Yes, still there" }).click();
+      await sheet.getByRole("button", { name: "Report this report" }).waitFor();
+    });
+  } catch (e) {
+    if (process.env.E2E_SHOT) await page.screenshot({ path: process.env.E2E_SHOT });
+    failures.push(`${name}: ${e.message.split("\n")[0]}`);
+    console.log(`  FAIL ${e.message.split("\n")[0]}`);
+  }
+  for (const p of problems) failures.push(`${name}: ${p}`), console.log(`  FAIL ${p}`);
+  await context.close();
 }
 await browser.close();
 server.close();

@@ -8,7 +8,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 import { communitySignals, type CommunityReport, type CommunitySignal } from "@causeway/graph";
 import { loadSnapshot } from "@causeway/graph/node";
 import { PRESETS } from "@causeway/profile";
-import { communityCost, DRY, Router, UNCONFIRMED_SHARE } from "@causeway/router";
+import { communityCost, communityOnRoute, DRY, Router, UNCONFIRMED_SHARE } from "@causeway/router";
 
 const manual = { ...PRESETS["manual-wheelchair"], buses: false };
 const walking = { ...PRESETS.walking, buses: false };
@@ -55,6 +55,22 @@ describe("communityCost", () => {
 
   it("ignoring closures (to explain what a block cut off) ignores community blocks too", () => {
     expect("exclude" in communityCost([sig("steps", "confirmed")], manual, 20, 0, true)).toBe(false);
+  });
+});
+
+describe("communityOnRoute", () => {
+  it("lists problems under Slower and confirmed good things under Worth knowing, once each, saying when one isn't confirmed", () => {
+    const edge = (id: number, name: string) => ({ edge: { id, name } }) as never;
+    const signals = new Map([
+      [1, [sig("no-dropped-kerb", "reported")]],
+      [2, [sig("no-dropped-kerb", "reported"), { ...sig("dropped-kerb", "confirmed"), reportId: "g" }]],
+      [3, [{ ...sig("ramp", "reported"), reportId: "u" }]],
+    ]);
+    const items = communityOnRoute({ steps: [edge(1, "Grange Road"), edge(2, "Grange Road"), edge(3, "Lauder Road")] }, signals);
+    expect(items).toHaveLength(2);
+    expect(items[0]).toMatchObject({ group: "slower", label: "reported", source: "Causewayside community", where: ["Grange Road"] });
+    expect(items[0]!.text).toMatch(/Not confirmed yet$/);
+    expect(items[1]).toMatchObject({ group: "info" });
   });
 });
 

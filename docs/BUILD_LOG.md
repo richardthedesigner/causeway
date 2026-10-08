@@ -2,6 +2,17 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
+## 2026-10-08 (community reports)
+
+FEAT-25 (D-083), PR #78. Richard's brief: the app was missing community content. [Plan](plans/COMMUNITY_REPORTS.md).
+- Tag good or bad access on the map by category, in three taps: "Add a report", what you found, Save. The pin starts at your location and can be dragged, tapped into place or moved with the arrow keys. An optional review (200 characters) and photo.
+- Report pins on the map, a triangle for a problem and a circle for something good, dashed until confirmed. The map layers menu filters them: all, problems, good things, and each category.
+- A report's sheet: how sure we are and why, what it means for routes, Agree or Disagree, "still there?", and "Report this report".
+- Confidence that decays per category (`packages/graph/src/community.ts`). Confirmed problems close edges for the people they stop; single reports only warn, under "On this route" (`packages/router/src/community.ts`). A wheelchair route in Edinburgh goes round a confirmed missing dropped kerb, not round one report.
+- Migration 0009: community reports, votes and flags, with per-person and per-network limits, rounding, and server-set fields. 21 database checks.
+- With sharing off, everything works on the phone. Sharing turns on with the Supabase project ([handoff](handoff/COWORK_COMMUNITY_REPORTS.md)).
+- End to end against a stand-in backend: add, move the pin by keyboard, filter, agree. The a11y check covers the new sheets and the layers menu, which now passes axe's menu rules.
+
 ## 2026-10-08 (who the route is for, and the route at a glance)
 
 FEAT-21, FEAT-22 and FEAT-23 (D-082), PR #75. From Richard's feedback on the route screen.

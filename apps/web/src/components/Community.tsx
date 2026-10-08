@@ -28,6 +28,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { useId, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   categoryInfo,
   COMMUNITY_CATEGORIES,
@@ -266,7 +267,8 @@ export function CommunityAddSheet({ open, onOpenChange, draft, city, sharing, re
 
 /** While moving the pin: a bar over the sheet with big targets, and the pin itself takes arrow keys. */
 export function PlacingBar({ onHere, onDone, locating }: { onHere: () => void; onDone: () => void; locating: boolean }) {
-  return (
+  // Drawn at the end of the page: inside the map's layer, the bottom sheet would sit on top of it.
+  return createPortal(
     <div role="region" aria-label="Move the report pin" className="fixed inset-x-0 bottom-0 z-[55] grid gap-3 rounded-t-[var(--radius)] border-t border-line bg-surface p-4 pb-[calc(16px+env(safe-area-inset-bottom,0px))] shadow-[0_-8px_30px_rgb(0_0_0/0.16)] md:left-4 md:right-auto md:bottom-4 md:w-[420px] md:rounded-[var(--radius)] md:border">
       <p className="m-0 font-bold">Drag the pin onto the spot, or tap the map. With a keyboard, the pin moves with the arrow keys.</p>
       <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,10rem),1fr))] gap-2">
@@ -277,7 +279,8 @@ export function PlacingBar({ onHere, onDone, locating }: { onHere: () => void; o
           Done
         </Button>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
