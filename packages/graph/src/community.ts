@@ -196,8 +196,10 @@ export interface CommunitySignal {
   category: CommunityCategory;
   level: Exclude<ReportLevel, "faded" | "disputed">;
   confidence: number;
-  /** Plain words for the route explanation: "No dropped kerb (3 people, last 2 days ago)". */
+  /** Plain words for the route explanation: "No dropped kerb: 3 people, last seen 2 days ago". */
   detail: string;
+  /** ISO time someone last said it's there. */
+  lastSeen: string;
 }
 
 const TARGET_KINDS: Record<CategoryTarget, ReadonlySet<string> | null> = {
@@ -304,22 +306,35 @@ export function communitySignals(
   now: Date = new Date(),
 ): Map<number, CommunitySignal[]> {
   const out = new Map<number, CommunitySignal[]>();
+  if (!reports.length) return out;
+  // Edges in a grid of about 100 m cells, by bounding box, so each report only measures the edges near it.
+  const CELL = 0.001;
+  const grid = new Map<string, Pick<GraphEdge, "id" | "kind" | "geometry">[]>();
+  for (const e of edges) {
+    if (NEVER.has(e.kind) || !e.geometry.length) continue;
+    let [x0, x1, y0, y1] = [Infinity, -Infinity, Infinity, -Infinity];
+    for (const [x, y] of e.geometry) [x0, x1, y0, y1] = [Math.min(x0, x), Math.max(x1, x), Math.min(y0, y), Math.max(y1, y)];
+    for (let cx = Math.floor(x0 / CELL); cx <= Math.floor(x1 / CELL); cx++)
+      for (let cy = Math.floor(y0 / CELL); cy <= Math.floor(y1 / CELL); cy++) {
+        const k = `${cx},${cy}`;
+        (grid.get(k) ?? grid.set(k, []).get(k)!).push(e);
+      }
+  }
+  const near = (lon: number, lat: number) => {
+    const set = new Set<Pick<GraphEdge, "id" | "kind" | "geometry">>();
+    const [cx, cy] = [Math.floor(lon / CELL), Math.floor(lat / CELL)];
+    for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) for (const e of grid.get(`${cx + dx},${cy + dy}`) ?? []) set.add(e);
+    return [...set];
+  };
   for (const r of reports) {
     if (!isCategory(r.category)) continue;
     const e = evidence(r, now);
     const level = reportLevel(e);
     if (level === "faded" || level === "disputed") continue;
-    const sig: CommunitySignal = { reportId: r.id, category: r.category, level, confidence: e.confidence, detail: signalDetail(r, e, now) };
-    for (const id of reportEdges(r, edges)) (out.get(id) ?? out.set(id, []).get(id)!).push(sig);
+    const sig: CommunitySignal = { reportId: r.id, category: r.category, level, confidence: e.confidence, detail: signalDetail(r, e, now), lastSeen: e.lastSeen };
+    for (const id of reportEdges(r, near(r.lon, r.lat))) (out.get(id) ?? out.set(id, []).get(id)!).push(sig);
   }
   return out;
-}
-
-/** Accessible toilets people have confirmed, for the route's toilet list and limits. */
-export function confirmedToilets(reports: readonly CommunityReport[], now: Date = new Date()): { lon: number; lat: number; name: string }[] {
-  return reports
-    .filter((r) => r.category === "accessible-toilet" && reportLevel(evidence(r, now)) === "confirmed")
-    .map((r) => ({ lon: r.lon, lat: r.lat, name: "Accessible toilet (confirmed by people)" }));
 }
 
 /** Reports near a point, nearest first, for "is this already reported?" before adding a duplicate. */

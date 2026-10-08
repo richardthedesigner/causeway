@@ -62,6 +62,8 @@ export function MyDataSheet({ open, onOpenChange }: { open: boolean; onOpenChang
                   <li>{plural(s.notes, "note")}</li>
                   <li>{plural(s.reports, "problem report")}</li>
                   <li>{plural(s.whatsThere, "report")} of what&apos;s there</li>
+                  <li>{plural(s.community, "community report")} on the map</li>
+                  <li>{plural(s.votes, "answer")} to other people&apos;s reports</li>
                   <li>{plural(s.saved, "saved place")}</li>
                   <li>{plural(s.recents, "recent place")}</li>
                   <li>Your city and settings</li>

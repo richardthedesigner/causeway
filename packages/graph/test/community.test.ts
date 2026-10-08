@@ -2,9 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   COMMUNITY_CATEGORIES,
   communitySignals,
-  confirmedToilets,
   decay,
   evidence,
+  nearbyReports,
   publicPoint,
   reportEdges,
   reportLevel,
@@ -99,9 +99,10 @@ describe("reports", () => {
     expect(publicPoint(-3.191234, 55.951278)).toEqual([-3.1912, 55.9513]);
   });
 
-  it("only confirmed accessible toilets count on routes", () => {
-    expect(confirmedToilets([report({ category: "accessible-toilet" })], NOW)).toHaveLength(0);
-    expect(confirmedToilets([report({ category: "accessible-toilet", votes: [vote("agree"), vote("agree")] })], NOW)).toHaveLength(1);
+  it("finds the same thing already reported nearby, so people agree rather than add a copy", () => {
+    const all = [report({ id: "near" }), report({ id: "far", lon: -3.18 }), report({ id: "other", category: "steps" })];
+    expect(nearbyReports(all, -3.19001, 55.95001, "no-dropped-kerb").map((r) => r.id)).toEqual(["near"]);
+    expect(nearbyReports(all, -3.19001, 55.95001, null).map((r) => r.id)).toEqual(["near", "other"]);
   });
 });
 

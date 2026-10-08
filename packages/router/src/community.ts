@@ -14,6 +14,8 @@
 import type { CommunityCategory, CommunitySignal } from "@causeway/graph";
 import type { Profile } from "@causeway/profile";
 import type { Reason } from "./cost.js";
+import type { OnRouteItem } from "./on-route.js";
+import type { Route } from "./router.js";
 
 const wheeled = (p: Profile) => p.maxSteps === 0;
 const stepFree = (p: Profile) => p.maxSteps < 10 || !p.escalators;
@@ -78,4 +80,36 @@ export function communityCost(sigs: readonly CommunitySignal[], p: Profile, seco
     }
   }
   return { reasons, penalty };
+}
+
+/** Where community reports come from, in "On this route". */
+export const COMMUNITY_SOURCE = "Causewayside community";
+
+/**
+ * "On this route" items for the community reports a route passes (D-067's
+ * shape): problems under Slower, good things under Worth knowing. Each says
+ * whether it's confirmed. What a confirmed report made the route go round is
+ * in the explanation's "avoided" list, like any closure.
+ */
+export function communityOnRoute(r: Pick<Route, "steps">, signals: ReadonlyMap<number, readonly CommunitySignal[]>): OnRouteItem[] {
+  const seen = new Set<string>();
+  const out: OnRouteItem[] = [];
+  for (const st of r.steps) {
+    for (const s of signals.get(st.edge.id) ?? []) {
+      if (seen.has(s.reportId)) continue;
+      seen.add(s.reportId);
+      const bad = !!BAD[s.category];
+      if (!bad && s.level !== "confirmed") continue;
+      out.push({
+        group: bad ? "slower" : "info",
+        text: `${s.detail}${s.level === "confirmed" ? "" : ". Not confirmed yet"}`,
+        where: st.edge.name ? [st.edge.name] : [],
+        label: "reported",
+        source: COMMUNITY_SOURCE,
+        date: s.lastSeen,
+        until: null,
+      });
+    }
+  }
+  return out;
 }

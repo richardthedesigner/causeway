@@ -18,6 +18,7 @@ const sig = (category: CommunitySignal["category"], level: CommunitySignal["leve
   level,
   confidence,
   detail: "test",
+  lastSeen: "2026-10-08T00:00:00Z",
 });
 
 describe("communityCost", () => {

@@ -108,3 +108,9 @@ h1, h2, h3 { text-wrap: balance; }
 .saved-marker-pill svg { flex: none; color: var(--accent); }
 .saved-marker-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .saved-marker-stem { width: 3px; height: 8px; background: var(--ink); }
+/* Community reports (FEAT-25): a 44 px target around a 26 px sign. Not confirmed yet: drawn lighter, with a dashed ring, so it reads without colour. */
+.community-marker { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 999px; background: none; cursor: pointer; }
+.community-marker[data-level="other"] svg { opacity: 0.8; }
+.community-marker[data-level="other"]::after { content: ""; position: absolute; inset: 6px; border: 2px dashed var(--ink); border-radius: 999px; pointer-events: none; }
+.community-marker:focus-visible, .draft-pin:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.draft-pin { display: block; padding: 0; border: 0; background: none; cursor: grab; touch-action: none; }

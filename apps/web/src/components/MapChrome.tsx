@@ -1,5 +1,7 @@
 "use client";
-import { Check, ChevronDown, CloudRain, Layers, LocateFixed, Snowflake, Sun } from "lucide-react";
+import { Check, ChevronDown, CloudRain, Layers, LocateFixed, MapPinPlus, Snowflake, Sun } from "lucide-react";
+import { COMMUNITY_CATEGORIES } from "@causeway/graph";
+import type { CommunityFilter } from "@/lib/community-store";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { City } from "@/lib/cities";
@@ -21,6 +23,11 @@ interface Props {
   credit: string;
   /** While navigating only the layers button stays; the rest is noise. */
   minimal?: boolean;
+  /** Community reports on the map (FEAT-25): which to show. */
+  community: CommunityFilter;
+  onCommunity: (f: CommunityFilter) => void;
+  /** Start adding a report. Absent while navigating (the report button there is for problems). */
+  onAddReport?: () => void;
 }
 
 export const GROUND = {
@@ -40,6 +47,17 @@ function Option({ on, onClick, children }: { on: boolean; onClick: () => void; c
     <button type="button" role="menuitemradio" aria-checked={on} onClick={onClick} className={cn("flex min-h-12 items-center gap-3 rounded-xl px-3 text-left", on ? "bg-surface-2 font-bold" : "hover:bg-surface-2")}>
       <span className="flex-1">{children}</span>
       {on ? <Check aria-hidden className="size-5 text-accent" /> : null}
+    </button>
+  );
+}
+
+function Toggle({ on, onClick, children, indent = false }: { on: boolean; onClick: () => void; children: React.ReactNode; indent?: boolean }) {
+  return (
+    <button type="button" role="menuitemcheckbox" aria-checked={on} onClick={onClick} className={cn("flex min-h-12 items-center gap-3 rounded-xl px-3 text-left hover:bg-surface-2", indent && "pl-6")}>
+      <span className={cn("min-w-0 flex-1", !indent && "font-bold")}>{children}</span>
+      <span aria-hidden className={cn("relative h-[28px] w-[48px] shrink-0 rounded-full transition-colors", on ? "bg-accent" : "bg-line")}>
+        <span className={cn("absolute top-[4px] size-[20px] rounded-full bg-surface transition-[left]", on ? "left-[24px]" : "left-[4px]")} />
+      </span>
     </button>
   );
 }
@@ -170,6 +188,39 @@ export function MapChrome(props: Props) {
                   <span className={cn("absolute top-[4px] size-[20px] rounded-full bg-surface transition-[left]", props.highContrast ? "left-[24px]" : "left-[4px]")} />
                 </span>
               </button>
+              <div role="group" aria-label="Community reports" className="mt-1 grid gap-1 border-t border-line pt-2">
+                <Toggle on={props.community.show} onClick={() => props.onCommunity({ ...props.community, show: !props.community.show })}>
+                  Community reports
+                </Toggle>
+                {props.community.show ? (
+                  <>
+                    <Toggle indent on={props.community.bad} onClick={() => props.onCommunity({ ...props.community, bad: !props.community.bad })}>
+                      <span aria-hidden className="mr-2 inline-block text-stop">▲</span>Problems
+                    </Toggle>
+                    <Toggle indent on={props.community.good} onClick={() => props.onCommunity({ ...props.community, good: !props.community.good })}>
+                      <span aria-hidden className="mr-2 inline-block text-ok">●</span>Good for access
+                    </Toggle>
+                    <details className="px-3 text-sm">
+                      <summary className="min-h-10 cursor-pointer py-2 font-bold">Choose categories</summary>
+                      <div className="grid gap-1 pb-2">
+                        {COMMUNITY_CATEGORIES.filter((c) => (c.polarity === "bad" ? props.community.bad : props.community.good)).map((c) => {
+                          const on = !props.community.hidden.includes(c.id);
+                          return (
+                            <Toggle
+                              key={c.id}
+                              indent
+                              on={on}
+                              onClick={() => props.onCommunity({ ...props.community, hidden: on ? [...props.community.hidden, c.id] : props.community.hidden.filter((h) => h !== c.id) })}
+                            >
+                              {c.label}
+                            </Toggle>
+                          );
+                        })}
+                      </div>
+                    </details>
+                  </>
+                ) : null}
+              </div>
               <details className="px-3 pb-2 text-sm text-muted">
                 <summary className="min-h-10 cursor-pointer py-2 font-bold text-ink">About this map</summary>
                 {props.credit}
@@ -177,6 +228,11 @@ export function MapChrome(props: Props) {
             </>)
           ) : null}
         </div>
+        {!props.minimal && props.onAddReport ? (
+          <button type="button" id="add-report" aria-label="Add a report" onClick={props.onAddReport} className={cn(fab, "bg-accent text-accent-ink")}>
+            <MapPinPlus aria-hidden className="size-[24px]" />
+          </button>
+        ) : null}
         {!props.minimal ? (
           <button type="button" aria-label={props.locating ? "Finding your location" : "Start from your location"} onClick={props.onLocate} className={fab}>
             <LocateFixed aria-hidden className={cn("size-[24px]", props.locating && "animate-pulse text-accent")} />

@@ -34,6 +34,12 @@ interface Props {
   /** Saved places (FEAT-04) drawn as labelled buttons (SMALL-13): reachable by keyboard and screen reader, unlike a canvas layer. */
   saved?: { id: string; label: string; lon: number; lat: number }[];
   onSavedPick?: (id: string) => void;
+  /** Community reports (FEAT-25) shown as buttons, like saved places: reachable by keyboard and screen reader. */
+  community?: { id: string; label: string; polarity: "good" | "bad"; level: string; lon: number; lat: number }[];
+  onCommunityPick?: (id: string) => void;
+  /** A new report's pin while it's being placed: drag it, tap the map, or move it with the arrow keys. */
+  draft?: { lon: number; lat: number } | null;
+  onDraftMove?: (lon: number, lat: number) => void;
 }
 
 const css = (v: string) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
@@ -54,7 +60,7 @@ const point = (p: { lon: number; lat: number }, props: Record<string, unknown> =
  * Colours come from the page's CSS tokens and follow theme changes live.
  * The high-contrast map (SMALL-05) swaps the base map palette and widens the route.
  */
-export function MapView({ network, routes, selectedId, from, to, pin, showSlopes, entrances, onMapClick, me, basemap, toilets = [], blockers = [], preview = null, focus = null, highContrast = false, saved = [], onSavedPick }: Props) {
+export function MapView({ network, routes, selectedId, from, to, pin, showSlopes, entrances, onMapClick, me, basemap, toilets = [], blockers = [], preview = null, focus = null, highContrast = false, saved = [], onSavedPick, community = [], onCommunityPick, draft = null, onDraftMove }: Props) {
   const el = useRef<HTMLDivElement>(null);
   const map = useRef<MLMap | null>(null);
   const ready = useRef(false);
@@ -73,6 +79,11 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
   clickRef.current = onMapClick;
   const savedPickRef = useRef(onSavedPick);
   savedPickRef.current = onSavedPick;
+  const communityPickRef = useRef(onCommunityPick);
+  communityPickRef.current = onCommunityPick;
+  const draftMoveRef = useRef(onDraftMove);
+  draftMoveRef.current = onDraftMove;
+  const draftMarker = useRef<maplibregl.Marker | null>(null);
   // SMALL-20: true while nothing else has framed the map, so saved places may.
   const homeRef = useRef(true);
   homeRef.current = !routes.length && !to && !pin && !me && !focus;
@@ -230,6 +241,70 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
     fitSaved.current();
     return () => markers.forEach((mk) => mk.remove());
   }, [saved, mapReady]);
+
+  // Community reports (FEAT-25): a triangle with "!" for a problem, a circle with a tick for something good, so the shape
+  // says it without colour. Unconfirmed ones are drawn dashed. Each is a real button that opens the report.
+  useEffect(() => {
+    const m = map.current;
+    if (!m || !mapReady) return;
+    const markers = community.map((c) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.id = `community-marker-${c.id}`;
+      b.setAttribute("aria-label", `${c.label}, ${c.polarity === "bad" ? "a problem" : "good for access"}, ${c.level.toLowerCase()}. Community report`);
+      b.setAttribute("aria-haspopup", "dialog");
+      b.dataset.polarity = c.polarity;
+      b.dataset.level = c.level === "Confirmed" ? "confirmed" : "other";
+      b.className = "community-marker";
+      b.innerHTML =
+        c.polarity === "bad"
+          ? '<svg aria-hidden="true" viewBox="0 0 24 24" width="26" height="26"><path d="M12 2.5 22.5 21h-21z" fill="var(--stop)" stroke="var(--surface)" stroke-width="2" stroke-linejoin="round"/><path d="M12 9v5" stroke="var(--stop-ink, #fff)" stroke-width="2.4" stroke-linecap="round"/><circle cx="12" cy="17.4" r="1.4" fill="var(--stop-ink, #fff)"/></svg>'
+          : '<svg aria-hidden="true" viewBox="0 0 24 24" width="26" height="26"><circle cx="12" cy="12" r="10" fill="var(--ok)" stroke="var(--surface)" stroke-width="2"/><path d="m7.5 12.3 3 3 6-6.3" fill="none" stroke="var(--surface)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      b.addEventListener("click", (e) => {
+        e.stopPropagation();
+        communityPickRef.current?.(c.id);
+      });
+      return new maplibregl.Marker({ element: b }).setLngLat([c.lon, c.lat]).addTo(m);
+    });
+    return () => markers.forEach((mk) => mk.remove());
+  }, [community, mapReady]);
+
+  // The new report's pin: draggable with a finger or mouse, and with the arrow keys (about 2 m a press, 10 m with Shift).
+  useEffect(() => {
+    const m = map.current;
+    if (!m || !mapReady) return;
+    if (!draft) {
+      draftMarker.current?.remove();
+      draftMarker.current = null;
+      return;
+    }
+    if (!draftMarker.current) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.id = "community-draft-pin";
+      b.className = "draft-pin";
+      b.setAttribute("aria-label", "Report pin. Drag it, or use the arrow keys to move it");
+      b.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 32" width="36" height="48"><path d="M12 31s10-11.6 10-19a10 10 0 0 0-20 0c0 7.4 10 19 10 19z" fill="var(--accent)" stroke="var(--ink)" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="var(--surface)"/></svg>';
+      const mk = new maplibregl.Marker({ element: b, anchor: "bottom", draggable: true }).setLngLat([draft.lon, draft.lat]).addTo(m);
+      mk.on("dragend", () => {
+        const p = mk.getLngLat();
+        draftMoveRef.current?.(p.lng, p.lat);
+      });
+      b.addEventListener("click", (e) => e.stopPropagation());
+      b.addEventListener("keydown", (e) => {
+        const step = (e.shiftKey ? 10 : 2) / 111_320;
+        const p = mk.getLngLat();
+        const k = Math.cos((p.lat * Math.PI) / 180);
+        const d = { ArrowUp: [0, step], ArrowDown: [0, -step], ArrowLeft: [-step / k, 0], ArrowRight: [step / k, 0] }[e.key];
+        if (!d) return;
+        e.preventDefault();
+        draftMoveRef.current?.(p.lng + d[0]!, p.lat + d[1]!);
+      });
+      draftMarker.current = mk;
+    } else draftMarker.current.setLngLat([draft.lon, draft.lat]);
+    // Keep the pin in view as it moves.
+    if (!m.getBounds().contains([draft.lon, draft.lat])) m.easeTo({ center: [draft.lon, draft.lat], duration: matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 300 });
+  }, [draft, mapReady]);
 
   // Theme change while open: our own layers take their colours from CSS tokens, so read them again.
   useEffect(() => {

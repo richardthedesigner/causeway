@@ -3,13 +3,14 @@
  * Routing runs on the device, in a worker. The profile (health data) never
  * leaves the phone: it arrives here with each request and is not stored.
  */
-import { addBus, applyCouncilFootways, applyStationAccess, isKnown, refRides, mobilityLabelFor, noteSignals, type Graph, type GraphEdge, type Stretch, type TransitNetwork, type BusNetwork, type CouncilFootways } from "@causeway/graph";
+import { addBus, applyCouncilFootways, applyStationAccess, communitySignals, isKnown, refRides, mobilityLabelFor, noteSignals, type Graph, type GraphEdge, type Stretch, type TransitNetwork, type BusNetwork, type CouncilFootways } from "@causeway/graph";
 import { applyEdgeStates, applyKeyedStates, applyLiveStates, disruptionsMissing, floodsHere, floodStates, heldDisruptions, holdDisruptions, liftOutageStates, mergeLiveStates, NO_DISRUPTIONS_HELD, railDisruptionStates, riverHigh, riverText, stationInfoNotes, usesWalkway, worksStates, type FloodAreas, type HeldDisruptions, type LiftOutage, type WorksObservation } from "@causeway/live";
 import { PRESETS, type Profile } from "@causeway/profile";
 import {
   buildNavPlan,
   busWait,
   closureBlind,
+  communityOnRoute,
   describeSegments,
   diagnose,
   elevationProfile,
@@ -350,6 +351,8 @@ function plan(req: Extract<WorkerRequest, { type: "plan" }>): PlanResult {
   const c = conditionsOf(req.conditions);
   // Notes stay a separate layer: joined to edge ids here, per request, never written into the graph.
   router.noteSignals = noteSignals(req.notes, graph, c.now, mobilityLabelFor(p.preset), c.wet);
+  // Community reports likewise (FEAT-25, D-083): confirmed ones can close an edge for this person, the rest only warn.
+  router.communitySignals = communitySignals(req.community ?? [], graph.edges, c.now);
   const a = router.snap(req.from.lon, req.from.lat, p, c);
   // A building: aim for the door that fits this person (D-018), not its middle. Fall back to the middle if no door fits or none is reachable.
   // A park found by name skips the door step: its gate wins over a neighbouring building's door (D-048).
@@ -406,6 +409,7 @@ function plan(req: Extract<WorkerRequest, { type: "plan" }>): PlanResult {
     ...(riverHigh(req.river) && usesWalkway(r.steps.map((s) => s.edge.name)) ? [{ group: "info" as const, text: riverText(req.river), where: ["Water of Leith Walkway"], label: "live" as const, source: "SEPA", date: req.river.at, until: null }] : []),
     // OpenStreetMap notes near the route: shown, never used to route (DATA-08).
     ...osmNoteItems(osmNotes, coords),
+    ...communityOnRoute(r, router!.communitySignals),
   ];
   const all = alts.map((r, i) => {
     const pl = toPlanned(r, a, `r${i}`, i === 0 ? "Best for you" : "", best.seconds, c.now, p);
