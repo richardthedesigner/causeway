@@ -4,10 +4,17 @@ A running record of what was built, newest first. Each entry links the decision 
 
 ## 2026-10-08 (safer spaces: research and plan)
 
-FEAT-25 (D-083), PR #77. Docs only, from a user's request for queer and women-friendly spaces.
+FEAT-35 (D-084), PR #77. Docs only, from a user's request for queer and women-friendly spaces.
 - Surveyed venue schemes, apps, OSM tags, lighting, night transport and crime data for Edinburgh, Scotland and the UK. Keep Safe and Ask for ANI have ended; no venue scheme publishes open data. Edinburgh's 58,819 lamp columns went into OSM in June 2026.
 - Plan in `docs/plans/SAFE_SPACES.md`: lit routes, toilet filters and night buses first, for everyone; an opt-in "Out at night" layer on the phone only; partner lists later, with written agreements.
-- Proposed safety rules in D-083. Added FEAT-26 to FEAT-31 and RES-12.
+- Proposed safety rules in D-084. Added FEAT-36 to FEAT-41 and RES-12.
+
+## 2026-10-08 (user accounts, planned)
+
+FEAT-25 (D-083), PR #76. Docs only, nothing built.
+- [plans/USER_ACCOUNTS.md](plans/USER_ACCOUNTS.md): goals and non-goals, sign-in methods and providers compared for accessibility (WCAG 2.2 SC 3.3.8, no CAPTCHA puzzles), data model, UK GDPR and special category data, threat model, reputation and moderation, carers and companions, rollout with flags, and what Richard must set up.
+- Recommendation: Supabase Auth, upgrading today's anonymous id in place; email code first, then passkeys; sync encrypted on the phone; pseudonymous handles; accounts never required.
+- Phases added to the roadmap as FEAT-26 to FEAT-34. Ten open questions for Richard in OPEN_ITEMS.
 
 ## 2026-10-08 (who the route is for, and the route at a glance)
 

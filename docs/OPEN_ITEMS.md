@@ -8,6 +8,7 @@ Last updated: 2026-10-08.
 
 | What | Why it matters | Effort | Link |
 |---|---|---|---|
+| Answer the user accounts plan's open questions, starting with go or wait (FEAT-26) | Accounts are planned but deferred (DEF-07). Nothing can start until the go-ahead, the choice on encrypted sync, minimum age and carer consent | A read and ten answers | [plans/USER_ACCOUNTS.md](plans/USER_ACCOUNTS.md#open-questions-for-richard), [D-083](DECISIONS.md#d-083-user-accounts-supabase-auth-upgraded-in-place-optional-forever) |
 | Time the app on a real mid-range Android phone, or run it through WebPageTest (SPEED-12) | The container's numbers have an unslowed worker and a software GPU, so they are best cases | 15 minutes | [perf notes](perf/2026-10.md) |
 | Run the data refresh once by hand: Actions, then data-refresh, then Run workflow on `main` | Proves the weekly refresh works. It has never run, and this project's sessions can't start workflows | 1 minute | [#14](https://github.com/richardthedesigner/causeway/issues/14) |
 | Sign up for free API keys: National Rail, Met Office, Mapillary, BODS, Nexus | Each unlocks a data adapter (live trains, better weather, street photos, live buses) | About 30 minutes | [#9](https://github.com/richardthedesigner/causeway/issues/9) |
@@ -18,8 +19,8 @@ Last updated: 2026-10-08.
 | Ask Nexus for Tyne and Wear Metro lift status | Without it, Metro stations reached by lift are always "unknown" for step-free users | An email | [#13](https://github.com/richardthedesigner/causeway/issues/13) |
 | Decide whether chain-store websites scraped by AllThePlaces count as scraping under our rule | 348 places in search come only from AllThePlaces: mostly chain stores, parcel lockers and scout halls. Its Changing Places and NHS records are already out | A decision | ROADMAP DATA-27, [D-028](DECISIONS.md#d-028-overture-fills-search-gaps-osm-stays-the-source-of-access-facts) |
 | Turn on private vulnerability reporting: Settings, then Code security | `SECURITY.md` sends people there; until it's on they have nowhere private to report | 1 minute | [ROADMAP](ROADMAP.md) SEC-14 |
-| Say yes or no to the safer spaces rules (D-083), and whether to start phases 1 to 3 (lit routes, toilet filters, night buses) | A user asked for queer and women-friendly spaces. Listing venues can make them targets, so the rules come first | A decision | [SAFE_SPACES.md](plans/SAFE_SPACES.md), ROADMAP FEAT-29 |
-| Send the safer spaces partnership emails: Equality Network (Rainbow Mark), Hestia (Safe Spaces), Ask for Angela CIC, Police Scotland (what replaces Keep Safe), Edinburgh council's night-time coordinator, Street Assist | No venue scheme publishes open data, so each list needs written agreement. Claude can draft them | About six short emails | [SAFE_SPACES.md](plans/SAFE_SPACES.md#partnerships-worth-contacting), ROADMAP FEAT-30 |
+| Say yes or no to the safer spaces rules (D-084), and whether to start phases 1 to 3 (lit routes, toilet filters, night buses) | A user asked for queer and women-friendly spaces. Listing venues can make them targets, so the rules come first | A decision | [SAFE_SPACES.md](plans/SAFE_SPACES.md), ROADMAP FEAT-39 |
+| Send the safer spaces partnership emails: Equality Network (Rainbow Mark), Hestia (Safe Spaces), Ask for Angela CIC, Police Scotland (what replaces Keep Safe), Edinburgh council's night-time coordinator, Street Assist | No venue scheme publishes open data, so each list needs written agreement. Claude drafts them in DATA-35 | About six short emails | [SAFE_SPACES.md](plans/SAFE_SPACES.md#partnerships-worth-contacting), ROADMAP FEAT-40 |
 | Score the security headers: open [securityheaders.com](https://securityheaders.com/?q=https%3A%2F%2Fcauseway.richardthedesigner.com%2F&followRedirects=on) and note the grade | The scorer refuses cloud sessions, so it needs a browser. The custom domain (DEP-07) unblocked it | 1 minute | [ROADMAP](ROADMAP.md) SEC-25 |
 
 ## Blocked outside the project
@@ -49,6 +50,7 @@ These numbers shape routes but are our estimates, not evidence.
 
 ## Known gaps
 
+- The community reports plan (`docs/plans/COMMUNITY_REPORTS.md`) hadn't landed when the accounts plan was written. When it does, check it uses the Supabase anonymous user id as the contributor id, reads weights through `contributor_weight()`, and allows one vote per contributor per item ([plans/USER_ACCOUNTS.md](plans/USER_ACCOUNTS.md#fit-with-community-reports-and-safe-spaces), D-083).
 - There is no Causeway Supabase project yet. When one is made, run db/migrations 0001 to 0008 in order. SEC-16 is merged, so this is now safe. 0008 (SEC-17) makes the server set note and report fields the client used to choose.
 - The profile has a gap limit for boarding trains (`maxGapMm`), but no setting in the app: everyone gets TfL's 85 mm level band. Add a setting once research says people want one ([D-068](DECISIONS.md#d-068-boarding-the-train-against-each-persons-limits)).
 - TfL's level-access doors are in the spoken route only, not on the visual route card ([D-068](DECISIONS.md#d-068-boarding-the-train-against-each-persons-limits)).
@@ -64,7 +66,7 @@ These numbers shape routes but are our estimates, not evidence.
 
 ## Deferred by Richard
 
-Not now, on purpose: a phone app, whole cities, a reports backend, app accounts.
+Not now, on purpose: a phone app, whole cities, a reports backend, app accounts. Accounts are now planned ([plans/USER_ACCOUNTS.md](plans/USER_ACCOUNTS.md), D-083) but stay deferred until Richard says go.
 
 ## Done
 
