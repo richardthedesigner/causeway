@@ -144,6 +144,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | FEAT-22 | Named, saved mobility profiles: create, name, pick and edit them; the current settings become the first one | M | now | done (2026-10-08) | Claude | D-082. PR #75. Saved devices (D-034) already were these; now shown by name and type on the route, and "Edit and name" for an unnamed one. On the phone only |
 | FEAT-23 | Route details as an expressive summary, not nine identical accordions: key facts inline, a gradient strip, steps listed, "Unsure" explained, the rest behind disclosure | M | now | done (2026-10-08) | Claude | D-082. PR #75. "At a glance" tiles; Getting in, Route in words, Hills and Toilets shown open; three sections still fold. [Plan](plans/ROUTE_PANEL_PROFILES.md) |
 | FEAT-24 | Check the new route screen and "Routes are for" line with testers: do the tiles and the open sections help, or is it too long on a phone? | S | next | todo | Richard, Claude | D-082. With RES work |
+| FEAT-25 | Community reports: tag good or bad access on the map by category (missing dropped kerb, steps, broken lift, good ramp, accessible toilet), with an optional short review and photo; others agree, disagree or say "still there?"; confidence decays, and well-confirmed reports change routes. Map filters by category and good or bad | XL | now | doing | Claude | Richard's brief 2026-10-08. Takes in DEF-04 and DEF-06. Branch `claude/community-reports`, 2026-10-08. [Plan](plans/COMMUNITY_REPORTS.md) |
 
 ## Small features
 
