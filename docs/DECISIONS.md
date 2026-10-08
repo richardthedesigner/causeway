@@ -423,7 +423,9 @@ Update (SMALL-01, 2026-10-05): bank holidays. GOV.UK's dates (OGL) for England a
 - the branch is `main`, which the mirror workflow keeps equal to the production branch, so the same commit was already built there; or
 - nothing changed since the last deployed commit except docs, Markdown, workflows or database migrations.
 
-When there is nothing to compare with, it builds. Once DEP-01 makes `main` the production branch, the `main` rule goes and the mirror branch gets it instead.
+When there is nothing to compare with, it builds.
+
+**Updated 2026-10-08 (DEP-01).** `main` is now the production branch and the mirror workflow is gone, so the `main` rule is removed. The old production branch, `claude/sleepy-johnson-mavbrs`, falls under the `claude/*` rule and no longer builds.
 
 ## D-043 Battery range is a warning, set by the user
 

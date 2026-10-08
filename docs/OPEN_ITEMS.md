@@ -66,6 +66,7 @@ Not now, on purpose: a phone app, whole cities, a reports backend, app accounts.
 
 ## Done
 
+- 2026-10-08: DEP-01. Richard set Vercel's production branch to `main`; GitHub's default branch is `main`. Still open for Richard: lift the no-deletion rule on `claude/sleepy-johnson-mavbrs` so the old branch can be deleted, and point the production-branch protection at `main` only.
 - 2026-10-05: Richard chose the next cities: Glasgow, then Leeds, then by built-up area population without asking again ([D-072](DECISIONS.md#d-072-which-city-next), ROADMAP DEF-09, DEF-10).
 - 2026-10-05: branch protection is on. `main` takes no deletion or force push, needs a PR, and requires `check` and `migrations`. The production branch takes no deletion or force push; it can't require PRs until DEP-01, because the mirror pushes to it (ROADMAP SEC-23).
 - 2026-10-05: the MapLibre worker guess is settled. Vercel serves `/maplibre/6.12.0/maplibre-gl-worker.mjs` as JavaScript and the map draws on production ([D-050](DECISIONS.md#d-050-dependency-audit-in-ci-and-maplibre-6)).
