@@ -126,7 +126,7 @@ export function DeviceMenu({ devices, activeId, onPick, onEdit, onAdd, onSetup, 
 
   return (
     <div ref={root} onKeyDown={keep} className="relative max-w-full min-w-0">
-      {onSetup ? (
+      {onSetup && variant !== "row" ? (
         <button type="button" data-menu="device" onClick={onSetup} aria-label="Set up how you get around" className="inline-flex min-h-12 items-center rounded-xl bg-accent px-4 text-sm font-bold text-accent-ink">
           Set up
         </button>
@@ -135,10 +135,13 @@ export function DeviceMenu({ devices, activeId, onPick, onEdit, onAdd, onSetup, 
           active={devices.find((d) => d.id === tripId) ?? active}
           trip={!!tripLabel}
           open={isOpen}
+          // First visit: nothing saved yet, so Change starts setup rather than a list of one.
           onClick={() => {
+            if (onSetup) return onSetup();
             if (tip) onTipSeen?.();
             toggle("device");
           }}
+          setup={!!onSetup}
         />
       ) : (
       <button
@@ -214,16 +217,16 @@ export function DeviceMenu({ devices, activeId, onPick, onEdit, onAdd, onSetup, 
  * type and the limits that shape a route, with "Change" to switch or edit.
  * The visible words start the button's name, so voice control finds it.
  */
-function RowButton({ active, trip, open, onClick }: { active: SavedDevice; trip: boolean; open: boolean; onClick: () => void }) {
+function RowButton({ active, trip, open, onClick, setup }: { active: SavedDevice; trip: boolean; open: boolean; onClick: () => void; setup?: boolean }) {
   const who = routingFor(active);
   return (
     <button
       type="button"
       data-menu="device"
-      aria-haspopup="menu"
-      aria-expanded={open}
+      aria-haspopup={setup ? "dialog" : "menu"}
+      aria-expanded={setup ? undefined : open}
       onClick={onClick}
-      aria-label={`Routes are for ${who.name}${who.type ? `, ${who.type}` : ""}${trip ? ", this trip only" : ""}. ${limitsLine(active.profile)}. Change`}
+      aria-label={`Routes are for ${who.name}${who.type ? `, ${who.type}` : ""}${trip ? ", this trip only" : ""}. ${limitsLine(active.profile)}. ${setup ? "Set up how you get around" : "Change"}`}
       className="flex min-h-14 w-full min-w-0 items-center gap-3 rounded-2xl border-2 border-line bg-surface-2 px-3 py-2 text-left hover:border-ink"
     >
       <span aria-hidden className="grid size-10 shrink-0 place-items-center rounded-full bg-accent text-accent-ink">
@@ -239,8 +242,8 @@ function RowButton({ active, trip, open, onClick }: { active: SavedDevice; trip:
         <span className="text-sm text-muted">{limitsLine(active.profile)}</span>
       </span>
       <span className="flex shrink-0 items-center gap-1 text-sm font-bold text-accent">
-        Change
-        <ChevronUp aria-hidden className={cn("size-4 transition-transform", !open && "rotate-180")} strokeWidth={2.6} />
+        {setup ? "Set up" : "Change"}
+        {setup ? null : <ChevronUp aria-hidden className={cn("size-4 transition-transform", !open && "rotate-180")} strokeWidth={2.6} />}
       </span>
     </button>
   );
