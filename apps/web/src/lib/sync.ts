@@ -8,12 +8,24 @@
  * let you delete your own notes and to count different people. The
  * mobility profile is never sent (D-009).
  */
-import { fromPublicRow, toNoteRow, type NotePublicRow, type UserNote } from "@causeway/graph";
+import { fromPublicRow, isCategory, toNoteRow, VOTE_KINDS, type CommunityReport, type NotePublicRow, type UserNote, type VoteKind } from "@causeway/graph";
 import { reportDetail, type Report } from "./reports";
 import { timedFetch, UPLOAD_TIMEOUT_MS } from "./timed-fetch";
 
-const URL_ = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "") ?? "";
-const KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
+/**
+ * The end-to-end checks run the app on localhost against a stand-in backend (scripts/e2e.mjs), since the build they
+ * test has no keys. Only ever on localhost, and only a *.supabase.co address gets past the page's CSP anyway.
+ */
+const testBackend = ((): { url: string; key: string } | null => {
+  try {
+    const t = (globalThis as { __CAUSEWAY_TEST_BACKEND__?: { url: string; key: string } }).__CAUSEWAY_TEST_BACKEND__;
+    return t && /^(127\.0\.0\.1|localhost)$/.test(location.hostname) ? t : null;
+  } catch {
+    return null;
+  }
+})();
+const URL_ = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? testBackend?.url)?.replace(/\/$/, "") ?? "";
+const KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? testBackend?.key ?? "";
 const SESSION_KEY = "causewayside.session.v1";
 const PHOTO_BUCKET = "note-photos";
 /** Approved photos are copied here by a reviewer; this bucket is public. */
@@ -74,7 +86,7 @@ async function rest(path: string, init: RequestInit & { signedIn?: boolean } = {
   return timedFetch(`${URL_}${path}`, { ...init, headers }, "Sharing");
 }
 
-async function uploadPhoto(n: UserNote): Promise<string | null> {
+async function uploadPhoto(n: Pick<UserNote, "id" | "photo">): Promise<string | null> {
   if (!n.photo?.startsWith("data:")) return null;
   const s = await session();
   const path = `${s.user.id}/${n.id}.jpg`;
@@ -151,7 +163,7 @@ export async function deleteEverythingShared(): Promise<"none" | "done" | "faile
       const del = await timedFetch(`${URL_}/storage/v1/object/${PHOTO_BUCKET}`, { method: "DELETE", headers, body: JSON.stringify({ prefixes: files.map((f) => `${id}/${f.name}`) }) }, "Photo delete");
       if (!del.ok) return "failed";
     }
-    for (const q of [`note_flag?flagger_id=eq.${id}`, `report?author_id=eq.${id}`, `note?author_id=eq.${id}`]) {
+    for (const q of [`note_flag?flagger_id=eq.${id}`, `report?author_id=eq.${id}`, `note?author_id=eq.${id}`, `community_flag?flagger_id=eq.${id}`, `community_vote?voter_id=eq.${id}`, `community_report?author_id=eq.${id}`]) {
       if (!(await rest(`/rest/v1/${q}`, { method: "DELETE" })).ok) return "failed";
     }
     return "done";
@@ -181,4 +193,105 @@ export async function pushReport(rep: Report): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+// ---------------------------------------------------------------- community reports (FEAT-35, D-084)
+
+/** Share a community report. True once the server has it (or already had it). */
+export async function pushCommunityReport(r: CommunityReport): Promise<boolean> {
+  if (!sharing) return false;
+  try {
+    const photoPath = await uploadPhoto(r).catch(() => null);
+    const res = await rest("/rest/v1/community_report", {
+      method: "POST",
+      headers: { prefer: "return=minimal" },
+      body: JSON.stringify({
+        id: r.id,
+        area_id: r.city,
+        category: r.category,
+        geom: `SRID=4326;POINT(${r.lon} ${r.lat})`,
+        body: r.text?.trim() || null,
+        photo_path: photoPath,
+        observed_at: r.at,
+      }),
+    });
+    return res.ok || res.status === 409;
+  } catch {
+    return false;
+  }
+}
+
+export async function deleteCommunityReport(id: string): Promise<boolean> {
+  if (!sharing) return false;
+  try {
+    return (await rest(`/rest/v1/community_report?id=eq.${encodeURIComponent(id)}`, { method: "DELETE" })).ok;
+  } catch {
+    return false;
+  }
+}
+
+/** One vote per person per report: a first vote is added, a changed one replaces it. */
+export async function pushVote(reportId: string, kind: VoteKind): Promise<boolean> {
+  if (!sharing) return false;
+  try {
+    const add = await rest("/rest/v1/community_vote", { method: "POST", headers: { prefer: "return=minimal" }, body: JSON.stringify({ report_id: reportId, kind }) });
+    if (add.ok) return true;
+    if (add.status !== 409) return false;
+    return (await rest(`/rest/v1/community_vote?report_id=eq.${encodeURIComponent(reportId)}`, { method: "PATCH", headers: { prefer: "return=minimal" }, body: JSON.stringify({ kind }) })).ok;
+  } catch {
+    return false;
+  }
+}
+
+export async function flagCommunityReport(id: string, reason: FlagReason): Promise<boolean> {
+  if (!sharing) return false;
+  try {
+    const r = await rest("/rest/v1/community_flag", { method: "POST", headers: { prefer: "return=minimal" }, body: JSON.stringify({ report_id: id, reason }) });
+    return r.ok || r.status === 409;
+  } catch {
+    return false;
+  }
+}
+
+interface CommunityPublicRow {
+  id: string;
+  area_id: string;
+  category: string;
+  lon: number;
+  lat: number;
+  body: string | null;
+  photo_path: string | null;
+  observed_at: string;
+  votes: { kind: string; at: string }[] | null;
+  my_vote: string | null;
+  own: boolean | null;
+}
+
+/** Everyone's community reports for a city. Reading needs no sign-in; signing in tells us which are yours and your votes. */
+export async function fetchCommunityReports(city: string): Promise<CommunityReport[]> {
+  if (!sharing) return [];
+  const r = await rest(`/rest/v1/community_report_public?area_id=eq.${encodeURIComponent(city)}&select=*&order=observed_at.desc&limit=3000`, { signedIn: !!loadSession() });
+  if (!r.ok) throw new Error(`community: HTTP ${r.status}`);
+  const rows = (await r.json()) as CommunityPublicRow[];
+  const isVote = (k: string | null): k is VoteKind => !!k && (VOTE_KINDS as readonly string[]).includes(k);
+  return rows.flatMap((row) =>
+    isCategory(row.category)
+      ? [
+          {
+            id: row.id,
+            city: row.area_id,
+            category: row.category,
+            lon: row.lon,
+            lat: row.lat,
+            text: row.body,
+            photo: row.photo_path ? `${URL_}/storage/v1/object/public/${APPROVED_BUCKET}/${row.photo_path}` : null,
+            at: row.observed_at,
+            votes: (row.votes ?? []).flatMap((v) => (isVote(v.kind) ? [{ kind: v.kind, at: v.at }] : [])),
+            own: !!row.own,
+            myVote: isVote(row.my_vote) ? row.my_vote : null,
+            shared: true,
+          },
+        ]
+      : [],
+  );
 }

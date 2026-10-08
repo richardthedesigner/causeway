@@ -1,8 +1,8 @@
 "use client";
 import { distanceUnit, learnPace, type Profile } from "@causeway/profile";
 import { conditionsFromOpenMeteo, forecastConditions, getJson, openMeteoUrl, riverHigh, type OpenMeteoResponse } from "@causeway/live";
-import { haversine } from "@causeway/graph";
-import { ChevronLeft } from "lucide-react";
+import { categoryInfo, evidence, haversine, LEVEL_LABEL, reportLevel } from "@causeway/graph";
+import { ChevronLeft, MapPinPlus } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MapChrome, type Ground } from "@/components/MapChrome";
 import { MapView } from "@/components/MapView";
@@ -17,6 +17,9 @@ import { ReportSheet } from "@/components/ReportSheet";
 import { RoutePanel } from "@/components/RoutePanel";
 import { TripSettings } from "@/components/TripSettings";
 import { MyDataSheet } from "@/components/MyDataSheet";
+import { CommunityAddSheet, CommunityDetailSheet, PlacingBar, type Draft } from "@/components/Community";
+import { loadFilter, saveFilter, DEFAULT_FILTER, type CommunityFilter } from "@/lib/community-store";
+import { useCommunity } from "@/lib/use-community";
 import { NoSignal } from "@/components/NoSignal";
 import { useOnline } from "@/lib/use-online";
 import { loadMapContrast, mapContrastOn, saveMapContrast } from "@/lib/map-contrast";
@@ -167,6 +170,19 @@ export default function Home() {
   const recentOnly = recents.filter((p) => !saved.some((s) => s.place.id === p.id));
   const shared = useNotes(city.id);
   const cityNotes = shared.notes;
+  // Community reports (FEAT-35): everyone's, and yours, for the map and for routes.
+  const community = useCommunity(city.id);
+  const [communityFilter, setCommunityFilter] = useState<CommunityFilter>(DEFAULT_FILTER);
+  useEffect(() => setCommunityFilter(loadFilter()), []);
+  const chooseCommunityFilter = (f: CommunityFilter) => {
+    setCommunityFilter(f);
+    saveFilter(f);
+  };
+  const [addOpen, setAddOpen] = useState(false);
+  const [draft, setDraft] = useState<Draft | null>(null);
+  const [placing, setPlacing] = useState(false);
+  const [detailId, setDetailId] = useState<string | null>(null);
+  const detail = community.reports.find((r) => r.id === detailId) ?? null;
   // Large text leaves little room at half height: open the sheet fully instead.
   // Read when the sheet opens, not once at load, so text enlarged after the page loaded counts too (STAB-18).
   const open = (s: number) => setSnap(parseFloat(getComputedStyle(document.documentElement).fontSize) >= 20 ? SNAP.full : s);
@@ -236,9 +252,9 @@ export default function Home() {
   // Re-plan whenever the journey, the person or the ground changes.
   useEffect(() => {
     if (!planner.ready || !to || !startKnown) return;
-    planner.plan(from, to, routeProfile, conditions, cityNotes);
+    planner.plan(from, to, routeProfile, conditions, cityNotes, community.reports);
     setSelected(null);
-  }, [planner.ready, startKnown, from, to, routeProfile, conditions, planner.lifts, alertKey, riverKey, cityNotes]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [planner.ready, startKnown, from, to, routeProfile, conditions, planner.lifts, alertKey, riverKey, cityNotes, community.reports]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Nothing fits for this device: would another saved device get there?
   const others = devices.devices.filter((d) => d.id !== routeDevice.id);
@@ -336,9 +352,54 @@ export default function Home() {
   /** Live search is biased towards a point. Never towards you: Photon gets the city's start instead (D-009). */
   const notMe = (p: { lon: number; lat: number; id?: string }) => (/^me(:|$)/.test(p.id ?? "") ? city.start : p);
 
+  /**
+   * Add a report (FEAT-35): the sheet opens at once on the map's middle (or a dropped pin), and moves to where you
+   * are as soon as the phone says, unless you've moved the pin yourself. Three taps: this, what you found, Save.
+   */
+  const askHere = () => {
+    if (!navigator.geolocation) return;
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setLocating(false);
+        const { longitude: lon, latitude: lat, accuracy } = pos.coords;
+        if (inArea(lon, lat)) setDraft((d) => (d && d.how === "moved" && !placing ? d : { lon, lat, how: "here", accuracyM: accuracy }));
+      },
+      () => setLocating(false),
+      { enableHighAccuracy: true, timeout: 10_000, maximumAge: 30_000 },
+    );
+  };
+  const startAdd = (at?: { lon: number; lat: number }) => {
+    const c = at ?? pin ?? (startKnown && from.id.startsWith("me") ? from : city.start);
+    setDraft({ lon: c.lon, lat: c.lat, how: at || pin ? "moved" : "guess" });
+    setPin(null);
+    setAddOpen(true);
+    if (!at && !pin) askHere();
+  };
+  const finishPlacing = () => {
+    setPlacing(false);
+    setAddOpen(true);
+  };
+  const communityOnMap = useMemo(() => {
+    const f = communityFilter;
+    if (!f.show || navigating) return [];
+    return community.reports.flatMap((r) => {
+      const info = categoryInfo(r.category);
+      const level = reportLevel(evidence(r));
+      if (level === "faded" || (info.polarity === "bad" ? !f.bad : !f.good) || f.hidden.includes(r.category)) return [];
+      return [{ id: r.id, label: info.label, polarity: info.polarity, level: LEVEL_LABEL[level], lon: r.lon, lat: r.lat }];
+    });
+  }, [community.reports, communityFilter, navigating]);
+  const closeDetail = () => {
+    const id = detailId;
+    setDetailId(null);
+    if (id) requestAnimationFrame(() => document.getElementById(`community-marker-${id}`)?.focus());
+  };
+
   // A stray tap must never wipe a route: a tap proposes a pin, and the user confirms it.
   const onMapClick = (lon: number, lat: number) => {
     if (!inArea(lon, lat)) return;
+    if (placing) return setDraft({ lon, lat, how: "moved" });
     setSavedPick(null);
     setPin({ id: `pin:${lon.toFixed(5)},${lat.toFixed(5)}`, name: "Dropped pin", kind: `${lat.toFixed(4)}, ${lon.toFixed(4)}`, lon, lat });
     open(SNAP.half);
@@ -513,6 +574,7 @@ export default function Home() {
           >
             Directions here
           </Button>
+          <Button onClick={() => startAdd(pin)}>Report something here</Button>
           <Button onClick={() => setPin(null)}>Cancel</Button>
         </section>
       ) : null}
@@ -549,6 +611,9 @@ export default function Home() {
             onFocus={() => open(SNAP.full)}
           />
           <p className="m-0 text-sm text-muted">Or tap the map to drop a pin.</p>
+          <Button size="lg" onClick={() => startAdd()} className="justify-self-stretch">
+            <MapPinPlus aria-hidden className="size-5" /> Add a report: good or bad access
+          </Button>
           <TripSettings
             deviceLabel={deviceLabel(routeDevice)}
             onDevice={() => setModeOpen(true)}
@@ -688,6 +753,10 @@ export default function Home() {
         preview={preview}
         focus={focus}
         highContrast={highContrast}
+        community={communityOnMap}
+        onCommunityPick={(id) => setDetailId(id)}
+        draft={placing ? draft : null}
+        onDraftMove={(lon, lat) => inArea(lon, lat) && setDraft({ lon, lat, how: "moved" })}
         saved={savedOnMap}
         onSavedPick={(id) => {
           setPin(null);
@@ -707,6 +776,9 @@ export default function Home() {
         locating={locating}
         credit={`${city.credit} Pavement data built ${planner.ready?.builtAt.slice(0, 10) ?? ""}.`}
         minimal={navigating}
+        community={communityFilter}
+        onCommunity={chooseCommunityFilter}
+        onAddReport={navigating ? undefined : () => startAdd()}
       />
       <UpdatePrompt navigating={navigating} />
       {navigating && selectedRoute ? (
@@ -806,6 +878,34 @@ export default function Home() {
       />
       <NoteSheet choices={noteChoices} onOpenChange={(v) => !v && setNoteChoices(null)} city={city.id} preset={profile.preset} sharing={shared.sharing !== "off"} onSaved={shared.saved} />
       <MyDataSheet open={dataOpen} onOpenChange={setDataOpen} />
+      {placing ? <PlacingBar locating={locating} onHere={askHere} onDone={finishPlacing} /> : null}
+      <CommunityAddSheet
+        open={addOpen}
+        onOpenChange={(v) => {
+          setAddOpen(v);
+          if (!v && !placing) setDraft(null);
+        }}
+        draft={draft}
+        city={city.id}
+        sharing={community.sharing !== "off"}
+        reports={community.reports}
+        onMovePin={() => {
+          setPlacing(true);
+          setAddOpen(false);
+          requestAnimationFrame(() => document.getElementById("community-draft-pin")?.focus());
+        }}
+        onSave={community.add}
+        onOpenReport={setDetailId}
+      />
+      <CommunityDetailSheet
+        key={detailId ?? "none"}
+        report={detail}
+        onOpenChange={(v) => !v && closeDetail()}
+        sharing={community.sharing !== "off"}
+        onVote={community.vote}
+        onFlag={community.flag}
+        onDelete={(id) => void community.remove(id)}
+      />
       <ReportSheet open={reportAt !== null} onOpenChange={(v) => !v && setReportAt(null)} where={reportAt} about={reportAt?.about ?? null} city={city.id} sharing={shared.sharing !== "off"} onSaved={shared.saved} />
     </main>
   );

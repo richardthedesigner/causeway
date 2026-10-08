@@ -3,7 +3,7 @@
  * implementation: it exists to prove the data model and cost model, and
  * to be the reference the chosen engine is tested against (DECISIONS.md D-003).
  */
-import { confidence, haversine, isKnown, type Graph, type GraphEdge, type GraphNode, type NoteSignal } from "@causeway/graph";
+import { confidence, haversine, isKnown, type Graph, type GraphEdge, type GraphNode, type NoteSignal, type CommunitySignal } from "@causeway/graph";
 import { distanceUnit, formatDistance, type DistanceUnit, type Profile } from "@causeway/profile";
 import { levelAccessAdvice } from "./boarding.js";
 import { baseSpeed, darkCost, DRY, entranceVerdict, evaluateEdge, evaluateNode, needsStepFree, surfaceLabel, type Conditions, type EdgeContext, type EntranceVerdict, type Evaluation, type Reason } from "./cost.js";
@@ -48,12 +48,14 @@ export class Router {
   readonly toiletM = new Map<number, number>();
   /** Edge id to what people's notes say about it. Held beside the graph, never written into it (D-008). */
   noteSignals = new Map<number, NoteSignal>();
+  /** Edge id to the community reports on it (FEAT-35). Held beside the graph like notes, never written into it. */
+  communitySignals = new Map<number, CommunitySignal[]>();
   /** Nodes settled by searches so far: a machine-independent measure of routing work, for the speed budget (D-056). */
   settled = 0;
 
   /** Everything around an edge the cost model needs that isn't the edge itself. */
   edgeContext(id: number): EdgeContext {
-    return { benchM: this.benchM.get(id), note: this.noteSignals.get(id) };
+    return { benchM: this.benchM.get(id), note: this.noteSignals.get(id), community: this.communitySignals.get(id) };
   }
 
   constructor(readonly graph: Graph) {

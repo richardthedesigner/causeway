@@ -59,6 +59,9 @@ export interface MyDataSummary {
   reports: number;
   /** "What's there" answers from "What we don't know" (FEAT-03). They share the reports list. */
   whatsThere: number;
+  /** Community reports made here (FEAT-35), and answers to other people's. */
+  community: number;
+  votes: number;
   recents: number;
   saved: number;
   /** Notes or reports may be on our server too. */
@@ -74,6 +77,8 @@ export function myDataSummary(): MyDataSummary {
     notes: count(get("causewayside.notes.v1")),
     reports: count(get("causewayside.reports.v1")) - whatsThere(get("causewayside.reports.v1")),
     whatsThere: whatsThere(get("causewayside.reports.v1")),
+    community: count(get("causewayside.community.v1")),
+    votes: count(get("causewayside.community-votes.v1")),
     recents: ks.filter((k) => k.startsWith("causewayside.recents.") && !k.endsWith(".backup")).reduce((n, k) => n + count(get(k)), 0),
     saved: ks.filter((k) => k.startsWith("causewayside.saved.")).reduce((n, k) => n + count(get(k)), 0),
     shared: sharing && ks.includes("causewayside.session.v1"),

@@ -43,7 +43,7 @@ describe("your data (SEC-06)", () => {
   });
 
   it("counts what's on this phone", () => {
-    expect(myDataSummary()).toEqual({ devices: 2, notes: 1, reports: 0, whatsThere: 0, recents: 2, saved: 0, shared: false });
+    expect(myDataSummary()).toEqual({ devices: 2, notes: 1, reports: 0, whatsThere: 0, community: 0, votes: 0, recents: 2, saved: 0, shared: false });
   });
 
   it("counts what's-there reports apart from problem reports (FEAT-03)", () => {

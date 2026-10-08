@@ -45,7 +45,7 @@ Keep rows to one line. Detail goes in an issue, a plan, a decision or the Notes 
 | 3 | Live data and the other cities: Newcastle and Gateshead, London zones, weather, TfL lifts | Done ([report](PHASE3_REPORT.md)) |
 | 4 | Navigation and the loop: turn-by-turn, report a problem, offline | First pass done ([report](PHASE4_REPORT.md)) |
 
-The current direction: **fix and fill the pilot cities** with open data that needs no permission, then **check our guesses with real people**. A phone app, whole cities, a reports backend and accounts are deferred by Richard (see **Deferred by Richard**).
+The current direction: **fix and fill the pilot cities** with open data that needs no permission, then **check our guesses with real people**. A phone app, whole cities and accounts are deferred by Richard (see **Deferred by Richard**). Community reports are on (FEAT-35, D-084), waiting on a Supabase project to be shared.
 
 ## Now
 
@@ -158,6 +158,13 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | FEAT-32 | Accounts phase 6: carers and companions: share a profile to use or manage, revoke, change notices to the owner | L | later | todo | Claude | D-083. After FEAT-29. Carer consent is an open question for Richard |
 | FEAT-33 | Sign in with Apple and Google, as an extra to email and passkeys | M | later | todo | Richard, Claude | D-083. Only if testers ask. Needs Richard's Apple Developer account and a Google OAuth client |
 | FEAT-34 | Saved routes: on the phone first, like saved places, then in sync | M | later | todo | Claude | D-083, D-060. Sync after FEAT-29 |
+| FEAT-35 | Community reports: tag good or bad access on the map by category (missing dropped kerb, steps, broken lift, good ramp, accessible toilet), with an optional short review and photo; others agree, disagree or say "still there?"; confidence decays, and well-confirmed reports change routes. Map filters by category and good or bad | XL | now | done (2026-10-08) | Claude | D-084. PR #78. Richard's brief 2026-10-08. Takes in DEF-04 and DEF-06. [Plan](plans/COMMUNITY_REPORTS.md). On the phone until the Supabase project exists ([handoff](handoff/COWORK_COMMUNITY_REPORTS.md)) |
+| FEAT-36 | A Community tab in `/review`: hidden community reports and their flags, photos to approve | M | next | todo | Claude | D-084. Until then, the SQL in BACKEND.md |
+| FEAT-37 | Routes use confirmed accessible toilets and seats from community reports (toilet and rest limits) | S | next | todo | Claude | D-084. Shown on the map already; `Router.addToilets` re-indexes, so add them once per city load, not per plan |
+| FEAT-38 | Privacy page: a paragraph on community reports (what others see, rounding, deleting) | S | next | todo | Richard, Claude | D-084. With the DPIA (SEC-10) |
+| FEAT-39 | Clean-up job: delete reports faded for a year, removed ones, and their photos | S | later | todo | Claude | D-084. A scheduled Supabase function or a GitHub Action with the service key |
+| FEAT-40 | Send confirmed structural reports to OpenStreetMap as OSM Notes, after a terms-of-use sentence on sharing | L | later | todo | Richard, Claude | D-084, D-008. Plan in [COMMUNITY_REPORTS.md](plans/COMMUNITY_REPORTS.md#openstreetmap-later-plan-only). Replaces DEF-05 |
+| FEAT-41 | Check the categories, the three-tap add and the confidence thresholds with testers | S | next | todo | Richard, Claude | D-084. With RES work |
 | FEAT-42 | Safer spaces: research data sources and plan an optional, off-by-default layer (women-friendly, LGBTQ+ friendly, help points, gender-neutral toilets, well-lit routes, late-night help) | M | now | done (2026-10-08) | Claude | D-085. PR #77. A user's request. [Plan](plans/SAFE_SPACES.md). Keep Safe and Ask for ANI have ended; no venue scheme publishes open data. Top sources: OSM `lit` plus Edinburgh's lamp import; OSM help point and toilet tags; BODS night buses. First step: FEAT-43 |
 | FEAT-43 | "Probably lit": a lamp column close along an untagged way in Edinburgh (June 2026 council import in OSM) costs between lit and not mapped; route card says "Lit for N% of the way" | M | next | todo | Claude | D-085, D-038. [Plan](plans/SAFE_SPACES.md) phase 1. Test the distance against ways mapped as unlit first |
 | FEAT-44 | Toilet filters for everyone: gender-neutral (`unisex=yes`) and changing tables | S | next | todo | Claude | D-085. Plan phase 2. Not behind the opt-in |
@@ -330,6 +337,10 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 | DEF-01 | Native app (Expo): lock-screen progress, background location, haptics | XL | later | blocked | Richard, Claude | D-004. Needs Apple and Google developer accounts |
 | DEF-02 | Whole cities, starting with all of Edinburgh | L | later | blocked | Richard, Claude | D-014. Needs a build worker (DEF-03) |
 | DEF-03 | Graph builds on a worker (Fly.io or Cloud Run) with normal network access | M | later | blocked | Richard, Claude | D-010 |
+| DEF-04 | Reports backend: store and moderate public reports | L | later | done (2026-10-08) | Richard, Claude | D-022, D-030. Richard asked for it with FEAT-35 (D-084). Live once the Supabase project exists |
+| DEF-05 | Send fixes back to OpenStreetMap from reports and notes | L | later | blocked | Richard, Claude | D-008. Planned as FEAT-40 |
+| DEF-06 | Crowd verification: several people confirming the same note | L | later | done (2026-10-08) | Claude | For community reports, in FEAT-35 (D-084): agree, disagree, still there. Notes still count corroboration by matching (D-026) |
+| DEF-07 | Optional accounts: sync devices and saved places between phones, encrypted on the device, sign in with a passkey or email code | L | later | blocked | Richard, Claude | Health data makes this a privacy decision first (D-009) |
 | DEF-04 | Reports backend: store and moderate public reports | L | later | blocked | Richard, Claude | D-022, D-030 |
 | DEF-05 | Send fixes back to OpenStreetMap from reports and notes | L | later | blocked | Richard, Claude | D-008. Needs DEF-04 |
 | DEF-06 | Crowd verification: several people confirming the same note | L | later | blocked | Claude | Needs DEF-04 |
@@ -341,7 +352,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 ## Log
 
 Newest first. One line per change: date, ID, what happened, link.
-
+- 2026-10-08: FEAT-35 done in PR #78 (D-084): community reports. Tag good or bad access by category in three taps, agree, disagree or "still there?", confidence that decays per category, confirmed problems close edges for the people they stop, map filters. Migration 0009 with per-person and per-network limits. Takes in DEF-04 and DEF-06. Added FEAT-36 to FEAT-41. [Plan](plans/COMMUNITY_REPORTS.md), [handoff](handoff/COWORK_COMMUNITY_REPORTS.md).
 - 2026-10-08: FEAT-42 done in PR #77: safer spaces research and plan ([SAFE_SPACES.md](plans/SAFE_SPACES.md), D-085). Added FEAT-43 to FEAT-48, RES-12 and DATA-33 to DATA-35 (lighting and help point data, access requests); sources in survey §12.
 - 2026-10-08: FEAT-25 done in PR #76: user accounts planned in [plans/USER_ACCOUNTS.md](plans/USER_ACCOUNTS.md) (D-083). Supabase Auth upgrading the anonymous id in place, email code then passkeys, sync encrypted on the phone, pseudonymous handles, never required. Added FEAT-26 to FEAT-34. DEF-07 stays deferred until Richard says go.
 - 2026-10-08: FEAT-21, FEAT-22 and FEAT-23 done in PR #75 (D-082), from Richard's feedback on the route screen: who the route is for, saved profiles by name, and route details at a glance. Added FEAT-24.

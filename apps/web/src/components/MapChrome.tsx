@@ -1,5 +1,7 @@
 "use client";
-import { Check, ChevronDown, CloudRain, Layers, LocateFixed, Snowflake, Sun } from "lucide-react";
+import { Check, ChevronDown, CloudRain, Layers, LocateFixed, MapPinPlus, Snowflake, Sun } from "lucide-react";
+import { COMMUNITY_CATEGORIES } from "@causeway/graph";
+import type { CommunityFilter } from "@/lib/community-store";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { City } from "@/lib/cities";
@@ -21,6 +23,11 @@ interface Props {
   credit: string;
   /** While navigating only the layers button stays; the rest is noise. */
   minimal?: boolean;
+  /** Community reports on the map (FEAT-35): which to show. */
+  community: CommunityFilter;
+  onCommunity: (f: CommunityFilter) => void;
+  /** Start adding a report. Absent while navigating (the report button there is for problems). */
+  onAddReport?: () => void;
 }
 
 export const GROUND = {
@@ -44,6 +51,17 @@ function Option({ on, onClick, children }: { on: boolean; onClick: () => void; c
   );
 }
 
+function Toggle({ on, onClick, children, indent = false }: { on: boolean; onClick: () => void; children: React.ReactNode; indent?: boolean }) {
+  return (
+    <button type="button" role="menuitemcheckbox" aria-checked={on} onClick={onClick} className={cn("flex min-h-12 items-center gap-3 rounded-xl px-3 text-left hover:bg-surface-2", indent && "pl-6")}>
+      <span className={cn("min-w-0 flex-1", !indent && "font-bold")}>{children}</span>
+      <span aria-hidden className={cn("relative h-[28px] w-[48px] shrink-0 rounded-full transition-colors", on ? "bg-accent" : "bg-line")}>
+        <span className={cn("absolute top-[4px] size-[20px] rounded-full bg-surface transition-[left]", on ? "left-[24px]" : "left-[4px]")} />
+      </span>
+    </button>
+  );
+}
+
 /**
  * What floats over the map: where you are (city) and the map's own
  * controls. Everything you set for a trip, the ground included, lives in the
@@ -52,6 +70,8 @@ function Option({ on, onClick, children }: { on: boolean; onClick: () => void; c
 export function MapChrome(props: Props) {
   const menu = useRef<HTMLDivElement>(null);
   const { open, setOpen, toggle, root } = useMenu(menu);
+  const [pickCategories, setPickCategories] = useState(false);
+  const [about, setAbout] = useState(false);
   /**
    * An open menu is drawn at the end of the page, above the sheet, just under its button.
    * Inside the map it sat under the bottom sheet (drawn later, on top), so at
@@ -146,18 +166,18 @@ export function MapChrome(props: Props) {
                   <span className={cn("absolute top-[4px] size-[20px] rounded-full bg-surface transition-[left]", props.showSlopes ? "left-[24px]" : "left-[4px]")} />
                 </span>
               </button>
-              <ul aria-label="Slope key" className="m-0 grid list-none grid-cols-2 gap-x-3 gap-y-1 px-3 py-2 text-sm">
+              <div role="group" aria-label="Slope key" className="m-0 grid grid-cols-2 gap-x-3 gap-y-1 px-3 py-2 text-sm">
                 {[["--g0", "0 to 3%"], ["--g1", "3 to 5%"], ["--g2", "5 to 8%"], ["--g3", "8 to 12%"], ["--g4", "Over 12%"]].map(([c, l]) => (
-                  <li key={l} className="flex items-center gap-2">
+                  <span key={l} className="flex items-center gap-2">
                     <span aria-hidden className="inline-block h-1.5 w-6 rounded-full" style={{ background: `var(${c})` }} />
                     {l}
-                  </li>
+                  </span>
                 ))}
-                <li className="flex items-center gap-2">
+                <span className="flex items-center gap-2">
                   <span aria-hidden className="inline-block h-0 w-6 border-t-2 border-dashed border-unknown" />
                   Not known
-                </li>
-              </ul>
+                </span>
+              </div>
               <button
                 type="button"
                 role="menuitemcheckbox"
@@ -170,13 +190,59 @@ export function MapChrome(props: Props) {
                   <span className={cn("absolute top-[4px] size-[20px] rounded-full bg-surface transition-[left]", props.highContrast ? "left-[24px]" : "left-[4px]")} />
                 </span>
               </button>
-              <details className="px-3 pb-2 text-sm text-muted">
-                <summary className="min-h-10 cursor-pointer py-2 font-bold text-ink">About this map</summary>
-                {props.credit}
-              </details>
+              <div role="group" aria-label="Community reports" className="mt-1 grid gap-1 border-t border-line pt-2">
+                <Toggle on={props.community.show} onClick={() => props.onCommunity({ ...props.community, show: !props.community.show })}>
+                  Community reports
+                </Toggle>
+                {props.community.show ? (
+                  <>
+                    <Toggle indent on={props.community.bad} onClick={() => props.onCommunity({ ...props.community, bad: !props.community.bad })}>
+                      <span aria-hidden className="mr-2 inline-block text-stop">▲</span>Problems
+                    </Toggle>
+                    <Toggle indent on={props.community.good} onClick={() => props.onCommunity({ ...props.community, good: !props.community.good })}>
+                      <span aria-hidden className="mr-2 inline-block text-ok">●</span>Good for access
+                    </Toggle>
+                    <button type="button" role="menuitem" aria-expanded={pickCategories} onClick={() => setPickCategories((v) => !v)} className="flex min-h-12 items-center gap-3 rounded-xl px-3 pl-6 text-left font-bold hover:bg-surface-2">
+                      <span className="min-w-0 flex-1">Choose categories</span>
+                      <ChevronDown aria-hidden className={cn("size-5 shrink-0 transition-transform", pickCategories && "rotate-180")} />
+                    </button>
+                    {pickCategories ? (
+                      <div role="group" aria-label="Categories" className="grid gap-1">
+                        {COMMUNITY_CATEGORIES.filter((c) => (c.polarity === "bad" ? props.community.bad : props.community.good)).map((c) => {
+                          const on = !props.community.hidden.includes(c.id);
+                          return (
+                            <Toggle
+                              key={c.id}
+                              indent
+                              on={on}
+                              onClick={() => props.onCommunity({ ...props.community, hidden: on ? [...props.community.hidden, c.id] : props.community.hidden.filter((h) => h !== c.id) })}
+                            >
+                              {c.label}
+                            </Toggle>
+                          );
+                        })}
+                      </div>
+                    ) : null}
+                  </>
+                ) : null}
+              </div>
+              <button type="button" role="menuitem" aria-expanded={about} onClick={() => setAbout((v) => !v)} className="flex min-h-10 items-center gap-3 rounded-xl px-3 text-left text-sm font-bold hover:bg-surface-2">
+                <span className="min-w-0 flex-1">About this map</span>
+                <ChevronDown aria-hidden className={cn("size-4 shrink-0 transition-transform", about && "rotate-180")} />
+              </button>
+              {about ? (
+                <div role="group" aria-label="About this map" className="px-3 pb-2 text-sm text-muted">
+                  {props.credit}
+                </div>
+              ) : null}
             </>)
           ) : null}
         </div>
+        {!props.minimal && props.onAddReport ? (
+          <button type="button" id="add-report" aria-label="Add a report" onClick={props.onAddReport} className={cn(fab, "bg-accent text-accent-ink")}>
+            <MapPinPlus aria-hidden className="size-[24px]" />
+          </button>
+        ) : null}
         {!props.minimal ? (
           <button type="button" aria-label={props.locating ? "Finding your location" : "Start from your location"} onClick={props.onLocate} className={fab}>
             <LocateFixed aria-hidden className={cn("size-[24px]", props.locating && "animate-pulse text-accent")} />

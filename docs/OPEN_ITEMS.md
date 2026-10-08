@@ -8,6 +8,8 @@ Last updated: 2026-10-08.
 
 | What | Why it matters | Effort | Link |
 |---|---|---|---|
+| Make the Causeway Supabase project, run migrations 0001 to 0009, turn on anonymous sign-ins and Turnstile, and set the two Vercel variables (FEAT-35) | Community reports, notes and votes stay on each phone until then. Your Supabase organisation already has two free projects (one is the live Expanvas database, never to be paused), so a third needs gtm-kpi-hub paused or a paid plan | About 30 minutes, with Cowork | [handoff](handoff/COWORK_COMMUNITY_REPORTS.md) |
+| Name who checks flagged community reports and photos each week (SEC-11) | Photos stay hidden and flagged reports stay down until someone looks | A decision | [BACKEND.md](BACKEND.md) |
 | Answer the user accounts plan's open questions, starting with go or wait (FEAT-26) | Accounts are planned but deferred (DEF-07). Nothing can start until the go-ahead, the choice on encrypted sync, minimum age and carer consent | A read and ten answers | [plans/USER_ACCOUNTS.md](plans/USER_ACCOUNTS.md#open-questions-for-richard), [D-083](DECISIONS.md#d-083-user-accounts-supabase-auth-upgraded-in-place-optional-forever) |
 | Time the app on a real mid-range Android phone, or run it through WebPageTest (SPEED-12) | The container's numbers have an unslowed worker and a software GPU, so they are best cases | 15 minutes | [perf notes](perf/2026-10.md) |
 | Run the data refresh once by hand: Actions, then data-refresh, then Run workflow on `main` | Proves the weekly refresh works. It has never run, and this project's sessions can't start workflows | 1 minute | [#14](https://github.com/richardthedesigner/causeway/issues/14) |
@@ -50,8 +52,9 @@ These numbers shape routes but are our estimates, not evidence.
 
 ## Known gaps
 
-- The community reports plan (`docs/plans/COMMUNITY_REPORTS.md`) hadn't landed when the accounts plan was written. When it does, check it uses the Supabase anonymous user id as the contributor id, reads weights through `contributor_weight()`, and allows one vote per contributor per item ([plans/USER_ACCOUNTS.md](plans/USER_ACCOUNTS.md#fit-with-community-reports-and-safe-spaces), D-083).
-- There is no Causeway Supabase project yet. When one is made, run db/migrations 0001 to 0008 in order. SEC-16 is merged, so this is now safe. 0008 (SEC-17) makes the server set note and report fields the client used to choose.
+- There is no Causeway Supabase project yet. When one is made, run db/migrations 0001 to 0009 in order. SEC-16 is merged, so this is now safe. 0008 (SEC-17) makes the server set note and report fields the client used to choose; 0009 adds community reports (D-084).
+- Community report confidence (confirmed at three fresh voices, half-lives from 5 days to 5 years) and the routing penalties are our guesses. Check with testers and real use (FEAT-41, D-084).
+- The per-network limit for community reports reads the address from the headers Supabase passes on. Check on the real project that `request.headers` carries `x-forwarded-for` or `cf-connecting-ip`; if not, only the per-person limits apply ([D-084](DECISIONS.md#d-084-community-reports-categories-votes-and-confidence-that-decays)).
 - The profile has a gap limit for boarding trains (`maxGapMm`), but no setting in the app: everyone gets TfL's 85 mm level band. Add a setting once research says people want one ([D-068](DECISIONS.md#d-068-boarding-the-train-against-each-persons-limits)).
 - TfL's level-access doors are in the spoken route only, not on the visual route card ([D-068](DECISIONS.md#d-068-boarding-the-train-against-each-persons-limits)).
 - When someone deletes everything, a photo a reviewer had approved stays in the public bucket (hidden, as its note is gone) until a reviewer removes it. Worth a weekly clean-up step for the reviewer, or a server job, once sharing is on ([D-059](DECISIONS.md#d-059-your-data-a-copy-and-delete-everything)).
@@ -66,10 +69,12 @@ These numbers shape routes but are our estimates, not evidence.
 
 ## Deferred by Richard
 
-Not now, on purpose: a phone app, whole cities, a reports backend, app accounts. Accounts are now planned ([plans/USER_ACCOUNTS.md](plans/USER_ACCOUNTS.md), D-083) but stay deferred until Richard says go.
+Not now, on purpose: a phone app, whole cities, app accounts. The reports backend came back on 2026-10-08 with community reports (FEAT-35). Accounts are now planned ([plans/USER_ACCOUNTS.md](plans/USER_ACCOUNTS.md), D-083) but stay deferred until Richard says go.
 
 ## Done
 
+- 2026-10-08: the community reports plan landed (FEAT-35, D-084) and meets the accounts plan's contract (D-083): the Supabase anonymous user id is the contributor id, it is never shown, votes are one per contributor per report (primary key), and every vote and report carries a weight the scoring multiplies by. The weight is 1 until `contributor_weight()` exists; then the public view returns it and the thresholds are recalibrated ([plan](plans/COMMUNITY_REPORTS.md#identity-working-now-accounts-later)).
+- 2026-10-08: Richard asked for community content: public reports by category with votes and decaying confidence (FEAT-35, [D-084](DECISIONS.md#d-084-community-reports-categories-votes-and-confidence-that-decays)). That takes the reports backend (DEF-04) and crowd verification (DEF-06) off the deferred list.
 - 2026-10-08: DEP-01. Richard set Vercel's production branch to `main`; GitHub's default branch is `main`. Still open for Richard: lift the no-deletion rule on `claude/sleepy-johnson-mavbrs` so the old branch can be deleted, and point the production-branch protection at `main` only.
 - 2026-10-05: Richard chose the next cities: Glasgow, then Leeds, then by built-up area population without asking again ([D-072](DECISIONS.md#d-072-which-city-next), ROADMAP DEF-09, DEF-10).
 - 2026-10-05: branch protection is on. `main` takes no deletion or force push, needs a PR, and requires `check` and `migrations`. The production branch takes no deletion or force push; it can't require PRs until DEP-01, because the mirror pushes to it (ROADMAP SEC-23).

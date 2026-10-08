@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { alertInForce, fetchAirNotes, fetchFloodWarnings, fetchHealthAlert, fetchLiftOutages, fetchRiverLevel, fetchTflDisruptions, fetchTflStreetWorks, type AreaNote, type DisruptionsMissing, type RiverLevel } from "@causeway/live";
 import type { HealthAlert } from "@causeway/router";
-import type { UserNote } from "@causeway/graph";
+import type { CommunityReport, UserNote } from "@causeway/graph";
 import type { Profile } from "@causeway/profile";
 import type { City } from "./cities";
 import type { Check, FloodHere, Place, PlanResult, WorkerRequest, WorkerResponse, WorksSummary } from "./plan-types";
@@ -267,7 +267,7 @@ export function usePlanner(city: City) {
     worker.current?.postMessage(lastToilets.current);
   }, []);
 
-  const plan = useCallback((from: Place, to: Place, profile: Profile, c: Conditions, notes: UserNote[] = []) => {
+  const plan = useCallback((from: Place, to: Place, profile: Profile, c: Conditions, notes: UserNote[] = [], community: CommunityReport[] = []) => {
     if (!worker.current) return;
     setPlanning(true);
     setError(null);
@@ -277,7 +277,7 @@ export function usePlanner(city: City) {
     if (journey !== lastJourney.current) setRestarted((r) => (r === "restarted" ? null : r));
     lastJourney.current = journey;
     const id = ++seq.current;
-    sendPlan.current?.({ type: "plan", id, from, to, profile, conditions: routing(c, alertNow.current), notes: notes.map((n) => ({ ...n, photo: null })), river: riverNow.current } satisfies WorkerRequest);
+    sendPlan.current?.({ type: "plan", id, from, to, profile, conditions: routing(c, alertNow.current), notes: notes.map((n) => ({ ...n, photo: null })), community: community.map((r) => ({ ...r, photo: null, text: null })), river: riverNow.current } satisfies WorkerRequest);
   }, []);
 
   /** Verdicts for a short list of places (recents), from one start. */
