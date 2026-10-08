@@ -16,8 +16,8 @@ You're helping Richard switch on sharing for his app Causewayside (causeway.rich
 
 His Supabase organisation (id `iwxvofchobzhelqrweef`) already has two projects: "Expanvas PoC" and "gtm-kpi-hub". The free plan allows two active projects.
 
-- Open https://supabase.com/dashboard/org/iwxvofchobzhelqrweef and check how many projects are active.
-- **Ask Richard:** "Supabase's free plan allows two active projects and you have two. Shall I pause Expanvas PoC (it can be restored later), pause gtm-kpi-hub, or would you rather upgrade to Pro (about $25 a month)?" Do what he says. To pause: open the project, then Project Settings, then General, then "Pause project".
+- **Never pause "Expanvas PoC".** Despite its name it is the live database for Expanvas (app.expanvas.com), with real users.
+- **Ask Richard:** "Supabase's free plan allows two active projects. Expanvas must stay on. Shall I pause gtm-kpi-hub (it can be restored later), or would you rather upgrade the organisation to Pro (about $25 a month, which Expanvas will need anyway)?" Do what he says. To pause: open the project, then Project Settings, then General, then "Pause project".
 
 ### 2. Create the project
 
