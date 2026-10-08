@@ -1028,3 +1028,16 @@ The trade: the route sheet is longer, because more is shown. The tiles at the to
 **A test seam.** The end-to-end checks run on localhost against a stand-in Supabase. `sync.ts` takes a backend from `window.__CAUSEWAY_TEST_BACKEND__` only on `localhost` or `127.0.0.1`, and the CSP still allows only `*.supabase.co`.
 
 **Also fixed:** the map layers menu now passes axe's menu rules. The slope key was a list and "About this map" a `details` inside `role="menu"`; the key is now a labelled group and "About this map" a menu item that shows the credit.
+## D-085 Safer spaces: opt in, on the phone only, what places say about themselves
+
+**Proposed.** 2026-10-08 (FEAT-42). A user asked for a section for queer, minority and women-friendly spaces. Research and plan: [SAFE_SPACES.md](plans/SAFE_SPACES.md). The rules below are Claude's recommendation; the venue layer (FEAT-46, FEAT-47) waits on Richard's yes.
+
+- **What helps everyone ships for everyone.** Lit routes after dark (D-038, plus "probably lit" from Edinburgh's lamp columns), gender-neutral and changing-table toilet filters, open-late pharmacies, police stations, taxi ranks and night buses. None of it is sensitive.
+- **Venue lists sit behind an opt-in layer, "Out at night", off by default.** The setting stays on the phone (D-009). It is never sent, logged or counted. The layer's data ships to everyone in the city file, so fetching it reveals nothing. Plain markers, no lock-screen or share-link traces.
+- **Only what places say about themselves.** A venue is listed only if it signed a scheme or pledge (Rainbow Mark, Ask for Angela, Safe Spaces) or is tagged in OSM (`lgbtq=*`) with evidence. Never inferred, never nominated by the public. Refuges, shelters, support groups and youth groups are never shown, even when OSM has them.
+- **Words.** "Lit", "signed up to", "LGBTQ+ welcoming", each with its source and date. Never "safe" as our own claim.
+- **No crime or deprivation data** in routing, layers or explanations. It is coarse, missing in Scotland, and stigmatises areas.
+- **Stale means hidden.** Unconfirmed for 12 months, it stops showing. Ended schemes go at once: Keep Safe and Ask for ANI have both ended. Any venue can ask to be removed.
+- **Community input is confirm or flag only.** Fixed answers, no free text, pre-moderated (stricter than notes in D-030), pseudonymous counts. No public additions.
+
+The trade: the layer will be thin until partners agree to share their lists, since none publishes open data. We accept that rather than scrape or guess.
