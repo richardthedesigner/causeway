@@ -140,6 +140,9 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | FEAT-18 | Road speed setting for road scooters in the device editor | S | later | done (2026-10-05) | Claude | D-051. 4 to 8 mph, and a per-device mph or km/h choice for speeds |
 | FEAT-19 | "On this route": what a route went round, what may slow you and what's worth knowing, in one grouped list, each with its label, source and date; the route card says only what changed the route or needs doing | M | now | done (2026-10-05) | Claude | D-067. Ported from PR #36 (its D-041). Blocked from the explanation and one closure-blind search per plan, only when something is closed. TfL's informational station messages, the weather and health lines and mappers' notes moved into it |
 | FEAT-20 | Destination first: one "Where to?" search, then From prefilled with "Your location", asking for location only then | M | now | done (2026-10-06) | Claude | D-073. PR #57. Fallbacks say why (location off, no fix, outside the city) and ask "Where are you starting from?" with the city's start suggested. Photon no longer gets your position. `pnpm e2e` fails if a request carries it |
+| FEAT-21 | Show who the route is for once a destination is set ("Routing for Cherry · powered wheelchair"), switchable in place, re-routing on change | M | now | doing | Claude | 2026-10-08, branch `claude/sleepy-johnson-mavbrs`. Richard's feedback 2026-10-08 |
+| FEAT-22 | Named, saved mobility profiles: create, name, pick and edit them; the current settings become the first one | M | now | doing | Claude | 2026-10-08, branch `claude/sleepy-johnson-mavbrs`. On the phone only |
+| FEAT-23 | Route details as an expressive summary, not nine identical accordions: key facts inline, a gradient strip, steps listed, "Unsure" explained, the rest behind disclosure | M | now | doing | Claude | 2026-10-08, branch `claude/sleepy-johnson-mavbrs` |
 
 ## Small features
 
