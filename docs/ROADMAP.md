@@ -115,6 +115,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | RES-09 | Choose where to go next with census disability data, Blue Badge statistics and station usage | M | later | done (2026-10-05) | Claude | §5. [where-next.md](research/where-next.md): Glasgow, then Leeds. Wales scores last. Richard chose Glasgow, then Leeds (D-072) |
 | RES-10 | Ask road scooter riders whether they want routes on roads, and whether to avoid busy ones | S | next | todo | Richard | D-051: routes now move onto roads at 8 mph |
 | RES-11 | Scottish council-level census disability and Blue Badge figures for Scotland and Wales; a proper data pass on Birmingham and Liverpool; then rerun the RES-09 scores | S | later | todo | Claude | [where-next.md](research/where-next.md), \"What the sources do not give us\". Scotland's UV303 tables need a browser download |
+| RES-12 | Ask women, LGBTQ+ and disabled people about getting about at night: what helps, main streets or not, what to call the layer | S | next | todo | Richard, Claude | D-083. [Plan](plans/SAFE_SPACES.md). With partner groups |
 
 ## Features
 
@@ -144,7 +145,13 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | FEAT-22 | Named, saved mobility profiles: create, name, pick and edit them; the current settings become the first one | M | now | done (2026-10-08) | Claude | D-082. PR #75. Saved devices (D-034) already were these; now shown by name and type on the route, and "Edit and name" for an unnamed one. On the phone only |
 | FEAT-23 | Route details as an expressive summary, not nine identical accordions: key facts inline, a gradient strip, steps listed, "Unsure" explained, the rest behind disclosure | M | now | done (2026-10-08) | Claude | D-082. PR #75. "At a glance" tiles; Getting in, Route in words, Hills and Toilets shown open; three sections still fold. [Plan](plans/ROUTE_PANEL_PROFILES.md) |
 | FEAT-24 | Check the new route screen and "Routes are for" line with testers: do the tiles and the open sections help, or is it too long on a phone? | S | next | todo | Richard, Claude | D-082. With RES work |
-| FEAT-25 | Safer spaces: research data sources and plan an optional, off-by-default layer (women-friendly, LGBTQ+ friendly, Keep Safe places, gender-neutral toilets, well-lit routes, late-night help) | M | now | doing | Claude | 2026-10-08, branch `claude/safe-spaces-plan`. A user's request. Plan only, no build |
+| FEAT-25 | Safer spaces: research data sources and plan an optional, off-by-default layer (women-friendly, LGBTQ+ friendly, help points, gender-neutral toilets, well-lit routes, late-night help) | M | now | done (2026-10-08) | Claude | D-083. PR #77. A user's request. [Plan](plans/SAFE_SPACES.md). Keep Safe and Ask for ANI have ended; no venue scheme publishes open data |
+| FEAT-26 | "Probably lit": a lamp column close along an untagged way in Edinburgh (June 2026 council import in OSM) costs between lit and not mapped; route card says "Lit for N% of the way" | M | next | todo | Claude | D-083, D-038. [Plan](plans/SAFE_SPACES.md) phase 1. Test the distance against ways mapped as unlit first |
+| FEAT-27 | Toilet filters for everyone: gender-neutral (`unisex=yes`) and changing tables | S | next | todo | Claude | D-083. Plan phase 2. Not behind the opt-in |
+| FEAT-28 | Night transport: keep after-midnight trips (GTFS times past 24:00) in the bus build; "last bus" and night bus lines on routes | M | next | todo | Claude | D-083. Plan phase 3. Lothian N routes and Go North East night routes are in BODS |
+| FEAT-29 | "Out at night" layer, off by default, on the phone only: help points (OSM, TfL), "Need help now?", lit-streets prompt, OSM `lgbtq=*` labelled as volunteer-mapped | M | later | blocked | Richard, Claude | D-083. Plan phase 4. Waits on Richard's yes to the rules and a wording review |
+| FEAT-30 | Partner lists in the layer: Rainbow Mark, Safe Spaces, Ask for Angela, weekend welfare points; removal on request; 12-month expiry | L | later | blocked | Richard, Claude | D-083. Plan phase 5. Waits on written agreements |
+| FEAT-31 | "Still there?" confirmations on safer-spaces items: fixed answers, pre-moderated, pseudonymous counts, stricter confidence class | M | later | blocked | Claude | D-083. Plan phase 6. Needs DEF-04 and the reports confidence work |
 
 ## Small features
 
@@ -321,6 +328,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 ## Log
 
 Newest first. One line per change: date, ID, what happened, link.
+- 2026-10-08: FEAT-25 done in PR #77: safer spaces research and plan ([SAFE_SPACES.md](plans/SAFE_SPACES.md), D-083). Added FEAT-26 to FEAT-31 and RES-12.
 - 2026-10-08: FEAT-21, FEAT-22 and FEAT-23 done in PR #75 (D-082), from Richard's feedback on the route screen: who the route is for, saved profiles by name, and route details at a glance. Added FEAT-24.
 - 2026-10-08: DEP-01 done. `main` is the default and production branch; the mirror workflow is retired. Open: delete `claude/sleepy-johnson-mavbrs` once its branch protection rule is lifted (OPEN_ITEMS).
 - 2026-10-07: SPEED-10 done in PR #69: destination to route in Edinburgh 5.55 s to 2.99 s on Fast 4G with 4x CPU ([numbers](perf/2026-10-07-speed-10.md)); Newcastle and London 0.2 to 0.3 s quicker. On `main` after SPEED-09, Edinburgh 6.20 to 3.10 s, and Edinburgh's map draws 2.9 s sooner. The map no longer sends the whole network to MapLibre on every journey change, and `alternatives` costs each edge once. `perf:web --trace` added. Added SPEED-15, SPEED-16. Now: SPEED-15, SPEED-11 and SPEED-12 replace SPEED-10, SEC-17 and SMALL-20, which are done.

@@ -2,6 +2,13 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
+## 2026-10-08 (safer spaces: research and plan)
+
+FEAT-25 (D-083), PR #77. Docs only, from a user's request for queer and women-friendly spaces.
+- Surveyed venue schemes, apps, OSM tags, lighting, night transport and crime data for Edinburgh, Scotland and the UK. Keep Safe and Ask for ANI have ended; no venue scheme publishes open data. Edinburgh's 58,819 lamp columns went into OSM in June 2026.
+- Plan in `docs/plans/SAFE_SPACES.md`: lit routes, toilet filters and night buses first, for everyone; an opt-in "Out at night" layer on the phone only; partner lists later, with written agreements.
+- Proposed safety rules in D-083. Added FEAT-26 to FEAT-31 and RES-12.
+
 ## 2026-10-08 (who the route is for, and the route at a glance)
 
 FEAT-21, FEAT-22 and FEAT-23 (D-082), PR #75. From Richard's feedback on the route screen.
