@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { PRESETS, savedDevice } from "@causeway/profile";
-import { activeDevice, compareLine, defaultDevice, deviceLabel, loadDeviceState, orderDevices, saveDeviceState, SEED_DEVICES, withActive, withActiveName, withActiveProfile, withDeviceProfile, withFavourite, withoutDevice, withSetup, presetProfile } from "../src/lib/devices";
+import { activeDevice, compareLine, defaultDevice, deviceLabel, loadDeviceState, orderDevices, saveDeviceState, SEED_DEVICES, withActive, withActiveName, withActiveProfile, withDeviceProfile, withFavourite, withoutDevice, withSetup, presetProfile, routingFor, limitsLine, FIRST_VISIT } from "../src/lib/devices";
 
 /** An in-memory stand-in for localStorage. */
 function memory(init: Record<string, string> = {}) {
@@ -177,5 +177,41 @@ describe("speed unit across a change of type (FEAT-18)", () => {
     expect(presetProfile(lulu, "mobility-scooter").speedUnit).toBe("kmh");
     expect(presetProfile(lulu, "powerchair").speedUnit).toBe("kmh");
     expect(presetProfile(PRESETS["mobility-scooter-road"], "powerchair").speedUnit).toBeUndefined();
+  });
+});
+
+describe("who the route is for (FEAT-21, FEAT-22)", () => {
+  it("names a saved profile and gives its type beside it", () => {
+    expect(routingFor(SEED_DEVICES[0]!)).toEqual({ name: "Cherry", type: "Powerchair, lightweight", named: true });
+  });
+
+  it("uses the type as the name for an unnamed profile, so the first visit still says who it's for", () => {
+    expect(routingFor(activeDevice(FIRST_VISIT))).toEqual({ name: "Manual wheelchair", type: null, named: false });
+  });
+
+  it("says the limits that shape a route in one line", () => {
+    expect(limitsLine(PRESETS["manual-wheelchair"])).toMatch(/^(No kerbs|Kerbs up to \d+(\.\d+)? cm) · slopes up to \d+(\.\d+)?% · no steps$/);
+    expect(limitsLine(PRESETS.walking)).toMatch(/· steps fine$/);
+    expect(limitsLine(PRESETS.rollator)).toMatch(/· up to 2 steps$/);
+  });
+
+  it("switching profile changes only which one routes, and keeps every profile and its limits", () => {
+    const state = { devices: SEED_DEVICES, activeId: SEED_DEVICES[0]!.id };
+    const next = withActive(state, SEED_DEVICES[1]!.id);
+    expect(activeDevice(next).name).toBe("Lulu");
+    expect(next.devices).toEqual(state.devices);
+    expect(routingFor(activeDevice(next)).type).toBe("Mobility scooter, pavement");
+  });
+
+  it("a switch survives a reload", () => {
+    const store = memory();
+    saveDeviceState(withActive({ devices: SEED_DEVICES, activeId: SEED_DEVICES[0]!.id }, SEED_DEVICES[1]!.id), store);
+    expect(activeDevice(loadDeviceState(store)).name).toBe("Lulu");
+  });
+
+  it("a named first profile keeps the settings it started with", () => {
+    const named = withActiveName(FIRST_VISIT, "Cherry");
+    expect(routingFor(activeDevice(named))).toMatchObject({ name: "Cherry", named: true });
+    expect(activeDevice(named).profile.maxKerbCm).toBe(activeDevice(FIRST_VISIT).profile.maxKerbCm);
   });
 });

@@ -986,3 +986,16 @@ The trade: a visit downloads the ranges read first and then the whole file, abou
 - **Reduced motion.** With `prefers-reduced-motion` the move is instant.
 - **Wide screens.** The sheet is a side panel and covers no marker, so nothing moves.
 - **Not done.** Re-framing when the sheet is dragged to another height, or after the person has panned. It only frames when the places load or the city changes.
+
+## D-082 The route screen says who it's for, and shows the facts that matter
+
+**Decided.** 2026-10-08 (FEAT-21, FEAT-22, FEAT-23). From Richard's feedback: with a destination set, nothing showed the mobility mode, nothing said it was a saved, named profile, and nine identical folded rows hid the route's facts. Plan: [ROUTE_PANEL_PROFILES.md](plans/ROUTE_PANEL_PROFILES.md).
+
+- **Who it's for.** Under the destination, a full-width line: "Routes are for **Cherry** · Powerchair, lightweight", the limits that shape a route most (kerbs, slopes, steps) and "Change". It is the same device menu as D-036, so switching, Edit and "Add a device" work as before, and switching re-plans and says what changed. The small button in the destination bar goes on the route screen: one control, not two. In the wide-screen side panel the list opens downwards, so it isn't cut off; on a phone it still opens upwards.
+- **Saved profiles are the saved devices (D-034).** No new model or storage: they already had names and their own limits, on the phone only (D-009). An unnamed one shows its type, and its menu offers "Edit and name". On a first visit, before anything is saved, the line still says who the route is for ("Routes are for Manual wheelchair"), and its button reads "Set up" and opens setup. The words say "Routes are for", which is also the start of the button's name, so voice control finds it.
+- **At a glance.** After Start, up to five tiles: On this route, Getting in (venues), Steepest, Accessible toilets and Not known. Each has an icon, a label and a value, never colour alone, and opens its section below.
+- **Open, not folded.** Getting in, Route in words (first five steps, then "Show all"), Hills (the chart) and Accessible toilets (first three) are shown open, with real headings. "On this route" keeps D-067's rule (opens itself when something is blocked or slower). Still folded: What we don't know (long, with report buttons), Why this way? and Where this comes from.
+- **"Unsure" says why.** When the chosen route is Unsure, the card says how much isn't fully mapped and links to What we don't know. When only another way is Unsure, one line under the list explains the word. The "not fully mapped" item left the card's extras line, since this says it.
+
+The trade: the route sheet is longer, because more is shown. The tiles at the top let people jump past it. To check with testers (FEAT-24).
+

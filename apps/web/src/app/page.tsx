@@ -361,8 +361,10 @@ export default function Home() {
   const toilets = useMemo(() => (index && selectedRoute && view === "route" ? toiletsAlong(index, selectedRoute.coords, 80, passingAt(selectedRoute, departure(conditions))) : null), [index, selectedRoute, view, conditions]);
   const entrances = useMemo(() => (result?.status === "ok" ? result.entrances.map((e) => ({ lon: e.lon, lat: e.lat, ok: e.verdict.passable })) : []), [result]);
 
-  const profileChip = (
+  const deviceMenu = (variant: "chip" | "row") => (
     <DeviceMenu
+      variant={variant}
+      tripId={trip ?? undefined}
       devices={devices.devices}
       activeId={devices.activeId}
       onPick={(id) => {
@@ -385,6 +387,7 @@ export default function Home() {
     />
   );
 
+  const profileChip = deviceMenu("chip");
   const placeRow = (p: Place, title: string, sub: string, value: string) => {
     const c = planner.checks[p.id];
     return (
@@ -620,7 +623,7 @@ export default function Home() {
             setStart("chosen");
           }}
           onOpenMode={() => setModeOpen(true)}
-          device={profileChip}
+          who={deviceMenu("row")}
           forLabel={devices.devices.length > 1 || routeDevice.name ? deviceLabel(routeDevice) : undefined}
           compare={compare}
           onGround={(g) => setConditions(PRESET_CONDITIONS[g])}

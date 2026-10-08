@@ -2,6 +2,15 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
+## 2026-10-08 (who the route is for, and the route at a glance)
+
+FEAT-21, FEAT-22 and FEAT-23 (D-082), PR #75. From Richard's feedback on the route screen.
+- "Routes are for Cherry · Powerchair, lightweight" under the destination, with the limits that shape a route and "Change". Switching re-plans and the card says what changed.
+- Saved, named profiles were already there as saved devices (D-034). They now show by name and type on the route, and an unnamed one offers "Edit and name".
+- The route's details: "At a glance" tiles that open their section; Getting in, Route in words, Hills and Accessible toilets shown open; What we don't know, Why this way? and Where this comes from still fold.
+- "Unsure" explained on the card, and under the other ways.
+- New `routingFor` and `limitsLine` in `lib/devices.ts`, tested with switching and reloading. Screenshots of the new screen in `docs/ux/feat-23/`.
+
 ## 2026-10-07 (the wait for a route)
 
 SPEED-10, PR #69.
