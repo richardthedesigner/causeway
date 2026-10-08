@@ -363,13 +363,13 @@ A final pass hunted for whole categories nobody had searched. New finds, best fi
 | GLA Cool Spaces 2025, Camden heat resources | London Datastore | London | 250 heat refuges with wheelchair access, toilets, seating, water | keep | V |
 | UK public GBFS (54 systems: Beryl, Dott, Bolt, Donkey) | Beryl CDLA-Permissive-2.0; others per feed | Leeds, Manchester, Bristol, West Midlands and more (none in the pilots) | Dockless vehicles on pavements; Dott parking zones | trial (expansion) | V |
 | East Renfrewshire pavement-parking layer | Not stated | East Renfrewshire | Second council pattern after Glasgow | ask | V |
-| police.uk street crime API | OGL | England, Wales, NI (not Scotland) | Opt-in personal-safety signal at night | trial | V |
+| police.uk street crime API | OGL | England, Wales, NI (not Scotland) | Opt-in personal-safety signal at night | no: coarse, two months late, stigmatises areas (D-085) | V |
 | DfT STATS19, DfT road traffic counts | OGL | GB | Pedestrian casualty sites; traffic volume as a "hard to cross" proxy | trial | V |
 | Geograph | CC BY-SA 2.0 | UK | Rural photos for desk checks where Mapillary and Panoramax are thin | trial | V |
 | Tower Bridge lift times | None stated | London | Footway closes about 800 times a year | ask | V |
 | Met Office climate data portal (frost days, wet days) | OGL | UK | Seasonal ice and wet risk by area | trial | V |
 | ADMIRALTY tidal API | UKHO terms | British Isles | Tidal causeways and promenades | trial | S |
-| Warm Spaces, Safe Places schemes | Mostly not stated | Local | Winter rest places; places to go if lost or frightened (cognitive and autism profiles) | trial / partner | V/S |
+| Warm Spaces, Safe Places schemes | Mostly not stated | Local | Winter rest places; places to go if lost or frightened (cognitive and autism profiles). Police Scotland's Keep Safe has ended (§12) | trial / partner | V/S |
 | GoodMaps, NaviLens | Commercial | UK stations (GoodMaps names Network Rail and LNER) | Indoor station maps; codes for low-vision users | partner | S |
 | TfGM traffic signals, GM Local Link (demand-responsive transport) | OGL | Greater Manchester | Crossings by type; accessible fallback | keep (expansion) | V |
 | Footfall counters (York hourly since 2009, Leeds, Leicester, Stirling) | OGL / not stated | Local | Quiet-time routing | trial | S |
@@ -409,3 +409,33 @@ A final pass hunted for whole categories nobody had searched. New finds, best fi
 - Hearing loops, quiet hours and Sunflower scheme locations.
 - Scooter charging.
 - GBFS in the pilot cities.
+
+## 12. Night-time and safer spaces
+
+Researched 2026-10-08 for FEAT-42. Plan and safety rules: [plans/SAFE_SPACES.md](plans/SAFE_SPACES.md), D-085. Counts are for central Edinburgh (55.93,-3.24 to 55.97,-3.15) from an OSM extract dated 2026-10-02.
+
+| Source | Licence | Coverage | Adds | Verdict | V/S |
+|---|---|---|---|---|---|
+| **Edinburgh street lighting columns, imported into OSM (June 2026)** | OGL v3 via OSM, OS attribution | Edinburgh: 58,819 lamps, 11,493 in the central box | `highway=street_lamp`. 63% of untagged footways have a lamp within 30 m. A "probably lit" signal, not proof | keep (DATA-33, FEAT-43) | V |
+| OSM `lit=*` | ODbL | Central Edinburgh: 52% of highway length tagged, footways 40%, main roads 95 to 98% | Already routed on (D-038) | keep | V |
+| Council lighting open data: Darlington, York, Camden | OGL | Those councils only. None found for Newcastle, Gateshead or pan-London | Lamp columns | ask Newcastle; keep where open (DATA-33) | V |
+| OS NGD Street Light | Premium | GB | Lamps from aerial images; misses lights under trees | add to the OS ask | S |
+| VIIRS, NASA Black Marble night lights | Unverified | World, about 500 m | Area brightness | no: too coarse | S |
+| BODS GTFS night services | OGL | Lothian N1 to N44 (15 routes), Edinburgh Trams; Go North East 861N, 876N, 877N, N21 | Night buses in data we already load | keep (FEAT-45). Check after-midnight trips survive the build | V |
+| OSM help points: `amenity=police`, `amenity=taxi`, pharmacies with `opening_hours` | ODbL | Central Edinburgh: 5 police, 31 taxi ranks, 42 pharmacies (36 with hours) | "Open now" help points | keep (DATA-34) | V |
+| OSM toilets: `unisex=yes`, `changing_table=*` | ODbL | Central Edinburgh: 8 unisex, 12 with changing tables (59 toilets) | Toilet filters for everyone. `toilets:gender_neutral` is unused | keep (DATA-34, FEAT-44) | V |
+| OSM `lgbtq=*`, `lgbtq:*` | ODbL | 4,022 worldwide; 9 in central Edinburgh | Venues that say they are LGBTQ+ primary or welcoming | keep, labelled as volunteer-mapped (FEAT-46) | V |
+| Scottish LGBTI+ Rainbow Mark (Equality Network) | Not stated | Scotland | Signatory venues and organisations | partner (FEAT-47, DATA-35) | S |
+| UK SAYS NO MORE Safe Spaces (Hestia) | Not stated | UK, over 5,000: Boots, Morrisons, Superdrug, Well pharmacies, TSB | Domestic abuse safe spaces | partner (FEAT-47, DATA-35) | V |
+| Ask for Angela (CIC) | All rights reserved | UK | Pledged venues | partner (DATA-35) | V |
+| Best Bar None Scotland (Retailers Against Crime CIC) | Not stated | Edinburgh city-wide; 46 venues in 2019 | Accredited venues | ask (DATA-35) | S |
+| Safe Places National Network (CIC) | Not stated | Mainly England | Places for people who feel lost or scared | partner | S |
+| Women's Night Safety Charter, London LGBTQ+ Venues Charter (GLA) | Not stated | London | Pledges, not on-site help | later, if at all | S |
+| Street Assist, Street Pastors, SafeZone (Edinburgh); Safe Haven van, Street Pastors (Newcastle) | None published | Weekend nights | Welfare points with hours | partner, hand-curated | S |
+| Strut Safe | n/a | UK phone line | Link with hours | link | V |
+| Keep Safe (Police Scotland, I Am Me) | | Scotland | Was over 900 venues | **ended**: do not use | V |
+| Ask for ANI | | UK pharmacies | | **ended 4 Nov 2024** | V |
+| Purple Flag (ATCM) | No public list | Whole town centres | An area award | low value | S |
+| SIMD, police.uk crime | OGL | | Deprivation, crime | **no** (D-085) | V |
+| Queering the Map; Grindr and similar | None / terms forbid | | | **no**: exposes people | S |
+
