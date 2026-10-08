@@ -999,3 +999,15 @@ The trade: a visit downloads the ranges read first and then the whole file, abou
 
 The trade: the route sheet is longer, because more is shown. The tiles at the top let people jump past it. To check with testers (FEAT-24).
 
+
+## D-083 User accounts: Supabase Auth, upgraded in place, optional forever
+
+**Proposed.** 2026-10-08 (FEAT-25). Plan only: [plans/USER_ACCOUNTS.md](plans/USER_ACCOUNTS.md). Accounts stay deferred (DEF-07) until Richard says go and answers the plan's open questions.
+
+- **Never required.** Routing, profiles, saved places, reports, notes and votes all keep working without an account. An account adds sync, weight for contributions, and carer sharing. Many disabled people use shared phones or find sign-in hard (D-009's promise stands).
+- **Supabase Auth.** We already use it (D-030). Signing up upgrades the anonymous user in place, so the id stays the same and everything done anonymously is already the account's, with no migration. Row-level security keeps working on `auth.uid()`, data stays in London, and there's no new processor. Clerk (best passkeys, but a second user store, a US transfer and heavier first-screen JavaScript) and Auth.js (needs a server; the site is a static export) were weighed and not chosen.
+- **Email code first, then passkeys.** A 6-digit code with paste and one-time-code autofill meets WCAG 2.2 SC 3.3.8 for everyone; a passkey is offered straight after and becomes the way back in. The code email also carries a link. No passwords. No CAPTCHA puzzles: Turnstile only in its invisible mode, falling back to the email code. Sign in with Apple and Google only if testers ask (FEAT-33).
+- **Sync is encrypted on the phone.** Profiles, saved places, saved routes and any sensitive preference (safe spaces) are encrypted with a per-account key before upload. A passkey with the PRF extension unlocks it; otherwise a recovery key saved as a file or in a password manager. The server can't read health data. Each kind needs its own consent (Art. 9(2)(a) explicit consent for special category data).
+- **Pseudonymous by default.** Generated handles, no public profiles or histories, no messaging. Public items show no handle unless the person opts in, and never as a list. Times shown by the day.
+- **The contributor id is the Supabase user id,** anonymous or not. Community reports should use it, so upgrading carries reports and votes with it. Weight comes from one function, `contributor_weight()`: anonymous 0.25, verified 0.5, established 1.0, trusted 1.5 at most, earned from independent agreement, not volume.
+- **Build-time flags** (`NEXT_PUBLIC_ACCOUNTS` off, invite or on, and one per later phase), backed by a database allow list during the invite stage. Nothing goes live before the DPIA (SEC-10).

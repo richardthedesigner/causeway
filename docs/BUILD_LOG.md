@@ -2,6 +2,13 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
+## 2026-10-08 (user accounts, planned)
+
+FEAT-25 (D-083), PR #76. Docs only, nothing built.
+- [plans/USER_ACCOUNTS.md](plans/USER_ACCOUNTS.md): goals and non-goals, sign-in methods and providers compared for accessibility (WCAG 2.2 SC 3.3.8, no CAPTCHA puzzles), data model, UK GDPR and special category data, threat model, reputation and moderation, carers and companions, rollout with flags, and what Richard must set up.
+- Recommendation: Supabase Auth, upgrading today's anonymous id in place; email code first, then passkeys; sync encrypted on the phone; pseudonymous handles; accounts never required.
+- Phases added to the roadmap as FEAT-26 to FEAT-34. Ten open questions for Richard in OPEN_ITEMS.
+
 ## 2026-10-08 (who the route is for, and the route at a glance)
 
 FEAT-21, FEAT-22 and FEAT-23 (D-082), PR #75. From Richard's feedback on the route screen.
