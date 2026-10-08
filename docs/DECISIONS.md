@@ -1011,9 +1011,9 @@ The trade: the route sheet is longer, because more is shown. The tiles at the to
 - **Pseudonymous by default.** Generated handles, no public profiles or histories, no messaging. Public items show no handle unless the person opts in, and never as a list. Times shown by the day.
 - **The contributor id is the Supabase user id,** anonymous or not. Community reports should use it, so upgrading carries reports and votes with it. Weight comes from one function, `contributor_weight()`: anonymous 0.25, verified 0.5, established 1.0, trusted 1.5 at most, earned from independent agreement, not volume.
 - **Build-time flags** (`NEXT_PUBLIC_ACCOUNTS` off, invite or on, and one per later phase), backed by a database allow list during the invite stage. Nothing goes live before the DPIA (SEC-10).
-## D-084 Safer spaces: opt in, on the phone only, what places say about themselves
+## D-085 Safer spaces: opt in, on the phone only, what places say about themselves
 
-**Proposed.** 2026-10-08 (FEAT-35). A user asked for a section for queer, minority and women-friendly spaces. Research and plan: [SAFE_SPACES.md](plans/SAFE_SPACES.md). The rules below are Claude's recommendation; the venue layer (FEAT-39, FEAT-40) waits on Richard's yes.
+**Proposed.** 2026-10-08 (FEAT-42). A user asked for a section for queer, minority and women-friendly spaces. Research and plan: [SAFE_SPACES.md](plans/SAFE_SPACES.md). The rules below are Claude's recommendation; the venue layer (FEAT-46, FEAT-47) waits on Richard's yes.
 
 - **What helps everyone ships for everyone.** Lit routes after dark (D-038, plus "probably lit" from Edinburgh's lamp columns), gender-neutral and changing-table toilet filters, open-late pharmacies, police stations, taxi ranks and night buses. None of it is sensitive.
 - **Venue lists sit behind an opt-in layer, "Out at night", off by default.** The setting stays on the phone (D-009). It is never sent, logged or counted. The layer's data ships to everyone in the city file, so fetching it reveals nothing. Plain markers, no lock-screen or share-link traces.

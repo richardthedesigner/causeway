@@ -4,10 +4,10 @@ A running record of what was built, newest first. Each entry links the decision 
 
 ## 2026-10-08 (safer spaces: research and plan)
 
-FEAT-35 (D-084), PR #77. Docs only, from a user's request for queer and women-friendly spaces.
+FEAT-42 (D-085), PR #77. Docs only, from a user's request for queer and women-friendly spaces.
 - Surveyed venue schemes, apps, OSM tags, lighting, night transport and crime data for Edinburgh, Scotland and the UK. Keep Safe and Ask for ANI have ended; no venue scheme publishes open data. Edinburgh's 58,819 lamp columns went into OSM in June 2026.
 - Plan in `docs/plans/SAFE_SPACES.md`: lit routes, toilet filters and night buses first, for everyone; an opt-in "Out at night" layer on the phone only; partner lists later, with written agreements.
-- Proposed safety rules in D-084. Added FEAT-36 to FEAT-41 and RES-12.
+- Proposed safety rules in D-085. Added FEAT-43 to FEAT-48, RES-12 and DATA-33 to DATA-35. Sources in the data survey §12.
 
 ## 2026-10-08 (user accounts, planned)
 
