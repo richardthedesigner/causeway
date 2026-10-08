@@ -3,7 +3,7 @@ import { PRESETS, type SavedDevice } from "@causeway/profile";
 import { Accessibility, Check, ChevronUp, Pencil, Plus } from "lucide-react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { deviceLabel, orderDevices } from "@/lib/devices";
+import { deviceLabel, limitsLine, orderDevices, routingFor } from "@/lib/devices";
 import { useMenu } from "@/lib/use-menu";
 import { cn } from "@/lib/utils";
 
@@ -17,9 +17,13 @@ interface Props {
   onSetup?: () => void;
   /** A device borrowed for this journey only: the button says "Lulu, this trip". */
   tripLabel?: string;
+  /** The id of that borrowed device, so the route screen's line can show its type and limits. */
+  tripId?: string;
   /** Show the one-time tip that the button switches device. */
   tip?: boolean;
   onTipSeen?: () => void;
+  /** "chip" sits in the search bar; "row" is the full-width line on the route screen (FEAT-21). */
+  variant?: "chip" | "row";
 }
 
 const typeOf = (d: SavedDevice) => PRESETS[d.profile.preset].label;
@@ -27,9 +31,11 @@ const typeOf = (d: SavedDevice) => PRESETS[d.profile.preset].label;
 /**
  * Who the routes are for, inside the search bar (D-036). A named device
  * shows its name; an unnamed one its icon and type. The list opens upwards,
- * so a thumb on the button never covers it.
+ * so a thumb on the button never covers it. On the route screen it is a
+ * full-width line near the top of the panel (FEAT-21); in the wide-screen
+ * side panel the list opens downwards there, so it isn't cut off above.
  */
-export function DeviceMenu({ devices, activeId, onPick, onEdit, onAdd, onSetup, tripLabel, tip, onTipSeen }: Props) {
+export function DeviceMenu({ devices, activeId, onPick, onEdit, onAdd, onSetup, tripLabel, tip, onTipSeen, variant = "chip", tripId }: Props) {
   const panel = useRef<HTMLDivElement>(null);
   const { open, setOpen, toggle, root } = useMenu(panel);
   /**
@@ -37,7 +43,7 @@ export function DeviceMenu({ devices, activeId, onPick, onEdit, onAdd, onSetup, 
    * on the sheet's outer layer (not inside its scrolling body, which clips
    * anything above the sheet's top edge) so focus and keys stay in the sheet.
    */
-  const [at, setAt] = useState<{ bottom: number; right: number; host: HTMLElement } | null>(null);
+  const [at, setAt] = useState<{ bottom: number; top: number; right: number; host: HTMLElement } | null>(null);
   const [said, setSaid] = useState<string | null>(null);
   const active = devices.find((d) => d.id === activeId) ?? devices[0]!;
   const list = orderDevices(devices);
@@ -50,7 +56,7 @@ export function DeviceMenu({ devices, activeId, onPick, onEdit, onAdd, onSetup, 
       const host = root.current?.closest<HTMLElement>("[data-vaul-drawer]") ?? document.body;
       const r = root.current?.getBoundingClientRect();
       const h = host === document.body ? new DOMRect(0, 0, window.innerWidth, window.innerHeight) : host.getBoundingClientRect();
-      if (r) setAt({ bottom: h.bottom - r.top + 8, right: Math.max(8, h.right - r.right), host });
+      if (r) setAt({ bottom: h.bottom - r.top + 8, top: r.bottom - h.top + 8, right: Math.max(8, h.right - r.right), host });
     };
     place();
     window.addEventListener("resize", place);
@@ -124,6 +130,16 @@ export function DeviceMenu({ devices, activeId, onPick, onEdit, onAdd, onSetup, 
         <button type="button" data-menu="device" onClick={onSetup} aria-label="Set up how you get around" className="inline-flex min-h-12 items-center rounded-xl bg-accent px-4 text-sm font-bold text-accent-ink">
           Set up
         </button>
+      ) : variant === "row" ? (
+        <RowButton
+          active={devices.find((d) => d.id === tripId) ?? active}
+          trip={!!tripLabel}
+          open={isOpen}
+          onClick={() => {
+            if (tip) onTipSeen?.();
+            toggle("device");
+          }}
+        />
       ) : (
       <button
         type="button"
@@ -149,7 +165,7 @@ export function DeviceMenu({ devices, activeId, onPick, onEdit, onAdd, onSetup, 
           role="menu"
           aria-label="Getting around as"
           onKeyDown={(e) => { keep(e); onKey(e); }}
-          style={{ bottom: at.bottom, right: at.right }}
+          style={variant === "row" && at.host === document.body ? { top: at.top, right: at.right } : { bottom: at.bottom, right: at.right }}
           className="absolute z-[60] grid w-72 max-w-[calc(100vw-2rem)] gap-0.5 rounded-2xl border border-line bg-surface p-2 text-base text-ink shadow-[0_8px_30px_rgb(0_0_0/0.2)]"
         >
           {split ? <p className="m-0 px-3 pt-1 text-xs tracking-wide text-muted uppercase">Favourites</p> : null}
@@ -158,7 +174,7 @@ export function DeviceMenu({ devices, activeId, onPick, onEdit, onAdd, onSetup, 
           {split ? list.filter((d) => !d.favourite).map(row) : null}
           <hr className="mx-2 my-1 border-0 border-t border-line" />
           <button type="button" role="menuitem" onClick={() => { close(); onEdit(); }} className="flex min-h-12 items-center gap-3 rounded-xl px-3 text-left hover:bg-surface-2">
-            <Pencil aria-hidden className="size-4 text-muted" /> Edit {deviceLabel(active)}
+            <Pencil aria-hidden className="size-4 text-muted" /> {active.name.trim() ? `Edit ${deviceLabel(active)}` : `Edit and name ${deviceLabel(active)}`}
           </button>
           <button type="button" role="menuitem" onClick={() => { close(); onAdd(); }} className="flex min-h-12 items-center gap-3 rounded-xl px-3 text-left hover:bg-surface-2">
             <Plus aria-hidden className="size-4 text-muted" /> Add a device
@@ -190,5 +206,42 @@ export function DeviceMenu({ devices, activeId, onPick, onEdit, onAdd, onSetup, 
           )
         : null}
     </div>
+  );
+}
+
+/**
+ * The route screen's line for who the routes are for (FEAT-21): the name, the
+ * type and the limits that shape a route, with "Change" to switch or edit.
+ * The visible words start the button's name, so voice control finds it.
+ */
+function RowButton({ active, trip, open, onClick }: { active: SavedDevice; trip: boolean; open: boolean; onClick: () => void }) {
+  const who = routingFor(active);
+  return (
+    <button
+      type="button"
+      data-menu="device"
+      aria-haspopup="menu"
+      aria-expanded={open}
+      onClick={onClick}
+      aria-label={`Routes are for ${who.name}${who.type ? `, ${who.type}` : ""}${trip ? ", this trip only" : ""}. ${limitsLine(active.profile)}. Change`}
+      className="flex min-h-14 w-full min-w-0 items-center gap-3 rounded-2xl border-2 border-line bg-surface-2 px-3 py-2 text-left hover:border-ink"
+    >
+      <span aria-hidden className="grid size-10 shrink-0 place-items-center rounded-full bg-accent text-accent-ink">
+        <Accessibility className="size-5" strokeWidth={2.4} />
+      </span>
+      <span className="grid min-w-0 flex-1 leading-snug [overflow-wrap:anywhere]">
+        <span>
+          <span className="text-muted">Routes are for </span>
+          <span className="font-bold">{who.name}</span>
+          {who.type ? <span className="text-muted"> · {who.type}</span> : null}
+          {trip ? <span className="text-muted"> · this trip only</span> : null}
+        </span>
+        <span className="text-sm text-muted">{limitsLine(active.profile)}</span>
+      </span>
+      <span className="flex shrink-0 items-center gap-1 text-sm font-bold text-accent">
+        Change
+        <ChevronUp aria-hidden className={cn("size-4 transition-transform", !open && "rotate-180")} strokeWidth={2.6} />
+      </span>
+    </button>
   );
 }

@@ -17,12 +17,12 @@ const ICON: Record<OnRouteGroup, React.ReactNode> = {
  * when something is blocked or slower; otherwise the summary row says what's
  * inside ("2 worth knowing", "Nothing known").
  */
-export function OnThisRoute({ items, routeId }: { items: readonly OnRouteItem[]; routeId: string }) {
+export function OnThisRoute({ items, routeId, id }: { items: readonly OnRouteItem[]; routeId: string; id?: string }) {
   const groups = (["blocked", "slower", "info"] as const).map((g) => ({ g, list: items.filter((i) => i.group === g) })).filter((x) => x.list.length);
   const urgent = onRouteUrgent(items);
   return (
     // Keyed by route and urgency, so a newly chosen route, or one where something new is blocked, opens on its own merits.
-    <details key={`${routeId}|${urgent}`} open={urgent || undefined} className="group rounded-2xl border border-line">
+    <details id={id} key={`${routeId}|${urgent}`} open={urgent || undefined} className="group scroll-mt-4 rounded-2xl border border-line">
       {/* The summary wraps under large text, as the other sections' do (STAB-12). */}
       <summary className="flex min-h-14 cursor-pointer list-none flex-wrap items-center justify-between gap-x-3 px-4 py-1">
         <span className="flex min-w-0 items-center gap-2 font-bold [overflow-wrap:anywhere]">

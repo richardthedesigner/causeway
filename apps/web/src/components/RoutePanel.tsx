@@ -1,5 +1,5 @@
 "use client";
-import { ArrowUpDown, ChevronDown, CircleAlert, CircleCheck, CircleHelp, CircleX, Copy, DoorOpen, MapPin, MessageSquarePlus, Share2, Trees, Undo2 } from "lucide-react";
+import { ArrowUpDown, CircleAlert, CircleCheck, CircleHelp, CircleX, Copy, DoorOpen, Info, ListChecks, ListOrdered, MapPin, MessageSquarePlus, Mountain, Share2, Toilet, Trees, Undo2 } from "lucide-react";
 import { entranceRef, notesForEntrance, notesForPlace, notesForStretch, type UserNote } from "@causeway/graph";
 import { distanceUnit, formatDistance, type DistanceUnit, type Profile } from "@causeway/profile";
 import { useEffect, useRef, useState } from "react";
@@ -21,11 +21,12 @@ import { Button } from "@/components/ui/button";
 import type { FloodHere, Place, PlannedRoute, PlanResult, RouteUnknown, WorksSummary } from "@/lib/plan-types";
 import { departure, type Conditions, type LiveArea, type LiveHealthAlert, type LiveLifts } from "@/lib/use-planner";
 import { areaStatus, gustStatus, healthAlertStatus } from "@/lib/area-status";
-import { airItems, blockedLine, floodLine } from "@/lib/on-route";
+import { airItems, blockedLine, floodLine, onRouteAside } from "@/lib/on-route";
 import { OnThisRoute, ReportWhatsThere } from "@/components/OnThisRoute";
 import { liveFailedLine } from "@/lib/live-status";
 import type { FlagReason } from "@/lib/sync";
 import { cn } from "@/lib/utils";
+import { AtAGlance, jumpTo, More, Section, ShortList, type Fact } from "@/components/RouteFacts";
 
 interface Props {
   from: Place;
@@ -42,8 +43,8 @@ interface Props {
   /** Waiting for the phone to say where you are (FEAT-20): no route yet. */
   locating?: boolean;
   onOpenMode: () => void;
-  /** Who the routes are for: the device button, shown in the destination bar. */
-  device?: React.ReactNode;
+  /** Who the routes are for, and the control to change it (FEAT-21): shown under the destination. */
+  who?: React.ReactNode;
   /** The device these routes were planned for, shown on the route ("For Cherry"). */
   forLabel?: string;
   /** The previous device's best time for this journey, after a switch. */
@@ -113,7 +114,6 @@ function extras(r: PlannedRoute, unit: DistanceUnit): string[] {
     s.lifts ? `${s.lifts} lift${s.lifts > 1 ? "s" : ""}` : null,
     s.steps ? `${s.steps} flight${s.steps > 1 ? "s" : ""} of steps` : null,
     (s.surfaceMix["setts"] ?? 0) > 20 ? `${formatDistance(s.surfaceMix["setts"] ?? 0, unit, { precise: true })} of setts` : null,
-    s.unknownM >= 10 ? `${formatDistance(s.unknownM, unit)} not fully mapped` : null,
   ].filter((x): x is string => !!x);
 }
 
@@ -181,6 +181,39 @@ export function RoutePanel(props: Props) {
   // The sentence that says why this route: the explanation for the best route, the trade-off for the others.
   const why = !sel ? null : result?.status === "ok" && sel.id === result.routes[0]?.id ? result.headline : (selTitle?.why ?? null);
 
+  // The key facts at a glance (FEAT-23): each tile opens its section below. Word and icon say it; colour only adds.
+  const fitting = entrances.filter((e) => e.verdict.passable === "yes").length;
+  const worst = sel?.summary.worstInclinePct ?? null;
+  const hillsAside = !sel ? "" : [worst === null ? "Steepest not known" : `Steepest ${Math.abs(worst)}%`, sel.summary.ascentM >= 1 ? `${Math.round(sel.summary.ascentM)} m up` : null].filter(Boolean).join(" · ");
+  const urgent = onRouteItems.find((i) => i.group === "blocked") ? "blocked" : onRouteItems.find((i) => i.group === "slower") ? "slower" : null;
+  const facts: Fact[] = !sel
+    ? []
+    : [
+        {
+          target: "sec-onroute",
+          label: "On this route",
+          value: onRouteAside(onRouteItems),
+          icon: urgent === "blocked" ? <CircleX aria-hidden className="size-5 text-stop" /> : urgent === "slower" ? <CircleAlert aria-hidden className="size-5 text-caution" /> : <ListChecks aria-hidden className="size-5 text-muted" />,
+        },
+        ...(isVenue
+          ? [
+              {
+                target: "sec-getting-in",
+                label: "Getting in",
+                value: entrances.length ? `${fitting} of ${entrances.length} fit` : "Not mapped",
+                icon: fitting ? <CircleCheck aria-hidden className="size-5 text-ok" /> : entrances.length && entrances.every((e) => e.verdict.passable === "no") ? <CircleX aria-hidden className="size-5 text-stop" /> : <CircleHelp aria-hidden className="size-5 text-unknown" />,
+              },
+            ]
+          : []),
+        { target: "sec-hills", label: "Steepest", value: worst === null ? "Not known" : `${Math.abs(worst)}%${Math.abs(worst) > profile.maxInclineUpPct ? ", over your limit" : ""}`, icon: <Mountain aria-hidden className="size-5 text-muted" /> },
+        ...(props.toilets
+          ? [{ target: "sec-toilets", label: "Accessible toilets", value: props.toilets.toilets.length ? `${props.toilets.toilets.length} on the way` : "None mapped", icon: <Toilet aria-hidden className="size-5 text-muted" /> }]
+          : []),
+        sel.unknowns.length
+          ? { target: "sec-unknowns", label: "Not known", value: `${sel.unknowns.length} place${sel.unknowns.length === 1 ? "" : "s"}`, icon: <CircleHelp aria-hidden className="size-5 text-unknown" /> }
+          : { target: "sec-words", label: "Not known", value: "Nothing missing", icon: <CircleCheck aria-hidden className="size-5 text-ok" /> },
+      ];
+
   return (
     <div className="grid grid-cols-1 gap-[min(0.75rem,12px)] [&>*]:min-w-0">
       {/* Journey: two rows, swap on the side. Tap either to change it. */}
@@ -206,8 +239,8 @@ export function RoutePanel(props: Props) {
             <span className="truncate text-lg font-bold">{to.name}</span>
           </button>
         }
-        trailing={props.device}
       />
+      {props.who}
       {props.onGround ? (
         <div className="-mt-1 flex flex-wrap items-center justify-between gap-2 px-1">
           <span className="text-sm text-muted">Worked out for {groundWord(conditions)}.</span>
@@ -256,12 +289,21 @@ export function RoutePanel(props: Props) {
             <h2 id="route-h" className="sr-only">
               {selTitle?.title || "Best for you"}
             </h2>
-            {props.forLabel ? <span className="justify-self-start rounded-full border border-line px-3 py-0.5 text-sm font-bold">For {props.forLabel}</span> : null}
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
               <VerdictPill v={sel.summary.verdict} />
               <span className="tabular text-[28px] leading-none font-bold">{Math.round(sel.summary.minutes)} min</span>
               <span className="tabular text-sm text-muted">{meta(sel, unit)}</span>
             </div>
+            {sel.summary.verdict === "passable-with-unknowns" ? (
+              <p className="m-0 text-sm">
+                <span className="font-bold">Unsure:</span> {sel.summary.unknownM >= 10 ? `${dist(sel.summary.unknownM)} of this route isn't fully mapped` : "part of this route isn't fully mapped"}, so we can&apos;t promise it fits.{" "}
+                {sel.unknowns.length ? (
+                  <button type="button" onClick={() => jumpTo("sec-unknowns")} className="min-h-6 font-bold text-accent underline underline-offset-4">
+                    See what we don&apos;t know
+                  </button>
+                ) : null}
+              </p>
+            ) : null}
             <ArrivalHours hours={to.hours} minutes={sel.summary.minutes} leave={conditions.leaveAt ?? null} />
             <RouteStrip strip={sel.strip} unit={unit} />
             {props.compare && props.compare.label !== props.forLabel ? (
@@ -311,6 +353,12 @@ export function RoutePanel(props: Props) {
               ))}
             </ul>
           ) : null}
+          {sel.summary.verdict !== "passable-with-unknowns" && others.some((o) => o.r.summary.verdict === "passable-with-unknowns") ? (
+            <p className="m-0 flex items-start gap-2 text-sm text-muted">
+              <CircleHelp aria-hidden className="mt-0.5 size-4 shrink-0" />
+              Unsure means part of that way isn&apos;t fully mapped, so we can&apos;t promise it fits.
+            </p>
+          ) : null}
           {tradeoffMessages.map((t) => (
             <p key={t.id} className="m-0 flex items-start gap-2 text-sm text-muted">
               <CircleAlert aria-hidden className="mt-0.5 size-4 shrink-0" />
@@ -339,13 +387,15 @@ export function RoutePanel(props: Props) {
               : actions;
           })()}
 
-          <div className="grid gap-2 [&>*]:min-w-0">
-            <OnThisRoute items={onRouteItems} routeId={sel.id} />
+          <AtAGlance facts={facts} />
+          <div className="grid gap-4 [&>*]:min-w-0">
+            <OnThisRoute id="sec-onroute" items={onRouteItems} routeId={sel.id} />
             {isVenue ? (
-              <More
+              <Section
+                id="sec-getting-in"
                 title="Getting in"
                 icon={<DoorOpen aria-hidden className="size-5" />}
-                aside={entrances.length ? `${entrances.filter((e) => e.verdict.passable === "yes").length} of ${entrances.length} fit` : "Not mapped"}
+                aside={entrances.length ? `${fitting} of ${entrances.length} fit` : "Not mapped"}
               >
                 {to.facts ? (
                   <div className="grid gap-0.5">
@@ -386,28 +436,36 @@ export function RoutePanel(props: Props) {
                   <p className="m-0 text-muted">No entrances mapped near this point. Check with the venue before you go.</p>
                 )}
                 <PeopleSay notes={placeNotes} all={notes} author={author} onDelete={props.onDeleteNote} onFlag={props.onFlagNote} title="What people say about the place" />
-              </More>
+              </Section>
             ) : null}
 
-            <More title="Why this way?" aside={peopleCount ? `${peopleCount} note${peopleCount === 1 ? "" : "s"} from people` : undefined}>
-              {result.notes.length ? (
-                <ul className="m-0 grid list-none grid-cols-1 gap-1 p-0">
-                  {result.notes.map((n) => (
-                    <li key={n}>{n}</li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="m-0 text-muted">Nothing else to flag on this route.</p>
-              )}
-              <PeopleSay notes={routeNotes} all={notes} author={author} onDelete={props.onDeleteNote} onFlag={props.onFlagNote} title="Notes from people on this route" hint="Their own experience, not checked by us. Notes nudge your routes but never rule a street in or out." />
-            </More>
+            <Section id="sec-words" title="Route in words" icon={<ListOrdered aria-hidden className="size-5" />} aside={`${sel.segments.length} step${sel.segments.length === 1 ? "" : "s"}`}>
+              <ShortList
+                key={sel.id}
+                ordered
+                first={5}
+                noun="steps"
+                className="grid gap-2 pl-6 [overflow-wrap:anywhere] marker:font-bold marker:text-muted"
+                items={sel.segments.map((s, i) => (
+                  <li key={i} className="pl-1">
+                    {s}
+                  </li>
+                ))}
+              />
+              <CopyRouteButton text={() => routeText(from, to, sel, unit)} />
+            </Section>
+
+            <Section id="sec-hills" title="Hills" icon={<Mountain aria-hidden className="size-5" />} aside={hillsAside}>
+              <ElevationChart data={sel.elevation} worstPct={sel.summary.worstInclinePct} unit={unit} />
+            </Section>
 
             <BusDepartures legs={sel.busLegs} live={props.liveBuses && leaveLabel(conditions.leaveAt ?? null) === "now"} />
 
             {props.toilets ? <Toilets data={props.toilets} wantM={profile.maxToiletIntervalM} unit={unit} /> : null}
 
+            <div className="grid gap-2 [&>*]:min-w-0">
             {sel.unknowns.length ? (
-              <More title="What we don't know" aside={`${sel.unknowns.length} place${sel.unknowns.length === 1 ? "" : "s"}`}>
+              <More id="sec-unknowns" title="What we don't know" icon={<CircleHelp aria-hidden className="size-5" />} aside={`${sel.unknowns.length} place${sel.unknowns.length === 1 ? "" : "s"}`}>
                 <ul className="m-0 grid list-none grid-cols-1 gap-3 p-0">
                   {sel.unknowns.slice(0, 12).map((u) => (
                     <li key={u.name} className="grid">
@@ -423,17 +481,17 @@ export function RoutePanel(props: Props) {
               </More>
             ) : null}
 
-            <More title="Hills" aside={sel.summary.worstInclinePct === null ? "Not known" : `Steepest ${Math.abs(sel.summary.worstInclinePct)}%`}>
-              <ElevationChart data={sel.elevation} worstPct={sel.summary.worstInclinePct} unit={unit} />
-            </More>
-
-            <More title="Route in words" aside={`${sel.segments.length} parts`}>
-              <ol className="m-0 grid gap-2 pl-5 [overflow-wrap:anywhere]">
-                {sel.segments.map((s, i) => (
-                  <li key={i}>{s}</li>
-                ))}
-              </ol>
-              <CopyRouteButton text={() => routeText(from, to, sel, unit)} />
+            <More title="Why this way?" icon={<Info aria-hidden className="size-5" />} aside={peopleCount ? `${peopleCount} note${peopleCount === 1 ? "" : "s"} from people` : undefined}>
+              {result.notes.length ? (
+                <ul className="m-0 grid list-none grid-cols-1 gap-1 p-0">
+                  {result.notes.map((n) => (
+                    <li key={n}>{n}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="m-0 text-muted">Nothing else to flag on this route.</p>
+              )}
+              <PeopleSay notes={routeNotes} all={notes} author={author} onDelete={props.onDeleteNote} onFlag={props.onFlagNote} title="Notes from people on this route" hint="Their own experience, not checked by us. Notes nudge your routes but never rule a street in or out." />
             </More>
 
             <More title="Where this comes from">
@@ -470,6 +528,7 @@ export function RoutePanel(props: Props) {
                 ) : null}
               </ul>
             </More>
+            </div>
           </div>
         </>
       ) : null}
@@ -550,25 +609,6 @@ function NoFit({ unit, result, to, forLabel, alternatives, onUseForTrip, onAllow
 const entranceName = (e: { name: string | null; verdict: { detail: string } }) => (e.name ? `${e.name} entrance` : `Entrance (${e.verdict.detail})`);
 
 /** A section you open when you want it. The summary row says what's inside, so a closed section still informs. */
-function More({ title, aside, icon, children }: { title: string; aside?: string; icon?: React.ReactNode; children: React.ReactNode }) {
-  return (
-    <details className="group rounded-2xl border border-line">
-      {/* The summary wraps under large text: the count and arrow drop below the title (STAB-12). */}
-      <summary className="flex min-h-14 cursor-pointer list-none flex-wrap items-center justify-between gap-x-3 px-4 py-1">
-        <span className="flex min-w-0 items-center gap-2 font-bold [overflow-wrap:anywhere]">
-          {icon}
-          {title}
-        </span>
-        <span className="ml-auto flex items-center gap-2 text-sm text-muted">
-          {aside}
-          <ChevronDown aria-hidden className="size-5 shrink-0 transition-transform group-open:rotate-180" />
-        </span>
-      </summary>
-      <div className="grid grid-cols-1 gap-3 px-4 pb-4 [overflow-wrap:break-word]">{children}</div>
-    </details>
-  );
-}
-
 function PeopleSay({
   notes,
   all,
@@ -670,15 +710,18 @@ function Toilets({ data, wantM, unit }: { data: NonNullable<Props["toilets"]>; w
   const { toilets, longestGapM } = data;
   const short = wantM !== null && longestGapM > wantM;
   return (
-    <More title="Accessible toilets" aside={toilets.length ? `${toilets.length} on the way` : "None mapped"}>
+    <Section id="sec-toilets" title="Accessible toilets" icon={<Toilet aria-hidden className="size-5" />} aside={toilets.length ? `${toilets.length} on the way` : "None mapped"}>
       {wantM !== null ? (
-        <p className={cn("m-0 mb-2 text-sm", short ? "text-caution" : "text-muted")}>
+        <p className={cn("m-0 text-sm", short ? "font-bold text-caution" : "text-muted")}>
           {short ? `Longest stretch without one: ${km(longestGapM)}. You asked for one every ${km(wantM)}.` : `One at least every ${km(wantM)}, as you asked.`}
         </p>
       ) : null}
       {toilets.length ? (
-        <ul className="m-0 grid list-none gap-2 p-0">
-          {toilets.slice(0, 12).map((t) => (
+        <ShortList
+          first={3}
+          noun="toilets"
+          className="grid list-none gap-2 p-0"
+          items={toilets.slice(0, 12).map((t) => (
             <li key={`${t.name}${t.at}`} className="grid">
               <span>
                 {t.name} <span className="tabular text-muted">/ at {km(t.at)}</span>
@@ -686,12 +729,12 @@ function Toilets({ data, wantM, unit }: { data: NonNullable<Props["toilets"]>; w
               <span className="text-sm text-muted">{[t.public ? "Public toilet" : "In a venue", t.offM > 15 ? `${km(t.offM)} off the route` : null, ...t.facts].filter(Boolean).join(" / ")}</span>
             </li>
           ))}
-        </ul>
+        />
       ) : (
-        <p className="m-0 text-sm text-muted">No accessible toilets are mapped within about {formatDistance(80, unit)} of this route. Some won't be mapped.</p>
+        <p className="m-0 text-sm text-muted">No accessible toilets are mapped within about {formatDistance(80, unit)} of this route. Some won&apos;t be mapped.</p>
       )}
-      <p className="m-0 mt-2 text-sm text-muted">From OpenStreetMap. Mapped by volunteers; check opening times.</p>
-    </More>
+      <p className="m-0 text-sm text-muted">From OpenStreetMap. Mapped by volunteers; check opening times.</p>
+    </Section>
   );
 }
 

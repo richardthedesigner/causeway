@@ -216,3 +216,21 @@ export const RANGE_MIN_KM = 3;
 export const RANGE_MAX_KM = 60;
 /** A starting figure when someone turns the range on: a typical lightweight powerchair. */
 export const RANGE_DEFAULT_KM = 15;
+
+/**
+ * Who the routes are for, as the route screen says it (FEAT-21): the name, and
+ * the type beside it. An unnamed device has only its type, as the name.
+ */
+export function routingFor(d: SavedDevice): { name: string; type: string | null; named: boolean } {
+  const type = PRESETS[d.profile.preset].label;
+  const name = d.name.trim();
+  return name ? { name, type, named: true } : { name: type, type: null, named: false };
+}
+
+/** The limits that shape a route most, in one short line (FEAT-22): kerbs, slopes, steps. */
+export function limitsLine(p: Profile): string {
+  const kerb = p.maxKerbCm <= 0 ? "No kerbs" : `Kerbs up to ${p.maxKerbCm} cm`;
+  const slope = `slopes up to ${p.maxInclineUpPct}%`;
+  const steps = p.maxSteps <= 0 ? "no steps" : p.maxSteps >= 99 ? "steps fine" : `up to ${p.maxSteps} step${p.maxSteps === 1 ? "" : "s"}`;
+  return [kerb, slope, steps].join(" · ");
+}
