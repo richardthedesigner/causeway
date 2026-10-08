@@ -158,7 +158,7 @@ export type WorkerRequest =
       conditions: Omit<Conditions, "now"> & { now: string };
       /** Notes on this device, without photos. Soft signals for the cost model only. */
       notes: UserNote[];
-      /** Community reports for the city, without photos (FEAT-25). Confirmed ones can block; others only warn. */
+      /** Community reports for the city, without photos (FEAT-35). Confirmed ones can block; others only warn. */
       community?: CommunityReport[];
       /** SEPA's latest Water of Leith reading (Edinburgh, D-066): a line on routes using the walkway when it's high. */
       river?: RiverLevel | null;

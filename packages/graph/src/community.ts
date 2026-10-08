@@ -1,5 +1,5 @@
 /**
- * Community reports (FEAT-25, D-083): people tag good or bad access on the
+ * Community reports (FEAT-35, D-084): people tag good or bad access on the
  * map by category ("no dropped kerb", "broken lift", "good ramp"), and other
  * people agree, disagree or say whether it's still there.
  *
@@ -81,6 +81,11 @@ export interface CommunityVote {
   kind: VoteKind;
   /** ISO 8601. */
   at: string;
+  /**
+   * How much this person's voice counts. 1 until accounts bring `contributor_weight()` (D-083),
+   * which the public view will then return per vote; the thresholds are recalibrated then.
+   */
+  weight?: number;
 }
 
 export const REVIEW_MAX_CHARS = 200;
@@ -105,6 +110,8 @@ export interface CommunityReport {
   myVote?: VoteKind | null;
   /** Shared with the server. Absent or false: only on this device. */
   shared?: boolean;
+  /** How much the reporter's voice counts (see CommunityVote.weight). */
+  weight?: number;
 }
 
 /** Weight of one voice of age `ageDays` for a category: 1 when new, halving every half-life. */
@@ -138,13 +145,13 @@ export interface ReportEvidence {
 
 const days = (from: string, now: Date) => (now.getTime() - Date.parse(from)) / 86_400_000;
 
-export function evidence(r: Pick<CommunityReport, "category" | "at" | "votes">, now: Date = new Date()): ReportEvidence {
+export function evidence(r: Pick<CommunityReport, "category" | "at" | "votes" | "weight">, now: Date = new Date()): ReportEvidence {
   const hl = categoryInfo(r.category).halfLifeDays;
-  let support = decay(days(r.at, now), hl);
+  let support = (r.weight ?? 1) * decay(days(r.at, now), hl);
   let against = 0;
   let lastSeen = r.at;
   for (const v of r.votes) {
-    const w = decay(days(v.at, now), hl);
+    const w = (v.weight ?? 1) * decay(days(v.at, now), hl);
     if (SUPPORTS[v.kind]) {
       support += w;
       if (v.at > lastSeen) lastSeen = v.at;

@@ -2,7 +2,7 @@
 
 For Richard's Cowork assistant. Paste everything under **The prompt** into Cowork. It does as much as it can in Chrome and stops where only Richard can act: a decision, a sign-in or a key.
 
-Why: community reports (FEAT-25, [D-083](../DECISIONS.md#d-083-community-reports-categories-votes-and-confidence-that-decays)) are live on causeway.richardthedesigner.com, but each phone keeps its own until there is a Supabase project. Notes and problem reports (D-030) are waiting on the same thing.
+Why: community reports (FEAT-35, [D-084](../DECISIONS.md#d-084-community-reports-categories-votes-and-confidence-that-decays)) are live on causeway.richardthedesigner.com, but each phone keeps its own until there is a Supabase project. Notes and problem reports (D-030) are waiting on the same thing.
 
 Never put a password, secret key or service-role key into a chat, a document or this repo. The two values Vercel needs are public by design (the anon key is meant to be in the app; the database rules do the protecting).
 

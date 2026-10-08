@@ -274,7 +274,7 @@ export interface EdgeContext {
   benchM?: number;
   /** What people's notes say about this edge (a separate layer, joined here at request time; never part of the graph). */
   note?: NoteSignal;
-  /** Community reports on this edge (FEAT-25, D-083): a separate layer like notes, joined at request time. */
+  /** Community reports on this edge (FEAT-35, D-084): a separate layer like notes, joined at request time. */
   community?: readonly CommunitySignal[];
 }
 

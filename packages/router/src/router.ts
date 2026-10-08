@@ -48,7 +48,7 @@ export class Router {
   readonly toiletM = new Map<number, number>();
   /** Edge id to what people's notes say about it. Held beside the graph, never written into it (D-008). */
   noteSignals = new Map<number, NoteSignal>();
-  /** Edge id to the community reports on it (FEAT-25). Held beside the graph like notes, never written into it. */
+  /** Edge id to the community reports on it (FEAT-35). Held beside the graph like notes, never written into it. */
   communitySignals = new Map<number, CommunitySignal[]>();
   /** Nodes settled by searches so far: a machine-independent measure of routing work, for the speed budget (D-056). */
   settled = 0;

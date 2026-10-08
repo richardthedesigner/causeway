@@ -170,7 +170,7 @@ export default function Home() {
   const recentOnly = recents.filter((p) => !saved.some((s) => s.place.id === p.id));
   const shared = useNotes(city.id);
   const cityNotes = shared.notes;
-  // Community reports (FEAT-25): everyone's, and yours, for the map and for routes.
+  // Community reports (FEAT-35): everyone's, and yours, for the map and for routes.
   const community = useCommunity(city.id);
   const [communityFilter, setCommunityFilter] = useState<CommunityFilter>(DEFAULT_FILTER);
   useEffect(() => setCommunityFilter(loadFilter()), []);
@@ -353,7 +353,7 @@ export default function Home() {
   const notMe = (p: { lon: number; lat: number; id?: string }) => (/^me(:|$)/.test(p.id ?? "") ? city.start : p);
 
   /**
-   * Add a report (FEAT-25): the sheet opens at once on the map's middle (or a dropped pin), and moves to where you
+   * Add a report (FEAT-35): the sheet opens at once on the map's middle (or a dropped pin), and moves to where you
    * are as soon as the phone says, unless you've moved the pin yourself. Three taps: this, what you found, Save.
    */
   const askHere = () => {

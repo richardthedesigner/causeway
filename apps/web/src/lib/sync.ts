@@ -195,7 +195,7 @@ export async function pushReport(rep: Report): Promise<boolean> {
   }
 }
 
-// ---------------------------------------------------------------- community reports (FEAT-25, D-083)
+// ---------------------------------------------------------------- community reports (FEAT-35, D-084)
 
 /** Share a community report. True once the server has it (or already had it). */
 export async function pushCommunityReport(r: CommunityReport): Promise<boolean> {

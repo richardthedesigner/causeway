@@ -23,7 +23,7 @@ interface Props {
   credit: string;
   /** While navigating only the layers button stays; the rest is noise. */
   minimal?: boolean;
-  /** Community reports on the map (FEAT-25): which to show. */
+  /** Community reports on the map (FEAT-35): which to show. */
   community: CommunityFilter;
   onCommunity: (f: CommunityFilter) => void;
   /** Start adding a report. Absent while navigating (the report button there is for problems). */

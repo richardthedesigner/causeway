@@ -1000,9 +1000,20 @@ The trade: a visit downloads the ranges read first and then the whole file, abou
 The trade: the route sheet is longer, because more is shown. The tiles at the top let people jump past it. To check with testers (FEAT-24).
 
 
-## D-083 Community reports: categories, votes and confidence that decays
+## D-083 User accounts: Supabase Auth, upgraded in place, optional forever
 
-**Decided** by Richard, 2026-10-08 ("the app is missing its critical feature: community content"). FEAT-25. Takes in DEF-04 and DEF-06. Plan: [COMMUNITY_REPORTS.md](plans/COMMUNITY_REPORTS.md). Code: `packages/graph/src/community.ts`, `packages/router/src/community.ts`, `db/migrations/0009_community_reports.sql`, `apps/web/src/components/Community.tsx`.
+**Proposed.** 2026-10-08 (FEAT-25). Plan only: [plans/USER_ACCOUNTS.md](plans/USER_ACCOUNTS.md). Accounts stay deferred (DEF-07) until Richard says go and answers the plan's open questions.
+
+- **Never required.** Routing, profiles, saved places, reports, notes and votes all keep working without an account. An account adds sync, weight for contributions, and carer sharing. Many disabled people use shared phones or find sign-in hard (D-009's promise stands).
+- **Supabase Auth.** We already use it (D-030). Signing up upgrades the anonymous user in place, so the id stays the same and everything done anonymously is already the account's, with no migration. Row-level security keeps working on `auth.uid()`, data stays in London, and there's no new processor. Clerk (best passkeys, but a second user store, a US transfer and heavier first-screen JavaScript) and Auth.js (needs a server; the site is a static export) were weighed and not chosen.
+- **Email code first, then passkeys.** A 6-digit code with paste and one-time-code autofill meets WCAG 2.2 SC 3.3.8 for everyone; a passkey is offered straight after and becomes the way back in. The code email also carries a link. No passwords. No CAPTCHA puzzles: Turnstile only in its invisible mode, falling back to the email code. Sign in with Apple and Google only if testers ask (FEAT-33).
+- **Sync is encrypted on the phone.** Profiles, saved places, saved routes and any sensitive preference (safe spaces) are encrypted with a per-account key before upload. A passkey with the PRF extension unlocks it; otherwise a recovery key saved as a file or in a password manager. The server can't read health data. Each kind needs its own consent (Art. 9(2)(a) explicit consent for special category data).
+- **Pseudonymous by default.** Generated handles, no public profiles or histories, no messaging. Public items show no handle unless the person opts in, and never as a list. Times shown by the day.
+- **The contributor id is the Supabase user id,** anonymous or not. Community reports should use it, so upgrading carries reports and votes with it. Weight comes from one function, `contributor_weight()`: anonymous 0.25, verified 0.5, established 1.0, trusted 1.5 at most, earned from independent agreement, not volume.
+- **Build-time flags** (`NEXT_PUBLIC_ACCOUNTS` off, invite or on, and one per later phase), backed by a database allow list during the invite stage. Nothing goes live before the DPIA (SEC-10).
+## D-084 Community reports: categories, votes and confidence that decays
+
+**Decided** by Richard, 2026-10-08 ("the app is missing its critical feature: community content"). FEAT-35. Takes in DEF-04 and DEF-06. Plan: [COMMUNITY_REPORTS.md](plans/COMMUNITY_REPORTS.md). Code: `packages/graph/src/community.ts`, `packages/router/src/community.ts`, `db/migrations/0009_community_reports.sql`, `apps/web/src/components/Community.tsx`.
 
 - **Public, categorical, votable.** People tag good or bad access by category (13 to start: no dropped kerb, steps, broken lift, narrow or blocked pavement, rough surface, steep; dropped kerb, good ramp, big lift, smooth pavement, accessible toilet, somewhere to sit), with an optional review of up to 200 characters and a photo. Others agree, disagree, or answer "still there?". Problem reports (D-076) stay private and go to triage; notes (D-026) stay free text. Community reports are the third, public kind.
 - **Confidence decays.** Each voice for or against counts 1 when new and halves every half-life of its category (5 days for a broken lift, 2 years for steps). Confidence is support over support, against and 1. Confirmed at 0.7 or more (three fresh voices), disputed when the weight against is three quarters of the weight for, faded under 0.3 of live support. Placeholders until calibrated (D-013).
@@ -1011,8 +1022,8 @@ The trade: the route sheet is longer, because more is shown. The tiles at the to
 - **Same backend, same flag** (D-030). Supabase, anonymous sign-in, plain fetch. Without the two variables everything works on the phone; with them, everyone's reports and votes are shared.
 - **Abuse limits in the database.** 20 reports and 200 votes a day per person, 60 and 600 per network address (a salted, daily-changing hash nobody can read), one vote per person per report, none on your own, two reports of a report hide it, photos checked by a person first, server-set fields, inside the city's bounds.
 - **Privacy.** No profile and no mobility label. Others see the point rounded to 4 decimal places, never the author or an author key, and vote times to the hour, so one person's reports can't be strung together into a home. Photos lose EXIF on the phone. In Your data and Delete everything.
-- **Accounts later, same ids.** The anonymous user id is the contributor id; Supabase links an identity to that same user, so nothing here changes when accounts come. Integration points are in the plan.
-- **OpenStreetMap later, as Notes.** Only confirmed structural facts, only where OSM disagrees or is silent, posted as OSM Notes for a mapper to judge, never as edits. Needs a terms-of-use sentence first (FEAT-30).
+- **Accounts later, same ids.** Meets the accounts plan's contract (D-083): the anonymous user id is the contributor id, never shown, one vote per contributor per report, and a per-voice weight (1 until `contributor_weight()` exists). Supabase links an identity to that same user, so nothing here changes when accounts come. Integration points are in the plan.
+- **OpenStreetMap later, as Notes.** Only confirmed structural facts, only where OSM disagrees or is silent, posted as OSM Notes for a mapper to judge, never as edits. Needs a terms-of-use sentence first (FEAT-40).
 
 **A test seam.** The end-to-end checks run on localhost against a stand-in Supabase. `sync.ts` takes a backend from `window.__CAUSEWAY_TEST_BACKEND__` only on `localhost` or `127.0.0.1`, and the CSP still allows only `*.supabase.co`.
 

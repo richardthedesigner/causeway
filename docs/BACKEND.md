@@ -1,6 +1,6 @@
 # Backend: sharing notes, reports and community reports
 
-Decisions: [D-030](DECISIONS.md), community reports [D-083](DECISIONS.md#d-083-community-reports-categories-votes-and-confidence-that-decays). Without the two environment variables below, the app keeps notes and reports on the device and never talks to a server.
+Decisions: [D-030](DECISIONS.md), community reports [D-084](DECISIONS.md#d-084-community-reports-categories-votes-and-confidence-that-decays). Without the two environment variables below, the app keeps notes and reports on the device and never talks to a server.
 
 ## Set up (once)
 
@@ -38,7 +38,7 @@ What a reviewer can do is enforced by the database (`0005_review.sql`): see hidd
 
 ## Looking after it (weekly)
 
-Open `/review` and work through the three lists: flagged notes, photos, reports. The page never holds the service key. Community reports have no tab there yet (FEAT-26): use the SQL below.
+Open `/review` and work through the three lists: flagged notes, photos, reports. The page never holds the service key. Community reports have no tab there yet (FEAT-36): use the SQL below.
 
 If the page is ever unavailable, the same in SQL:
 

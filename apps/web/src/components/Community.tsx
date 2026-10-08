@@ -1,6 +1,6 @@
 "use client";
 /**
- * Community reports (FEAT-25, D-083): add one in three taps (the button,
+ * Community reports (FEAT-35, D-084): add one in three taps (the button,
  * what you found, Save), and check other people's.
  */
 import {
@@ -288,7 +288,7 @@ export function PlacingBar({ onHere, onDone, locating }: { onHere: () => void; o
 
 const MEANS: Record<ReportLevel, { bad: string; good: string }> = {
   confirmed: { bad: "Confirmed: routes for anyone it stops now go round it.", good: "Confirmed: routes count on it." },
-  reported: { bad: "Routes warn about it and lean away a little. Two more people agreeing makes routes avoid it.", good: "Routes don't count on it until more people confirm it." },
+  reported: { bad: "Routes warn about it and lean away a little. Once more people confirm it, routes for anyone it stops go round it.", good: "Routes don't count on it until more people confirm it." },
   disputed: { bad: "People disagree about this, so routes ignore it for now.", good: "People disagree about this, so routes ignore it for now." },
   faded: { bad: "Nobody has checked this lately, so routes ignore it.", good: "Nobody has checked this lately, so routes ignore it." },
 };
@@ -312,7 +312,7 @@ export function CommunityDetailSheet({ report, onOpenChange, sharing, onVote, on
   const yes = 1 + report.votes.filter((v) => v.kind === "agree" || v.kind === "still-there").length;
   const no = report.votes.length + 1 - yes;
   const Icon = CATEGORY_ICON[report.category];
-  const pct = Math.round(e.confidence * 100);
+  const pct = Math.floor(e.confidence * 100);
   const canVote = sharing && !report.own && report.shared !== false;
   const vote = (k: VoteKind) => onVote(report.id, k);
   const close = (v: boolean) => {

@@ -34,7 +34,7 @@ interface Props {
   /** Saved places (FEAT-04) drawn as labelled buttons (SMALL-13): reachable by keyboard and screen reader, unlike a canvas layer. */
   saved?: { id: string; label: string; lon: number; lat: number }[];
   onSavedPick?: (id: string) => void;
-  /** Community reports (FEAT-25) shown as buttons, like saved places: reachable by keyboard and screen reader. */
+  /** Community reports (FEAT-35) shown as buttons, like saved places: reachable by keyboard and screen reader. */
   community?: { id: string; label: string; polarity: "good" | "bad"; level: string; lon: number; lat: number }[];
   onCommunityPick?: (id: string) => void;
   /** A new report's pin while it's being placed: drag it, tap the map, or move it with the arrow keys. */
@@ -242,7 +242,7 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
     return () => markers.forEach((mk) => mk.remove());
   }, [saved, mapReady]);
 
-  // Community reports (FEAT-25): a triangle with "!" for a problem, a circle with a tick for something good, so the shape
+  // Community reports (FEAT-35): a triangle with "!" for a problem, a circle with a tick for something good, so the shape
   // says it without colour. Unconfirmed ones are drawn dashed. Each is a real button that opens the report.
   useEffect(() => {
     const m = map.current;

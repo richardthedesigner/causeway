@@ -1,4 +1,4 @@
--- Community reports (FEAT-25, D-083). People tag good or bad access on the
+-- Community reports (FEAT-35, D-084). People tag good or bad access on the
 -- map by category, others agree, disagree or say whether it's still there,
 -- and the app works out a decaying confidence from the votes
 -- (packages/graph/src/community.ts). Unlike problem reports (`report`, write
@@ -68,7 +68,7 @@ create table community_flag (
 
 insert into source (id, name, licence, attribution, share_alike, refresh_cadence, notes) values
   ('community', 'Causewayside community reports', 'Causewayside content (not ODbL)', 'Reports from Causewayside users', false, 'live',
-   'Separate layer from the ODbL graph (D-008). Joined to edges by position at request time (D-083).')
+   'Separate layer from the ODbL graph (D-008). Joined to edges by position at request time (D-084).')
 on conflict (id) do nothing;
 
 -- ------------------------------------------------------------ server fields and limits

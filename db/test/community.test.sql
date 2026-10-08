@@ -1,4 +1,4 @@
--- Community reports (0009_community_reports.sql, D-083), run by scripts/test-db.sh.
+-- Community reports (0009_community_reports.sql, D-084), run by scripts/test-db.sh.
 \set ON_ERROR_STOP 1
 \set a '''aaaaaaaa-0000-0000-0000-00000000000a'''
 \set b '''bbbbbbbb-0000-0000-0000-00000000000b'''

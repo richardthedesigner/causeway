@@ -1,6 +1,6 @@
 # Community reports
 
-Roadmap: FEAT-25 (takes in DEF-04 and DEF-06). Decision: [D-083](../DECISIONS.md#d-083-community-reports-categories-votes-and-confidence-that-decays). Brief: Richard, 2026-10-08.
+Roadmap: FEAT-35 (takes in DEF-04 and DEF-06). Decision: [D-084](../DECISIONS.md#d-084-community-reports-categories-votes-and-confidence-that-decays). Brief: Richard, 2026-10-08.
 
 People tag good or bad access on the map: a missing dropped kerb, steps, a broken lift, a narrow pavement, a good ramp, an accessible toilet. Others agree, disagree, or say whether it's still there. That gives a confidence that fades with time, and routes trust a report only once enough people have confirmed it recently.
 
@@ -116,7 +116,7 @@ The database enforces all of it, not the app (`0009`, tested by `db/test/communi
   - The address comes from the headers PostgREST passes on (`cf-connecting-ip`, `x-real-ip`, `x-forwarded-for`).
 - **One vote each**, never on your own report.
 - **Report button**: two people reporting a report hide it until a reviewer looks. A reviewer putting it back resets the count.
-- **Photos**: pre-moderated (above). The review page needs a Community tab (FEAT-26).
+- **Photos**: pre-moderated (above). The review page needs a Community tab (FEAT-36).
 - **Server fields**: who, when it arrived, status and photo status are set by the database whatever the app sends. The column grants refuse them outright.
 - **Inside the city**: a report outside its city's bounds is refused.
 - **CAPTCHA**: Cloudflare Turnstile on anonymous sign-up (SEC-09) is still owed before any publicity. It matters more now that one id can vote.
@@ -134,24 +134,37 @@ The database enforces all of it, not the app (`0009`, tested by `db/test/communi
 - **Lawful basis**: legitimate interests (making routes safer for disabled people) for the report itself. Consent is explicit and per report for the optional words and photo.
 - **Your data**: "Your data" counts community reports and answers, includes them in the copy, and "Delete everything" removes your reports, votes and flags from the server too.
 - **Retention**:
-  - Reports are kept while visible. Faded ones stop affecting anything but stay until a clean-up job removes reports faded for a year (FEAT-29).
+  - Reports are kept while visible. Faded ones stop affecting anything but stay until a clean-up job removes reports faded for a year (FEAT-39).
   - Removed reports and their photos should be purged by the same job.
 - **Owed by people**:
   - The DPIA (SEC-10) should now cover community reports.
-  - The privacy page needs a paragraph on them (FEAT-28).
+  - The privacy page needs a paragraph on them (FEAT-38).
 
 ## Identity: working now, accounts later
 
-Accounts are being designed in a separate session ("Causeway: user accounts architecture"). This feature doesn't build accounts. It is shaped so they slot in.
+Accounts are planned in [USER_ACCOUNTS.md](USER_ACCOUNTS.md) (D-083, PR #76, written alongside this). This feature doesn't build accounts; it meets that plan's contract, so they slot in.
 
 - **Now**: Supabase anonymous sign-in (D-030), on the first save or vote. The anonymous user id is the contributor id. It is stored on the phone, and is what the per-person limits, own-report checks and deletes key on.
-- **Later**: Supabase links an email, passkey or OAuth identity to the existing anonymous user (`updateUser` / `linkIdentity`). `auth.uid()` stays the same, so every report, vote and flag carries over with no migration and no rewrite.
-- **Integration points for the accounts work**:
-  1. `apps/web/src/lib/sync.ts` `session()`: the one place a session is made or refreshed. Upgrading the anonymous user in place keeps the id.
-  2. Two phones, one account: if accounts let someone sign in on a second phone that already has its own anonymous id, that phone's contributions need a "merge" step. It should be a server function that re-parents `community_report.author_id`, `community_vote.voter_id` and `community_flag.flagger_id` from the old id to the new one. Resolve one-vote-per-report conflicts by keeping the newer vote, then delete the old auth user. Nothing else changes.
-  3. Rate limits key on `auth.uid()`, so an account inherits them. Accounts may earn higher limits or more weight later (a trusted reviewer's "confirmed"). That would be a column on a profile table read by the triggers, not a change to the report tables.
-  4. The public view never exposes ids, so accounts don't change what others see. A public display name, if ever wanted, would be opt-in and a separate decision.
-  5. `deleteEverythingShared()` deletes by `auth.uid()`; for an account it should also delete the auth user.
+- **Later**: Supabase links an email code or passkey to the existing anonymous user. `auth.uid()` stays the same, so every report, vote and flag carries over with no migration and no rewrite.
+
+How it meets the accounts plan's contract ([Fit with community reports](USER_ACCOUNTS.md#fit-with-community-reports-and-safe-spaces)):
+
+- **Contributor id**: `auth.uid()` on `community_report.author_id`, `community_vote.voter_id` and `community_flag.flagger_id`. No phone-made id.
+- **Never public**: the view shows no id and no per-person key at all. Votes come as kind and hour only.
+- **One vote per contributor per item**: the primary key `(report_id, voter_id)`.
+- **Weights**:
+  - Every report and vote carries an optional `weight` that `evidence()` multiplies by, default 1.
+  - When `contributor_weight()` exists (accounts phase 5, FEAT-31), the public view returns it per vote and for the reporter, and the scoring code doesn't change.
+  - The accounts plan treats anonymous as 0.25. The thresholds (confirmed at 0.7, three fresh voices at weight 1) must be recalibrated in the same change, or no anonymous report could ever be confirmed.
+  - The accounts plan's cap of 1.5 per contributor per item fits as is.
+
+Integration points for the accounts work:
+
+1. `apps/web/src/lib/sync.ts` `session()`: the one place a session is made or refreshed. Upgrading the anonymous user in place keeps the id.
+2. **Claiming another phone's anonymous id** (accounts phase 4, FEAT-30): a server function that re-parents `community_report.author_id`, `community_vote.voter_id` and `community_flag.flagger_id` from the old id to the account. It keeps the newer vote where both voted on the same report.
+3. **Rate limits** key on `auth.uid()`, so an account inherits them. Higher limits for trusted contributors would read the `contributor` table in the 0009 triggers, not change the report tables.
+4. **Public credit**, if ever wanted, is opt-in and separate. The view stays free of ids.
+5. **Delete everything**: `deleteEverythingShared()` deletes by `auth.uid()`. For an account it should also delete the auth user, or leave a tombstone as the accounts plan describes.
 
 ## OpenStreetMap later (plan only)
 
@@ -164,7 +177,7 @@ D-008 says crowd checks should flow back to OSM. Not built; the order would be:
 3. **OSM Notes, not edits**: post an OSM Note at the point, in plain words with the evidence, using the public Notes API. For example: "Causewayside users report this crossing has no dropped kerb (6 people, last seen 2 October)". A local mapper decides. Automated edits need the Automated Edits code of conduct, a discussion and an account. Notes don't, and they keep a person in the loop.
 4. **Licence**:
    - Reports are our content (not ODbL).
-   - Sending a fact to OSM needs contributors to have agreed that we may share it under ODbL terms. The terms of use need a sentence on that before the first note (FEAT-30).
+   - Sending a fact to OSM needs contributors to have agreed that we may share it under ODbL terms. The terms of use need a sentence on that before the first note (FEAT-40).
    - Photos are never sent.
 5. **Close the loop**:
    - When the weekly data refresh picks up a matching OSM tag, mark the report "now in OpenStreetMap".
@@ -186,9 +199,9 @@ D-008 says crowd checks should flow back to OSM. Not built; the order would be:
 
 ## Not done (roadmap rows)
 
-- **FEAT-26**: a Community tab in `/review` (hidden reports, photos to approve).
-- **FEAT-27**: confirmed accessible toilets and seats used by routes (rest and toilet limits).
-- **FEAT-28**: the privacy page paragraph.
-- **FEAT-29**: a clean-up job for faded and removed reports and their photos.
-- **FEAT-30**: OSM Notes from confirmed reports (this plan's last section).
-- **FEAT-31**: check the categories, the three-tap flow and the thresholds with testers.
+- **FEAT-36**: a Community tab in `/review` (hidden reports, photos to approve).
+- **FEAT-37**: confirmed accessible toilets and seats used by routes (rest and toilet limits).
+- **FEAT-38**: the privacy page paragraph.
+- **FEAT-39**: a clean-up job for faded and removed reports and their photos.
+- **FEAT-40**: OSM Notes from confirmed reports (this plan's last section).
+- **FEAT-41**: check the categories, the three-tap flow and the thresholds with testers.

@@ -50,6 +50,12 @@ describe("confidence", () => {
     expect(level(report({ votes: [vote("gone")] }))).toBe("disputed");
   });
 
+  it("a contributor's weight scales their voice (accounts, D-083): three low-weight voices don't confirm", () => {
+    const light = (kind: CommunityVote["kind"]) => ({ ...vote(kind), weight: 0.25 });
+    expect(level(report({ weight: 0.25, votes: [light("agree"), light("agree")] }))).toBe("reported");
+    expect(level(report({ votes: [light("agree"), vote("agree"), vote("agree")] }))).toBe("confirmed");
+  });
+
   it("decays: half the weight after one half-life", () => {
     expect(decay(0, 10)).toBe(1);
     expect(decay(10, 10)).toBeCloseTo(0.5);

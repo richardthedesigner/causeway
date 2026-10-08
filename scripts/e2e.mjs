@@ -24,7 +24,7 @@
  * city's suggested start; the others share a location, and no request may carry it. One
  * journey checks where you start: from your location, swapped, with location turned off,
  * and from outside the city. One with saved places on the map (SMALL-13): a marker offers
- * "Go here" and "Start from here", by keyboard too. And community reports (FEAT-25), against a stand-in
+ * "Go here" and "Start from here", by keyboard too. And community reports (FEAT-35), against a stand-in
  * backend: add one in three taps, move its pin by keyboard, filter the map, and agree with one.
  * Exits 1 on any failed step, page error, profile leak, or anything the Content
  * Security Policy blocks. Runs in CI (.github/workflows/ci.yml). Set E2E_SHOT=<file.png>
@@ -751,7 +751,7 @@ for (const j of JOURNEYS) {
   });
   for (const p of problems) failures.push(`${name}: ${p}`), console.log(`  FAIL ${p}`);
 }
-// Community reports (FEAT-25, D-083), against a stand-in backend (the build has no keys; sync.ts takes one on localhost
+// Community reports (FEAT-35, D-084), against a stand-in backend (the build has no keys; sync.ts takes one on localhost
 // only). Add a report in three taps at your location, move a pin by keyboard, filter the map, and agree with someone
 // else's report, which makes it confirmed. Reports carry a place on purpose (the thing reported), never the profile.
 {

@@ -83,7 +83,7 @@ for (const scheme of ["light", "dark"]) {
   await check("report what's there");
   await page.keyboard.press("Escape");
 
-  // Community reports (FEAT-25): the add sheet with a category chosen and the review open, a report's own sheet,
+  // Community reports (FEAT-35): the add sheet with a category chosen and the review open, a report's own sheet,
   // and the map layers menu with its filters.
   await page.getByRole("button", { name: "Add a report", exact: true }).click();
   const add = page.getByRole("dialog", { name: "Add a report" });
@@ -294,7 +294,7 @@ for (const [scheme, size, zoom] of [["light", { width: 390, height: 844 }, false
   await page.getByRole("slider", { name: "Speed on the road" }).waitFor();
   await reflow("device settings, road scooter");
   await page.keyboard.press("Escape");
-  // Community reports (FEAT-25).
+  // Community reports (FEAT-35).
   await page.getByRole("button", { name: "Add a report", exact: true }).click();
   await page.getByRole("dialog", { name: "Add a report" }).waitFor();
   await page.getByRole("radio", { name: "Pavement blocked" }).click();

@@ -7,7 +7,7 @@ import { deleteCommunityReport, fetchCommunityReports, flagCommunityReport, push
 export type CommunityState = "off" | "loading" | "ok" | "offline";
 
 /**
- * Community reports for one city (FEAT-25): yours from this phone, plus
+ * Community reports for one city (FEAT-35): yours from this phone, plus
  * everyone's once sharing is on. Your own vote is counted in each report's
  * votes, as everyone else sees it. Anything not yet sent goes up when the
  * city loads or you come back online.

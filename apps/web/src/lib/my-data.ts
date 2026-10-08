@@ -59,7 +59,7 @@ export interface MyDataSummary {
   reports: number;
   /** "What's there" answers from "What we don't know" (FEAT-03). They share the reports list. */
   whatsThere: number;
-  /** Community reports made here (FEAT-25), and answers to other people's. */
+  /** Community reports made here (FEAT-35), and answers to other people's. */
   community: number;
   votes: number;
   recents: number;

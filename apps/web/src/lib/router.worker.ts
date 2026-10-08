@@ -351,7 +351,7 @@ function plan(req: Extract<WorkerRequest, { type: "plan" }>): PlanResult {
   const c = conditionsOf(req.conditions);
   // Notes stay a separate layer: joined to edge ids here, per request, never written into the graph.
   router.noteSignals = noteSignals(req.notes, graph, c.now, mobilityLabelFor(p.preset), c.wet);
-  // Community reports likewise (FEAT-25, D-083): confirmed ones can close an edge for this person, the rest only warn.
+  // Community reports likewise (FEAT-35, D-084): confirmed ones can close an edge for this person, the rest only warn.
   router.communitySignals = communitySignals(req.community ?? [], graph.edges, c.now);
   const a = router.snap(req.from.lon, req.from.lat, p, c);
   // A building: aim for the door that fits this person (D-018), not its middle. Fall back to the middle if no door fits or none is reachable.

@@ -4,7 +4,7 @@ A running record of what was built, newest first. Each entry links the decision 
 
 ## 2026-10-08 (community reports)
 
-FEAT-25 (D-083), PR #78. Richard's brief: the app was missing community content. [Plan](plans/COMMUNITY_REPORTS.md).
+FEAT-35 (D-084), PR #78. Richard's brief: the app was missing community content. [Plan](plans/COMMUNITY_REPORTS.md).
 - Tag good or bad access on the map by category, in three taps: "Add a report", what you found, Save. The pin starts at your location and can be dragged, tapped into place or moved with the arrow keys. An optional review (200 characters) and photo.
 - Report pins on the map, a triangle for a problem and a circle for something good, dashed until confirmed. The map layers menu filters them: all, problems, good things, and each category.
 - A report's sheet: how sure we are and why, what it means for routes, Agree or Disagree, "still there?", and "Report this report".
@@ -12,6 +12,13 @@ FEAT-25 (D-083), PR #78. Richard's brief: the app was missing community content.
 - Migration 0009: community reports, votes and flags, with per-person and per-network limits, rounding, and server-set fields. 21 database checks.
 - With sharing off, everything works on the phone. Sharing turns on with the Supabase project ([handoff](handoff/COWORK_COMMUNITY_REPORTS.md)).
 - End to end against a stand-in backend: add, move the pin by keyboard, filter, agree. The a11y check covers the new sheets and the layers menu, which now passes axe's menu rules.
+
+## 2026-10-08 (user accounts, planned)
+
+FEAT-25 (D-083), PR #76. Docs only, nothing built.
+- [plans/USER_ACCOUNTS.md](plans/USER_ACCOUNTS.md): goals and non-goals, sign-in methods and providers compared for accessibility (WCAG 2.2 SC 3.3.8, no CAPTCHA puzzles), data model, UK GDPR and special category data, threat model, reputation and moderation, carers and companions, rollout with flags, and what Richard must set up.
+- Recommendation: Supabase Auth, upgrading today's anonymous id in place; email code first, then passkeys; sync encrypted on the phone; pseudonymous handles; accounts never required.
+- Phases added to the roadmap as FEAT-26 to FEAT-34. Ten open questions for Richard in OPEN_ITEMS.
 
 ## 2026-10-08 (who the route is for, and the route at a glance)
 
