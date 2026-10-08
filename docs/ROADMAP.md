@@ -144,7 +144,16 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | FEAT-22 | Named, saved mobility profiles: create, name, pick and edit them; the current settings become the first one | M | now | done (2026-10-08) | Claude | D-082. PR #75. Saved devices (D-034) already were these; now shown by name and type on the route, and "Edit and name" for an unnamed one. On the phone only |
 | FEAT-23 | Route details as an expressive summary, not nine identical accordions: key facts inline, a gradient strip, steps listed, "Unsure" explained, the rest behind disclosure | M | now | done (2026-10-08) | Claude | D-082. PR #75. "At a glance" tiles; Getting in, Route in words, Hills and Toilets shown open; three sections still fold. [Plan](plans/ROUTE_PANEL_PROFILES.md) |
 | FEAT-24 | Check the new route screen and "Routes are for" line with testers: do the tiles and the open sections help, or is it too long on a phone? | S | next | todo | Richard, Claude | D-082. With RES work |
-| FEAT-25 | Plan user accounts: sign-in, data model, privacy, reputation, carers, rollout | M | now | doing | Claude | 2026-10-08, branch `claude/feat-25-accounts-plan`. Plan only, builds nothing |
+| FEAT-25 | Plan user accounts: sign-in, data model, privacy, reputation, carers, rollout | M | now | done (2026-10-08) | Claude | D-083. PR #76. [plan](plans/USER_ACCOUNTS.md). Phases are FEAT-26 to FEAT-34. Builds nothing |
+| FEAT-26 | Accounts phase 0: Richard's answers to the plan's open questions, the DPIA (SEC-10), privacy notice, terms and guidelines, Supabase project, email sender, Turnstile | M | later | blocked | Richard, Claude | D-083, [plan](plans/USER_ACCOUNTS.md). Waits on Richard lifting DEF-07. Claude drafts the documents |
+| FEAT-27 | Accounts phase 1: upgrade the anonymous id with an email code, sign in on another phone, sign out everywhere, handles, delete account in Your data. Behind `NEXT_PUBLIC_ACCOUNTS` | L | later | todo | Claude | D-083. After FEAT-26. Supabase Auth, no SDK (D-030) |
+| FEAT-28 | Accounts phase 2: passkeys, offered after the first sign-in, then the default way back in | M | later | todo | Claude | D-083. After FEAT-27. Check Supabase passkey sign-in first; fallback is an Edge Function with SimpleWebAuthn |
+| FEAT-29 | Accounts phase 3: sync profiles and saved places, encrypted on the phone, consent per kind, recovery key, conflicts | L | later | todo | Claude | D-083, D-009, D-060. After FEAT-28 (passkey PRF unlocks the key) |
+| FEAT-30 | Accounts phase 4: contributor identity, claim anonymous ids from other phones, optional public credit | M | later | todo | Claude | D-083. After FEAT-27 and the community reports' first release. Needs SEC-18 |
+| FEAT-31 | Accounts phase 5: trust levels and vote weight (`contributor_weight()`), Sybil and brigade checks, moderators by area | L | later | todo | Claude | D-083. After FEAT-30, once there are enough reports to tune it |
+| FEAT-32 | Accounts phase 6: carers and companions: share a profile to use or manage, revoke, change notices to the owner | L | later | todo | Claude | D-083. After FEAT-29. Carer consent is an open question for Richard |
+| FEAT-33 | Sign in with Apple and Google, as an extra to email and passkeys | M | later | todo | Richard, Claude | D-083. Only if testers ask. Needs Richard's Apple Developer account and a Google OAuth client |
+| FEAT-34 | Saved routes: on the phone first, like saved places, then in sync | M | later | todo | Claude | D-083, D-060. Sync after FEAT-29 |
 
 ## Small features
 
@@ -313,7 +322,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 | DEF-04 | Reports backend: store and moderate public reports | L | later | blocked | Richard, Claude | D-022, D-030 |
 | DEF-05 | Send fixes back to OpenStreetMap from reports and notes | L | later | blocked | Richard, Claude | D-008. Needs DEF-04 |
 | DEF-06 | Crowd verification: several people confirming the same note | L | later | blocked | Claude | Needs DEF-04 |
-| DEF-07 | Optional accounts: sync devices and saved places between phones, encrypted on the device, sign in with a passkey or email code | L | later | blocked | Richard, Claude | Health data makes this a privacy decision first (D-009) |
+| DEF-07 | Optional accounts: sync devices and saved places between phones, encrypted on the device, sign in with a passkey or email code | L | later | blocked | Richard, Claude | Health data makes this a privacy decision first (D-009). Planned in [plan](plans/USER_ACCOUNTS.md) (D-083): phases FEAT-26 to FEAT-34 |
 | DEF-08 | Opt-in surface sensing from the accelerometer | L | later | blocked | Claude | Needs DEF-01 and a privacy review |
 | DEF-09 | Beyond the pilot cities: Glasgow first (once DATA-13 is licensed), then Leeds, then by city size (D-072) | XL | later | blocked | Richard, Claude | §5 |
 | DEF-10 | Leeds as the second expansion city: pull its open crossing, rights-of-way and café-licence data and run the England stack on it | XL | later | blocked | Claude | RES-09 ranks Leeds second. Richard chose Leeds second (D-072). Needs a plan in `docs/plans/` |
@@ -321,6 +330,8 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 ## Log
 
 Newest first. One line per change: date, ID, what happened, link.
+
+- 2026-10-08: FEAT-25 done in PR #76: user accounts planned in [plans/USER_ACCOUNTS.md](plans/USER_ACCOUNTS.md) (D-083). Supabase Auth upgrading the anonymous id in place, email code then passkeys, sync encrypted on the phone, pseudonymous handles, never required. Added FEAT-26 to FEAT-34. DEF-07 stays deferred until Richard says go.
 - 2026-10-08: FEAT-21, FEAT-22 and FEAT-23 done in PR #75 (D-082), from Richard's feedback on the route screen: who the route is for, saved profiles by name, and route details at a glance. Added FEAT-24.
 - 2026-10-08: DEP-01 done. `main` is the default and production branch; the mirror workflow is retired. Open: delete `claude/sleepy-johnson-mavbrs` once its branch protection rule is lifted (OPEN_ITEMS).
 - 2026-10-07: SPEED-10 done in PR #69: destination to route in Edinburgh 5.55 s to 2.99 s on Fast 4G with 4x CPU ([numbers](perf/2026-10-07-speed-10.md)); Newcastle and London 0.2 to 0.3 s quicker. On `main` after SPEED-09, Edinburgh 6.20 to 3.10 s, and Edinburgh's map draws 2.9 s sooner. The map no longer sends the whole network to MapLibre on every journey change, and `alternatives` costs each edge once. `perf:web --trace` added. Added SPEED-15, SPEED-16. Now: SPEED-15, SPEED-11 and SPEED-12 replace SPEED-10, SEC-17 and SMALL-20, which are done.

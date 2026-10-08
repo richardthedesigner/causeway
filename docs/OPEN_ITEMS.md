@@ -2,12 +2,13 @@
 
 What's outstanding on Causewayside: things waiting on Richard, things blocked outside the project, and guesses to check with users. Keep this up to date: add an item when it comes up, and move it to "Done" with the date when it's settled. Details live in the linked issue or decision. The order of work is in [ROADMAP.md](ROADMAP.md).
 
-Last updated: 2026-10-07.
+Last updated: 2026-10-08.
 
 ## Waiting on Richard
 
 | What | Why it matters | Effort | Link |
 |---|---|---|---|
+| Answer the user accounts plan's open questions, starting with go or wait (FEAT-26) | Accounts are planned but deferred (DEF-07). Nothing can start until the go-ahead, the choice on encrypted sync, minimum age and carer consent | A read and ten answers | [plans/USER_ACCOUNTS.md](plans/USER_ACCOUNTS.md#open-questions-for-richard), [D-083](DECISIONS.md#d-083-user-accounts-supabase-auth-upgraded-in-place-optional-forever) |
 | Time the app on a real mid-range Android phone, or run it through WebPageTest (SPEED-12) | The container's numbers have an unslowed worker and a software GPU, so they are best cases | 15 minutes | [perf notes](perf/2026-10.md) |
 | Run the data refresh once by hand: Actions, then data-refresh, then Run workflow on `main` | Proves the weekly refresh works. It has never run, and this project's sessions can't start workflows | 1 minute | [#14](https://github.com/richardthedesigner/causeway/issues/14) |
 | Sign up for free API keys: National Rail, Met Office, Mapillary, BODS, Nexus | Each unlocks a data adapter (live trains, better weather, street photos, live buses) | About 30 minutes | [#9](https://github.com/richardthedesigner/causeway/issues/9) |
@@ -47,6 +48,7 @@ These numbers shape routes but are our estimates, not evidence.
 
 ## Known gaps
 
+- The community reports plan (`docs/plans/COMMUNITY_REPORTS.md`) hadn't landed when the accounts plan was written. When it does, check it uses the Supabase anonymous user id as the contributor id, reads weights through `contributor_weight()`, and allows one vote per contributor per item ([plans/USER_ACCOUNTS.md](plans/USER_ACCOUNTS.md#fit-with-community-reports-and-safe-spaces), D-083).
 - There is no Causeway Supabase project yet. When one is made, run db/migrations 0001 to 0008 in order. SEC-16 is merged, so this is now safe. 0008 (SEC-17) makes the server set note and report fields the client used to choose.
 - The profile has a gap limit for boarding trains (`maxGapMm`), but no setting in the app: everyone gets TfL's 85 mm level band. Add a setting once research says people want one ([D-068](DECISIONS.md#d-068-boarding-the-train-against-each-persons-limits)).
 - TfL's level-access doors are in the spoken route only, not on the visual route card ([D-068](DECISIONS.md#d-068-boarding-the-train-against-each-persons-limits)).
@@ -62,7 +64,7 @@ These numbers shape routes but are our estimates, not evidence.
 
 ## Deferred by Richard
 
-Not now, on purpose: a phone app, whole cities, a reports backend, app accounts.
+Not now, on purpose: a phone app, whole cities, a reports backend, app accounts. Accounts are now planned ([plans/USER_ACCOUNTS.md](plans/USER_ACCOUNTS.md), D-083) but stay deferred until Richard says go.
 
 ## Done
 
