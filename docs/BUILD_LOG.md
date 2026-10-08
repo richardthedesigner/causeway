@@ -12,6 +12,7 @@ FEAT-35 (D-084), PR #78. Richard's brief: the app was missing community content.
 - Migration 0009: community reports, votes and flags, with per-person and per-network limits, rounding, and server-set fields. 21 database checks.
 - With sharing off, everything works on the phone. Sharing turns on with the Supabase project ([handoff](handoff/COWORK_COMMUNITY_REPORTS.md)).
 - End to end against a stand-in backend: add, move the pin by keyboard, filter, agree. The a11y check covers the new sheets and the layers menu, which now passes axe's menu rules.
+- Screenshot baselines are CI's own renders (from its uploaded diffs), since cloud sessions render fonts differently. The new map button changes every screen.
 
 ## 2026-10-08 (user accounts, planned)
 
