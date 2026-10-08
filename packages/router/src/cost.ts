@@ -7,8 +7,9 @@
  * scaled by (1 - uncertaintyTolerance): a cautious user pays more to avoid
  * the unknown, an adventurous one barely notices it.
  */
-import { confidence, isKnown, type EntranceInfo, type GraphEdge, type GraphNode, type NoteSignal, type PlatformBoarding, type Surface } from "@causeway/graph";
+import { confidence, isKnown, type CommunitySignal, type EntranceInfo, type GraphEdge, type GraphNode, type NoteSignal, type PlatformBoarding, type Surface } from "@causeway/graph";
 import { isPowerchair, isScooter, type Profile } from "@causeway/profile";
+import { communityCost } from "./community.js";
 
 export interface Conditions {
   now: Date;
@@ -273,6 +274,8 @@ export interface EdgeContext {
   benchM?: number;
   /** What people's notes say about this edge (a separate layer, joined here at request time; never part of the graph). */
   note?: NoteSignal;
+  /** Community reports on this edge (FEAT-25, D-083): a separate layer like notes, joined at request time. */
+  community?: readonly CommunitySignal[];
 }
 
 /**
@@ -541,6 +544,14 @@ function evaluateEdgeBase(e: GraphEdge, forward: boolean, p: Profile, c: Conditi
         reasons.push({ kind: "penalty", attr: "note", detail: "people's notes say it went well", seconds: -s });
       }
     }
+  }
+
+  if (ctx.community?.length && !RAIL_KINDS.has(e.kind)) {
+    const risk = reasons.filter((r) => r.kind === "unknown").reduce((t, r) => t + r.seconds, 0);
+    const out = communityCost(ctx.community, p, seconds, risk, c.ignoreClosures);
+    if ("exclude" in out) return { passable: "no", seconds: Infinity, cost: Infinity, reasons: [...reasons, out.exclude] };
+    penalty += out.penalty;
+    reasons.push(...out.reasons);
   }
 
   return {
