@@ -2,6 +2,16 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
+## 2026-10-09 (a quieter first screen)
+
+SMALL-23, SMALL-24 and SMALL-25 (D-086), PR #79. Richard's requests.
+- The "Tell us how you get around and we'll plan routes you can actually do" note is gone from the home sheet.
+- The sheet starts down, showing only "Where to?" and the device button. Its lowest point on the home screen is measured to the bottom of the search bar, so larger text or a notice above it still fits. The route screen keeps its own.
+- On a first visit the "Set up" button rests on "Set up" for 7 seconds, then shows Scooter, Wheelchair, Rollator and Stick for 1.75 seconds each. Its name is always "Set up how you get around"; the words are hidden from screen readers and never announced. Still under reduced motion, back to "Set up" while hovered or focused, gone once a device is set up. All the words share one grid cell, so the button never changes width.
+- Fixed on the way: the search list (cmdk) scrolled its first result into view on load, which at 200% text scrolled the sheet past "Where to?". And the search bar measured its width with the smaller padding it has while split, so a button between about 264 and 276 px wide made it flip between one and two rows for ever (React error 185 at 320 px).
+- The a11y check focuses search before opening Your data at 200% text, as the other steps do, since the sheet now starts down.
+- 16 screenshot baselines updated from CI's own renders (the map, search and device list screens).
+
 ## 2026-10-08 (community reports)
 
 FEAT-35 (D-084), PR #78. Richard's brief: the app was missing community content. [Plan](plans/COMMUNITY_REPORTS.md).

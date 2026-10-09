@@ -1041,3 +1041,14 @@ The trade: the route sheet is longer, because more is shown. The tiles at the to
 - **Community input is confirm or flag only.** Fixed answers, no free text, pre-moderated (stricter than notes in D-030), pseudonymous counts. No public additions.
 
 The trade: the layer will be thin until partners agree to share their lists, since none publishes open data. We accept that rather than scrape or guess.
+
+## D-086 The first screen starts quiet, and "Set up" shows what it covers
+
+**Decided.** 2026-10-09 (SMALL-23 to SMALL-25), Richard's requests.
+
+- **The sheet starts down.** On load it shows only "Where to?" and the device button, so the map has the screen. On the home screen its lowest point is measured to the search bar rather than a fixed share of the screen, so it still fits at 200% text, at 320 px and with a notice above it. Focusing search opens it fully, as before. Saved places are still framed above the half-open sheet (D-081), which leaves them clear.
+- **No explanatory note.** "Tell us how you get around" is gone. The "Set up" button does that job.
+- **"Set up" cycles through what it covers.** It rests on "Set up" for 7 seconds, then Scooter, Wheelchair, Rollator and Stick for 1.75 seconds each. The button's name never changes ("Set up how you get around", which starts with the words it rests on); the words are `aria-hidden` and there is no live region, so nothing is announced. It holds still under reduced motion, shows "Set up" while hovered or focused (so the visible label matches the name when someone is about to use it), and goes once a device is set up. The words share one grid cell, so the button is always as wide as "Wheelchair" and the bar never jumps.
+
+The trade: a first-time visitor sees less before they search, and moving text can distract. SMALL-26 checks both with testers.
+

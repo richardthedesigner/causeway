@@ -332,6 +332,8 @@ for (const [scheme, size, zoom] of [["light", { width: 390, height: 844 }, false
   });
   const cityProblems = [...(city.spills ? ["the city name spills out of its button"] : []), ...(city.under ? ["the city name runs under the map layers button"] : [])];
   await reflow("start, with This trip", cityProblems);
+  // The sheet starts down, showing only "Where to?" (SMALL-24). Focusing search opens it, as dragging it up would.
+  await page.getByPlaceholder("Where to?").focus();
   await page.getByRole("button", { name: "Your data", exact: true }).click();
   await page.getByRole("dialog", { name: "Your data" }).waitFor();
   await page.getByRole("button", { name: "Delete everything" }).click();

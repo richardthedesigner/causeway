@@ -3,7 +3,7 @@ import { distanceUnit, learnPace, type Profile } from "@causeway/profile";
 import { conditionsFromOpenMeteo, forecastConditions, getJson, openMeteoUrl, riverHigh, type OpenMeteoResponse } from "@causeway/live";
 import { categoryInfo, evidence, haversine, LEVEL_LABEL, reportLevel } from "@causeway/graph";
 import { ChevronLeft, MapPinPlus } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { MapChrome, type Ground } from "@/components/MapChrome";
 import { MapView } from "@/components/MapView";
 import { DeviceMenu } from "@/components/DeviceMenu";
@@ -143,7 +143,13 @@ export default function Home() {
     setContrastChoice(v);
     saveMapContrast(v);
   };
-  const [snap, setSnap] = useState<number | string | null>(SNAP.half);
+  // The sheet starts down, showing only "Where to?" (SMALL-24). On the home screen its lowest point is measured to the
+  // search bar, so larger text or a notice above it still fits; elsewhere it is SNAP.peek.
+  const [snap, setSnap] = useState<number | string | null>(SNAP.peek);
+  const [fieldPx, setFieldPx] = useState<number | null>(null);
+  const homeGrid = useRef<HTMLDivElement>(null);
+  /** Set once the person touches, scrolls or types in the sheet: from then on, its scroll is theirs. */
+  const touched = useRef(false);
   const [geoError, setGeoError] = useState<string | null>(null);
   const [locating, setLocating] = useState(false);
   const [focus, setFocus] = useState<{ lon: number; lat: number; n: number } | null>(null);
@@ -497,6 +503,41 @@ export default function Home() {
     </>
   );
 
+  // The home sheet's lowest point: from the sheet's top edge to the bottom of the search bar, plus a margin (SMALL-24).
+  // Measured again when the bar changes size (larger text, the device chip wrapping) or a notice appears above it.
+  useLayoutEffect(() => {
+    const grid = homeGrid.current;
+    if (wide || !grid) return;
+    const measure = () => {
+      const bar = grid.querySelector<HTMLElement>("[data-search-bar]");
+      const sheet = grid.closest<HTMLElement>("[data-vaul-drawer]");
+      if (!bar || !sheet) return;
+      const s = sheet.getBoundingClientRect();
+      const scrolled = grid.closest<HTMLElement>("[data-route-panel]")?.scrollTop ?? 0;
+      // vaul counts a snap point from the screen's bottom edge to where the sheet's top would be if it were full
+      // height, and the sheet is shorter than the screen: add the difference.
+      const px = Math.ceil(bar.getBoundingClientRect().bottom - s.top + scrolled + 12 + (window.innerHeight - s.height));
+      setFieldPx((was) => (was === px ? was : px));
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(grid);
+    window.addEventListener("resize", measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, [wide, view, planner.ready, online, planner.restarted, savedPick]);
+  const peek: number | string = !wide && view === "home" && fieldPx ? `${fieldPx}px` : SNAP.peek;
+  // When the lowest point moves, a sheet resting on it stays down, rather than on a point no longer in the list.
+  const lastPeek = useRef(peek);
+  useEffect(() => {
+    if (lastPeek.current === peek) return;
+    const was = lastPeek.current;
+    lastPeek.current = peek;
+    setSnap((s) => (s === was ? peek : s));
+  }, [peek]);
+
   // Fully open, the drawer still sits (1 - SNAP.full) of the screen below the bottom edge. Pad by that much, or the last
   // things in the list (the trip settings, the end of a route) can never scroll into view (STAB-10). Scroll padding does the
   // same for anything scrolled to by keyboard focus.
@@ -507,6 +548,15 @@ export default function Home() {
       data-route-panel
       onFocusCapture={(e) => {
         if (snap !== SNAP.full && (e.target as HTMLElement).matches?.(":focus-visible")) setSnap(SNAP.full);
+      }}
+      onPointerDown={() => (touched.current = true)}
+      onWheel={() => (touched.current = true)}
+      onKeyDown={() => (touched.current = true)}
+      // The search list (cmdk) scrolls its first result into view when it loads, with nothing focused. At 200% text
+      // that scrolled the home sheet past "Where to?", which is all the sheet shows when it starts down (SMALL-24).
+      onScroll={(e) => {
+        const el = e.currentTarget;
+        if (view === "home" && !touched.current && el.scrollTop > 0 && !el.contains(document.activeElement)) el.scrollTop = 0;
       }}
       className="min-h-0 flex-1 overflow-y-auto px-4 pt-1 pb-[calc(1.5rem+6dvh+env(safe-area-inset-bottom,0px))] [scroll-padding-bottom:calc(1rem+6dvh)] md:pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] md:[scroll-padding-bottom:1rem]">
       {!online ? <NoSignal city={city.name} /> : null}
@@ -592,8 +642,7 @@ export default function Home() {
           Loading {city.name}…
         </p>
       ) : view === "home" ? (
-        <div className="grid gap-3 [&>*]:min-w-0">
-          {devices.fresh ? <p className="m-0 rounded-2xl bg-surface-2 px-4 py-3 text-sm">Tell us how you get around and we&apos;ll plan routes you can actually do.</p> : null}
+        <div ref={homeGrid} className="grid gap-3 [&>*]:min-w-0">
           <PlaceSearch
             key={`${city.id}-to`}
             label="Where to?"
@@ -833,7 +882,7 @@ export default function Home() {
           {body}
         </aside>
       ) : (
-        <Drawer open modal={false} dismissible={false} snapPoints={[SNAP.peek, SNAP.half, SNAP.full]} activeSnapPoint={snap} setActiveSnapPoint={setSnap}>
+        <Drawer open modal={false} dismissible={false} snapPoints={[peek, SNAP.half, SNAP.full]} activeSnapPoint={snap} setActiveSnapPoint={setSnap}>
           <DrawerContent aria-describedby={undefined}>
             <DrawerTitle className="sr-only">{view === "route" ? "Directions" : "Causewayside: can I get there?"}</DrawerTitle>
             {body}
