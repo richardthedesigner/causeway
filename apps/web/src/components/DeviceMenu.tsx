@@ -127,9 +127,7 @@ export function DeviceMenu({ devices, activeId, onPick, onEdit, onAdd, onSetup, 
   return (
     <div ref={root} onKeyDown={keep} className="relative max-w-full min-w-0">
       {onSetup && variant !== "row" ? (
-        <button type="button" data-menu="device" onClick={onSetup} aria-label="Set up how you get around" className="inline-flex min-h-12 items-center rounded-xl bg-accent px-4 text-sm font-bold text-accent-ink">
-          Set up
-        </button>
+        <SetupButton onClick={onSetup} />
       ) : variant === "row" ? (
         <RowButton
           active={devices.find((d) => d.id === tripId) ?? active}
@@ -244,6 +242,66 @@ function RowButton({ active, trip, open, onClick, setup }: { active: SavedDevice
       <span className="flex shrink-0 items-center gap-1 text-sm font-bold text-accent">
         {setup ? "Set up" : "Change"}
         {setup ? null : <ChevronUp aria-hidden className={cn("size-4 transition-transform", !open && "rotate-180")} strokeWidth={2.6} />}
+      </span>
+    </button>
+  );
+}
+
+/** What the first-visit button shows in turn (SMALL-25): "Set up", then the kinds of mobility it covers. */
+const SETUP_WORDS = ["Set up", "Scooter", "Wheelchair", "Rollator", "Stick"];
+const REST_MS = 7000;
+const WORD_MS = 1750;
+
+/**
+ * The first-visit "Set up" button (D-036 step 5). It rests on "Set up", then
+ * shows Scooter, Wheelchair, Rollator and Stick in turn, so people see what
+ * it's for. Its name is always "Set up how you get around": the words are
+ * hidden from screen readers and never announced. All the words sit in one
+ * grid cell, so the button is as wide as the longest and never jumps. Still
+ * under reduced motion, back on "Set up" while hovered or focused, and gone
+ * once a device is set up.
+ */
+function SetupButton({ onClick }: { onClick: () => void }) {
+  const [shown, setShown] = useState(0);
+  const [held, setHeld] = useState({ hover: false, focus: false });
+  const [still, setStill] = useState(true);
+
+  useEffect(() => {
+    const q = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const set = () => setStill(q.matches);
+    set();
+    q.addEventListener("change", set);
+    return () => q.removeEventListener("change", set);
+  }, []);
+
+  const paused = still || held.hover || held.focus;
+  useEffect(() => {
+    if (paused) {
+      setShown(0);
+      return;
+    }
+    const t = window.setTimeout(() => setShown((i) => (i + 1) % SETUP_WORDS.length), shown === 0 ? REST_MS : WORD_MS);
+    return () => window.clearTimeout(t);
+  }, [paused, shown]);
+
+  return (
+    <button
+      type="button"
+      data-menu="device"
+      onClick={onClick}
+      onPointerEnter={() => setHeld((h) => ({ ...h, hover: true }))}
+      onPointerLeave={() => setHeld((h) => ({ ...h, hover: false }))}
+      onFocus={() => setHeld((h) => ({ ...h, focus: true }))}
+      onBlur={() => setHeld((h) => ({ ...h, focus: false }))}
+      aria-label="Set up how you get around"
+      className="inline-flex min-h-12 items-center rounded-xl bg-accent px-3 text-sm font-bold text-accent-ink"
+    >
+      <span aria-hidden className="grid">
+        {SETUP_WORDS.map((w, i) => (
+          <span key={w} className={cn("text-center [grid-area:1/1] motion-safe:transition-opacity motion-safe:duration-300", i === shown ? "opacity-100" : "opacity-0")}>
+            {w}
+          </span>
+        ))}
       </span>
     </button>
   );

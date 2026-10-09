@@ -4,7 +4,7 @@ The one list of work for Causewayside: what's next, in what order, how big it is
 
 This file is the master copy. A read-only copy for sharing and comments lives in Google Drive: [Causewayside roadmap](https://docs.google.com/document/d/1T-RPq188B09LBahJIWPg_Hapm6m_vYbHB88pUzxJXV4/edit). Change this file, then update the Doc to match. Edits made only in the Doc are lost.
 
-Last updated: 2026-10-08.
+Last updated: 2026-10-09.
 
 - What's waiting on Richard, blocked, or a guess: [OPEN_ITEMS.md](OPEN_ITEMS.md)
 - What shipped and when: [BUILD_LOG.md](BUILD_LOG.md) and the phase reports
@@ -199,9 +199,10 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | SMALL-20 | A saved place's marker can sit under the half-open sheet, out of tap range. Pan the map to bring it into view when it opens, or list saved places on the home sheet | S | later | done (2026-10-07) | Claude | PR #71. D-081. On a phone the map frames every saved place above the half-open sheet, once when it loads and again when the base map swaps in. `pnpm e2e` checks that each marker's centre is tappable |
 | SMALL-21 | Save a chosen start as a place too ("Save this place" is on the destination only) | S | later | todo | Claude | Found doing SMALL-13 |
 | SMALL-22 | Answer buttons in the report sheets (`role="radio"`) move with Tab, not the arrow keys. Use a roving tab index so a group is one Tab stop | S | later | todo | Claude | Found doing FEAT-03. `ReportSheet.tsx` `Choices`, also the note sheet |
-| SMALL-23 | Remove the "Tell us how you get around" note from the home sheet | S | now | doing | Claude | Richard's request 2026-10-09. 2026-10-09, `claude/small-23-home-sheet` |
-| SMALL-24 | On first load, show the sheet collapsed, with only the address field | S | now | doing | Claude | Richard's request 2026-10-09. 2026-10-09, `claude/small-23-home-sheet` |
-| SMALL-25 | The "Set up" button cycles Scooter, Wheelchair, Rollator, Stick, then rests on "Set up". Name stays "Set up"; still under reduced motion; pauses on hover and focus; stops once set up | S | now | doing | Claude | Richard's request 2026-10-09. 2026-10-09, `claude/small-23-home-sheet` |
+| SMALL-23 | Remove the "Tell us how you get around" note from the home sheet | S | now | done (2026-10-09) | Claude | Richard's request 2026-10-09. PR #79. The "Set up" button says it now (SMALL-25) |
+| SMALL-24 | On first load, show the sheet collapsed, with only the address field | S | now | done (2026-10-09) | Claude | Richard's request 2026-10-09. PR #79. D-086. The lowest point on the home screen is measured to the search bar, so it fits at 200% text. Fixed on the way: the search list scrolled the sheet past "Where to?" at 200% text, and the search bar could flip between one and two rows for ever |
+| SMALL-25 | The "Set up" button cycles Scooter, Wheelchair, Rollator, Stick, then rests on "Set up". Name stays "Set up"; still under reduced motion; pauses on hover and focus; stops once set up | S | now | done (2026-10-09) | Claude | Richard's request 2026-10-09. PR #79. D-086. 7 s on "Set up", 1.75 s a word. Name "Set up how you get around"; the words are `aria-hidden`, no live region. As wide as "Wheelchair" |
+| SMALL-26 | Check with testers whether the moving words on "Set up" help or distract, and whether the collapsed sheet hides too much on a first visit | S | next | todo | Richard, Claude | D-086. With RES work |
 
 ## Security and privacy
 
@@ -355,6 +356,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 ## Log
 
 Newest first. One line per change: date, ID, what happened, link.
+- 2026-10-09: SMALL-23, SMALL-24 and SMALL-25 done in PR #79 (D-086), Richard's requests: no "Tell us how you get around" note, the sheet starts down with only "Where to?", and "Set up" cycles Scooter, Wheelchair, Rollator and Stick. Added SMALL-26.
 - 2026-10-08: FEAT-35 done in PR #78 (D-084): community reports. Tag good or bad access by category in three taps, agree, disagree or "still there?", confidence that decays per category, confirmed problems close edges for the people they stop, map filters. Migration 0009 with per-person and per-network limits. Takes in DEF-04 and DEF-06. Added FEAT-36 to FEAT-41. [Plan](plans/COMMUNITY_REPORTS.md), [handoff](handoff/COWORK_COMMUNITY_REPORTS.md).
 - 2026-10-08: FEAT-42 done in PR #77: safer spaces research and plan ([SAFE_SPACES.md](plans/SAFE_SPACES.md), D-085). Added FEAT-43 to FEAT-48, RES-12 and DATA-33 to DATA-35 (lighting and help point data, access requests); sources in survey §12.
 - 2026-10-08: FEAT-25 done in PR #76: user accounts planned in [plans/USER_ACCOUNTS.md](plans/USER_ACCOUNTS.md) (D-083). Supabase Auth upgrading the anonymous id in place, email code then passkeys, sync encrypted on the phone, pseudonymous handles, never required. Added FEAT-26 to FEAT-34. DEF-07 stays deferred until Richard says go.

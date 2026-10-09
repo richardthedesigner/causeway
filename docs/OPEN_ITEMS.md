@@ -54,6 +54,7 @@ These numbers shape routes but are our estimates, not evidence.
 
 - There is no Causeway Supabase project yet. When one is made, run db/migrations 0001 to 0009 in order. SEC-16 is merged, so this is now safe. 0008 (SEC-17) makes the server set note and report fields the client used to choose; 0009 adds community reports (D-084).
 - Community report confidence (confirmed at three fresh voices, half-lives from 5 days to 5 years) and the routing penalties are our guesses. Check with testers and real use (FEAT-41, D-084).
+- The timing of the moving words on "Set up" (7 s rest, 1.75 s a word) and starting the sheet down are guesses. Check with testers that they help rather than distract (SMALL-26, D-086).
 - The per-network limit for community reports reads the address from the headers Supabase passes on. Check on the real project that `request.headers` carries `x-forwarded-for` or `cf-connecting-ip`; if not, only the per-person limits apply ([D-084](DECISIONS.md#d-084-community-reports-categories-votes-and-confidence-that-decays)).
 - The profile has a gap limit for boarding trains (`maxGapMm`), but no setting in the app: everyone gets TfL's 85 mm level band. Add a setting once research says people want one ([D-068](DECISIONS.md#d-068-boarding-the-train-against-each-persons-limits)).
 - TfL's level-access doors are in the spoken route only, not on the visual route card ([D-068](DECISIONS.md#d-068-boarding-the-train-against-each-persons-limits)).

@@ -17,6 +17,7 @@ export function SearchBar({ main, trailing, className }: { main: React.ReactNode
   const bar = useRef<HTMLDivElement>(null);
   const tail = useRef<HTMLDivElement>(null);
   const natural = useRef(0);
+  const padLeft = useRef(0);
   const [split, setSplit] = useState(false);
 
   useLayoutEffect(() => {
@@ -26,9 +27,14 @@ export function SearchBar({ main, trailing, className }: { main: React.ReactNode
       const t = tail.current;
       if (!t) return;
       // Measure the button at its own width when it sits on the line; while split it is stretched, so use the last natural width.
-      if (!split) natural.current = t.offsetWidth;
+      // The same goes for the bar's left padding, which is smaller while split: measured split, a button just too wide
+      // would fit, unsplit, split again, and so on for ever.
       const s = getComputedStyle(el);
-      const inner = el.clientWidth - parseFloat(s.paddingLeft) - parseFloat(s.paddingRight);
+      if (!split) {
+        natural.current = t.offsetWidth;
+        padLeft.current = parseFloat(s.paddingLeft);
+      }
+      const inner = el.clientWidth - padLeft.current - parseFloat(s.paddingRight);
       const fits = inner >= MIN_MAIN_PX + GAP_PX + natural.current;
       if (fits === split) setSplit(!fits);
     };
@@ -41,6 +47,7 @@ export function SearchBar({ main, trailing, className }: { main: React.ReactNode
   return (
     <div
       ref={bar}
+      data-search-bar
       data-split={split || undefined}
       className={cn(
         "flex min-h-14 flex-wrap items-center gap-x-2 gap-y-1 rounded-2xl border border-line bg-surface-2 py-1 pr-1 pl-4 focus-within:border-accent",
