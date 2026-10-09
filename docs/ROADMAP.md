@@ -172,6 +172,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | FEAT-46 | "Out at night" layer, off by default, on the phone only: help points (OSM, TfL), "Need help now?", lit-streets prompt, OSM `lgbtq=*` labelled as volunteer-mapped | M | later | blocked | Richard, Claude | D-085. Plan phase 4. Waits on Richard's yes to the rules and a wording review |
 | FEAT-47 | Partner lists in the layer: Rainbow Mark, Safe Spaces, Ask for Angela, weekend welfare points; removal on request; 12-month expiry | L | later | blocked | Richard, Claude | D-085. Plan phase 5. Waits on written agreements |
 | FEAT-48 | "Still there?" confirmations on safer-spaces items: fixed answers, pre-moderated, pseudonymous counts, stricter confidence class | M | later | blocked | Claude | D-085. Plan phase 6. Builds on community reports (FEAT-35, D-084, PR #78) |
+| FEAT-49 | Map layers: survey what a mobility-impaired user would want to switch on (kerbs, steps, surface, widths, lifts, toilets, benches, parking, crossings, reports, works), propose the panel, and build it with the layers the graph already has | M | now | doing | Claude | Richard 2026-10-09: "what else can we give them?" Started 2026-10-09 on `claude/feat-49-map-layers` |
 
 ## Small features
 
