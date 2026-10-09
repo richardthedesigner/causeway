@@ -140,15 +140,15 @@ export function MapView({ network, routes, selectedId, from, to, pin, layers, ke
       // FEAT-49: each layer has its own shape, so none relies on colour. Rough ground is a wide dash, a narrow path a pair of close lines, steps dots.
       const z = (lo: number, hi: number) => ["interpolate", ["linear"], ["zoom"], 12, lo, 17, hi] as maplibregl.ExpressionSpecification;
       m.addLayer({ id: "network-rough", type: "line", source: "network", filter: ["==", ["get", "r"], true], paint: { "line-color": css("--ink"), "line-width": z(2, 9), "line-dasharray": [1.2, 0.8], "line-opacity": 0.3 } });
-      m.addLayer({ id: "network-narrow", type: "line", source: "network", filter: ["==", ["get", "n"], true], paint: { "line-color": css("--ink"), "line-width": z(1, 1.8), "line-gap-width": z(2, 6), "line-opacity": 0.85 } });
+      m.addLayer({ id: "network-narrow", type: "line", source: "network", minzoom: 15, filter: ["==", ["get", "n"], true], paint: { "line-color": css("--ink"), "line-width": ["interpolate", ["linear"], ["zoom"], 15, 1.2, 17, 1.8], "line-gap-width": ["interpolate", ["linear"], ["zoom"], 15, 3, 17, 6], "line-opacity": 0.85 } });
       m.addLayer({ id: "network-steps", type: "line", source: "network", filter: ["==", ["get", "bin"], 5], paint: { "line-color": css("--muted"), "line-width": ["interpolate", ["linear"], ["zoom"], 12, 1.5, 17, 6], "line-dasharray": [0.25, 0.5], "line-opacity": 0.8 } });
       // Kerbs only from street level: across the city they'd be a rash of dots. Dropped is a small filled dot, raised a ring.
       m.addLayer({ id: "kerbs-dropped", type: "circle", source: "kerbs", minzoom: 15, filter: ["!", ["get", "raised"]], paint: { "circle-radius": ["interpolate", ["linear"], ["zoom"], 15, 2.5, 19, 5], "circle-color": css("--ok"), "circle-stroke-color": css("--surface"), "circle-stroke-width": 1.5 } });
       m.addLayer({ id: "kerbs-raised", type: "circle", source: "kerbs", minzoom: 15, filter: ["get", "raised"], paint: { "circle-radius": ["interpolate", ["linear"], ["zoom"], 15, 4, 19, 7], "circle-color": css("--surface"), "circle-stroke-color": css("--stop"), "circle-stroke-width": 3 } });
-      // Benches: a square seat, so they don't read as kerbs. Accessible toilets: "WC", as on a route.
+      // Benches: a square seat, so they don't read as kerbs. Accessible toilets: "WC", as on a route, but not piled on each other; on a route only the route's own show.
       addBenchIcon(m);
       m.addLayer({ id: "benches", type: "symbol", source: "benches", minzoom: 15, layout: { "icon-image": "bench", "icon-allow-overlap": true, "icon-size": ["interpolate", ["linear"], ["zoom"], 15, 0.7, 19, 1.1] } });
-      m.addLayer({ id: "city-toilets", type: "symbol", source: "city-toilets", minzoom: 13, layout: { "text-field": "WC", "text-font": ["Noto Sans Medium"], "text-size": 11, "text-allow-overlap": true }, paint: { "text-color": css("--surface"), "text-halo-color": css("--ink"), "text-halo-width": 5 } });
+      m.addLayer({ id: "city-toilets", type: "symbol", source: "city-toilets", minzoom: 13, layout: { "text-field": "WC", "text-font": ["Noto Sans Medium"], "text-size": 11 }, paint: { "text-color": css("--surface"), "text-halo-color": css("--ink"), "text-halo-width": 5 } });
       m.addLayer({ id: "route-alt", type: "line", source: "route-alt", paint: { "line-color": css("--route-alt"), "line-width": 7 }, layout: { "line-cap": "round", "line-join": "round" } });
       m.addLayer({ id: "route-casing", type: "line", source: "route", paint: { "line-color": css("--surface"), "line-width": 12 }, layout: { "line-cap": "round", "line-join": "round" } });
       // The chosen route coloured by slope, the same bands as the route strip. Not-known ground is dashed, steps dotted.

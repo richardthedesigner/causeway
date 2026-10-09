@@ -1050,7 +1050,7 @@ The trade: the layer will be thin until partners agree to share their lists, sin
 - **Defaults follow the profile until you choose.** On wheels: steps, rough ground, narrow paths, kerbs and toilets. Walking with an aid or fatigue: steps, rough ground, toilets and benches. Low vision: steps, kerbs and toilets. Slopes stay off, as before, because they colour every street. Once you change a switch, your choice is kept on the phone (D-009) until "Back to what suits".
 - **Every layer has a shape, not only a colour,** and the key beside each switch is drawn as it looks on the map.
 - **Only what's mapped.** An unknown width is not narrow; an unmapped kerb is left off; the menu says "where the width is mapped" and "where they're mapped". We don't fill gaps with guesses on the map.
-- **Kerbs and benches from street level only** (zoom 15), so the city view stays readable.
+- **Narrow paths, kerbs and benches from street level only** (zoom 15), so the city view stays readable.
 
 The trade: narrow paths and kerbs are thin outside central Edinburgh until council data arrives (DATA-12, DATA-14). We show them anyway, labelled, rather than wait.
 

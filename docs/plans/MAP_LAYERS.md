@@ -82,12 +82,12 @@ Each layer has its own shape, and the menu shows each key beside its switch, dra
 - **Benches:** a square with a seat in it.
 - **Reports:** a triangle for a problem, a circle for something good (FEAT-35).
 
-Kerbs and benches appear only from street level (zoom 15), so the city view isn't a rash of dots. The menu says "Zoom in to see them".
+Narrow paths, kerbs and benches appear only from street level (zoom 15), so the city view isn't a rash of dots. The menu says "Zoom in to see them".
 
 ### Keyboard and screen readers
 
 - The button is "Map layers". Enter opens the menu and moves focus to its first switch. Up and Down move through it; Escape or Tab closes it and returns focus to the button (STAB-13).
-- Each switch is a `menuitemcheckbox` with its state, and its name includes the hint ("Narrow paths, under 1.5 m wide, where the width is mapped"). Each group is labelled ("The ground", "Kerbs").
+- Each switch is a `menuitemcheckbox` with its state, and its name includes the hint ("Narrow paths, under 1.5 m wide, where the width is mapped. Zoom in to see them"). Each group is labelled ("The ground", "Kerbs").
 - The map itself is a canvas: a screen reader can't read a kerb dot. The same facts are in words where they matter: on a route, in "On this route" and the route details. Saved places and reports are buttons. Making layer items reachable by keyboard is FEAT-58.
 
 ### 320 px and 200% text

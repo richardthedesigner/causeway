@@ -763,7 +763,7 @@ export default function Home() {
         layers={layers}
         kerbs={planner.ready?.kerbs}
         benches={planner.ready?.benches}
-        cityToilets={cityToilets}
+        cityToilets={view === "route" ? [] : cityToilets}
         entrances={view === "route" ? entrances : []}
         toilets={toilets?.toilets ?? []}
         onMapClick={navigating ? () => {} : onMapClick}

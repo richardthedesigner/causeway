@@ -212,7 +212,7 @@ export function MapChrome(props: Props) {
                 <Toggle on={props.layers.rough} onClick={() => setLayer("rough")} swatch={SWATCH.rough} hint="Setts, cobbles, gravel and grass">
                   Rough ground
                 </Toggle>
-                <Toggle on={props.layers.narrow} onClick={() => setLayer("narrow")} swatch={SWATCH.narrow} hint={`Under ${NARROW_M} m wide, where the width is mapped`}>
+                <Toggle on={props.layers.narrow} onClick={() => setLayer("narrow")} swatch={SWATCH.narrow} hint={`Under ${NARROW_M} m wide, where the width is mapped. Zoom in to see them`}>
                   Narrow paths
                 </Toggle>
               </div>
