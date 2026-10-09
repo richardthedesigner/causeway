@@ -2,6 +2,14 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
+
+## 2026-10-09 (sharing on production)
+
+DEP-09 and SEC-26. Sharing is set up on Supabase (`rlcppigbsggjrhkvexmb`, London) and the Vercel variables are set.
+- `apps/web/scripts/vercel-ignore.sh` skipped a redeploy of a commit already built, because there was nothing to compare. New `NEXT_PUBLIC_*` variables are fixed at build time, so production never got them. A redeploy of the same commit now always builds.
+- Migration `0010_search_paths.sql`: the community report trigger searches `extensions`, where Supabase keeps PostGIS. Before this every new community report failed on `st_intersects`. Already applied live by hand. Four older trigger functions get `search_path = public` too, as Supabase's Security Advisor asks.
+- The favicon 404 from the 2026-10-05 release check was fixed on 2026-10-06 (SMALL-12) and production serves it.
+- Roadmap: FEAT-60 to FEAT-62 for more sign-in methods; SEC-09 has the Turnstile site key.
 ## 2026-10-08 (community reports)
 
 FEAT-35 (D-084), PR #78. Richard's brief: the app was missing community content. [Plan](plans/COMMUNITY_REPORTS.md).

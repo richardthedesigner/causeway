@@ -2,13 +2,13 @@
 
 What's outstanding on Causewayside: things waiting on Richard, things blocked outside the project, and guesses to check with users. Keep this up to date: add an item when it comes up, and move it to "Done" with the date when it's settled. Details live in the linked issue or decision. The order of work is in [ROADMAP.md](ROADMAP.md).
 
-Last updated: 2026-10-08.
+Last updated: 2026-10-09.
 
 ## Waiting on Richard
 
 | What | Why it matters | Effort | Link |
 |---|---|---|---|
-| Make the Causeway Supabase project, run migrations 0001 to 0009, turn on anonymous sign-ins and Turnstile, and set the two Vercel variables (FEAT-35) | Community reports, notes and votes stay on each phone until then. Your Supabase organisation already has two free projects (one is the live Expanvas database, never to be paused), so a third needs gtm-kpi-hub paused or a paid plan | About 30 minutes, with Cowork | [handoff](handoff/COWORK_COMMUNITY_REPORTS.md) |
+| Enable more sign-in methods in Supabase Auth: email with our own sender, passkeys, then Apple and Google (FEAT-60 to FEAT-62) | Accounts (FEAT-27, FEAT-28, FEAT-33) need them. Not before the go-ahead on accounts (FEAT-26) | About 15 minutes each, Apple needs a developer account | [ROADMAP](ROADMAP.md) FEAT-60 |
 | Name who checks flagged community reports and photos each week (SEC-11) | Photos stay hidden and flagged reports stay down until someone looks | A decision | [BACKEND.md](BACKEND.md) |
 | Answer the user accounts plan's open questions, starting with go or wait (FEAT-26) | Accounts are planned but deferred (DEF-07). Nothing can start until the go-ahead, the choice on encrypted sync, minimum age and carer consent | A read and ten answers | [plans/USER_ACCOUNTS.md](plans/USER_ACCOUNTS.md#open-questions-for-richard), [D-083](DECISIONS.md#d-083-user-accounts-supabase-auth-upgraded-in-place-optional-forever) |
 | Time the app on a real mid-range Android phone, or run it through WebPageTest (SPEED-12) | The container's numbers have an unslowed worker and a software GPU, so they are best cases | 15 minutes | [perf notes](perf/2026-10.md) |
@@ -52,7 +52,7 @@ These numbers shape routes but are our estimates, not evidence.
 
 ## Known gaps
 
-- There is no Causeway Supabase project yet. When one is made, run db/migrations 0001 to 0009 in order. SEC-16 is merged, so this is now safe. 0008 (SEC-17) makes the server set note and report fields the client used to choose; 0009 adds community reports (D-084).
+- CAPTCHA protection is off in Supabase until the app sends a Turnstile token (SEC-09). Until then, scripted anonymous accounts can still vote and flag.
 - Community report confidence (confirmed at three fresh voices, half-lives from 5 days to 5 years) and the routing penalties are our guesses. Check with testers and real use (FEAT-41, D-084).
 - The per-network limit for community reports reads the address from the headers Supabase passes on. Check on the real project that `request.headers` carries `x-forwarded-for` or `cf-connecting-ip`; if not, only the per-person limits apply ([D-084](DECISIONS.md#d-084-community-reports-categories-votes-and-confidence-that-decays)).
 - The profile has a gap limit for boarding trains (`maxGapMm`), but no setting in the app: everyone gets TfL's 85 mm level band. Add a setting once research says people want one ([D-068](DECISIONS.md#d-068-boarding-the-train-against-each-persons-limits)).
@@ -73,6 +73,7 @@ Not now, on purpose: a phone app, whole cities, app accounts. The reports backen
 
 ## Done
 
+- 2026-10-09: the Causeway Supabase project exists (`rlcppigbsggjrhkvexmb`, London) with migrations 0001 to 0010, anonymous sign-ins and the two Vercel variables. The Turnstile site key is noted on SEC-09; CAPTCHA protection stays off until the app sends a token.
 - 2026-10-08: the community reports plan landed (FEAT-35, D-084) and meets the accounts plan's contract (D-083): the Supabase anonymous user id is the contributor id, it is never shown, votes are one per contributor per report (primary key), and every vote and report carries a weight the scoring multiplies by. The weight is 1 until `contributor_weight()` exists; then the public view returns it and the thresholds are recalibrated ([plan](plans/COMMUNITY_REPORTS.md#identity-working-now-accounts-later)).
 - 2026-10-08: Richard asked for community content: public reports by category with votes and decaying confidence (FEAT-35, [D-084](DECISIONS.md#d-084-community-reports-categories-votes-and-confidence-that-decays)). That takes the reports backend (DEF-04) and crowd verification (DEF-06) off the deferred list.
 - 2026-10-08: DEP-01. Richard set Vercel's production branch to `main`; GitHub's default branch is `main`. Still open for Richard: lift the no-deletion rule on `claude/sleepy-johnson-mavbrs` so the old branch can be deleted, and point the production-branch protection at `main` only.
