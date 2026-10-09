@@ -4,7 +4,7 @@ The one list of work for Causewayside: what's next, in what order, how big it is
 
 This file is the master copy. A read-only copy for sharing and comments lives in Google Drive: [Causewayside roadmap](https://docs.google.com/document/d/1T-RPq188B09LBahJIWPg_Hapm6m_vYbHB88pUzxJXV4/edit). Change this file, then update the Doc to match. Edits made only in the Doc are lost.
 
-Last updated: 2026-10-08.
+Last updated: 2026-10-09.
 
 - What's waiting on Richard, blocked, or a guess: [OPEN_ITEMS.md](OPEN_ITEMS.md)
 - What shipped and when: [BUILD_LOG.md](BUILD_LOG.md) and the phase reports
@@ -172,6 +172,17 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | FEAT-46 | "Out at night" layer, off by default, on the phone only: help points (OSM, TfL), "Need help now?", lit-streets prompt, OSM `lgbtq=*` labelled as volunteer-mapped | M | later | blocked | Richard, Claude | D-085. Plan phase 4. Waits on Richard's yes to the rules and a wording review |
 | FEAT-47 | Partner lists in the layer: Rainbow Mark, Safe Spaces, Ask for Angela, weekend welfare points; removal on request; 12-month expiry | L | later | blocked | Richard, Claude | D-085. Plan phase 5. Waits on written agreements |
 | FEAT-48 | "Still there?" confirmations on safer-spaces items: fixed answers, pre-moderated, pseudonymous counts, stricter confidence class | M | later | blocked | Claude | D-085. Plan phase 6. Builds on community reports (FEAT-35, D-084, PR #78) |
+| FEAT-49 | Map layers: survey what a mobility-impaired user would want to switch on (kerbs, steps, surface, widths, lifts, toilets, benches, parking, crossings, reports, works), propose the panel, and build it with the layers the graph already has | M | now | done (2026-10-09) | Claude | D-086. PR #81. [Plan](plans/MAP_LAYERS.md). Richard 2026-10-09: "what else can we give them?" Grouped menu: slopes, steps, rough ground, narrow paths, kerbs, accessible toilets, benches, reports, high contrast. Defaults follow the profile until you choose |
+| FEAT-50 | Map layer: stations by step-free access, and lifts out now (TfL station data and live outages in London, Waverley's lifts by hand) | M | next | todo | Claude | D-086, [plan](plans/MAP_LAYERS.md) #1. Builds on DATA-03, D-020. Newcastle Metro waits on DATA-19 |
+| FEAT-51 | Map layer: works on the pavement (roadworks, scaffolding, café tables, skips) from the works already loaded for routing | S | next | todo | Claude | D-086, plan #2. SRWR (DATA-02), Street Manager (DATA-05), TfL live. Thin in Newcastle and London until DATA-18 |
+| FEAT-52 | Map layer: crossings, with tactile paving, beeping signals, cones and islands shown by shape | S | next | todo | Claude | D-086, plan #3. In the graph: Edinburgh 1,279 crossings, 809 tactile, 254 beep. Council flags wait on DATA-12 |
+| FEAT-53 | Map layer: where we don't know (no slope, surface or width), with a way to report what's there | S | next | todo | Claude | D-086, plan #4. Today "Not known" shows only with slopes on |
+| FEAT-54 | Map layer: lit streets after dark, with "probably lit" once FEAT-43 lands | S | later | todo | Claude | D-086, D-085, D-038. `lit` known on 44% of Edinburgh's edges |
+| FEAT-55 | Map layers that show by themselves in season: gritted pavements when the ground is icy, paths under a flood warning | S | later | todo | Claude | D-086, DATA-07. Gritting is Edinburgh only |
+| FEAT-56 | Map layer: Blue Badge parking. Measure OSM disabled-parking coverage in the pilots first; council bays need permission (DATA-14) | M | later | todo | Claude | D-086, survey §3, §4.1. Coverage unknown |
+| FEAT-57 | Benches with backs and arms where mapped, and OpenBenches as a share-alike layer | M | later | todo | Claude | D-086, survey §4.4. York seats as the schema to ask councils for. With FEAT-07 |
+| FEAT-58 | Layer items reachable by keyboard and screen reader: a "What's near here" list for the map in view (kerbs, toilets, benches, works) | M | next | todo | Claude | D-086. The map is a canvas; today the facts are in words only on a route |
+| FEAT-59 | Check the layer defaults, keys and groups with testers | S | next | todo | Richard, Claude | D-086. With RES work |
 
 ## Small features
 
@@ -199,6 +210,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | SMALL-20 | A saved place's marker can sit under the half-open sheet, out of tap range. Pan the map to bring it into view when it opens, or list saved places on the home sheet | S | later | done (2026-10-07) | Claude | PR #71. D-081. On a phone the map frames every saved place above the half-open sheet, once when it loads and again when the base map swaps in. `pnpm e2e` checks that each marker's centre is tappable |
 | SMALL-21 | Save a chosen start as a place too ("Save this place" is on the destination only) | S | later | todo | Claude | Found doing SMALL-13 |
 | SMALL-22 | Answer buttons in the report sheets (`role="radio"`) move with Tab, not the arrow keys. Use a roving tab index so a group is one Tab stop | S | later | todo | Claude | Found doing FEAT-03. `ReportSheet.tsx` `Choices`, also the note sheet |
+| SMALL-23 | Toilet labels along a route pile on each other ("WCWC") where several are close: let them collide, or group them with a count | S | later | todo | Claude | Seen in the route screenshots while doing FEAT-49; already on `main` |
 
 ## Security and privacy
 
@@ -352,6 +364,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 ## Log
 
 Newest first. One line per change: date, ID, what happened, link.
+- 2026-10-09: FEAT-49 done in PR #81 (D-086): map layers. Survey and plan in [MAP_LAYERS.md](plans/MAP_LAYERS.md); the layers menu now has slopes, steps, rough ground, narrow paths, kerbs, accessible toilets and benches, grouped, with shape keys and defaults that follow the profile. Added FEAT-50 to FEAT-59 and SMALL-23.
 - 2026-10-08: FEAT-35 done in PR #78 (D-084): community reports. Tag good or bad access by category in three taps, agree, disagree or "still there?", confidence that decays per category, confirmed problems close edges for the people they stop, map filters. Migration 0009 with per-person and per-network limits. Takes in DEF-04 and DEF-06. Added FEAT-36 to FEAT-41. [Plan](plans/COMMUNITY_REPORTS.md), [handoff](handoff/COWORK_COMMUNITY_REPORTS.md).
 - 2026-10-08: FEAT-42 done in PR #77: safer spaces research and plan ([SAFE_SPACES.md](plans/SAFE_SPACES.md), D-085). Added FEAT-43 to FEAT-48, RES-12 and DATA-33 to DATA-35 (lighting and help point data, access requests); sources in survey §12.
 - 2026-10-08: FEAT-25 done in PR #76: user accounts planned in [plans/USER_ACCOUNTS.md](plans/USER_ACCOUNTS.md) (D-083). Supabase Auth upgrading the anonymous id in place, email code then passkeys, sync encrypted on the phone, pseudonymous handles, never required. Added FEAT-26 to FEAT-34. DEF-07 stays deferred until Richard says go.

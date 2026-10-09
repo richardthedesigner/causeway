@@ -4,17 +4,24 @@ import type { GeoJSONSource, Map as MLMap } from "maplibre-gl";
 import type * as GeoJSON from "geojson";
 import { useEffect, useRef, useState } from "react";
 import { basemapLayers, fillBasemap, GLYPHS, loadBasemap, registerProtocols } from "@/lib/basemap";
-import type { Place, PlannedRoute } from "@/lib/plan-types";
+import type { MapKerb, MapLayers } from "@/lib/map-layers";
+import type { NetworkLine, Place, PlannedRoute } from "@/lib/plan-types";
 
 interface Props {
-  network: { coords: [number, number][]; bin: number }[] | null;
+  network: NetworkLine[] | null;
   routes: PlannedRoute[];
   selectedId: string | null;
   from: Place | null;
   to: Place | null;
   /** A proposed destination awaiting confirmation. */
   pin: Place | null;
-  showSlopes: boolean;
+  /** What the layers menu has switched on (FEAT-49). */
+  layers: MapLayers;
+  /** Kerbs mapped at crossings, for the kerbs layer. */
+  kerbs?: MapKerb[];
+  /** Accessible toilets across the city and benches, for their layers. */
+  cityToilets?: { lon: number; lat: number }[];
+  benches?: [number, number][];
   entrances: { lon: number; lat: number; ok: "yes" | "no" | "unknown" }[];
   /** Accessible toilets along the chosen route. */
   toilets?: { lon: number; lat: number; public: boolean }[];
@@ -55,12 +62,36 @@ const point = (p: { lon: number; lat: number }, props: Record<string, unknown> =
   geometry: { type: "Point", coordinates: [p.lon, p.lat] },
 });
 
+/** The bench icon, drawn in the theme's colours: a square with a seat and legs. Redrawn when the theme changes. */
+function addBenchIcon(m: MLMap) {
+  const px = 2;
+  const size = 18 * px;
+  const c = document.createElement("canvas");
+  c.width = c.height = size;
+  const g = c.getContext("2d");
+  if (!g) return;
+  g.fillStyle = css("--surface");
+  g.strokeStyle = css("--ink");
+  g.lineWidth = 2 * px;
+  g.beginPath();
+  g.roundRect(px, px, size - 2 * px, size - 2 * px, 3 * px);
+  g.fill();
+  g.stroke();
+  g.fillStyle = css("--ink");
+  g.fillRect(4 * px, 7 * px, 10 * px, 2.5 * px);
+  g.fillRect(5 * px, 9 * px, 1.8 * px, 4 * px);
+  g.fillRect(11.2 * px, 9 * px, 1.8 * px, 4 * px);
+  const img = g.getImageData(0, 0, size, size);
+  if (m.hasImage("bench")) m.updateImage("bench", img);
+  else m.addImage("bench", img, { pixelRatio: px });
+}
+
 /**
  * Our own footway graph and routes, drawn over a Protomaps base map (D-024).
  * Colours come from the page's CSS tokens and follow theme changes live.
  * The high-contrast map (SMALL-05) swaps the base map palette and widens the route.
  */
-export function MapView({ network, routes, selectedId, from, to, pin, showSlopes, entrances, onMapClick, me, basemap, toilets = [], blockers = [], preview = null, focus = null, highContrast = false, saved = [], onSavedPick, community = [], onCommunityPick, draft = null, onDraftMove }: Props) {
+export function MapView({ network, routes, selectedId, from, to, pin, layers, kerbs = [], cityToilets = [], benches = [], entrances, onMapClick, me, basemap, toilets = [], blockers = [], preview = null, focus = null, highContrast = false, saved = [], onSavedPick, community = [], onCommunityPick, draft = null, onDraftMove }: Props) {
   const el = useRef<HTMLDivElement>(null);
   const map = useRef<MLMap | null>(null);
   const ready = useRef(false);
@@ -104,9 +135,20 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
     map.current = m;
     m.on("load", () => {
       const empty = fc([]);
-      for (const id of ["network", "route-alt", "route", "bands", "unknown", "rides", "ride-labels", "toilets", "markers", "entrances", "blockers", "me"]) m.addSource(id, { type: "geojson", data: empty });
+      for (const id of ["network", "route-alt", "route", "bands", "unknown", "rides", "ride-labels", "toilets", "markers", "entrances", "blockers", "me", "kerbs", "city-toilets", "benches"]) m.addSource(id, { type: "geojson", data: empty });
       m.addLayer({ id: "network", type: "line", source: "network", paint: { "line-color": ["get", "c"], "line-width": ["interpolate", ["linear"], ["zoom"], 12, 0.8, 17, 3.5], "line-opacity": 0.9 }, layout: { "line-cap": "round" } });
+      // FEAT-49: each layer has its own shape, so none relies on colour. Rough ground is a wide dash, a narrow path a pair of close lines, steps dots.
+      const z = (lo: number, hi: number) => ["interpolate", ["linear"], ["zoom"], 12, lo, 17, hi] as maplibregl.ExpressionSpecification;
+      m.addLayer({ id: "network-rough", type: "line", source: "network", filter: ["==", ["get", "r"], true], paint: { "line-color": css("--ink"), "line-width": z(2, 9), "line-dasharray": [1.2, 0.8], "line-opacity": 0.3 } });
+      m.addLayer({ id: "network-narrow", type: "line", source: "network", minzoom: 15, filter: ["==", ["get", "n"], true], paint: { "line-color": css("--ink"), "line-width": ["interpolate", ["linear"], ["zoom"], 15, 1.2, 17, 1.8], "line-gap-width": ["interpolate", ["linear"], ["zoom"], 15, 3, 17, 6], "line-opacity": 0.85 } });
       m.addLayer({ id: "network-steps", type: "line", source: "network", filter: ["==", ["get", "bin"], 5], paint: { "line-color": css("--muted"), "line-width": ["interpolate", ["linear"], ["zoom"], 12, 1.5, 17, 6], "line-dasharray": [0.25, 0.5], "line-opacity": 0.8 } });
+      // Kerbs only from street level: across the city they'd be a rash of dots. Dropped is a small filled dot, raised a ring.
+      m.addLayer({ id: "kerbs-dropped", type: "circle", source: "kerbs", minzoom: 15, filter: ["!", ["get", "raised"]], paint: { "circle-radius": ["interpolate", ["linear"], ["zoom"], 15, 2.5, 19, 5], "circle-color": css("--ok"), "circle-stroke-color": css("--surface"), "circle-stroke-width": 1.5 } });
+      m.addLayer({ id: "kerbs-raised", type: "circle", source: "kerbs", minzoom: 15, filter: ["get", "raised"], paint: { "circle-radius": ["interpolate", ["linear"], ["zoom"], 15, 4, 19, 7], "circle-color": css("--surface"), "circle-stroke-color": css("--stop"), "circle-stroke-width": 3 } });
+      // Benches: a square seat, so they don't read as kerbs. Accessible toilets: "WC", as on a route, but not piled on each other; on a route only the route's own show.
+      addBenchIcon(m);
+      m.addLayer({ id: "benches", type: "symbol", source: "benches", minzoom: 15, layout: { "icon-image": "bench", "icon-allow-overlap": true, "icon-size": ["interpolate", ["linear"], ["zoom"], 15, 0.7, 19, 1.1] } });
+      m.addLayer({ id: "city-toilets", type: "symbol", source: "city-toilets", minzoom: 13, layout: { "text-field": "WC", "text-font": ["Noto Sans Medium"], "text-size": 11 }, paint: { "text-color": css("--surface"), "text-halo-color": css("--ink"), "text-halo-width": 5 } });
       m.addLayer({ id: "route-alt", type: "line", source: "route-alt", paint: { "line-color": css("--route-alt"), "line-width": 7 }, layout: { "line-cap": "round", "line-join": "round" } });
       m.addLayer({ id: "route-casing", type: "line", source: "route", paint: { "line-color": css("--surface"), "line-width": 12 }, layout: { "line-cap": "round", "line-join": "round" } });
       // The chosen route coloured by slope, the same bands as the route strip. Not-known ground is dashed, steps dotted.
@@ -158,13 +200,23 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
       const neutral = css("--muted");
       const ramp = ["--g0", "--g1", "--g2", "--g3", "--g4"].map(css);
       (m.getSource("network") as GeoJSONSource).setData(
-        fc((network ?? []).map((n) => line(n.coords, { bin: n.bin, c: showSlopes && n.bin >= 0 && n.bin < 5 ? ramp[n.bin] : n.bin === -1 && showSlopes ? css("--unknown") : neutral }))),
+        fc((network ?? []).map((n) => line(n.coords, { bin: n.bin, r: n.r, n: n.n, c: layers.slopes && n.bin >= 0 && n.bin < 5 ? ramp[n.bin] : n.bin === -1 && layers.slopes ? css("--unknown") : neutral }))),
       );
-      m.setPaintProperty("network", "line-opacity", showSlopes ? 0.9 : highContrast ? 0.5 : 0.22);
+      (m.getSource("kerbs") as GeoJSONSource).setData(fc(kerbs.map((k) => point(k, { raised: k.raised }))));
+      (m.getSource("benches") as GeoJSONSource).setData(fc(benches.map(([lon, lat]) => point({ lon, lat }))));
+      (m.getSource("city-toilets") as GeoJSONSource).setData(fc(cityToilets.map((t) => point(t))));
+      m.setPaintProperty("network", "line-opacity", layers.slopes ? 0.9 : highContrast ? 0.5 : 0.22);
+      const show = (on: boolean) => (on ? "visible" : "none");
+      m.setLayoutProperty("network-steps", "visibility", show(layers.steps));
+      m.setLayoutProperty("network-rough", "visibility", show(layers.rough));
+      m.setLayoutProperty("network-narrow", "visibility", show(layers.narrow));
+      for (const id of ["kerbs-dropped", "kerbs-raised"]) m.setLayoutProperty(id, "visibility", show(layers.kerbs));
+      m.setLayoutProperty("benches", "visibility", show(layers.benches));
+      m.setLayoutProperty("city-toilets", "visibility", show(layers.toilets));
     };
     draw();
     drawNetwork.current = draw;
-  }, [network, showSlopes, highContrast]);
+  }, [network, kerbs, benches, cityToilets, layers, highContrast]);
 
   useEffect(() => {
     const m = map.current;
@@ -312,6 +364,14 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
     if (!m || !mapReady) return;
     m.setPaintProperty("ground", "background-color", highContrast ? (dark ? "#000000" : "#ffffff") : css("--ground"));
     m.setPaintProperty("network-steps", "line-color", css("--muted"));
+    for (const id of ["network-rough", "network-narrow"]) m.setPaintProperty(id, "line-color", css("--ink"));
+    m.setPaintProperty("kerbs-dropped", "circle-color", css("--ok"));
+    m.setPaintProperty("kerbs-dropped", "circle-stroke-color", css("--surface"));
+    m.setPaintProperty("kerbs-raised", "circle-color", css("--surface"));
+    m.setPaintProperty("kerbs-raised", "circle-stroke-color", css("--stop"));
+    m.setPaintProperty("city-toilets", "text-color", css("--surface"));
+    m.setPaintProperty("city-toilets", "text-halo-color", css("--ink"));
+    addBenchIcon(m);
     m.setPaintProperty("route-alt", "line-color", css("--route-alt"));
     m.setPaintProperty("route-casing", "line-color", css(highContrast ? "--ink" : "--surface"));
     m.setPaintProperty("route-casing", "line-width", highContrast ? 15 : 12);

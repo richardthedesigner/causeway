@@ -1041,3 +1041,16 @@ The trade: the route sheet is longer, because more is shown. The tiles at the to
 - **Community input is confirm or flag only.** Fixed answers, no free text, pre-moderated (stricter than notes in D-030), pseudonymous counts. No public additions.
 
 The trade: the layer will be thin until partners agree to share their lists, since none publishes open data. We accept that rather than scrape or guess.
+
+## D-086 Map layers: what suits you by default, shape keys, only what's mapped
+
+**Decided.** 2026-10-09 (FEAT-49). Richard asked what else users could switch on besides slopes. Survey and plan: [MAP_LAYERS.md](plans/MAP_LAYERS.md).
+
+- **One layers menu, in groups:** the ground (slopes, steps, rough ground, narrow paths), kerbs, places (accessible toilets, benches), reports, display. New layers join a group.
+- **Defaults follow the profile until you choose.** On wheels: steps, rough ground, narrow paths, kerbs and toilets. Walking with an aid or fatigue: steps, rough ground, toilets and benches. Low vision: steps, kerbs and toilets. Slopes stay off, as before, because they colour every street. Once you change a switch, your choice is kept on the phone (D-009) until "Back to what suits".
+- **Every layer has a shape, not only a colour,** and the key beside each switch is drawn as it looks on the map.
+- **Only what's mapped.** An unknown width is not narrow; an unmapped kerb is left off; the menu says "where the width is mapped" and "where they're mapped". We don't fill gaps with guesses on the map.
+- **Narrow paths, kerbs and benches from street level only** (zoom 15), so the city view stays readable.
+
+The trade: narrow paths and kerbs are thin outside central Edinburgh until council data arrives (DATA-12, DATA-14). We show them anyway, labelled, rather than wait.
+

@@ -3,6 +3,7 @@ import type { Conditions, EntranceOption, NavPlan, OnRouteItem, RouteSummary } f
 import type { Profile } from "@causeway/profile";
 import type { WorksObservation } from "@causeway/live";
 import type { CommunityReport, Stretch, UserNote } from "@causeway/graph";
+import type { MapKerb } from "./map-layers";
 
 export interface Place {
   id: string;
@@ -168,7 +169,7 @@ export type WorkerRequest =
   | { type: "fits"; id: number; from: Place; to: Place; profiles: { key: string; profile: Profile }[]; conditions: Omit<Conditions, "now"> & { now: string } };
 
 export type WorkerResponse =
-  | { type: "ready"; places: Place[]; network: { coords: [number, number][]; bin: number }[]; bbox: [number, number, number, number]; builtAt: string; buses: { stops: number; lines: number; source: string } | null }
+  | { type: "ready"; places: Place[]; network: NetworkLine[]; kerbs: MapKerb[]; benches: [number, number][]; bbox: [number, number, number, number]; builtAt: string; buses: { stops: number; lines: number; source: string } | null }
   | { type: "error"; message: string }
   | { type: "works"; summary: WorksSummary }
   /** Flood warnings that touch this city's paths, worst first. */
@@ -192,4 +193,12 @@ export interface WorksSummary {
   sources: string[];
   /** When the newest feed was read. */
   asOf: string;
+}
+
+/** A street on the base map: its slope bin, and whether it's rough (`r`) or narrow (`n`) (FEAT-49). */
+export interface NetworkLine {
+  coords: [number, number][];
+  bin: number;
+  r: boolean;
+  n: boolean;
 }

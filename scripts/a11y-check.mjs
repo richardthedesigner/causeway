@@ -101,8 +101,16 @@ for (const scheme of ["light", "dark"]) {
   await page.getByRole("button", { name: "Map layers" }).click();
   await page.getByRole("menuitemcheckbox", { name: "Community reports" }).waitFor();
   await page.getByRole("menuitem", { name: "Choose categories" }).click();
-  await page.getByRole("menuitemcheckbox", { name: "Steps" }).waitFor();
+  // "Steps" is a map layer too (FEAT-49): this one is the report category.
+  await page.getByRole("group", { name: "Categories" }).getByRole("menuitemcheckbox", { name: "Steps" }).waitFor();
   await check("map layers, community categories open");
+  // A manual wheelchair starts with kerbs on; slopes on is a choice, so "Back to what suits" appears.
+  await page.getByRole("group", { name: "Kerb key" }).waitFor();
+  await page.getByRole("menuitemcheckbox", { name: /Slopes on every street/ }).click();
+  await page.getByRole("group", { name: "Slope key" }).waitFor();
+  await page.getByRole("menuitem", { name: /Back to what suits/ }).waitFor();
+  await check("map layers, every key open");
+  await page.getByRole("menuitem", { name: /Back to what suits/ }).click();
   await page.keyboard.press("Escape");
 
   // A first visit: the device button reads "Set up" and opens setup (D-036 step 5).
@@ -420,7 +428,21 @@ for (const [scheme, size, zoom] of [["light", { width: 390, height: 844 }, false
     if (r.clipped) problems.push(`"${city}" is cut off`);
     if (r.right > r.next) problems.push(`"${city}" runs under the layers button`);
   }
-  console.log(`map controls: ${problems.length ? problems.join("; ") : "reachable, and every city name fits"}`);
+  // The layers menu (FEAT-49) with every key open: nothing runs off the side or makes it scroll sideways.
+  await page.locator('[data-menu="layers"]').click();
+  for (const name of [/Slopes on every street/, /Kerbs at crossings/]) {
+    const t = page.getByRole("menuitemcheckbox", { name });
+    if ((await t.getAttribute("aria-checked")) !== "true") await t.click();
+  }
+  const wide = await page.evaluate(() => {
+    const m = document.querySelector('[role=menu][aria-label="Map layers"]');
+    const off = [...m.querySelectorAll("*")].filter((e) => e.getBoundingClientRect().right > innerWidth + 1).map((e) => (e.textContent ?? "").trim().slice(0, 30));
+    return { scrolls: m.scrollWidth > m.clientWidth + 1, off: off.slice(0, 3) };
+  });
+  if (wide.scrolls) problems.push("the layers menu scrolls sideways");
+  for (const o of wide.off) problems.push(`"${o}" in the layers menu runs off the side`);
+  await page.keyboard.press("Escape");
+  console.log(`map controls: ${problems.length ? problems.join("; ") : "reachable, every city name fits, and the layers menu fits"}`);
   for (const p of problems) failures.push(`map controls / ${p}`);
 }
 await browser.close();

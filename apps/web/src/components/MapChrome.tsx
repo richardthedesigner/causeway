@@ -2,6 +2,7 @@
 import { Check, ChevronDown, CloudRain, Layers, LocateFixed, MapPinPlus, Snowflake, Sun } from "lucide-react";
 import { COMMUNITY_CATEGORIES } from "@causeway/graph";
 import type { CommunityFilter } from "@/lib/community-store";
+import { NARROW_M, type MapLayers } from "@/lib/map-layers";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { City } from "@/lib/cities";
@@ -14,8 +15,12 @@ interface Props {
   city: City;
   cities: City[];
   onCity: (c: City) => void;
-  showSlopes: boolean;
-  onSlopes: (v: boolean) => void;
+  /** What the map shows (FEAT-49). */
+  layers: MapLayers;
+  onLayers: (l: MapLayers) => void;
+  /** Set when you've changed the layers: the profile whose defaults "Back to" returns to. */
+  layersSuit?: string | null;
+  onLayersReset?: () => void;
   highContrast: boolean;
   onHighContrast: (v: boolean) => void;
   onLocate: () => void;
@@ -51,15 +56,42 @@ function Option({ on, onClick, children }: { on: boolean; onClick: () => void; c
   );
 }
 
-function Toggle({ on, onClick, children, indent = false }: { on: boolean; onClick: () => void; children: React.ReactNode; indent?: boolean }) {
+function Toggle({ on, onClick, children, indent = false, swatch, hint }: { on: boolean; onClick: () => void; children: React.ReactNode; indent?: boolean; swatch?: React.ReactNode; hint?: string }) {
   return (
-    <button type="button" role="menuitemcheckbox" aria-checked={on} onClick={onClick} className={cn("flex min-h-12 items-center gap-3 rounded-xl px-3 text-left hover:bg-surface-2", indent && "pl-6")}>
-      <span className={cn("min-w-0 flex-1", !indent && "font-bold")}>{children}</span>
+    <button type="button" role="menuitemcheckbox" aria-checked={on} onClick={onClick} className={cn("flex min-h-12 items-center gap-3 rounded-xl px-3 py-1 text-left hover:bg-surface-2", indent && "pl-6")}>
+      {/* The key sits in the text, not a column of its own, so at 200% text on a narrow phone it wraps with the words. */}
+      <span className={cn("min-w-0 flex-1 [overflow-wrap:anywhere]", !indent && "font-bold")}>
+        {swatch ? <span aria-hidden className="mr-2 inline-flex w-7 justify-center align-middle">{swatch}</span> : null}
+        {children}
+        {hint ? <span className="block text-sm font-normal text-muted">{hint}</span> : null}
+      </span>
       <span aria-hidden className={cn("relative h-[28px] w-[48px] shrink-0 rounded-full transition-colors", on ? "bg-accent" : "bg-line")}>
         <span className={cn("absolute top-[4px] size-[20px] rounded-full bg-surface transition-[left]", on ? "left-[24px]" : "left-[4px]")} />
       </span>
     </button>
   );
+}
+
+/** Each layer's key drawn as it looks on the map: a shape as well as a colour (FEAT-49). */
+const SWATCH = {
+  slopes: (
+    <svg width="28" height="12" viewBox="0 0 28 12"><path d="M2 6h6" stroke="var(--g0)" strokeWidth="4" strokeLinecap="round" /><path d="M11 6h6" stroke="var(--g2)" strokeWidth="4" strokeLinecap="round" /><path d="M20 6h6" stroke="var(--g4)" strokeWidth="4" strokeLinecap="round" /></svg>
+  ),
+  steps: <svg width="28" height="12" viewBox="0 0 28 12"><path d="M3 6h22" stroke="var(--muted)" strokeWidth="5" strokeLinecap="round" strokeDasharray="0.1 6" /></svg>,
+  rough: <svg width="28" height="12" viewBox="0 0 28 12"><path d="M2 6h24" stroke="var(--ink)" strokeOpacity="0.45" strokeWidth="7" strokeDasharray="6 4" /></svg>,
+  narrow: (
+    <svg width="28" height="12" viewBox="0 0 28 12"><path d="M2 3h24M2 9h24" stroke="var(--ink)" strokeWidth="1.8" /></svg>
+  ),
+  dropped: <svg width="14" height="14" viewBox="0 0 14 14"><circle cx="7" cy="7" r="4" fill="var(--ok)" stroke="var(--surface)" strokeWidth="1.5" /></svg>,
+  raised: <svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5" fill="var(--surface)" stroke="var(--stop)" strokeWidth="3" /></svg>,
+  toilets: <span className="rounded-md bg-ink px-1 text-[11px] font-bold leading-4 text-surface">WC</span>,
+  benches: (
+    <svg width="18" height="18" viewBox="0 0 18 18"><rect x="1" y="1" width="16" height="16" rx="3" fill="var(--surface)" stroke="var(--ink)" strokeWidth="2" /><path d="M4 7h10v2.5H4zM5 9h1.8v4H5zM11.2 9H13v4h-1.8z" fill="var(--ink)" /></svg>
+  ),
+};
+
+function Heading({ children }: { children: React.ReactNode }) {
+  return <p className="m-0 px-3 pt-1 text-sm font-bold text-muted">{children}</p>;
 }
 
 /**
@@ -72,6 +104,7 @@ export function MapChrome(props: Props) {
   const { open, setOpen, toggle, root } = useMenu(menu);
   const [pickCategories, setPickCategories] = useState(false);
   const [about, setAbout] = useState(false);
+  const setLayer = (k: keyof MapLayers) => props.onLayers({ ...props.layers, [k]: !props.layers[k] });
   /**
    * An open menu is drawn at the end of the page, above the sheet, just under its button.
    * Inside the map it sat under the bottom sheet (drawn later, on top), so at
@@ -149,48 +182,63 @@ export function MapChrome(props: Props) {
       ) : null}
       <div className="ml-auto grid shrink-0 gap-2">
         <div className="relative">
-          <button type="button" data-menu="layers" aria-haspopup="menu" aria-expanded={open === "layers"} aria-label="Map layers" onClick={() => toggle("layers")} className={cn(fab, props.showSlopes && "bg-ink text-surface")}>
+          <button type="button" data-menu="layers" aria-haspopup="menu" aria-expanded={open === "layers"} aria-label="Map layers" onClick={() => toggle("layers")} className={cn(fab, props.layers.slopes && "bg-ink text-surface")}>
             <Layers aria-hidden className="size-[24px]" />
           </button>
           {open === "layers" ? (
-            floating("Map layers", "w-[288px]", <>
-              <button
-                type="button"
-                role="menuitemcheckbox"
-                aria-checked={props.showSlopes}
-                onClick={() => props.onSlopes(!props.showSlopes)}
-                className="flex min-h-12 items-center gap-3 rounded-xl px-3 text-left hover:bg-surface-2"
-              >
-                <span className="min-w-0 flex-1 font-bold">Slopes on every street</span>
-                <span aria-hidden className={cn("relative h-[28px] w-[48px] shrink-0 rounded-full transition-colors", props.showSlopes ? "bg-accent" : "bg-line")}>
-                  <span className={cn("absolute top-[4px] size-[20px] rounded-full bg-surface transition-[left]", props.showSlopes ? "left-[24px]" : "left-[4px]")} />
-                </span>
-              </button>
-              <div role="group" aria-label="Slope key" className="m-0 grid grid-cols-2 gap-x-3 gap-y-1 px-3 py-2 text-sm">
-                {[["--g0", "0 to 3%"], ["--g1", "3 to 5%"], ["--g2", "5 to 8%"], ["--g3", "8 to 12%"], ["--g4", "Over 12%"]].map(([c, l]) => (
-                  <span key={l} className="flex items-center gap-2">
-                    <span aria-hidden className="inline-block h-1.5 w-6 rounded-full" style={{ background: `var(${c})` }} />
-                    {l}
-                  </span>
-                ))}
-                <span className="flex items-center gap-2">
-                  <span aria-hidden className="inline-block h-0 w-6 border-t-2 border-dashed border-unknown" />
-                  Not known
-                </span>
+            floating("Map layers", "w-[320px] grid-cols-[minmax(0,1fr)] [overflow-wrap:anywhere]", <>
+              <div role="group" aria-label="The ground" className="grid gap-1">
+                <Heading>The ground</Heading>
+                <Toggle on={props.layers.slopes} onClick={() => setLayer("slopes")} swatch={SWATCH.slopes}>
+                  Slopes on every street
+                </Toggle>
+                {props.layers.slopes ? (
+                  <div role="group" aria-label="Slope key" className="m-0 grid grid-cols-2 gap-x-3 gap-y-1 px-3 pb-2 pl-6 text-sm">
+                    {[["--g0", "0 to 3%"], ["--g1", "3 to 5%"], ["--g2", "5 to 8%"], ["--g3", "8 to 12%"], ["--g4", "Over 12%"]].map(([c, l]) => (
+                      <span key={l} className="flex items-center gap-2">
+                        <span aria-hidden className="inline-block h-1.5 w-6 rounded-full" style={{ background: `var(${c})` }} />
+                        {l}
+                      </span>
+                    ))}
+                    <span className="flex items-center gap-2">
+                      <span aria-hidden className="inline-block h-0 w-6 border-t-2 border-dashed border-unknown" />
+                      Not known
+                    </span>
+                  </div>
+                ) : null}
+                <Toggle on={props.layers.steps} onClick={() => setLayer("steps")} swatch={SWATCH.steps}>
+                  Steps
+                </Toggle>
+                <Toggle on={props.layers.rough} onClick={() => setLayer("rough")} swatch={SWATCH.rough} hint="Setts, cobbles, gravel and grass">
+                  Rough ground
+                </Toggle>
+                <Toggle on={props.layers.narrow} onClick={() => setLayer("narrow")} swatch={SWATCH.narrow} hint={`Under ${NARROW_M} m wide, where the width is mapped. Zoom in to see them`}>
+                  Narrow paths
+                </Toggle>
               </div>
-              <button
-                type="button"
-                role="menuitemcheckbox"
-                aria-checked={props.highContrast}
-                onClick={() => props.onHighContrast(!props.highContrast)}
-                className="flex min-h-12 items-center gap-3 rounded-xl px-3 text-left hover:bg-surface-2"
-              >
-                <span className="min-w-0 flex-1 font-bold">High contrast map</span>
-                <span aria-hidden className={cn("relative h-[28px] w-[48px] shrink-0 rounded-full transition-colors", props.highContrast ? "bg-accent" : "bg-line")}>
-                  <span className={cn("absolute top-[4px] size-[20px] rounded-full bg-surface transition-[left]", props.highContrast ? "left-[24px]" : "left-[4px]")} />
-                </span>
-              </button>
+              <div role="group" aria-label="Kerbs" className="mt-1 grid gap-1 border-t border-line pt-2">
+                <Heading>Kerbs</Heading>
+                <Toggle on={props.layers.kerbs} onClick={() => setLayer("kerbs")} swatch={SWATCH.raised} hint="Where they're mapped. Zoom in to see them">
+                  Kerbs at crossings
+                </Toggle>
+                {props.layers.kerbs ? (
+                  <div role="group" aria-label="Kerb key" className="m-0 grid gap-1 px-3 pb-2 pl-6 text-sm">
+                    <span className="flex items-center gap-2">{SWATCH.dropped}Dropped or flush</span>
+                    <span className="flex items-center gap-2">{SWATCH.raised}Raised</span>
+                  </div>
+                ) : null}
+              </div>
+              <div role="group" aria-label="Places" className="mt-1 grid gap-1 border-t border-line pt-2">
+                <Heading>Places</Heading>
+                <Toggle on={props.layers.toilets} onClick={() => setLayer("toilets")} swatch={SWATCH.toilets} hint="Mapped as wheelchair accessible">
+                  Accessible toilets
+                </Toggle>
+                <Toggle on={props.layers.benches} onClick={() => setLayer("benches")} swatch={SWATCH.benches} hint="Zoom in to see them">
+                  Benches and seats
+                </Toggle>
+              </div>
               <div role="group" aria-label="Community reports" className="mt-1 grid gap-1 border-t border-line pt-2">
+                <Heading>Reports</Heading>
                 <Toggle on={props.community.show} onClick={() => props.onCommunity({ ...props.community, show: !props.community.show })}>
                   Community reports
                 </Toggle>
@@ -224,6 +272,16 @@ export function MapChrome(props: Props) {
                       </div>
                     ) : null}
                   </>
+                ) : null}
+              </div>
+              <div role="group" aria-label="Display" className="mt-1 grid gap-1 border-t border-line pt-2">
+                <Toggle on={props.highContrast} onClick={() => props.onHighContrast(!props.highContrast)}>
+                  High contrast map
+                </Toggle>
+                {props.layersSuit && props.onLayersReset ? (
+                  <button type="button" role="menuitem" onClick={props.onLayersReset} className="flex min-h-12 items-center gap-3 rounded-xl px-3 text-left font-bold text-accent hover:bg-surface-2">
+                    <span className="min-w-0 flex-1">Back to what suits {props.layersSuit}</span>
+                  </button>
                 ) : null}
               </div>
               <button type="button" role="menuitem" aria-expanded={about} onClick={() => setAbout((v) => !v)} className="flex min-h-10 items-center gap-3 rounded-xl px-3 text-left text-sm font-bold hover:bg-surface-2">
