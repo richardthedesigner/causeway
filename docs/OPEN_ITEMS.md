@@ -2,7 +2,7 @@
 
 What's outstanding on Causewayside: things waiting on Richard, things blocked outside the project, and guesses to check with users. Keep this up to date: add an item when it comes up, and move it to "Done" with the date when it's settled. Details live in the linked issue or decision. The order of work is in [ROADMAP.md](ROADMAP.md).
 
-Last updated: 2026-10-08.
+Last updated: 2026-10-09.
 
 ## Waiting on Richard
 
@@ -24,6 +24,7 @@ Last updated: 2026-10-08.
 | Say yes or no to the safer spaces rules (D-085), and whether to start phases 1 to 3 (lit routes, toilet filters, night buses) | A user asked for queer and women-friendly spaces. Listing venues can make them targets, so the rules come first | A decision | [SAFE_SPACES.md](plans/SAFE_SPACES.md), ROADMAP FEAT-46 |
 | Send the safer spaces partnership emails: Equality Network (Rainbow Mark), Hestia (Safe Spaces), Ask for Angela CIC, Police Scotland (what replaces Keep Safe), Edinburgh council's night-time coordinator, Street Assist | No venue scheme publishes open data, so each list needs written agreement. Claude drafts them in DATA-35 | About six short emails | [SAFE_SPACES.md](plans/SAFE_SPACES.md#partnerships-worth-contacting), ROADMAP FEAT-47 |
 | Score the security headers: open [securityheaders.com](https://securityheaders.com/?q=https%3A%2F%2Fcauseway.richardthedesigner.com%2F&followRedirects=on) and note the grade | The scorer refuses cloud sessions, so it needs a browser. The custom domain (DEP-07) unblocked it | 1 minute | [ROADMAP](ROADMAP.md) SEC-25 |
+| Decide when sample content goes off by default, and when it is removed (FEAT-49) | Ten made-up community reports show on the map, labelled "Sample", until switched off in Map layers. Once there are enough real reports, they add noise | A decision | [D-086](DECISIONS.md#d-086-sample-content-made-up-labelled-kept-apart-switchable) |
 
 ## Blocked outside the project
 

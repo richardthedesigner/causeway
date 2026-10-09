@@ -1041,3 +1041,13 @@ The trade: the route sheet is longer, because more is shown. The tiles at the to
 - **Community input is confirm or flag only.** Fixed answers, no free text, pre-moderated (stricter than notes in D-030), pseudonymous counts. No public additions.
 
 The trade: the layer will be thin until partners agree to share their lists, since none publishes open data. We accept that rather than scrape or guess.
+
+## D-086 Sample content: made up, labelled, kept apart, switchable
+
+**Decided** by Richard, 2026-10-09 ("demo content from artificial users, which should be able to be toggled off somewhere"). FEAT-49. Code: `apps/web/src/lib/sample-content.ts`.
+
+- **What.** Ten sample community reports (D-084) around Causewayside, the Southside and the Old Town, good and bad, with short reviews and made-up votes, so the map shows how reports look while there are few real ones. Edinburgh only for now. Notes stay real only (FEAT-50).
+- **Never mistaken for real.** Every item says "Sample" in words: a tag under its map pin, "Sample:" at the start of its accessible name and its sheet's title, and a box saying it is by "Sample user", that the person, votes and words are made up and that routes ignore it. Each review starts "Example review:". No real person's name.
+- **Kept apart.** The samples live only in the app's code. They are never written to storage, so they are not in Your data, its download or Delete everything; never sent, so never in the server's tables, counts or moderation queues; can't be voted on or flagged; and never reach the router (`realOnly` before planning). "Someone has already reported this" looks at real reports only. Their ids start `sample-`, a second guard. No migration was needed, since nothing is server-side.
+- **Switchable.** "Show sample content" in Map layers, on by default while there is little real content. Off takes them off the map at once. Kept per phone (`causewayside.sample-content.v1`), and per account once accounts exist (D-083). A sample's own sheet has "Hide sample content" too.
+- **Richard decides** when it goes off by default or is removed (OPEN_ITEMS). Changing `SAMPLES_ON_BY_DEFAULT` turns it off for everyone who hasn't chosen.

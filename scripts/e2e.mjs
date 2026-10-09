@@ -837,6 +837,30 @@ for (const j of JOURNEYS) {
       await bad.waitFor();
       await page.keyboard.press("Escape");
     });
+    await step("sample content: labelled, can't be voted on, and gone at once when switched off (FEAT-49)", async () => {
+      const samples = page.locator('[aria-label^="Sample: "]');
+      await samples.first().waitFor();
+      if ((await samples.count()) < 5) throw new Error(`only ${await samples.count()} samples on the map`);
+      if (!(await page.locator(".community-marker[data-sample] .sample-tag").first().textContent())?.includes("Sample")) throw new Error("no Sample tag on the marker");
+      await page.locator('[aria-label^="Sample: Somewhere to sit"]').focus();
+      await page.keyboard.press("Enter");
+      const sheet = page.getByRole("dialog", { name: "Sample: Somewhere to sit" });
+      await sheet.getByText("By Sample user").waitFor();
+      if (await sheet.getByRole("button", { name: "Agree", exact: true }).count()) throw new Error("a sample can be voted on");
+      if (await sheet.getByRole("button", { name: "Report this report" }).count()) throw new Error("a sample can be flagged");
+      await page.keyboard.press("Escape");
+      await page.getByRole("button", { name: "Map layers" }).click();
+      await page.getByRole("menuitemcheckbox", { name: /Show sample content/ }).click();
+      await samples.first().waitFor({ state: "detached" });
+      if (!(await page.locator('[aria-label^="Broken lift, a problem"]').count())) throw new Error("real reports went too");
+      await page.keyboard.press("Escape");
+      await page.reload();
+      await page.getByPlaceholder("Where to?").waitFor({ timeout: 60_000 });
+      await page.locator('[aria-label^="Broken lift, a problem"]').waitFor();
+      if (await samples.count()) throw new Error("samples came back after a reload");
+      const sent = JSON.stringify(posted);
+      if (sent.includes("sample-") || sent.includes("Example review")) throw new Error("a sample was sent to the server");
+    });
     await step("agree with someone else's report: it becomes confirmed", async () => {
       // By keyboard: on a phone this one is under the half-open sheet, and a marker is a real button.
       await page.locator('[aria-label^="Broken lift, a problem"]').focus();

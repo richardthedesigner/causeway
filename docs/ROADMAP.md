@@ -4,7 +4,7 @@ The one list of work for Causewayside: what's next, in what order, how big it is
 
 This file is the master copy. A read-only copy for sharing and comments lives in Google Drive: [Causewayside roadmap](https://docs.google.com/document/d/1T-RPq188B09LBahJIWPg_Hapm6m_vYbHB88pUzxJXV4/edit). Change this file, then update the Doc to match. Edits made only in the Doc are lost.
 
-Last updated: 2026-10-08.
+Last updated: 2026-10-09.
 
 - What's waiting on Richard, blocked, or a guess: [OPEN_ITEMS.md](OPEN_ITEMS.md)
 - What shipped and when: [BUILD_LOG.md](BUILD_LOG.md) and the phase reports
@@ -172,6 +172,8 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | FEAT-46 | "Out at night" layer, off by default, on the phone only: help points (OSM, TfL), "Need help now?", lit-streets prompt, OSM `lgbtq=*` labelled as volunteer-mapped | M | later | blocked | Richard, Claude | D-085. Plan phase 4. Waits on Richard's yes to the rules and a wording review |
 | FEAT-47 | Partner lists in the layer: Rainbow Mark, Safe Spaces, Ask for Angela, weekend welfare points; removal on request; 12-month expiry | L | later | blocked | Richard, Claude | D-085. Plan phase 5. Waits on written agreements |
 | FEAT-48 | "Still there?" confirmations on safer-spaces items: fixed answers, pre-moderated, pseudonymous counts, stricter confidence class | M | later | blocked | Claude | D-085. Plan phase 6. Builds on community reports (FEAT-35, D-084, PR #78) |
+| FEAT-49 | Sample content from clearly fictional users (community reports, votes, notes), each labelled "Sample", kept apart from real data, with "Show sample content" in settings, on by default for now | M | now | done (2026-10-09) | Claude | D-086. PR #80. Richard 2026-10-09. Ten sample community reports with reviews and votes around the Southside and Old Town; "Show sample content" in Map layers, kept per phone. Never stored, sent, voted on or routed. Richard decides when it goes (OPEN_ITEMS) |
+| FEAT-50 | Sample notes ("What people say") and sample reports for Newcastle and London, if testers find the samples useful | S | later | todo | Claude | Found doing FEAT-49 (D-086). Notes target ways by graph build, so sample notes need ids from the current build |
 
 ## Small features
 
@@ -352,6 +354,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 ## Log
 
 Newest first. One line per change: date, ID, what happened, link.
+- 2026-10-09: FEAT-49 done in PR #80 (D-086): sample community reports from a made-up "Sample user", labelled "Sample" on the map and in their sheet, with "Show sample content" in Map layers (on by default, kept per phone). Never stored, sent, voted on or used for routes. Added FEAT-50.
 - 2026-10-08: FEAT-35 done in PR #78 (D-084): community reports. Tag good or bad access by category in three taps, agree, disagree or "still there?", confidence that decays per category, confirmed problems close edges for the people they stop, map filters. Migration 0009 with per-person and per-network limits. Takes in DEF-04 and DEF-06. Added FEAT-36 to FEAT-41. [Plan](plans/COMMUNITY_REPORTS.md), [handoff](handoff/COWORK_COMMUNITY_REPORTS.md).
 - 2026-10-08: FEAT-42 done in PR #77: safer spaces research and plan ([SAFE_SPACES.md](plans/SAFE_SPACES.md), D-085). Added FEAT-43 to FEAT-48, RES-12 and DATA-33 to DATA-35 (lighting and help point data, access requests); sources in survey §12.
 - 2026-10-08: FEAT-25 done in PR #76: user accounts planned in [plans/USER_ACCOUNTS.md](plans/USER_ACCOUNTS.md) (D-083). Supabase Auth upgrading the anonymous id in place, email code then passkeys, sync encrypted on the phone, pseudonymous handles, never required. Added FEAT-26 to FEAT-34. DEF-07 stays deferred until Richard says go.
