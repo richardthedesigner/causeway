@@ -4,7 +4,7 @@ The one list of work for Causewayside: what's next, in what order, how big it is
 
 This file is the master copy. A read-only copy for sharing and comments lives in Google Drive: [Causewayside roadmap](https://docs.google.com/document/d/1T-RPq188B09LBahJIWPg_Hapm6m_vYbHB88pUzxJXV4/edit). Change this file, then update the Doc to match. Edits made only in the Doc are lost.
 
-Last updated: 2026-10-08.
+Last updated: 2026-10-09.
 
 - What's waiting on Richard, blocked, or a guess: [OPEN_ITEMS.md](OPEN_ITEMS.md)
 - What shipped and when: [BUILD_LOG.md](BUILD_LOG.md) and the phase reports
@@ -158,6 +158,9 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | FEAT-32 | Accounts phase 6: carers and companions: share a profile to use or manage, revoke, change notices to the owner | L | later | todo | Claude | D-083. After FEAT-29. Carer consent is an open question for Richard |
 | FEAT-33 | Sign in with Apple and Google, as an extra to email and passkeys | M | later | todo | Richard, Claude | D-083. Only if testers ask. Needs Richard's Apple Developer account and a Google OAuth client |
 | FEAT-34 | Saved routes: on the phone first, like saved places, then in sync | M | later | todo | Claude | D-083, D-060. Sync after FEAT-29 |
+| FEAT-60 | More sign-in methods: turn on email sign-in in Supabase Auth with our own email sender, for the email code | S | later | blocked | Richard, Claude | D-083. For FEAT-27. Needs the email sender from FEAT-26 |
+| FEAT-61 | More sign-in methods: turn on passkeys (WebAuthn) in Supabase Auth, with the site's domains as relying party | S | later | todo | Richard, Claude | D-083. For FEAT-28. If Supabase can't, the Edge Function fallback in FEAT-28 |
+| FEAT-62 | More sign-in methods: Apple and Google providers in Supabase Auth, redirect URLs for production and the custom domain | S | later | blocked | Richard, Claude | D-083. For FEAT-33. Needs Richard's Apple Developer account and a Google OAuth client |
 | FEAT-35 | Community reports: tag good or bad access on the map by category (missing dropped kerb, steps, broken lift, good ramp, accessible toilet), with an optional short review and photo; others agree, disagree or say "still there?"; confidence decays, and well-confirmed reports change routes. Map filters by category and good or bad | XL | now | done (2026-10-08) | Claude | D-084. PR #78. Richard's brief 2026-10-08. Takes in DEF-04 and DEF-06. [Plan](plans/COMMUNITY_REPORTS.md). On the phone until the Supabase project exists ([handoff](handoff/COWORK_COMMUNITY_REPORTS.md)) |
 | FEAT-36 | A Community tab in `/review`: hidden community reports and their flags, photos to approve | M | next | todo | Claude | D-084. Until then, the SQL in BACKEND.md |
 | FEAT-37 | Routes use confirmed accessible toilets and seats from community reports (toilet and rest limits) | S | next | todo | Claude | D-084. Shown on the map already; `Router.addToilets` re-indexes, so add them once per city load, not per plan |
@@ -212,7 +215,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | SEC-06 | Export and delete everything about me, in one place | M | now | done (2026-10-05) | Claude | PR #42, D-059. "Your data": what's kept, a copy as a file, and delete everything, shared notes, reports, flags and photos included. Migration 0006 |
 | SEC-07 | Review row-level security and storage bucket rules against a threat model | M | later | done (2026-10-05) | Claude | [Security review](reviews/security-2026-10.md). One critical, one high, four medium, five low. SEC-16 to SEC-23 |
 | SEC-08 | Harden `/review`: sign-in rate limits, session length | S | later | todo | Claude | |
-| SEC-09 | Cloudflare Turnstile on anonymous sign-up, before sharing goes live | S | later | blocked | Richard, Claude | D-030. Two scripted accounts can hide any note ([review](reviews/security-2026-10.md) M4) |
+| SEC-09 | Cloudflare Turnstile on anonymous sign-up, before sharing goes live | S | next | todo | Claude | D-030. Two scripted accounts can hide any note ([review](reviews/security-2026-10.md) M4). Site key `0x4AAAAAAFSrB0uBxtRpvjc6` (public, goes in the page). Send the token with the anonymous sign-in, then turn on CAPTCHA protection in Supabase with the secret key, never before |
 | SEC-10 | Data protection impact assessment (DPIA), before wider launch | M | later | blocked | Richard | D-030 |
 | SEC-12 | Check the headers are live on production (`curl -I`) | S | next | done (2026-10-05) | Claude | D-041. Confirmed live on production by REL-01 and again after #54. Scoring them is SEC-25 |
 | SEC-13 | Drop `'unsafe-inline'` from the CSP's `script-src`: hashes for Next's inline scripts at build time | S | later | todo | Claude | D-041. They change every build |
@@ -228,6 +231,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | SEC-23 | Check branch protection on `main` and the production branch blocks direct pushes | S | next | done (2026-10-05) | Richard | [Review](reviews/security-2026-10.md) M3. Richard turned on rulesets on 2026-10-05. `main`: no deletion, no force push, PR required, `check` and `migrations` required. Production branch: no deletion, no force push. It can't require PRs until DEP-01, because the mirror pushes to it |
 | SEC-24 | Create PostGIS in the `extensions` schema in the migrations, as Supabase does, not in `public` | S | later | todo | Claude | Found in SEC-16. `0001_graph.sql` creates PostGIS in `public` when it isn't there; `0007` makes its tables read only, but Supabase's Security Advisor will still flag `spatial_ref_sys` |
 | SEC-25 | Score the headers on securityheaders.com | S | later | todo | Richard | Split from SEC-12. Unblocked by DEP-07: score `causeway.richardthedesigner.com`. The scorer refuses cloud sessions (403), so it needs a browser. All six headers it grades are sent |
+| SEC-26 | Pin `search_path` on trigger functions: `extensions` for the community report trigger (PostGIS), `public` for the rest | S | now | done (2026-10-09) | Claude | Migration `0010`. 0009's trigger couldn't find `st_intersects` on Supabase, so no community report saved; fixed live by hand first |
 | SEC-11 | Name the weekly reviewer for flags, photos and reports | S | later | blocked | Richard | [BACKEND.md](BACKEND.md). Only once sharing is on |
 
 ## Stability and testing
@@ -313,6 +317,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | DEP-06 | Release notes and version numbers users can see | S | later | todo | Claude | The build log is internal |
 | DEP-07 | A custom domain | S | later | done (2026-10-06) | Richard, Claude | `causeway.richardthedesigner.com`, added to the Vercel project (the `richardthedesigner.com` zone is on Vercel DNS, so no purchase). The custom domain skips Vercel login protection, so the app is now public. The `vercel.app` addresses still need a login |
 | DEP-08 | Merge PR #44 on top of PR #42: conflicts, D-numbers and task IDs (PORT-44) | S | now | done (2026-10-05) | Claude | Merge commits only. No numbers collided. CSP checked for #44's new feeds |
+| DEP-09 | A redeploy of a commit already built skipped the build, so new Vercel variables never reached production | S | now | done (2026-10-09) | Claude | `apps/web/scripts/vercel-ignore.sh` now always builds a redeploy of the same commit |
 | REL-01 | Release check and runbook for 2026-10-05 | S | now | done (2026-10-05) | Claude | PR #48, [release check](releases/2026-10-05.md). #38, #42 and #44 released and checked on production |
 
 ## Reviews
@@ -352,6 +357,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 ## Log
 
 Newest first. One line per change: date, ID, what happened, link.
+- 2026-10-09: DEP-09 and SEC-26 done: a redeploy of an already-built commit now builds, so the Supabase variables reach production; migration 0010 pins `search_path` (community reports could not save on Supabase). SEC-09 unblocked with the Turnstile site key. Added FEAT-60 to FEAT-62 for more sign-in methods. The favicon 404 from the 2026-10-05 release check was already fixed by SMALL-12.
 - 2026-10-08: FEAT-35 done in PR #78 (D-084): community reports. Tag good or bad access by category in three taps, agree, disagree or "still there?", confidence that decays per category, confirmed problems close edges for the people they stop, map filters. Migration 0009 with per-person and per-network limits. Takes in DEF-04 and DEF-06. Added FEAT-36 to FEAT-41. [Plan](plans/COMMUNITY_REPORTS.md), [handoff](handoff/COWORK_COMMUNITY_REPORTS.md).
 - 2026-10-08: FEAT-42 done in PR #77: safer spaces research and plan ([SAFE_SPACES.md](plans/SAFE_SPACES.md), D-085). Added FEAT-43 to FEAT-48, RES-12 and DATA-33 to DATA-35 (lighting and help point data, access requests); sources in survey §12.
 - 2026-10-08: FEAT-25 done in PR #76: user accounts planned in [plans/USER_ACCOUNTS.md](plans/USER_ACCOUNTS.md) (D-083). Supabase Auth upgrading the anonymous id in place, email code then passkeys, sync encrypted on the phone, pseudonymous handles, never required. Added FEAT-26 to FEAT-34. DEF-07 stays deferred until Richard says go.

@@ -3,6 +3,8 @@
 # Keeps us under the free plan's 100 deployments a day (DEP-03):
 #  - Changes only to docs, Markdown, workflows or database migrations don't change the app.
 # When in doubt (no earlier commit to compare with), it builds.
+# A redeploy of the commit already built always builds (DEP-09): that's how new
+# Vercel variables reach the app, since NEXT_PUBLIC_* are fixed at build time.
 set -u
 base="${VERCEL_GIT_PREVIOUS_SHA:-}"
 if [ -z "$base" ] || ! git cat-file -e "$base^{commit}" 2>/dev/null; then
@@ -10,6 +12,10 @@ if [ -z "$base" ] || ! git cat-file -e "$base^{commit}" 2>/dev/null; then
 fi
 if [ -z "$base" ]; then
   echo "Build: nothing to compare with."
+  exit 1
+fi
+if [ "$(git rev-parse "$base^{commit}")" = "$(git rev-parse HEAD)" ]; then
+  echo "Build: a redeploy of $base."
   exit 1
 fi
 cd "$(git rev-parse --show-toplevel)" || exit 1
