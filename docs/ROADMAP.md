@@ -199,6 +199,9 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | SMALL-20 | A saved place's marker can sit under the half-open sheet, out of tap range. Pan the map to bring it into view when it opens, or list saved places on the home sheet | S | later | done (2026-10-07) | Claude | PR #71. D-081. On a phone the map frames every saved place above the half-open sheet, once when it loads and again when the base map swaps in. `pnpm e2e` checks that each marker's centre is tappable |
 | SMALL-21 | Save a chosen start as a place too ("Save this place" is on the destination only) | S | later | todo | Claude | Found doing SMALL-13 |
 | SMALL-22 | Answer buttons in the report sheets (`role="radio"`) move with Tab, not the arrow keys. Use a roving tab index so a group is one Tab stop | S | later | todo | Claude | Found doing FEAT-03. `ReportSheet.tsx` `Choices`, also the note sheet |
+| SMALL-23 | Remove the "Tell us how you get around" note from the home sheet | S | now | doing | Claude | Richard's request 2026-10-09. 2026-10-09, `claude/small-23-home-sheet` |
+| SMALL-24 | On first load, show the sheet collapsed, with only the address field | S | now | doing | Claude | Richard's request 2026-10-09. 2026-10-09, `claude/small-23-home-sheet` |
+| SMALL-25 | The "Set up" button cycles Scooter, Wheelchair, Rollator, Stick, then rests on "Set up". Name stays "Set up"; still under reduced motion; pauses on hover and focus; stops once set up | S | now | doing | Claude | Richard's request 2026-10-09. 2026-10-09, `claude/small-23-home-sheet` |
 
 ## Security and privacy
 
