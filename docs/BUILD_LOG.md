@@ -2,6 +2,14 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
+## 2026-10-09 (sample content)
+
+FEAT-49 (D-086), PR #80. Richard asked for demo content from artificial users that can be switched off.
+- Ten sample community reports in Edinburgh's Southside and Old Town, good and bad, with "Example review" words and made-up votes, dated from today so they don't fade.
+- Labelled in words everywhere: a "Sample" tag under each pin, "Sample:" in its name and sheet title, "By Sample user" and a note that it is made up and routes ignore it. No voting or flagging on a sample.
+- "Show sample content" in Map layers, on by default, kept per phone. Off removes them at once; "Hide sample content" in a sample's sheet does the same.
+- Never stored, sent or routed: not in Your data, the server, its counts or moderation. `pnpm e2e` checks they show, can't be voted on, go when switched off, stay off after a reload and never reach the stand-in server; `pnpm a11y` checks a sample's sheet in light, dark and at 200% text.
+
 ## 2026-10-08 (community reports)
 
 FEAT-35 (D-084), PR #78. Richard's brief: the app was missing community content. [Plan](plans/COMMUNITY_REPORTS.md).

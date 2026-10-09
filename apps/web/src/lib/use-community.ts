@@ -2,6 +2,7 @@
 import type { CommunityReport, VoteKind } from "@causeway/graph";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { deleteCommunity, loadCommunity, loadVotes, markCommunityShared, markVoteShared, saveCommunity, saveVote, type LocalCommunityReport, type LocalVote } from "./community-store";
+import { isSample, sampleReports } from "./sample-content";
 import { deleteCommunityReport, fetchCommunityReports, flagCommunityReport, pushCommunityReport, pushVote, sharing, type FlagReason } from "./sync";
 
 export type CommunityState = "off" | "loading" | "ok" | "offline";
@@ -10,9 +11,11 @@ export type CommunityState = "off" | "loading" | "ok" | "offline";
  * Community reports for one city (FEAT-35): yours from this phone, plus
  * everyone's once sharing is on. Your own vote is counted in each report's
  * votes, as everyone else sees it. Anything not yet sent goes up when the
- * city loads or you come back online.
+ * city loads or you come back online. With `showSamples`, the made-up
+ * sample reports (FEAT-49) are added at the end, marked `sample`; they are
+ * never stored, sent or voted on.
  */
-export function useCommunity(city: string) {
+export function useCommunity(city: string, showSamples = false) {
   const [local, setLocal] = useState<LocalCommunityReport[]>([]);
   const [votes, setVotes] = useState<LocalVote[]>([]);
   const [shared, setShared] = useState<CommunityReport[]>([]);
@@ -43,7 +46,7 @@ export function useCommunity(city: string) {
     return () => window.removeEventListener("online", sync);
   }, [refreshLocal, sync]);
 
-  const reports = useMemo(() => {
+  const real = useMemo(() => {
     const byId = new Map<string, CommunityReport>();
     for (const r of shared) byId.set(r.id, r);
     // Yours that the server doesn't have yet (or sharing is off) still count, here.
@@ -57,9 +60,13 @@ export function useCommunity(city: string) {
         return v && !r.own ? { ...r, myVote: v.kind, votes: [...r.votes, { kind: v.kind, at: v.at }] } : r;
       });
   }, [shared, local, votes, city]);
+  const reports = useMemo(() => (showSamples ? [...real, ...sampleReports(city)] : real), [real, showSamples, city]);
 
   return {
+    /** Everyone's reports, with the samples if they're shown. For the map and the report sheet. */
     reports,
+    /** Real reports only: for routes and for "someone has already reported this". */
+    real,
     sharing: state,
     /** After the add sheet saves a report here: show it now, share it in the background. */
     add: (r: LocalCommunityReport) => {
@@ -69,6 +76,7 @@ export function useCommunity(city: string) {
       return ok;
     },
     vote: (reportId: string, kind: VoteKind) => {
+      if (isSample({ id: reportId })) return false;
       const ok = saveVote({ reportId, kind, at: new Date().toISOString() });
       refreshLocal();
       void sync();
@@ -81,6 +89,7 @@ export function useCommunity(city: string) {
       await deleteCommunityReport(id);
     },
     flag: async (id: string, reason: FlagReason) => {
+      if (isSample({ id })) return false;
       const ok = await flagCommunityReport(id, reason);
       if (ok) setShared((s) => s.filter((r) => r.id !== id));
       return ok;

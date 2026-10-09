@@ -112,6 +112,11 @@ export interface CommunityReport {
   shared?: boolean;
   /** How much the reporter's voice counts (see CommunityVote.weight). */
   weight?: number;
+  /**
+   * Sample content from a made-up user (FEAT-49), to show how reports look while there are few real ones.
+   * Never stored, sent, voted on or used for routes.
+   */
+  sample?: true;
 }
 
 /** Weight of one voice of age `ageDays` for a category: 1 when new, halving every half-life. */

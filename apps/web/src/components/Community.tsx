@@ -46,6 +46,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import type { LocalCommunityReport } from "@/lib/community-store";
 import { shrinkPhoto } from "@/lib/reports";
+import { SAMPLE_AUTHOR } from "@/lib/sample-content";
 import type { FlagReason } from "@/lib/sync";
 import { cn } from "@/lib/utils";
 
@@ -300,9 +301,11 @@ interface DetailProps {
   onVote: (id: string, kind: VoteKind) => void;
   onFlag: (id: string, reason: FlagReason) => Promise<boolean>;
   onDelete: (id: string) => void;
+  /** Turn "Show sample content" off, from a sample's own sheet (FEAT-49). */
+  onHideSamples: () => void;
 }
 
-export function CommunityDetailSheet({ report, onOpenChange, sharing, onVote, onFlag, onDelete }: DetailProps) {
+export function CommunityDetailSheet({ report, onOpenChange, sharing, onVote, onFlag, onDelete, onHideSamples }: DetailProps) {
   const [flagging, setFlagging] = useState(false);
   const [flagged, setFlagged] = useState<"done" | "failed" | null>(null);
   if (!report) return null;
@@ -313,7 +316,8 @@ export function CommunityDetailSheet({ report, onOpenChange, sharing, onVote, on
   const no = report.votes.length + 1 - yes;
   const Icon = CATEGORY_ICON[report.category];
   const pct = Math.floor(e.confidence * 100);
-  const canVote = sharing && !report.own && report.shared !== false;
+  const sample = report.sample === true;
+  const canVote = sharing && !sample && !report.own && report.shared !== false;
   const vote = (k: VoteKind) => onVote(report.id, k);
   const close = (v: boolean) => {
     if (!v) {
@@ -330,14 +334,28 @@ export function CommunityDetailSheet({ report, onOpenChange, sharing, onVote, on
 
   return (
     <Sheet open onOpenChange={close}>
-      <SheetContent title={info.label} description={`${info.polarity === "bad" ? "A problem" : "Good for access"}, reported by people. Not checked by us.`}>
+      <SheetContent
+        title={sample ? `Sample: ${info.label}` : info.label}
+        description={sample ? "An example of a community report. It isn't real." : `${info.polarity === "bad" ? "A problem" : "Good for access"}, reported by people. Not checked by us.`}
+      >
         <div className="grid gap-5">
+          {sample ? (
+            <div role="note" className="grid gap-2 rounded-2xl border-2 border-ink p-3">
+              <p className="m-0 flex flex-wrap items-center gap-2">
+                <span className="rounded-full bg-ink px-2 text-sm font-bold text-surface">Sample</span>
+                <span className="font-bold">By {SAMPLE_AUTHOR}</span>
+              </p>
+              <p className="m-0">This shows how reports look. The person, the votes and the words are made up, and routes ignore it.</p>
+              <Button onClick={onHideSamples}>Hide sample content</Button>
+            </div>
+          ) : null}
           <div className="grid gap-2 rounded-2xl bg-surface-2 p-3">
             <p className="m-0 flex items-center gap-2 font-bold">
               <Icon aria-hidden className={cn("size-6", info.polarity === "bad" ? "text-stop" : "text-ok")} />
               <span id="community-level">{LEVEL_LABEL[level]}</span>
             </p>
             <p className="m-0">
+              {sample ? "Made up: " : ""}
               {yes === 1 ? "1 person says it's there" : `${yes} people say it's there`}
               {no ? `, ${no === 1 ? "1 says" : `${no} say`} it isn't` : ""}. Last seen {ago(e.lastSeen)}.
             </p>
@@ -347,7 +365,7 @@ export function CommunityDetailSheet({ report, onOpenChange, sharing, onVote, on
               </span>
               <span className="tabular text-sm">How sure: {pct}%</span>
             </div>
-            <p className="m-0 text-sm">{MEANS[level][info.polarity]}</p>
+            <p className="m-0 text-sm">{sample ? "Routes ignore samples." : MEANS[level][info.polarity]}</p>
           </div>
           {report.text ? <blockquote className="m-0 border-l-4 border-line pl-3">“{report.text}”</blockquote> : null}
           {report.photo ? <img src={report.photo} alt={`Photo with the report: ${info.label}`} className="max-h-64 w-full rounded-2xl object-cover" /> : null}
@@ -373,6 +391,8 @@ export function CommunityDetailSheet({ report, onOpenChange, sharing, onVote, on
                 </p>
               ) : null}
             </div>
+          ) : sample ? (
+            <p className="m-0 text-muted">You can&apos;t agree or disagree with a sample.</p>
           ) : report.own ? (
             <div className="grid gap-2">
               <p className="m-0">You reported this{report.shared ? "" : ". It's on this phone only"}.</p>
@@ -388,7 +408,7 @@ export function CommunityDetailSheet({ report, onOpenChange, sharing, onVote, on
           ) : (
             <p className="m-0 text-muted">Agreeing and disagreeing need sharing, which isn&apos;t switched on yet.</p>
           )}
-          {sharing && !report.own ? (
+          {sharing && !sample && !report.own ? (
             flagged === "done" ? (
               <p role="status" className="m-0">
                 Thanks. Two reports like yours hide it until someone checks.

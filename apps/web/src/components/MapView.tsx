@@ -35,7 +35,8 @@ interface Props {
   saved?: { id: string; label: string; lon: number; lat: number }[];
   onSavedPick?: (id: string) => void;
   /** Community reports (FEAT-35) shown as buttons, like saved places: reachable by keyboard and screen reader. */
-  community?: { id: string; label: string; polarity: "good" | "bad"; level: string; lon: number; lat: number }[];
+  /** `sample`: made-up example content (FEAT-49), labelled as such. */
+  community?: { id: string; label: string; polarity: "good" | "bad"; level: string; lon: number; lat: number; sample?: boolean }[];
   onCommunityPick?: (id: string) => void;
   /** A new report's pin while it's being placed: drag it, tap the map, or move it with the arrow keys. */
   draft?: { lon: number; lat: number } | null;
@@ -251,15 +252,23 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
       const b = document.createElement("button");
       b.type = "button";
       b.id = `community-marker-${c.id}`;
-      b.setAttribute("aria-label", `${c.label}, ${c.polarity === "bad" ? "a problem" : "good for access"}, ${c.level.toLowerCase()}. Community report`);
+      b.setAttribute(
+        "aria-label",
+        c.sample
+          ? `Sample: ${c.label}, ${c.polarity === "bad" ? "a problem" : "good for access"}. Example report from a made-up user, not real`
+          : `${c.label}, ${c.polarity === "bad" ? "a problem" : "good for access"}, ${c.level.toLowerCase()}. Community report`,
+      );
       b.setAttribute("aria-haspopup", "dialog");
       b.dataset.polarity = c.polarity;
       b.dataset.level = c.level === "Confirmed" ? "confirmed" : "other";
       b.className = "community-marker";
+      if (c.sample) b.dataset.sample = "";
       b.innerHTML =
         c.polarity === "bad"
           ? '<svg aria-hidden="true" viewBox="0 0 24 24" width="26" height="26"><path d="M12 2.5 22.5 21h-21z" fill="var(--stop)" stroke="var(--surface)" stroke-width="2" stroke-linejoin="round"/><path d="M12 9v5" stroke="var(--stop-ink, #fff)" stroke-width="2.4" stroke-linecap="round"/><circle cx="12" cy="17.4" r="1.4" fill="var(--stop-ink, #fff)"/></svg>'
           : '<svg aria-hidden="true" viewBox="0 0 24 24" width="26" height="26"><circle cx="12" cy="12" r="10" fill="var(--ok)" stroke="var(--surface)" stroke-width="2"/><path d="m7.5 12.3 3 3 6-6.3" fill="none" stroke="var(--surface)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      // A sample says so in words under the shape, not only in its label.
+      if (c.sample) b.insertAdjacentHTML("beforeend", '<span aria-hidden="true" class="sample-tag">Sample</span>');
       b.addEventListener("click", (e) => {
         e.stopPropagation();
         communityPickRef.current?.(c.id);

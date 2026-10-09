@@ -20,6 +20,7 @@ import { MyDataSheet } from "@/components/MyDataSheet";
 import { CommunityAddSheet, CommunityDetailSheet, PlacingBar, type Draft } from "@/components/Community";
 import { loadFilter, saveFilter, DEFAULT_FILTER, type CommunityFilter } from "@/lib/community-store";
 import { useCommunity } from "@/lib/use-community";
+import { loadShowSamples, saveShowSamples, SAMPLES_ON_BY_DEFAULT } from "@/lib/sample-content";
 import { NoSignal } from "@/components/NoSignal";
 import { useOnline } from "@/lib/use-online";
 import { loadMapContrast, mapContrastOn, saveMapContrast } from "@/lib/map-contrast";
@@ -171,7 +172,14 @@ export default function Home() {
   const shared = useNotes(city.id);
   const cityNotes = shared.notes;
   // Community reports (FEAT-35): everyone's, and yours, for the map and for routes.
-  const community = useCommunity(city.id);
+  // Sample reports from a made-up user (FEAT-49), on until switched off in Map layers. Kept per phone.
+  const [showSamples, setShowSamples] = useState(SAMPLES_ON_BY_DEFAULT);
+  useEffect(() => setShowSamples(loadShowSamples()), []);
+  const chooseShowSamples = (on: boolean) => {
+    setShowSamples(on);
+    saveShowSamples(on);
+  };
+  const community = useCommunity(city.id, showSamples);
   const [communityFilter, setCommunityFilter] = useState<CommunityFilter>(DEFAULT_FILTER);
   useEffect(() => setCommunityFilter(loadFilter()), []);
   const chooseCommunityFilter = (f: CommunityFilter) => {
@@ -252,9 +260,9 @@ export default function Home() {
   // Re-plan whenever the journey, the person or the ground changes.
   useEffect(() => {
     if (!planner.ready || !to || !startKnown) return;
-    planner.plan(from, to, routeProfile, conditions, cityNotes, community.reports);
+    planner.plan(from, to, routeProfile, conditions, cityNotes, community.real);
     setSelected(null);
-  }, [planner.ready, startKnown, from, to, routeProfile, conditions, planner.lifts, alertKey, riverKey, cityNotes, community.reports]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [planner.ready, startKnown, from, to, routeProfile, conditions, planner.lifts, alertKey, riverKey, cityNotes, community.real]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Nothing fits for this device: would another saved device get there?
   const others = devices.devices.filter((d) => d.id !== routeDevice.id);
@@ -387,7 +395,7 @@ export default function Home() {
       const info = categoryInfo(r.category);
       const level = reportLevel(evidence(r));
       if (level === "faded" || (info.polarity === "bad" ? !f.bad : !f.good) || f.hidden.includes(r.category)) return [];
-      return [{ id: r.id, label: info.label, polarity: info.polarity, level: LEVEL_LABEL[level], lon: r.lon, lat: r.lat }];
+      return [{ id: r.id, label: info.label, polarity: info.polarity, level: LEVEL_LABEL[level], lon: r.lon, lat: r.lat, sample: r.sample === true }];
     });
   }, [community.reports, communityFilter, navigating]);
   const closeDetail = () => {
@@ -778,6 +786,8 @@ export default function Home() {
         minimal={navigating}
         community={communityFilter}
         onCommunity={chooseCommunityFilter}
+        showSamples={showSamples}
+        onShowSamples={chooseShowSamples}
         onAddReport={navigating ? undefined : () => startAdd()}
       />
       <UpdatePrompt navigating={navigating} />
@@ -888,7 +898,7 @@ export default function Home() {
         draft={draft}
         city={city.id}
         sharing={community.sharing !== "off"}
-        reports={community.reports}
+        reports={community.real}
         onMovePin={() => {
           setPlacing(true);
           setAddOpen(false);
@@ -905,6 +915,10 @@ export default function Home() {
         onVote={community.vote}
         onFlag={community.flag}
         onDelete={(id) => void community.remove(id)}
+        onHideSamples={() => {
+          chooseShowSamples(false);
+          setDetailId(null);
+        }}
       />
       <ReportSheet open={reportAt !== null} onOpenChange={(v) => !v && setReportAt(null)} where={reportAt} about={reportAt?.about ?? null} city={city.id} sharing={shared.sharing !== "off"} onSaved={shared.saved} />
     </main>

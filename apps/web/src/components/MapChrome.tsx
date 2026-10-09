@@ -26,6 +26,9 @@ interface Props {
   /** Community reports on the map (FEAT-35): which to show. */
   community: CommunityFilter;
   onCommunity: (f: CommunityFilter) => void;
+  /** Sample reports from a made-up user (FEAT-49). */
+  showSamples: boolean;
+  onShowSamples: (on: boolean) => void;
   /** Start adding a report. Absent while navigating (the report button there is for problems). */
   onAddReport?: () => void;
 }
@@ -225,6 +228,10 @@ export function MapChrome(props: Props) {
                     ) : null}
                   </>
                 ) : null}
+                <Toggle on={props.showSamples} onClick={() => props.onShowSamples(!props.showSamples)}>
+                  Show sample content
+                  <span className="block text-sm font-normal text-muted">Made-up example reports, labelled &ldquo;Sample&rdquo;</span>
+                </Toggle>
               </div>
               <button type="button" role="menuitem" aria-expanded={about} onClick={() => setAbout((v) => !v)} className="flex min-h-10 items-center gap-3 rounded-xl px-3 text-left text-sm font-bold hover:bg-surface-2">
                 <span className="min-w-0 flex-1">About this map</span>

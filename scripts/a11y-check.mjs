@@ -98,6 +98,12 @@ for (const scheme of ["light", "dark"]) {
   await page.getByRole("dialog", { name: "No dropped kerb" }).waitFor();
   await check("a community report");
   await page.keyboard.press("Escape");
+  // A sample report (FEAT-49): its marker tag and its sheet.
+  await page.locator('[aria-label^="Sample: Steep slope"]').focus();
+  await page.keyboard.press("Enter");
+  await page.getByRole("dialog", { name: "Sample: Steep slope" }).waitFor();
+  await check("a sample community report");
+  await page.keyboard.press("Escape");
   await page.getByRole("button", { name: "Map layers" }).click();
   await page.getByRole("menuitemcheckbox", { name: "Community reports" }).waitFor();
   await page.getByRole("menuitem", { name: "Choose categories" }).click();
@@ -300,6 +306,12 @@ for (const [scheme, size, zoom] of [["light", { width: 390, height: 844 }, false
   await page.getByRole("radio", { name: "Pavement blocked" }).click();
   await page.locator("[role=dialog] details").evaluateAll((els) => els.forEach((el) => (el.open = true)));
   await reflow("add a community report");
+  await page.keyboard.press("Escape");
+  await page.getByRole("dialog", { name: "Add a report" }).waitFor({ state: "detached" });
+  await page.locator('[aria-label^="Sample: Steep slope"]').focus();
+  await page.keyboard.press("Enter");
+  await page.getByRole("dialog", { name: "Sample: Steep slope" }).waitFor();
+  await reflow("a sample community report");
 }
 // Reflow on the other screens at 320 by 640 with text at 200% (STAB-12). The map draws its own labels, so it's left out.
 {

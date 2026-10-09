@@ -130,6 +130,8 @@ async function open(scheme, size) {
   await page.addInitScript(() => {
     delete Navigator.prototype.geolocation;
     localStorage.setItem("causewayside.city.v1", "edinburgh");
+    // Sample reports (FEAT-49) off, so the baselines show the app itself. `pnpm e2e` and `pnpm a11y` cover the samples.
+    localStorage.setItem("causewayside.sample-content.v1", "off");
     // Hold navigation's preview walk (a 500 ms tick) still.
     const every = window.setInterval;
     window.setInterval = (fn, ms, ...rest) => (ms === 500 ? 0 : every(fn, ms, ...rest));
