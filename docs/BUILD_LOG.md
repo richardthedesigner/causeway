@@ -10,6 +10,7 @@ SMALL-23, SMALL-24 and SMALL-25 (D-086), PR #79. Richard's requests.
 - On a first visit the "Set up" button rests on "Set up" for 7 seconds, then shows Scooter, Wheelchair, Rollator and Stick for 1.75 seconds each. Its name is always "Set up how you get around"; the words are hidden from screen readers and never announced. Still under reduced motion, back to "Set up" while hovered or focused, gone once a device is set up. All the words share one grid cell, so the button never changes width.
 - Fixed on the way: the search list (cmdk) scrolled its first result into view on load, which at 200% text scrolled the sheet past "Where to?". And the search bar measured its width with the smaller padding it has while split, so a button between about 264 and 276 px wide made it flip between one and two rows for ever (React error 185 at 320 px).
 - The a11y check focuses search before opening Your data at 200% text, as the other steps do, since the sheet now starts down.
+- 16 screenshot baselines updated from CI's own renders (the map, search and device list screens).
 
 ## 2026-10-08 (community reports)
 
