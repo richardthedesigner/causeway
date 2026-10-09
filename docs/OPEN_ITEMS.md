@@ -2,7 +2,7 @@
 
 What's outstanding on Causewayside: things waiting on Richard, things blocked outside the project, and guesses to check with users. Keep this up to date: add an item when it comes up, and move it to "Done" with the date when it's settled. Details live in the linked issue or decision. The order of work is in [ROADMAP.md](ROADMAP.md).
 
-Last updated: 2026-10-08.
+Last updated: 2026-10-09.
 
 ## Waiting on Richard
 
@@ -37,6 +37,7 @@ These numbers shape routes but are our estimates, not evidence.
 
 | What | Where |
 |---|---|
+| Map layer defaults by mobility: which layers each kind of user wants on at first, and whether the keys read without colour (FEAT-59) | [MAP_LAYERS.md](plans/MAP_LAYERS.md#defaults-by-mobility), D-086 |
 | Bus, tram and Metro costs: waits, wheelchair space taken, seats at stops | [#12](https://github.com/richardthedesigner/causeway/issues/12) |
 | How much detour a crossing with no lights, a silent signal or no tactile paving is worth | [D-037](DECISIONS.md#d-037-crossings-for-people-who-cross-by-sound-and-touch) |
 | How much detour an unlit street is worth after dark | [D-038](DECISIONS.md#d-038-lit-streets-after-dark) |

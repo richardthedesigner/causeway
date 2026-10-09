@@ -36,6 +36,7 @@ import { SavePlace } from "@/components/SavePlace";
 import { useNotes } from "@/lib/use-notes";
 import { hoursText, setBankHolidays } from "@/lib/opening-hours";
 import { toiletsAlong } from "@/lib/toilets";
+import { layersFor, loadMapLayers, sameLayers, saveMapLayers, type MapLayers } from "@/lib/map-layers";
 import { usePlaces } from "@/lib/use-places";
 import { departure, usePlanner, type Conditions } from "@/lib/use-planner";
 
@@ -133,7 +134,18 @@ export default function Home() {
   // Gusts come with the weather but stay when you set the ground yourself (D-066).
   const [gust, setGust] = useState<Conditions["gust"]>(undefined);
   const conditions = useMemo(() => ({ ...ground0, leaveAt, ...(gust ? { gust } : {}) }), [ground0, leaveAt, gust]);
-  const [showSlopes, setShowSlopes] = useState(false);
+  // Map layers (FEAT-49): what suits the profile until you choose, then your choice, kept on this phone.
+  const [layersChoice, setLayersChoice] = useState<MapLayers | null>(null);
+  useEffect(() => setLayersChoice(loadMapLayers()), []);
+  // Memoised: the map redraws every street when this changes.
+  const suited = useMemo(() => layersFor(profile.preset), [profile.preset]);
+  const layers = layersChoice ?? suited;
+  const chooseLayers = (l: MapLayers | null) => {
+    // Choosing exactly what suits the profile is the same as not choosing: the map follows the profile again.
+    const kept = l && !sameLayers(l, suited) ? l : null;
+    setLayersChoice(kept);
+    saveMapLayers(kept);
+  };
   // High-contrast map (SMALL-05): on for the low-vision device or when the phone asks, unless changed in the layers menu.
   const [contrastChoice, setContrastChoice] = useState<boolean | null>(null);
   const phoneAsksContrast = useMediaQuery("(prefers-contrast: more)");
@@ -419,6 +431,11 @@ export default function Home() {
     return typeof document === "undefined" || mapCity !== city.id ? null : { url: u(city.basemap), key: city.id, glyphs: u("fonts/glyphs.json"), center: [city.start.lon, city.start.lat] as [number, number] };
   }, [city, mapCity]); // eslint-disable-line react-hooks/exhaustive-deps
   const selectedRoute = routes.find((r) => r.id === selected) ?? routes[0] ?? null;
+  // Accessible toilets for the map layer (FEAT-49): OSM, the Toilet Map and TfL, not ones the sources disagree on (D-065) or inside ticket gates.
+  const cityToilets = useMemo(
+    () => (index?.entries ?? []).filter((e) => e.cat === "amenity=toilets" && !e.disputed && /^(yes|designated)$/.test(e.access?.wheelchair ?? "") && e.access?.access !== "customers").map((e) => ({ lon: e.place.lon, lat: e.place.lat })),
+    [index],
+  );
   const toilets = useMemo(() => (index && selectedRoute && view === "route" ? toiletsAlong(index, selectedRoute.coords, 80, passingAt(selectedRoute, departure(conditions))) : null), [index, selectedRoute, view, conditions]);
   const entrances = useMemo(() => (result?.status === "ok" ? result.entrances.map((e) => ({ lon: e.lon, lat: e.lat, ok: e.verdict.passable })) : []), [result]);
 
@@ -743,7 +760,10 @@ export default function Home() {
         from={startKnown ? from : null}
         to={view === "route" ? to : null}
         pin={pin}
-        showSlopes={showSlopes}
+        layers={layers}
+        kerbs={planner.ready?.kerbs}
+        benches={planner.ready?.benches}
+        cityToilets={cityToilets}
         entrances={view === "route" ? entrances : []}
         toilets={toilets?.toilets ?? []}
         onMapClick={navigating ? () => {} : onMapClick}
@@ -768,8 +788,10 @@ export default function Home() {
         city={city}
         cities={CITIES}
         onCity={switchCity}
-        showSlopes={showSlopes}
-        onSlopes={setShowSlopes}
+        layers={layers}
+        onLayers={chooseLayers}
+        layersSuit={layersChoice ? deviceLabel(device) : null}
+        onLayersReset={() => chooseLayers(null)}
         highContrast={highContrast}
         onHighContrast={chooseContrast}
         onLocate={() => locate(to !== null && view !== "home")}

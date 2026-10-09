@@ -34,6 +34,7 @@ import type { Check, Place, PlannedRoute, PlanResult, RouteStrip, WorkerRequest,
 import { parkGates, type GreenspaceFile } from "./greenspace";
 import { doorFirst } from "./destination";
 import { osmNoteItems, type OsmNotesFile } from "./osm-notes";
+import { isNarrow, isRough, mapBenches, mapKerbs } from "./map-layers";
 
 declare const self: DedicatedWorkerGlobalScope;
 let router: Router | null = null;
@@ -150,7 +151,7 @@ async function load(url: string, networkUrl: string | undefined, worksUrl: strin
     refRides(graph);
   }
   router = new Router(graph);
-  post({ type: "ready", places: places(graph, demo, network), network: networkLines(graph), bbox: graph.meta.bbox, builtAt: graph.meta.builtAt, buses });
+  post({ type: "ready", places: places(graph, demo, network), network: networkLines(graph), kerbs: mapKerbs(graph.nodes), benches: mapBenches(graph.amenities), bbox: graph.meta.bbox, builtAt: graph.meta.builtAt, buses });
   if (worksUrl) {
     try {
       fileWorks = (await (await fetch(worksUrl)).json()) as { works: WorksObservation[]; source: string; builtAt: string };
@@ -185,7 +186,10 @@ function places(g: Graph, demo: Place[], net: TransitNetwork | null): Place[] {
   return [...demo, ...streets];
 }
 
-/** Base network for the map, binned by steepest gradient (0-4) or unknown (-1). Rail is not drawn as pavement. */
+/**
+ * Base network for the map, binned by steepest gradient (0-4), steps (5) or unknown (-1).
+ * `r` marks rough ground and `n` narrow paths for the layers menu (FEAT-49). Rail is not drawn as pavement.
+ */
 function networkLines(g: Graph) {
   const bin = (e: GraphEdge) => {
     if (e.kind === "steps") return 5;
@@ -194,7 +198,7 @@ function networkLines(g: Graph) {
     return v < 3 ? 0 : v < 5 ? 1 : v < 8 ? 2 : v < 12 ? 3 : 4;
   };
   const rail = new Set(["transit", "board", "interchange", "station_link", "elevator"]);
-  return g.edges.filter((e) => !rail.has(e.kind)).map((e) => ({ coords: e.geometry, bin: bin(e) }));
+  return g.edges.filter((e) => !rail.has(e.kind)).map((e) => ({ coords: e.geometry, bin: bin(e), r: isRough(e), n: isNarrow(e) }));
 }
 
 function toPlanned(r: Route, start: Parameters<typeof elevationProfile>[1], id: string, label: string, baseSeconds: number, now: Date, p: Profile): PlannedRoute {

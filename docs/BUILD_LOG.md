@@ -2,6 +2,14 @@
 
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
+## 2026-10-09 (map layers)
+
+FEAT-49 (D-086), PR #81. Richard: "what else can we give them?" besides slopes. [Plan](plans/MAP_LAYERS.md).
+- Surveyed 18 candidate layers against the data survey: source, coverage in our cities, cost and value. Ranked next: lifts and step-free stations, works on the pavement, crossings with cues, where we don't know.
+- The layers menu is grouped and has seven map layers from data we already load: slopes, steps (now a switch), rough ground, narrow paths, kerbs at crossings, accessible toilets city-wide, and benches. Each has a shape key beside its switch.
+- Defaults suit the profile you're routing for until you change a switch; "Back to what suits" returns to them.
+- `pnpm a11y` checks the menu with every key open at 320 px with 200% text, so nothing in it runs off the side.
+
 ## 2026-10-08 (community reports)
 
 FEAT-35 (D-084), PR #78. Richard's brief: the app was missing community content. [Plan](plans/COMMUNITY_REPORTS.md).
