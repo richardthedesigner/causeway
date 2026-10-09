@@ -210,6 +210,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | SMALL-20 | A saved place's marker can sit under the half-open sheet, out of tap range. Pan the map to bring it into view when it opens, or list saved places on the home sheet | S | later | done (2026-10-07) | Claude | PR #71. D-081. On a phone the map frames every saved place above the half-open sheet, once when it loads and again when the base map swaps in. `pnpm e2e` checks that each marker's centre is tappable |
 | SMALL-21 | Save a chosen start as a place too ("Save this place" is on the destination only) | S | later | todo | Claude | Found doing SMALL-13 |
 | SMALL-22 | Answer buttons in the report sheets (`role="radio"`) move with Tab, not the arrow keys. Use a roving tab index so a group is one Tab stop | S | later | todo | Claude | Found doing FEAT-03. `ReportSheet.tsx` `Choices`, also the note sheet |
+| SMALL-23 | Toilet labels along a route pile on each other ("WCWC") where several are close: let them collide, or group them with a count | S | later | todo | Claude | Seen in the route screenshots while doing FEAT-49; already on `main` |
 
 ## Security and privacy
 
@@ -363,7 +364,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 ## Log
 
 Newest first. One line per change: date, ID, what happened, link.
-- 2026-10-09: FEAT-49 done in PR #81 (D-086): map layers. Survey and plan in [MAP_LAYERS.md](plans/MAP_LAYERS.md); the layers menu now has slopes, steps, rough ground, narrow paths, kerbs, accessible toilets and benches, grouped, with shape keys and defaults that follow the profile. Added FEAT-50 to FEAT-59.
+- 2026-10-09: FEAT-49 done in PR #81 (D-086): map layers. Survey and plan in [MAP_LAYERS.md](plans/MAP_LAYERS.md); the layers menu now has slopes, steps, rough ground, narrow paths, kerbs, accessible toilets and benches, grouped, with shape keys and defaults that follow the profile. Added FEAT-50 to FEAT-59 and SMALL-23.
 - 2026-10-08: FEAT-35 done in PR #78 (D-084): community reports. Tag good or bad access by category in three taps, agree, disagree or "still there?", confidence that decays per category, confirmed problems close edges for the people they stop, map filters. Migration 0009 with per-person and per-network limits. Takes in DEF-04 and DEF-06. Added FEAT-36 to FEAT-41. [Plan](plans/COMMUNITY_REPORTS.md), [handoff](handoff/COWORK_COMMUNITY_REPORTS.md).
 - 2026-10-08: FEAT-42 done in PR #77: safer spaces research and plan ([SAFE_SPACES.md](plans/SAFE_SPACES.md), D-085). Added FEAT-43 to FEAT-48, RES-12 and DATA-33 to DATA-35 (lighting and help point data, access requests); sources in survey §12.
 - 2026-10-08: FEAT-25 done in PR #76: user accounts planned in [plans/USER_ACCOUNTS.md](plans/USER_ACCOUNTS.md) (D-083). Supabase Auth upgrading the anonymous id in place, email code then passkeys, sync encrypted on the phone, pseudonymous handles, never required. Added FEAT-26 to FEAT-34. DEF-07 stays deferred until Richard says go.
