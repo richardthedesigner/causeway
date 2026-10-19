@@ -1,7 +1,7 @@
 {
  "source": "GOV.UK bank holidays",
  "licence": "Open Government Licence v3.0",
- "fetchedAt": "2026-10-05",
+ "fetchedAt": "2026-10-19",
  "divisions": {
   "england-and-wales": {
    "2025-01-01": "New Year's Day",
