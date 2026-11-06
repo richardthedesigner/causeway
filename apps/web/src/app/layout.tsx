@@ -4,6 +4,9 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Causewayside",
   description: "Routes you can actually complete, worked out for how you get around.",
+  metadataBase: new URL("https://causeway.richardthedesigner.com"),
+  openGraph: { siteName: "Causewayside", locale: "en_GB", type: "website" },
+  twitter: { card: "summary_large_image" },
 };
 
 export const viewport: Viewport = {
