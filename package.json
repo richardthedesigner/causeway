@@ -39,7 +39,7 @@
     "@causeway/profile": "workspace:*",
     "@causeway/router": "workspace:*",
     "@types/node": "^26.6.5",
-    "axe-core": "^4.14.0",
+    "axe-core": "~4.13.0",
     "knip": "^6.41.0",
     "playwright": "^1.64.1",
     "tsx": "^4.23.15",
