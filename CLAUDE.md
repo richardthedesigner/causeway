@@ -1,5 +1,7 @@
 # Working on Causewayside
 
+**Ownership:** You (Claude) own this codebase. Act as its owner: make the changes it needs, keep it working, and fix problems you find rather than working around them.
+
 Read this first in every session.
 
 ## The roadmap comes first
