@@ -90,8 +90,9 @@ export default function Home() {
     }
   }, []);
   const planner = usePlanner(city);
-  const index = usePlaces(city, planner.ready?.places ?? null);
-  // The base map waits for the graph and search index, so "Where to?" doesn't share the line with tiles (SPEED-08, D-077).
+  const { index, downloaded: indexIn } = usePlaces(city, planner.ready?.places ?? null);
+  // The base map waits for the graph and the search index's download, so "Where to?" doesn't share the line with tiles (SPEED-08, D-077).
+  // Not for the index to be built: its tiles download meanwhile (SPEED-14).
   // It stays on once released for a city; a failed graph releases it too, so the map still draws.
   // Right after a city switch, index and error still belong to the old city, so that run is skipped.
   const [mapCity, setMapCity] = useState<string | null>(null);
@@ -99,8 +100,8 @@ export default function Home() {
   useEffect(() => {
     const switched = indexCity.current !== city.id;
     indexCity.current = city.id;
-    if (!switched && (index || planner.error)) setMapCity(city.id);
-  }, [index, planner.error, city.id]);
+    if (!switched && (indexIn || planner.error)) setMapCity(city.id);
+  }, [indexIn, planner.error, city.id]);
   // Venues with an accessible toilet go to the router, so "Past more toilets" can use them (public ones are in the graph).
   useEffect(() => {
     if (!index) return;
