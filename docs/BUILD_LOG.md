@@ -12,6 +12,7 @@ SPEED-14 (D-087), PR #94. [Numbers](perf/2026-11-17-speed-14.md).
 - Edinburgh's map draws at 11.4 s, not 13.3 s, on Fast 4G with 4x CPU (target 12 s). Newcastle 6.4 to 5.7 s, London 6.0 to 5.6 s.
 - `pnpm perf:web --trace-load <dir>` traces from opening the page until the map draws.
 - The London "On this route" e2e check had failed since 2026-10-11, when the recorded Canning Town escalator message expired. It now moves the recorded messages' dates to today.
+- `pnpm audit` failed on new advisories (two critical and one high in Next, one high each in vite and zod). Next 16.4.6, vite 8.3.8 (now a direct dev dependency, since vitest takes it as a peer), knip 6.45 and fast-xml-parser 5.12.
 ## 2026-10-09 (sharing on production)
 
 DEP-09 and SEC-26. Sharing is set up on Supabase (`rlcppigbsggjrhkvexmb`, London) and the Vercel variables are set.
