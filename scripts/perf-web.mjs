@@ -18,6 +18,7 @@
  *   --debug             print the draw-call frames the map-drawn time is read from, and when each file loaded
  *   --trace dir         record a Chrome trace of each run from choosing the destination to the route, into dir,
  *                       and print where the main thread and the worker spent that time (SPEED-10)
+ *   --trace-load dir    the same, from opening the page until the map draws (SPEED-14)
  *
  * The CPU slowdown applies to the page's main thread only. The router and the graph
  * parse run in a worker, which Chromium does not slow (checked: a fixed loop takes the same
@@ -45,6 +46,7 @@ const CPU = Number(opt("cpu", 4));
 const DEBUG = args.includes("--debug");
 const JSON_OUT = opt("json", null);
 const TRACE = opt("trace", null);
+const TRACE_LOAD = opt("trace-load", null);
 const ONLY = args.flatMap((a, i) => (a === "--city" ? [args[i + 1]] : []));
 
 /** Chrome DevTools' presets. Bytes per second is what the protocol takes. */
@@ -155,12 +157,23 @@ function pageHooks() {
   }
   const tick = () => {
     if (draws) perf.frames.push([performance.now(), draws]);
+    // The same test as DRAWN_CALLS below, marked for --trace-load.
+    if (perf.drawn === undefined && draws >= 150) {
+      const base = performance.getEntriesByType("resource").find((r) => r.name.endsWith(".pmtiles"));
+      if (base && base.responseEnd > 0 && performance.now() >= base.responseEnd) {
+        perf.drawn = performance.now();
+        performance.mark("perf:drawn");
+      }
+    }
     draws = 0;
     requestAnimationFrame(tick);
   };
   requestAnimationFrame(tick);
   new MutationObserver(() => {
-    if (perf.ready === null && document.querySelector('input[placeholder="Where to?"]')) perf.ready = performance.now();
+    if (perf.ready === null && document.querySelector('input[placeholder="Where to?"]')) {
+      perf.ready = performance.now();
+      performance.mark("perf:ready");
+    }
     if (perf.chosen !== null && perf.route === null && document.body.textContent.includes("Why this way?")) {
       perf.route = performance.now();
       performance.mark("perf:route");
@@ -214,6 +227,7 @@ async function run(browser, server, city) {
   await page.addInitScript((id) => localStorage.setItem("causewayside.city.v1", id), city.id);
   await page.addInitScript(pageHooks);
   const t0 = Date.now();
+  if (TRACE_LOAD) await startTrace(cdp);
   await page.goto(server.url, { waitUntil: "commit" });
   const wait = (fn, label, timeout = 120_000) => page.waitForFunction(fn, null, { timeout, polling: 100 }).catch(() => {
     throw new Error(`${city.id}: ${label} never happened`);
@@ -224,6 +238,12 @@ async function run(browser, server, city) {
     const base = performance.getEntriesByType("resource").find((r) => r.name.endsWith(".pmtiles"));
     return base && base.responseEnd > 0 && window.__perf.frames.some(([t, n]) => t >= base.responseEnd && n >= 150);
   }, "the map drawing");
+  if (TRACE_LOAD) {
+    const file = join(TRACE_LOAD, `${city.id}-load-${Date.now()}.json`);
+    const events = await stopTrace(cdp);
+    writeFileSync(file, JSON.stringify({ traceEvents: events }));
+    printTrace(events, file, null, "perf:drawn");
+  }
   const input = page.getByPlaceholder("Where to?");
   await input.fill(city.to);
   const option = page.getByRole("option").first();
@@ -298,10 +318,11 @@ async function stopTrace(cdp) {
  * "perf:route" marks): per thread, the busy time in top-level tasks, then the busiest functions from the
  * CPU profile (self time). Workers are told apart by the script they started from.
  */
-function printTrace(events, file) {
+function printTrace(events, file, fromMark = "perf:chosen", toMark = "perf:route") {
   const mark = (n) => events.find((e) => e.name === n)?.ts;
-  const from = mark("perf:chosen");
-  const to = mark("perf:route");
+  // With no start mark, from the page's navigation.
+  const from = fromMark ? mark(fromMark) : events.find((e) => e.name === "navigationStart")?.ts;
+  const to = mark(toMark);
   if (from === undefined || to === undefined) return console.log(`  trace ${file}: no perf marks`);
   const inWindow = (ts, dur = 0) => ts + dur > from && ts < to;
   const clip = (ts, dur) => Math.min(ts + dur, to) - Math.max(ts, from);
@@ -314,7 +335,7 @@ function printTrace(events, file) {
     if (url && /Worker/.test(threads.get(k) ?? "")) threads.set(k, `worker ${url.split("/").pop().replace(/\?.*/, "").slice(0, 40)}`);
   }
   const name = (e) => (threads.get(`${e.pid}:${e.tid}`) ?? `${e.pid}:${e.tid}`).replace("DedicatedWorker thread", "worker");
-  console.log(`  trace ${file}: ${((to - from) / 1e6).toFixed(2)} s from destination to route`);
+  console.log(`  trace ${file}: ${((to - from) / 1e6).toFixed(2)} s from ${fromMark ?? "navigation"} to ${toMark}`);
   const busy = new Map();
   for (const e of events) {
     if (e.ph !== "X" || e.name !== "RunTask" || !inWindow(e.ts, e.dur)) continue;

@@ -958,7 +958,7 @@ A person who reads speeds in mph reads distances in miles, and a person who read
 
 1. **The graph and the files that join it.** The worker fetches the graph, buses, council footways, OSM notes, greenspace gates, flood areas and the rail network together, then joins them in the same order as before. They used to download one after another once the graph was in, which cost Edinburgh about 2 s of round trips.
 2. **The search index**, with the Toilet Map and TfL station toilets, once the graph is ready. Fetching it alongside the graph was measured and was slower: Edinburgh's graph was ready at 9.4 s against 7.5 s, because unzipping the index on the main thread held up the page. Until the index lands, the search box says "Loading places…" and makes no live lookups, as D-025 requires.
-3. **The base map**, once the search index is built, or at once if the graph fails, so the map still draws. Once released for a city it stays on.
+3. **The base map**, once the search index is built, or at once if the graph fails, so the map still draws. Once released for a city it stays on. Since D-087 it starts once the index has downloaded, not built.
 
 The trade: the map draws later on a cold visit (Edinburgh 18 s to about 23 s on Fast 4G with 4x CPU, in software). SPEED-09 (range reads) is the fix for that, not a change back. Caching is unchanged (D-023): the service worker still stores every file, and a repeat visit reads them from the cache in this order too. Nothing about routing changes.
 
@@ -1041,3 +1041,15 @@ The trade: the route sheet is longer, because more is shown. The tiles at the to
 - **Community input is confirm or flag only.** Fixed answers, no free text, pre-moderated (stricter than notes in D-030), pseudonymous counts. No public additions.
 
 The trade: the layer will be thin until partners agree to share their lists, since none publishes open data. We accept that rather than scrape or guess.
+
+## D-087 The base map starts when the search index has downloaded
+
+**Decided.** 2026-11-17 (SPEED-14). Amends point 3 of D-077. Code: `apps/web/src/app/page.tsx`, `apps/web/src/lib/use-places.ts`, `apps/web/src/components/MapView.tsx`.
+
+D-077 held the base map until the search index was built. Building it is main-thread work (about 1.2 s in Edinburgh on a slowed phone), and the network stayed idle meanwhile, so the first range reads left two seconds after the index had downloaded.
+
+- **The base map starts once the index file is in** (or has failed), and its range reads download while the index is built. The graph and the index still have the line to themselves first, as D-077 wants.
+- **The footway network follows the base map.** It goes to MapLibre once the base map has drawn (its first `idle`), or at once if the base map can't load. Copying it to MapLibre's worker cost about 1.2 s of main thread, which held up the first map.
+- **Its colours are a paint expression** on each line's slope bin, so slopes, contrast and theme changes don't send it again.
+
+The trade: the footway lines appear a moment after the base map, not with it. Edinburgh's map draws at 11.4 s, not 13.3 s, on Fast 4G with 4x CPU ([numbers](perf/2026-11-17-speed-14.md)).

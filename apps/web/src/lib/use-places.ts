@@ -6,8 +6,12 @@ import { buildIndex, type Index, type PlacesFile } from "./search";
 import { mergeStationToilets, type NetworkFile } from "./station-toilets";
 import { mergeToiletMap, type ToiletMapFile } from "./toiletmap";
 
-/** Load a city's search index (places, addresses, postcodes) and merge in the street names from its graph. */
-export function usePlaces(city: City, streets: Place[] | null): Index | null {
+/**
+ * Load a city's search index (places, addresses, postcodes) and merge in the street names from its graph.
+ * `downloaded` is true once the index file is in (or failed): the base map waits for that, not for the index
+ * to be built, so its tiles download while the main thread builds the index (SPEED-14, D-077).
+ */
+export function usePlaces(city: City, streets: Place[] | null): { index: Index | null; downloaded: boolean } {
   // These downloads wait for the city's graph, so the graph has the line to itself and "Where to?" comes sooner (SPEED-08, D-077).
   const graphIn = streets !== null;
   const [file, setFile] = useState<PlacesFile | null>(null);
@@ -66,5 +70,5 @@ export function usePlaces(city: City, streets: Place[] | null): Index | null {
       setIndex(index);
     }
   }, [file, failed, streets, loos, network]);
-  return index;
+  return { index, downloaded: file !== null || failed };
 }

@@ -4,7 +4,7 @@ The one list of work for Causewayside: what's next, in what order, how big it is
 
 This file is the master copy. A read-only copy for sharing and comments lives in Google Drive: [Causewayside roadmap](https://docs.google.com/document/d/1T-RPq188B09LBahJIWPg_Hapm6m_vYbHB88pUzxJXV4/edit). Change this file, then update the Doc to match. Edits made only in the Doc are lost.
 
-Last updated: 2026-10-09.
+Last updated: 2026-11-17.
 
 - What's waiting on Richard, blocked, or a guess: [OPEN_ITEMS.md](OPEN_ITEMS.md)
 - What shipped and when: [BUILD_LOG.md](BUILD_LOG.md) and the phase reports
@@ -51,9 +51,9 @@ The current direction: **fix and fill the pilot cities** with open data that nee
 
 The next five things to pick up, in order.
 
-1. **SPEED-14**: draw Edinburgh's map sooner after the search index, now that the base map's download is small.
-2. **SPEED-13**: start the graph download before the page hydrates, so "Where to?" comes sooner.
-3. **SPEED-15**: faster route searches, now most of the wait for a route.
+1. **SPEED-13**: start the graph download before the page hydrates, so "Where to?" comes sooner.
+2. **SPEED-15**: faster route searches, now most of the wait for a route.
+3. **SPEED-18**: build the search index in a worker, off the main thread.
 4. **SPEED-11**: trim JavaScript, and load later what the first screen doesn't need.
 5. **SPEED-12**: measure on a real mid-range Android and a real CDN.
 
@@ -274,13 +274,15 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | SPEED-07 | Speed budget follow-ups: a CI wall-time baseline from a few weeks of printed figures, and a re-baseline when the weekly refresh changes the graphs | S | later | todo | Claude | D-056. Settled nodes depend on the graph, so a refresh PR can trip the 10% check |
 | SPEED-08 | Load the graph and search index before the base map, so "Where to?" doesn't wait for tiles | S | now | done (2026-10-06) | Claude | SPEED-01. D-077, [numbers](perf/2026-10-06-speed-08.md). Edinburgh ready 12.9 s to 7.6 s (LCP 13.9 s to 8.8 s) on Fast 4G with 4x CPU; 6 s missed, see SPEED-13 and SPEED-06. The map now draws later (SPEED-09) |
 | SPEED-09 | Read the base map in byte ranges, not whole, and fill the rest in the background for offline | M | next | done (2026-10-07) | Claude | SPEED-01. D-079, [numbers](perf/2026-10-07-speed-09.md). 234 to 430 KB of base map before the map draws (was 2.3 to 8.8 MB). Map drawn: Edinburgh 26.9 s to 20.0 s, London 14.9 s to 9.9 s, Newcastle 11.3 s to 10.7 s, on Fast 4G with 4x CPU. Works offline as before |
-| SPEED-14 | Draw Edinburgh's map sooner after the search index: the main thread is busy for about 10 s first | M | next | doing | Claude | 2026-11-17, `claude/upbeat-wozniak-q9ot9o`. SPEED-09. After the index lands: about 4.5 s building it, about 2.3 s posting the footway network to MapLibre's worker (SPEED-10 stopped the re-sends on every redraw; measure what is left), React and style layers. Profile first. Target: Edinburgh map drawn in 12 s or less |
+| SPEED-14 | Draw Edinburgh's map sooner after the search index: the main thread is busy for about 10 s first | M | next | done (2026-11-17) | Claude | PR #94, D-087, [numbers](perf/2026-11-17-speed-14.md). Edinburgh map drawn 13.3 s to 11.4 s (target 12 s), Newcastle 6.4 to 5.7 s, London 6.0 to 5.6 s, on Fast 4G with 4x CPU. Base map starts once the index has downloaded; the network follows the base map. Found SPEED-17, SPEED-18 |
 | SPEED-10 | Cut the main-thread work after a route returns | S | next | done (2026-10-07) | Claude | SPEED-01. [Numbers](perf/2026-10-07-speed-10.md). Edinburgh 5.55 s to 2.99 s on Fast 4G with 4x CPU, Newcastle 1.80 to 1.63 s, London 1.95 to 1.62 s. On `main` after SPEED-09: Edinburgh 6.20 to 3.10 s (0.1 s over target), and the map draws 0.9 to 2.9 s sooner. The map sent the whole network to MapLibre again on every journey change; `alternatives` costed each edge once per search. SPEED-08's slowdown was the base map still loading during the wait. `perf:web --trace` |
 | SPEED-11 | Trim JavaScript: see what is in the 650 to 680 KB and load later what the first screen doesn't need | M | later | todo | Claude | SPEED-01. MapLibre is the largest chunk. Pairs with SPEED-04 |
 | SPEED-12 | Measure on a real mid-range Android and a real CDN, plus repeat visits and city switching | S | next | todo | Richard and Claude | SPEED-01 limits: unslowed worker, software GPU, local server. Needs a phone or WebPageTest |
 | SPEED-13 | Start the graph download before the page hydrates (it starts at 2.1 s in Edinburgh), and hand it to the router worker | M | next | todo | Claude | SPEED-08. The rest of the way to 6 s with SPEED-06: after it, Edinburgh's worker spends 1.6 s (unslowed) on the graph. Check the service worker (D-023) still caches it |
 | SPEED-15 | Faster route searches: arrays in place of maps in the A*, and fewer searches in `explain` and the trade-offs. Then re-baseline the speed budget (PERF_BASELINE), which SPEED-10 left about a third loose | M | next | todo | Claude | SPEED-10. Routing is now about 1.5 s of Edinburgh's 3 s wait, unslowed, so more on a phone |
 | SPEED-16 | The route request waits about 1 s after choosing a destination, for the phone's position on a main thread busy repainting the map | S | later | todo | Claude | SPEED-10. Check whether the position callback or the map frames are the cost on a real phone (SPEED-12) first |
+| SPEED-17 | Send the footway network to MapLibre without a second of main-thread work: prebuilt vector tiles, or a source that doesn't copy it back | M | later | todo | Claude | SPEED-14. A route asked for in that second waits for it |
+| SPEED-18 | Build the search index in a worker: about 1.2 s of main thread on a slowed phone in Edinburgh | M | next | todo | Claude | SPEED-14. Search would run there too, or the index would cost as much to copy back |
 
 ## Bloat reduction
 
@@ -357,6 +359,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 ## Log
 
 Newest first. One line per change: date, ID, what happened, link.
+- 2026-11-17: SPEED-14 done in PR #94 (D-087): the base map starts once the search index has downloaded, and the footway network follows the base map. Edinburgh's map drawn 13.3 s to 11.4 s on Fast 4G with 4x CPU. Fixed the London e2e check, which failed from 2026-10-11 when a recorded TfL message expired. Added SPEED-17 and SPEED-18; SPEED-18 is in Now.
 - 2026-10-09: DEP-09 and SEC-26 done: a redeploy of an already-built commit now builds, so the Supabase variables reach production; migration 0010 pins `search_path` (community reports could not save on Supabase). SEC-09 unblocked with the Turnstile site key. Added FEAT-60 to FEAT-62 for more sign-in methods. The favicon 404 from the 2026-10-05 release check was already fixed by SMALL-12.
 - 2026-10-08: FEAT-35 done in PR #78 (D-084): community reports. Tag good or bad access by category in three taps, agree, disagree or "still there?", confidence that decays per category, confirmed problems close edges for the people they stop, map filters. Migration 0009 with per-person and per-network limits. Takes in DEF-04 and DEF-06. Added FEAT-36 to FEAT-41. [Plan](plans/COMMUNITY_REPORTS.md), [handoff](handoff/COWORK_COMMUNITY_REPORTS.md).
 - 2026-10-08: FEAT-42 done in PR #77: safer spaces research and plan ([SAFE_SPACES.md](plans/SAFE_SPACES.md), D-085). Added FEAT-43 to FEAT-48, RES-12 and DATA-33 to DATA-35 (lighting and help point data, access requests); sources in survey §12.

@@ -88,6 +88,8 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
   const homeRef = useRef(true);
   homeRef.current = !routes.length && !to && !pin && !me && !focus;
   const fitSaved = useRef<() => void>(() => {});
+  // True once the base map has drawn (or failed to load), so the footway network may follow (SPEED-14).
+  const [baseDrawn, setBaseDrawn] = useState(false);
 
   useEffect(() => {
     if (!el.current || map.current) return;
@@ -105,7 +107,7 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
     m.on("load", () => {
       const empty = fc([]);
       for (const id of ["network", "route-alt", "route", "bands", "unknown", "rides", "ride-labels", "toilets", "markers", "entrances", "blockers", "me"]) m.addSource(id, { type: "geojson", data: empty });
-      m.addLayer({ id: "network", type: "line", source: "network", paint: { "line-color": ["get", "c"], "line-width": ["interpolate", ["linear"], ["zoom"], 12, 0.8, 17, 3.5], "line-opacity": 0.9 }, layout: { "line-cap": "round" } });
+      m.addLayer({ id: "network", type: "line", source: "network", paint: { "line-color": css("--muted"), "line-width": ["interpolate", ["linear"], ["zoom"], 12, 0.8, 17, 3.5], "line-opacity": 0.9 }, layout: { "line-cap": "round" } });
       m.addLayer({ id: "network-steps", type: "line", source: "network", filter: ["==", ["get", "bin"], 5], paint: { "line-color": css("--muted"), "line-width": ["interpolate", ["linear"], ["zoom"], 12, 1.5, 17, 6], "line-dasharray": [0.25, 0.5], "line-opacity": 0.8 } });
       m.addLayer({ id: "route-alt", type: "line", source: "route-alt", paint: { "line-color": css("--route-alt"), "line-width": 7 }, layout: { "line-cap": "round", "line-join": "round" } });
       m.addLayer({ id: "route-casing", type: "line", source: "route", paint: { "line-color": css("--surface"), "line-width": 12 }, layout: { "line-cap": "round", "line-join": "round" } });
@@ -150,21 +152,29 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
     };
   }, []);
 
+  /**
+   * The network is sent to MapLibre once per city, and only after the base map has first drawn: it is an overlay,
+   * and copying it to MapLibre's worker held up Edinburgh's first map by over a second (SPEED-14). Colours are a
+   * paint expression on each line's bin, so slopes, contrast and theme changes don't send it again.
+   */
+  const networkSent = useRef<typeof network>(null);
   useEffect(() => {
     const m = map.current;
     if (!m) return;
     const draw = () => {
-      if (!ready.current) return;
+      if (!ready.current || !baseDrawn) return;
+      if (networkSent.current !== network) {
+        (m.getSource("network") as GeoJSONSource).setData(fc((network ?? []).map((n) => line(n.coords, { bin: n.bin }))));
+        networkSent.current = network;
+      }
       const neutral = css("--muted");
       const ramp = ["--g0", "--g1", "--g2", "--g3", "--g4"].map(css);
-      (m.getSource("network") as GeoJSONSource).setData(
-        fc((network ?? []).map((n) => line(n.coords, { bin: n.bin, c: showSlopes && n.bin >= 0 && n.bin < 5 ? ramp[n.bin] : n.bin === -1 && showSlopes ? css("--unknown") : neutral }))),
-      );
+      m.setPaintProperty("network", "line-color", showSlopes ? ["match", ["get", "bin"], 0, ramp[0], 1, ramp[1], 2, ramp[2], 3, ramp[3], 4, ramp[4], -1, css("--unknown"), neutral] : neutral);
       m.setPaintProperty("network", "line-opacity", showSlopes ? 0.9 : highContrast ? 0.5 : 0.22);
     };
     draw();
     drawNetwork.current = draw;
-  }, [network, showSlopes, highContrast]);
+  }, [network, showSlopes, highContrast, baseDrawn]);
 
   useEffect(() => {
     const m = map.current;
@@ -354,11 +364,16 @@ export function MapView({ network, routes, selectedId, from, to, pin, showSlopes
           fitSaved.current();
         }
         shownKey.current = basemap.key;
-        // Once the tiles in view have drawn, fetch the rest of the file for offline (D-079).
-        m.once("idle", () => fillBasemap(basemap.key));
+        // Once the tiles in view have drawn: the footway network follows (SPEED-14), and the rest of the file is
+        // fetched for offline (D-079). Sending the network as the first tiles painted put the map back by about 0.6 s.
+        m.once("idle", () => {
+          setBaseDrawn(true);
+          fillBasemap(basemap.key);
+        });
       })
       .catch(() => {
         /* No basemap: the footway network still draws the map. */
+        if (!cancelled) setBaseDrawn(true);
       });
     return () => {
       cancelled = true;

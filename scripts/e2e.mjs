@@ -603,10 +603,17 @@ for (const j of JOURNEYS) {
   watchPosition(page, "london", problems);
   page.on("pageerror", (e) => problems.push(`page error: ${e.message}`));
   const fixture = (f) => readFileSync(new URL(`../packages/live/test/fixtures/${f}`, import.meta.url), "utf8");
+  // The station messages were recorded on 2026-10-04 and carry their dates, so move them to today, or they expire
+  // (Canning Town's escalator message ended on 2026-10-11 and this check failed from then on).
+  const shift = Date.now() - Date.parse("2026-10-04T12:00:00Z");
+  const today = (json) =>
+    JSON.stringify(
+      JSON.parse(json).map((d) => ({ ...d, ...(d.fromDate ? { fromDate: new Date(Date.parse(d.fromDate) + shift).toISOString() } : {}), ...(d.toDate ? { toDate: new Date(Date.parse(d.toDate) + shift).toISOString() } : {}) })),
+    );
   await page.route(/open-meteo\.com|environment\.data\.gov\.uk|ukhsa-dashboard\.data\.gov\.uk/, (r) => r.abort());
   await page.route(/api\.tfl\.gov\.uk/, (r) => {
     const u = r.request().url();
-    const body = /Disruptions\/Lifts/.test(u) ? fixture("tfl-lifts-2026-10-04.json") : /StopPoint\/Mode/.test(u) ? fixture("tfl-station-disruptions-2026-10-04.json") : "[]";
+    const body = /Disruptions\/Lifts/.test(u) ? fixture("tfl-lifts-2026-10-04.json") : /StopPoint\/Mode/.test(u) ? today(fixture("tfl-station-disruptions-2026-10-04.json")) : "[]";
     return r.fulfill({ contentType: "application/json", body });
   });
   await page.addInitScript(() => localStorage.setItem("causewayside.city.v1", "london"));
