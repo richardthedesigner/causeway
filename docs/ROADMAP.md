@@ -361,10 +361,6 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 | DEF-04 | Reports backend: store and moderate public reports | L | later | done (2026-10-08) | Richard, Claude | D-022, D-030. Richard asked for it with FEAT-35 (D-084). Live once the Supabase project exists |
 | DEF-05 | Send fixes back to OpenStreetMap from reports and notes | L | later | blocked | Richard, Claude | D-008. Planned as FEAT-40 |
 | DEF-06 | Crowd verification: several people confirming the same note | L | later | done (2026-10-08) | Claude | For community reports, in FEAT-35 (D-084): agree, disagree, still there. Notes still count corroboration by matching (D-026) |
-| DEF-07 | Optional accounts: sync devices and saved places between phones, encrypted on the device, sign in with a passkey or email code | L | later | blocked | Richard, Claude | Health data makes this a privacy decision first (D-009) |
-| DEF-04 | Reports backend: store and moderate public reports | L | later | blocked | Richard, Claude | D-022, D-030 |
-| DEF-05 | Send fixes back to OpenStreetMap from reports and notes | L | later | blocked | Richard, Claude | D-008. Needs DEF-04 |
-| DEF-06 | Crowd verification: several people confirming the same note | L | later | blocked | Claude | Needs DEF-04 |
 | DEF-07 | Optional accounts: sync devices and saved places between phones, encrypted on the device, sign in with a passkey or email code | L | later | blocked | Richard, Claude | Health data makes this a privacy decision first (D-009). Planned in [plan](plans/USER_ACCOUNTS.md) (D-083): phases FEAT-26 to FEAT-34 |
 | DEF-08 | Opt-in surface sensing from the accelerometer | L | later | blocked | Claude | Needs DEF-01 and a privacy review |
 | DEF-09 | Beyond the pilot cities: Glasgow first (once DATA-13 is licensed), then Leeds, then by city size (D-072) | XL | later | blocked | Richard, Claude | §5 |
@@ -373,6 +369,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 ## Log
 
 Newest first. One line per change: date, ID, what happened, link.
+- 2026-11-23: FEAT-64: removed duplicate DEF-04 to DEF-07 rows left by a merge; kept the newest of each.
 - 2026-11-23: FEAT-67 done in PR #100: `Stone`, `StreetBand` and `StreetBandList` in `components/v3/`, a fill variant of `VerdictPill`, and `/v3-lab`, a test page on fixtures that shows only with the `v3` flag on and is in `pnpm a11y`. Flag off, nothing changes: all 48 existing screens match `main`. FEAT-70 done with it (the preview build copies the stones, and builds again). Added FEAT-72 and STAB-25.
 - 2026-11-23: FEAT-66 done in PR #99: `streetBands()` and the route moment's words as pure, tested functions, attached to each route in the worker as `streetBands`. Fixture from the real router: Warrender Park Road to the Grassmarket by manual wheelchair is Unsure, 175 m unknown, two buses. Added FEAT-71 and SMALL-26; met STAB-23.
 - 2026-11-23: FEAT-65 done in PR #98: the v3 tokens are in `globals.css`, the `v3` flag reader is in `lib/design-flag.ts` (nothing reads it yet), and the four stones are WebP at 2x and 3x in `public/stone/`. Bricolage Grotesque is served from our own origin. Flag off, nothing changes. Added FEAT-70, STAB-23, STAB-24, SEC-27 and SPEED-17.
