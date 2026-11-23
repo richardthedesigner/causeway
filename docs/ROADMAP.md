@@ -175,8 +175,8 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | FEAT-46 | "Out at night" layer, off by default, on the phone only: help points (OSM, TfL), "Need help now?", lit-streets prompt, OSM `lgbtq=*` labelled as volunteer-mapped | M | later | blocked | Richard, Claude | D-085. Plan phase 4. Waits on Richard's yes to the rules and a wording review |
 | FEAT-47 | Partner lists in the layer: Rainbow Mark, Safe Spaces, Ask for Angela, weekend welfare points; removal on request; 12-month expiry | L | later | blocked | Richard, Claude | D-085. Plan phase 5. Waits on written agreements |
 | FEAT-48 | "Still there?" confirmations on safer-spaces items: fixed answers, pre-moderated, pseudonymous counts, stricter confidence class | M | later | blocked | Claude | D-085. Plan phase 6. Builds on community reports (FEAT-35, D-084, PR #78) |
-| FEAT-49 | Design v3 handoff: route moment that unfolds into street bands, with the stone | S | next | done (2026-11-23) | Claude | PR #96. [DESIGN_V3_HANDOFF.md](handoff/DESIGN_V3_HANDOFF.md), screens and prototype in [ux/v3](ux/v3/). Proposal only: changes parts of D-035 once Richard decides |
-| FEAT-50 | Build design v3: RouteMoment, StreetBand, Stone and the unfold, then redo map, device, saved and reporting in the same language | L | next | waiting on Richard | Claude | [DESIGN_V3_HANDOFF.md](handoff/DESIGN_V3_HANDOFF.md). Five open questions first (OPEN_ITEMS). Use the 6 mm kerb figure and the 13 presets, not the stills |
+| FEAT-63 | Design v3 handoff: route moment that unfolds into street bands, with the stone | S | next | done (2026-11-23) | Claude | PR #96. [DESIGN_V3_HANDOFF.md](handoff/DESIGN_V3_HANDOFF.md), screens and prototype in [ux/v3](ux/v3/). Proposal only: changes parts of D-035 once Richard decides |
+| FEAT-64 | Build design v3: RouteMoment, StreetBand, Stone and the unfold, then redo map, device, saved and reporting in the same language | L | next | waiting on Richard | Claude | [DESIGN_V3_HANDOFF.md](handoff/DESIGN_V3_HANDOFF.md). Five open questions first (OPEN_ITEMS). Use the 6 mm kerb figure and the 13 presets, not the stills |
 
 ## Small features
 
@@ -359,7 +359,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 ## Log
 
 Newest first. One line per change: date, ID, what happened, link.
-- 2026-11-23: FEAT-49 done in PR #96: design v3 handoff from Jonny ([DESIGN_V3_HANDOFF.md](handoff/DESIGN_V3_HANDOFF.md)), a route moment that unfolds into street bands, with the stone. Added FEAT-50 (the build, waiting on Richard).
+- 2026-11-23: FEAT-63 done in PR #96: design v3 handoff from Jonny ([DESIGN_V3_HANDOFF.md](handoff/DESIGN_V3_HANDOFF.md)), a route moment that unfolds into street bands, with the stone. Added FEAT-64 (the build, waiting on Richard).
 - 2026-10-09: DEP-09 and SEC-26 done: a redeploy of an already-built commit now builds, so the Supabase variables reach production; migration 0010 pins `search_path` (community reports could not save on Supabase). SEC-09 unblocked with the Turnstile site key. Added FEAT-60 to FEAT-62 for more sign-in methods. The favicon 404 from the 2026-10-05 release check was already fixed by SMALL-12.
 - 2026-10-08: FEAT-35 done in PR #78 (D-084): community reports. Tag good or bad access by category in three taps, agree, disagree or "still there?", confidence that decays per category, confirmed problems close edges for the people they stop, map filters. Migration 0009 with per-person and per-network limits. Takes in DEF-04 and DEF-06. Added FEAT-36 to FEAT-41. [Plan](plans/COMMUNITY_REPORTS.md), [handoff](handoff/COWORK_COMMUNITY_REPORTS.md).
 - 2026-10-08: FEAT-42 done in PR #77: safer spaces research and plan ([SAFE_SPACES.md](plans/SAFE_SPACES.md), D-085). Added FEAT-43 to FEAT-48, RES-12 and DATA-33 to DATA-35 (lighting and help point data, access requests); sources in survey §12.

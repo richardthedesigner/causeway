@@ -106,8 +106,8 @@ Folding back reverses with no delays. Gestures: swipe up opens, swipe down close
 
 ## Roadmap
 
-- FEAT-49 is this handoff (PR #96).
-- FEAT-50 is the build. It waits on the open questions above, listed in [OPEN_ITEMS.md](../OPEN_ITEMS.md).
+- FEAT-63 is this handoff (PR #96).
+- FEAT-64 is the build. It waits on the open questions above, listed in [OPEN_ITEMS.md](../OPEN_ITEMS.md).
 
 ## Checks before any PR
 
