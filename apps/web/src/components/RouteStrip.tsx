@@ -89,20 +89,26 @@ export function RouteStrip({ strip, along, className, unit = "kmh" }: { strip: S
 
 export type VerdictKind = "passable" | "passable-with-unknowns" | "not-passable" | "none";
 
-/** Fits / Unsure / Doesn't fit. Word, icon and colour together; never colour alone. */
-export function VerdictPill({ v, className }: { v: VerdictKind; className?: string }) {
+/**
+ * Fits / Unsure / Doesn't fit. Word, icon and colour together; never colour alone.
+ * `variant="fill"` is the design v3 pill: a solid verdict fill with `--fill-ink` text, in the display face.
+ */
+export function VerdictPill({ v, className, variant = "tint" }: { v: VerdictKind; className?: string; variant?: "tint" | "fill" }) {
   const ok = v === "passable";
   const unsure = v === "passable-with-unknowns";
   const Icon = ok ? CircleCheck : unsure ? CircleHelp : CircleX;
+  const fill = variant === "fill";
   return (
     <span
       className={cn(
-        "inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-sm font-bold whitespace-nowrap",
-        ok ? "bg-ok-soft text-ok" : unsure ? "bg-caution-soft text-caution" : "bg-stop-soft text-stop",
+        fill
+          ? "inline-flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1 font-[family-name:var(--font-display)] text-[1.0625rem] font-extrabold whitespace-nowrap text-[var(--fill-ink)]"
+          : "inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-sm font-bold whitespace-nowrap",
+        fill ? (ok ? "bg-[var(--ok-fill)]" : unsure ? "bg-[var(--caution-fill)]" : "bg-[var(--stop-fill)]") : ok ? "bg-ok-soft text-ok" : unsure ? "bg-caution-soft text-caution" : "bg-stop-soft text-stop",
         className,
       )}
     >
-      <Icon aria-hidden className="size-4" strokeWidth={2.4} />
+      <Icon aria-hidden className={fill ? "size-[1.125rem]" : "size-4"} strokeWidth={2.4} />
       {ok ? "Fits" : unsure ? "Unsure" : "Doesn't fit"}
     </span>
   );

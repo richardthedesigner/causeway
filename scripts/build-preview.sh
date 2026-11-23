@@ -5,7 +5,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 OUT="$ROOT/.data-cache/artifact-app"
 cd "$ROOT/apps/web"
-rm -rf out && ARTIFACT=1 NEXT_PUBLIC_GRAPH_B64=1 NEXT_TELEMETRY_DISABLED=1 npx next build
+rm -rf out && ARTIFACT=1 NEXT_PUBLIC_GRAPH_B64=1 NEXT_TELEMETRY_DISABLED=1 npx next build --webpack
 rm -rf "$OUT" && mkdir -p "$OUT/graph"
 cp -r out/_next "$OUT/next"
 for f in out/graph/*.graph.json.gz; do base64 -w0 "$f" > "$OUT/graph/$(basename "$f" .json.gz).b64.txt"; done
@@ -14,6 +14,8 @@ mkdir -p "$OUT/live" && cp out/live/*.json "$OUT/live/"
 mkdir -p "$OUT/basemap" "$OUT/fonts"
 for f in out/basemap/*.pmtiles; do base64 -w0 "$f" > "$OUT/basemap/$(basename "$f" .pmtiles).b64.txt"; done
 cp out/fonts/glyphs.json "$OUT/fonts/"
+# The v3 stones (FEAT-70). The app asks for them by a relative path, so they sit beside the page.
+cp -r out/stone "$OUT/stone"
 mkdir -p "$OUT/places"
 for f in out/places/*.json.gz; do base64 -w0 "$f" > "$OUT/places/$(basename "$f" .json.gz).b64.txt"; done
 python3 - out/index.html "$OUT/causewayside.html" <<'PY'
