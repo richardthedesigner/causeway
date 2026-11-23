@@ -114,3 +114,81 @@ h1, h2, h3 { text-wrap: balance; }
 .community-marker[data-level="other"]::after { content: ""; position: absolute; inset: 6px; border: 2px dashed var(--ink); border-radius: 999px; pointer-events: none; }
 .community-marker:focus-visible, .draft-pin:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 .draft-pin { display: block; padding: 0; border: 0; background: none; cursor: grab; touch-action: none; }
+
+/*
+  Design v3 tokens (FEAT-65), from docs/ux/v3/tokens.css. Additions only: --ok, --caution,
+  --stop and their -soft tints stay for text and tints everywhere else. Nothing uses these
+  until the v3 surfaces land behind the flag (lib/design-flag.ts).
+
+  Contrast is measured against the value each token is used on (WCAG 2.2).
+  Fills always carry --fill-ink text: 9.9 on ok, 10.7 on caution, 5.6 on stop.
+*/
+:root {
+  /* Ground of the moment and the unfolded detail. Same in light and dark:
+     the moment is a night scene by design, the bands carry the colour. */
+  --moment-ground: #141210;
+  --moment-ink: #f5efe4;        /* 16.3 on ground */
+  --moment-muted: #cfc6b6;      /* 11.0 on ground */
+
+  /* Solid verdict fills. Text on them is always --fill-ink. */
+  --ok-fill: #3dd68c;
+  --caution-fill: #ffb800;
+  --stop-fill: #ff4e2e;
+  --fill-ink: #17130f;
+
+  /* The unlit band: data nobody has measured. */
+  --unknown-edge: #80756a;      /* 4.2 on ground; a UI edge needs 3 */
+  --unknown-hatch: rgb(255 255 255 / 0.04);
+
+  /* Light-theme drench grounds, for the screens that stay light (device, saved, report). */
+  --drench-paper: #fff8ee;
+  --drench-fog: #e9e2d5;
+  --drench-fog-ink: #4d463b;    /* 8.0 on fog */
+
+  /* Type. Swap --font-display to var(--font-sans) to drop Bricolage in one line. */
+  --font-display: "Bricolage Grotesque", var(--font-sans);
+
+  /* Shape. */
+  --band-radius: 16px;
+  --band-gap: 6px;
+  --band-gutter: 12px;
+  --go-radius: 18px;
+
+  /* Motion (see the handoff's motion table). */
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-hop: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-unfold: 700ms;
+  --dur-band: 600ms;
+  --stagger-band: 60ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-unfold: 1ms;
+    --dur-band: 1ms;
+    --stagger-band: 0ms;
+  }
+}
+/*
+  Bricolage Grotesque, the v3 display face, served from our own origin (SIL Open Font
+  Licence, type/OFL.txt). A browser fetches a face only when text on the page uses it,
+  so nothing downloads until a v3 surface asks for --font-display.
+*/
+@font-face {
+  font-family: "Bricolage Grotesque";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200 800;
+  font-stretch: 75% 100%;
+  src: url("./type/bricolage-grotesque-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Bricolage Grotesque";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200 800;
+  font-stretch: 75% 100%;
+  src: url("./type/bricolage-grotesque-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
