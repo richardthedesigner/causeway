@@ -1,0 +1,42 @@
+<!doctype html><html><head><style>html,body{margin:0;background:transparent}canvas{display:block}</style>
+<script type="importmap">{"imports":{"three":"./three/build/three.module.js","three/addons/":"./three/examples/jsm/"}}</script></head><body>
+<script type="module">
+import * as THREE from 'three';
+import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
+import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
+const q=new URLSearchParams(location.search);
+const col=q.get('c')||'#FFB800', look=q.get('look')||'side', S=+(q.get('s')||800);
+const r=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});
+r.setPixelRatio(1);r.setSize(S,S);r.setClearColor(0x000000,0);r.shadowMap.enabled=true;r.shadowMap.type=THREE.PCFSoftShadowMap;
+r.toneMapping=THREE.NeutralToneMapping;r.toneMappingExposure=0.92;r.outputColorSpace=THREE.SRGBColorSpace;
+document.body.appendChild(r.domElement);
+const sc=new THREE.Scene();
+const pm=new THREE.PMREMGenerator(r);sc.environment=pm.fromScene(new RoomEnvironment(),0.04).texture;sc.environmentIntensity=0.45;
+const cam=new THREE.PerspectiveCamera(23,1,0.1,100);cam.position.set(4.2,3.4,6.2);cam.lookAt(0,0.55,0);
+const c=new THREE.Color(col);
+const mat=new THREE.MeshPhysicalMaterial({color:c,roughness:.62,clearcoat:.25,clearcoatRoughness:.4,sheen:.35,sheenColor:c.clone().offsetHSL(0,0,.2),sheenRoughness:.6});
+const g=new THREE.Group();sc.add(g);
+const bg=new RoundedBoxGeometry(2.3,1.35,1.7,24,0.3);
+{const p=bg.attributes.position,v=new THREE.Vector3();for(let i=0;i<p.count;i++){v.fromBufferAttribute(p,i);
+ const n=Math.sin(v.x*2.1+v.z*1.3)*0.025+Math.sin(v.y*3.3+v.x*1.7)*0.02+Math.sin(v.z*2.7-v.y*1.9)*0.02;
+ const front=v.z>0.7&&Math.abs(v.x)<0.75&&v.y>-0.2&&v.y<0.35?0.2:1;v.multiplyScalar(1+n*front);p.setXYZ(i,v.x,v.y,v.z);}bg.computeVertexNormals();}
+const box=new THREE.Mesh(bg,mat);box.position.y=0.675;box.castShadow=true;g.add(box);
+// worn top facet, the causey stone's polished face
+const topm=new THREE.MeshPhysicalMaterial({color:c.clone().offsetHSL(0,-.05,.12),roughness:.25,clearcoat:.8,clearcoatRoughness:.15});
+const top=new THREE.Mesh(new RoundedBoxGeometry(1.7,0.06,1.15,6,0.03),topm);top.position.set(0,1.352,0);
+// eyes on the front face
+const eyeM=new THREE.MeshStandardMaterial({color:0x14110e,roughness:.2,metalness:0});
+const hiM=new THREE.MeshBasicMaterial({color:0xffffff});
+const off={side:[0.09,0.02],front:[0,0],down:[0,-0.08],up:[0.03,0.07]}[look]||[0,0];
+for(const x of [-0.36,0.36]){
+ const e=new THREE.Mesh(new THREE.SphereGeometry(0.17,32,24),eyeM);e.scale.set(1,1.35,0.55);e.position.set(x+off[0],0.74+off[1],0.86);g.add(e);
+ const h=new THREE.Mesh(new THREE.SphereGeometry(0.04,16,12),hiM);h.position.set(x+off[0]-0.04,0.81+off[1],0.93);g.add(h);
+}
+g.rotation.y=-0.32;
+const pl=new THREE.Mesh(new THREE.PlaneGeometry(20,20),new THREE.ShadowMaterial({opacity:.22}));pl.rotation.x=-Math.PI/2;pl.receiveShadow=true;sc.add(pl);
+const key=new THREE.DirectionalLight(0xffffff,2.6);key.position.set(3,7,4);key.castShadow=true;key.shadow.mapSize.set(2048,2048);key.shadow.radius=12;key.shadow.blurSamples=20;
+Object.assign(key.shadow.camera,{left:-4,right:4,top:4,bottom:-4});sc.add(key);
+const rim=new THREE.DirectionalLight(0xfff3e0,1.0);rim.position.set(-5,3,-3);sc.add(rim);
+sc.add(new THREE.HemisphereLight(0xffffff,c.clone().multiplyScalar(.4),.35));
+r.render(sc,cam);window.done=true;
+</script></body></html>

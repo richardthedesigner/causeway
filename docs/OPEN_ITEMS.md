@@ -2,12 +2,14 @@
 
 What's outstanding on Causewayside: things waiting on Richard, things blocked outside the project, and guesses to check with users. Keep this up to date: add an item when it comes up, and move it to "Done" with the date when it's settled. Details live in the linked issue or decision. The order of work is in [ROADMAP.md](ROADMAP.md).
 
-Last updated: 2026-10-09.
+Last updated: 2026-11-23.
 
 ## Waiting on Richard
 
 | What | Why it matters | Effort | Link |
 |---|---|---|---|
+| Overturn any of the design v3 defaults if you disagree: controls at the bottom, Bricolage for display, no mono section labels on v3, the moment for new results only, Undo in, measured-stretch alert out (FEAT-64) | The build starts on these defaults behind a flag; changing one later is cheap | A decision, when you like | [DESIGN_V3_HANDOFF.md](handoff/DESIGN_V3_HANDOFF.md) |
+| Watch the v3 recording on FEAT-64's PR and say yes before the flag defaults on | Nobody sees v3 until you do | 5 minutes | [DESIGN_V3_HANDOFF.md](handoff/DESIGN_V3_HANDOFF.md) |
 | Enable more sign-in methods in Supabase Auth: email with our own sender, passkeys, then Apple and Google (FEAT-60 to FEAT-62) | Accounts (FEAT-27, FEAT-28, FEAT-33) need them. Not before the go-ahead on accounts (FEAT-26) | About 15 minutes each, Apple needs a developer account | [ROADMAP](ROADMAP.md) FEAT-60 |
 | Name who checks flagged community reports and photos each week (SEC-11) | Photos stay hidden and flagged reports stay down until someone looks | A decision | [BACKEND.md](BACKEND.md) |
 | Answer the user accounts plan's open questions, starting with go or wait (FEAT-26) | Accounts are planned but deferred (DEF-07). Nothing can start until the go-ahead, the choice on encrypted sync, minimum age and carer consent | A read and ten answers | [plans/USER_ACCOUNTS.md](plans/USER_ACCOUNTS.md#open-questions-for-richard), [D-083](DECISIONS.md#d-083-user-accounts-supabase-auth-upgraded-in-place-optional-forever) |
