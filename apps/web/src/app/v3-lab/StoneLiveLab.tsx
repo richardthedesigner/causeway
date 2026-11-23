@@ -75,7 +75,7 @@ export function StoneLiveLab() {
       </div>
 
       <h3 className="mt-6 px-4 font-bold">Under reduced motion</h3>
-      <p className="mt-1 px-4 text-sm text-[var(--moment-muted)]">It holds its still pose: no loop, no bob, no hop. A change of state swaps the image.</p>
+      <p className="mt-1 px-4 text-sm text-[var(--moment-muted)]">It holds its still pose: no loop, no bob, no hop. A change of state cross-fades in 200 ms.</p>
       <div className="mt-2 px-4">
         <StoneLive state={state} size={124} idle force="reduced-motion" />
       </div>

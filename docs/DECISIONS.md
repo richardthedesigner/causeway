@@ -1041,3 +1041,32 @@ The trade: the route sheet is longer, because more is shown. The tiles at the to
 - **Community input is confirm or flag only.** Fixed answers, no free text, pre-moderated (stricter than notes in D-030), pseudonymous counts. No public additions.
 
 The trade: the layer will be thin until partners agree to share their lists, since none publishes open data. We accept that rather than scrape or guess.
+
+## D-088 Design v3: the route moment, behind a flag, on these defaults
+
+**Decided** by Richard on 2026-11-23 ("start the build now"), on the defaults in the handoff. Each is listed in [OPEN_ITEMS.md](OPEN_ITEMS.md) for him to overturn. Spec: [DESIGN_V3_HANDOFF.md](handoff/DESIGN_V3_HANDOFF.md). Rows FEAT-63 to FEAT-73. Code: `apps/web/src/lib/design-flag.ts`, `apps/web/src/lib/street-bands.ts`, `apps/web/src/lib/route-verdict.ts`, `apps/web/src/components/v3/`, `RoutePanel.tsx`. Builds on D-035 and keeps D-036; changes neither until the flag defaults on.
+
+**Defaults from the handoff**
+- **Behind a flag, off by default.** On with `?v3` (then remembered on the phone as `cw-design-v3`) or a build with `NEXT_PUBLIC_DESIGN_V3=1`. `?v3=0` forgets it; it can't turn off a build that sets the variable. It defaults on only after Richard has seen the recording and said yes.
+- **Nothing you must tap sits at the top** (D-035, D-036). The prototype's Back and Read aloud move to the bottom bar, beside GO.
+- **Display type.** Bricolage Grotesque for the time, the verdict word and street names; Atkinson for everything else. Bricolage is served from our own origin, not Google Fonts, so the flag adds no outside request (SEC-27 moves Atkinson the same way). Weights 700 and 800; width 75% for the word.
+- **No mono uppercase section labels** on v3 surfaces. Existing screens keep theirs.
+- **The moment is for a new answer.** The first result for a journey (its start and destination) in this visit opens on the moment. A journey already shown this visit opens unfolded. A re-plan of the same journey keeps what is on screen. The record is in memory only, so a reload starts again.
+- **Out of this build:** "tell me when someone measures it" (needs notifications). Undo after a report comes with phase 2.
+
+**What the build settled where the handoff and the code disagreed**
+- **A measured band is mint whatever the route's verdict,** as the prototype shows. The handoff's component spec said the verdict's fill.
+- **The blocked band is a last band after the closest route.** `diagnose` ends the closest route before the blocker, so no stretch on it contains the blocker. The band is tomato, names the blocker, and shows "Blocked" where a distance goes, never "0 m".
+- **No "Adds n min" under the bands.** `minutesExtra` is the gap to the best route, so 0 on the route the note describes, and the real figure is not in `PlanResult` (FEAT-71). Nothing on screen is a figure the router didn't give.
+- **Distances follow the device's unit** (D-074), in the bands, the flag and the sentence.
+- **Ride bands** (bus, tram, train) are quiet: no verdict fill, a vehicle icon and "Ride" where a distance goes, named "Bus 23 to Forrest Road" with the number of stops. They don't count towards walking metres.
+- **Words when data is missing.** A measured band with no slope reads "Slope not measured", never "Level". A route that fits with no slope data has no flag rather than "Level all the way". Never "step-free" while anything is unknown.
+- **The stone lands** on the first unknown band (Unsure), the last band (Fits), or the blocked band (Doesn't fit). On a band without room for it, it perches on the band's top edge, covering none of its words.
+- **The stone is decorative and never alone.** The verdict is always a word and an icon; the moment's flag carries the icon too.
+- **Where the moment lives.** On phones, a layer over the map with the ground at 92%; the sheet waits underneath at full height and is revealed by the unfold. While the moment shows, everything behind it is inert. Desktop keeps the docked card, with the bands in place of the strip and no moment.
+- **Reduced motion** is a 200 ms cross-fade on v3 surfaces only; the app's global rule stays as it is elsewhere.
+- **Read aloud** speaks the way through the phone's speech, and is hidden where speech isn't available.
+
+**Since the handoff (Richard, 2026-11-23).** The stone's states must read without colour. It becomes an expressive, live 3D stone whose posture, eyes and motion carry each state, drafted by Claude and reviewed by Jonny (FEAT-73). It stays decorative.
+
+**Rejected:** controls at the top as in the prototype (D-036); a new third-party font request; inventing "Adds n min" from other fields.

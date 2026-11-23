@@ -85,6 +85,37 @@ export function noteLine(result: PlanResult, route?: MomentRoute | null): string
   return `Goes round ${a.name}, ${a.detail}.${r.minutesExtra > 0 ? ` Adds ${r.minutesExtra} min.` : ""}`;
 }
 
+/**
+ * The small line above the stone: where you're going and how long it takes,
+ * "Grassmarket, 34 min". A "none" result has no route there, so no time: the
+ * closest route's minutes are to somewhere else.
+ */
+export function momentLine(result: PlanResult, to: string, route?: MomentRoute | null): string {
+  if (result.status === "none") return to;
+  const r = pick(result, route);
+  return r ? `${to}, ${Math.round(r.summary.minutes)} min` : to;
+}
+
+/**
+ * Everything the route moment says, in reading order, for "Read aloud": the
+ * word, the flag, where and how long, the sentence, each band as a screen reader
+ * hears it, and the note.
+ */
+export function readAloud(result: PlanResult, to: string, route?: MomentRoute | null, unit: DistanceUnit = "kmh"): string {
+  const r = pick(result, route);
+  const flag = flagLine(result, r, unit);
+  return [
+    `${routeVerdict(result, r).word}.`,
+    flag ? `${flag}.` : null,
+    `${momentLine(result, to, r)}.`,
+    unfoldedSentence(result, r, unit),
+    ...(r?.streetBands ?? []).map((b) => bandLabel(b, unit)),
+    noteLine(result, r),
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
 const lower = (s: string) => (s ? s[0]!.toLowerCase() + s.slice(1) : s);
 
 /** A band as one item for a screen reader: "Marchmont Road, about 5% down, 204 metres." */

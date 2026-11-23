@@ -35,7 +35,7 @@
 /*
   Swapping state: the old stone fades out as the new one fades in, 200 ms.
   The old one rests at opacity 0, so if animations are off it is simply gone.
-  Under reduced motion the app's global rule shortens this to an instant swap.
+  Under reduced motion it still cross-fades (below).
 */
 .in {
   animation: stone-in 200ms linear;
@@ -43,6 +43,17 @@
 .out {
   opacity: 0;
   animation: stone-out 200ms linear;
+}
+/*
+  Under reduced motion the app's global rule cuts every animation to nothing.
+  The handoff asks for a 200 ms cross-fade there (design v3, FEAT-68), so the
+  swap keeps it. More specific than the global rule, so it wins; nothing else changes.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .stone .in,
+  .stone .out {
+    animation-duration: 200ms !important;
+  }
 }
 @keyframes stone-in {
   from {
@@ -103,6 +114,24 @@
   flex: none;
   align-self: stretch;
   width: clamp(56px, calc(36% - (1rem - 16px) * 4), 124px);
+}
+
+/*
+  The perch: the stone lands on a band that has no room of its own (the last
+  band of a route that fits, the blocked band). It sits on the band's top edge
+  at the right, overlapping it by 10 px, so it covers none of the band's words.
+  The band moves down to make room above it. 72 px wide at the renders' ratio.
+*/
+.perch {
+  position: absolute;
+  right: 0.75rem;
+  bottom: calc(100% - 10px);
+  width: 72px;
+  aspect-ratio: 676 / 550;
+  pointer-events: none;
+}
+.perched {
+  margin-top: calc(72px * 550 / 676 - 10px - var(--band-gap) + 4px);
 }
 
 /* A band that lights its stretch on the map is a button. */
