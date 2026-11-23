@@ -1,0 +1,20 @@
+/*
+  The live stone (FEAT-73). A box of the same size as Stone's, so either can stand in
+  the same place. The canvas covers the box and some room above it for hops; it never
+  reaches past the box's sides, so it cannot make a page scroll sideways.
+*/
+.box {
+  position: relative;
+  display: block;
+  flex: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.canvas {
+  position: absolute;
+  left: 0;
+  display: block;
+  width: 100%;
+  pointer-events: none;
+}
