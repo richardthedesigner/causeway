@@ -375,11 +375,8 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 
 Newest first. One line per change: date, ID, what happened, link.
 - 2026-11-23: Added FEAT-76: v3 only reaches the route result, so the rest of the app goes back to Jonny for a full redesign.
-<<<<<<< HEAD
 - 2026-11-23: FEAT-64: removed duplicate DEF-04 to DEF-07 rows left by a merge; kept the newest of each.
-=======
 - 2026-11-23: FEAT-68 done in PR #101: the route moment and the unfolded way, behind the `v3` flag. On a phone a new journey opens on the word, the flag and the stone over the dimmed map; pulling up opens the sheet at 94% with the bands, the stone walks to its band, and Back, Read aloud and GO sit at the bottom. Desktop shows the bands in the route card. Flag off, all 48 screens match `main` and no stone or display face is fetched. `pnpm a11y` checks both states. Added FEAT-74, FEAT-75, SMALL-27 and STAB-26.
->>>>>>> origin/main
 - 2026-11-23: FEAT-67 done in PR #100: `Stone`, `StreetBand` and `StreetBandList` in `components/v3/`, a fill variant of `VerdictPill`, and `/v3-lab`, a test page on fixtures that shows only with the `v3` flag on and is in `pnpm a11y`. Flag off, nothing changes: all 48 existing screens match `main`. FEAT-70 done with it (the preview build copies the stones, and builds again). Added FEAT-72 and STAB-25.
 - 2026-11-23: FEAT-66 done in PR #99: `streetBands()` and the route moment's words as pure, tested functions, attached to each route in the worker as `streetBands`. Fixture from the real router: Warrender Park Road to the Grassmarket by manual wheelchair is Unsure, 175 m unknown, two buses. Added FEAT-71 and SMALL-26; met STAB-23.
 - 2026-11-23: FEAT-65 done in PR #98: the v3 tokens are in `globals.css`, the `v3` flag reader is in `lib/design-flag.ts` (nothing reads it yet), and the four stones are WebP at 2x and 3x in `public/stone/`. Bricolage Grotesque is served from our own origin. Flag off, nothing changes. Added FEAT-70, STAB-23, STAB-24, SEC-27 and SPEED-17.
