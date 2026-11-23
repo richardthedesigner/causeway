@@ -10,7 +10,16 @@ FEAT-66, PR #99. The data for the route moment ([handoff](handoff/DESIGN_V3_HAND
 - The worker attaches the bands to each route as `streetBands`, one optional field. On a "none" result the closest route ends with the blocker as a last band of 0 m: the closest route stops short of the blocker, so no stretch on it holds it.
 - `apps/web/src/lib/route-verdict.ts`: the verdict word, the flag, the unfolded sentence, the note line and a band read aloud. Distances follow the device's unit (D-074).
 - A fixture from the real router: Warrender Park Road to the Grassmarket by manual wheelchair. It is Unsure, 175 m unknown of 540 m, and takes the 23 and the 2. Regenerate with `pnpm tsx scripts/street-bands-fixture.ts`.
-- Found: the note's "Adds n min" has no figure in `PlanResult` (FEAT-70); the worker's own copies of two router tests (SMALL-26); `pnpm e2e` fails on `main` in London (STAB-23).
+- Found: the note's "Adds n min" has no figure in `PlanResult` (FEAT-71); the worker's own copies of two router tests (SMALL-26); `pnpm e2e` fails on `main` in London (STAB-23).
+
+## 2026-11-23 (design v3: tokens, flag, stones)
+
+FEAT-65, PR #98. The groundwork for design v3 ([handoff](handoff/DESIGN_V3_HANDOFF.md)). Nothing on screen changes: no component uses any of it yet.
+- The v3 tokens from [tokens.css](ux/v3/tokens.css) are appended to `apps/web/src/app/globals.css` as plain `:root` variables, the way the existing tokens are. No existing token or rule changed. They are not in the Tailwind theme yet; FEAT-67 can add the ones it wants as utilities.
+- Bricolage Grotesque, the v3 display face, is served from our own origin (`apps/web/src/app/type/`, SIL Open Font Licence). Atkinson still comes from Google Fonts, but a new face from there would have been a new outside request, so this one is ours. A browser only fetches it when text uses `--font-display`. Checked in a browser: a visit with the flag off asks for no Bricolage file and no stone.
+- `apps/web/src/lib/design-flag.ts`: v3 is on with `?v3` (remembered under `cw-design-v3`) or `NEXT_PUBLIC_DESIGN_V3=1`. `?v3=0` forgets it. Read once per page load. Safe in the static export and when storage throws. Nothing reads it yet.
+- The four stones (`fits`, `unsure`, `nope`, `fog`) as WebP with transparency in `apps/web/public/stone/`: 3x is 676 by 550, 2x is 451 by 367, for a stone drawn up to 225 by 183 CSS px. 13 to 16 KB each. The service worker has no precache list, so they are only fetched when shown.
+- Found: `pnpm e2e` fails on `main` in the London lift test (STAB-23), and CI's `check` job stops at `pnpm audit` (STAB-24).
 
 ## 2026-10-09 (sharing on production)
 
