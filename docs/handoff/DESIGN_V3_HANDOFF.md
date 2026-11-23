@@ -78,7 +78,7 @@ Folding back reverses with no delays. Gestures: swipe up opens, swipe down close
 
 ## The stone
 
-- A sett (causey stone) with two eyes. Four states, rendered in three.js: [docs/ux/v3/stone/render.html](../ux/v3/stone/render.html) with `?c=<hex>&look=<side|front|down|up>`; `shoot.py` renders transparent PNGs with Playwright.
+- A sett (causey stone) with two eyes. Four states, rendered in three.js: [docs/ux/v3/stone/render.html](../ux/v3/stone/render.html) with `?c=<hex>&look=<side|front|down|up>`; `shoot.py` renders transparent PNGs with Playwright. It expects three.js 0.170 at `./three` beside the page (`npm i three@0.170`, then link `node_modules/three` there) and a local server on port 8765.
   - `unsure`: saffron, eyes to the side
   - `fits`: mint, eyes forward
   - `nope`: tomato, eyes down
