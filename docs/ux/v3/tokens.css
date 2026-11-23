@@ -1,0 +1,55 @@
+/*
+  Design v3 tokens (FEAT-65). Add to apps/web/src/app/globals.css under the existing
+  tokens. Nothing here replaces an existing token: --ok, --caution, --stop and their
+  -soft tints stay for text and tints everywhere else.
+
+  Contrast is measured against the value each token is used on (WCAG 2.2).
+  Fills always carry --fill-ink text: 9.9 on ok, 10.7 on caution, 5.6 on stop.
+*/
+
+:root {
+  /* Ground of the moment and the unfolded detail. Same in light and dark:
+     the moment is a night scene by design, the bands carry the colour. */
+  --moment-ground: #141210;
+  --moment-ink: #f5efe4;        /* 16.3 on ground */
+  --moment-muted: #cfc6b6;      /* 11.0 on ground */
+
+  /* Solid verdict fills. Text on them is always --fill-ink. */
+  --ok-fill: #3dd68c;
+  --caution-fill: #ffb800;
+  --stop-fill: #ff4e2e;
+  --fill-ink: #17130f;
+
+  /* The unlit band: data nobody has measured. */
+  --unknown-edge: #80756a;      /* 4.2 on ground; a UI edge needs 3 */
+  --unknown-hatch: rgb(255 255 255 / 0.04);
+
+  /* Light-theme drench grounds, for the screens that stay light (device, saved, report). */
+  --drench-paper: #fff8ee;
+  --drench-fog: #e9e2d5;
+  --drench-fog-ink: #4d463b;    /* 8.0 on fog */
+
+  /* Type. Swap --font-display to var(--font-sans) to drop Bricolage in one line. */
+  --font-display: "Bricolage Grotesque", var(--font-sans);
+
+  /* Shape. */
+  --band-radius: 16px;
+  --band-gap: 6px;
+  --band-gutter: 12px;
+  --go-radius: 18px;
+
+  /* Motion (see the handoff's motion table). */
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-hop: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-unfold: 700ms;
+  --dur-band: 600ms;
+  --stagger-band: 60ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-unfold: 1ms;
+    --dur-band: 1ms;
+    --stagger-band: 0ms;
+  }
+}
