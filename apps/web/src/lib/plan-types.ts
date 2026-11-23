@@ -60,6 +60,8 @@ export interface PlannedRoute {
   bands: { bin: number; coords: [number, number][] }[];
   /** "On this route" (D-067): blocked, slower and worth knowing, each with its label, source and date. */
   onRoute: OnRouteItem[];
+  /** Design v3 (FEAT-66): the route as street bands, one per stretch in travel order. The closest route of a "none" result ends on the blocked band. */
+  streetBands?: import("./street-bands").StreetBand[];
 }
 
 /**
