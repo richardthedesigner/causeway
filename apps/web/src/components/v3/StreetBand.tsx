@@ -51,6 +51,12 @@ function Aside({ band, unit }: { band: Band; unit: DistanceUnit }) {
  *   with its icon where the distance would be.
  * - Ride: no verdict fill, a bus icon and "Ride".
  *
+ * `stone`: the stone lands on this band (the unfolded route, FEAT-68). An
+ * unlit band already keeps room for it on its right. Any other band gets a
+ * perch on its top edge at the right, with room above it, so the stone sits on
+ * the band and covers none of its words. Either way the box the stone fits in
+ * is marked `data-stone-target`, to be measured after layout.
+ *
  * A screen reader hears one sentence for the band (`bandLabel`). With
  * `onFocusBand` the band is a button: focusing or pressing it hands back the
  * stretch's edges, to light it on the map. Without it, or with no edges to
@@ -58,8 +64,9 @@ function Aside({ band, unit }: { band: Band; unit: DistanceUnit }) {
  *
  * @public Used on its own by the unfolded route (FEAT-68); until then only through the list.
  */
-export function StreetBand({ band, verdict, unit = "kmh", onFocusBand }: { band: Band; verdict: BandVerdict; unit?: DistanceUnit; onFocusBand?: (edgeIds: number[]) => void }) {
+export function StreetBand({ band, verdict, unit = "kmh", onFocusBand, stone = false }: { band: Band; verdict: BandVerdict; unit?: DistanceUnit; onFocusBand?: (edgeIds: number[]) => void; stone?: boolean }) {
   const unknown = band.state === "unknown";
+  const perch = stone && !unknown;
   const className = cn(styles.band, styles[band.state]);
   const body = (
     <>
@@ -69,11 +76,12 @@ export function StreetBand({ band, verdict, unit = "kmh", onFocusBand }: { band:
         <span className="mt-0.5 block text-sm leading-snug break-words">{band.condition}</span>
         {unknown ? <Aside band={band} unit={unit} /> : null}
       </span>
-      {unknown ? <span aria-hidden data-stone-slot className={styles.slot} /> : <span aria-hidden className="contents"><Aside band={band} unit={unit} /></span>}
+      {unknown ? <span aria-hidden data-stone-slot data-stone-target={stone ? "" : undefined} className={styles.slot} /> : <span aria-hidden className="contents"><Aside band={band} unit={unit} /></span>}
+      {perch ? <span aria-hidden data-stone-target className={styles.perch} /> : null}
     </>
   );
   return (
-    <li data-band-state={band.state} data-verdict={verdict}>
+    <li data-band-state={band.state} data-verdict={verdict} className={perch ? styles.perched : undefined}>
       {onFocusBand && band.edgeIds.length ? (
         <button type="button" className={className} onFocus={() => onFocusBand(band.edgeIds)} onClick={() => onFocusBand(band.edgeIds)}>
           {body}
@@ -91,12 +99,15 @@ export function StreetBandList({
   verdict,
   unit = "kmh",
   onFocusBand,
+  stoneAt = null,
   className,
 }: {
   bands: Band[];
   verdict: BandVerdict;
   unit?: DistanceUnit;
   onFocusBand?: (edgeIds: number[]) => void;
+  /** The band the stone lands on, by its place in the list (`stoneTarget`). */
+  stoneAt?: number | null;
   className?: string;
 }) {
   return (
@@ -104,7 +115,7 @@ export function StreetBandList({
     <ol role="list" aria-label="The way, street by street" className={cn("m-0 flex list-none flex-col gap-[var(--band-gap)] px-[var(--band-gutter)] py-0", className)}>
       {bands.map((band, i) => (
         // The same street can come up more than once, so the place in the list is the key.
-        <StreetBand key={i} band={band} verdict={verdict} unit={unit} onFocusBand={onFocusBand} />
+        <StreetBand key={i} band={band} verdict={verdict} unit={unit} onFocusBand={onFocusBand} stone={i === stoneAt} />
       ))}
     </ol>
   );

@@ -2,6 +2,7 @@
 import { ArrowUpDown, CircleAlert, CircleCheck, CircleHelp, CircleX, Copy, DoorOpen, Info, ListChecks, ListOrdered, MapPin, MessageSquarePlus, Mountain, Share2, Toilet, Trees, Undo2 } from "lucide-react";
 import { entranceRef, notesForEntrance, notesForPlace, notesForStretch, type UserNote } from "@causeway/graph";
 import { distanceUnit, formatDistance, type DistanceUnit, type Profile } from "@causeway/profile";
+import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { BusDepartures } from "@/components/BusDepartures";
@@ -27,6 +28,11 @@ import { liveFailedLine } from "@/lib/live-status";
 import type { FlagReason } from "@/lib/sync";
 import { cn } from "@/lib/utils";
 import { AtAGlance, jumpTo, More, Section, ShortList, type Fact } from "@/components/RouteFacts";
+import { designV3 } from "@/lib/design-flag";
+
+// Design v3 (FEAT-68): fetched only once the flag is known to be on, so with it off no v3 code, face or stone is asked for.
+const RouteUnfold = dynamic(() => import("@/components/v3/RouteUnfold").then((m) => m.RouteUnfold), { ssr: false });
+const RouteBands = dynamic(() => import("@/components/v3/RouteUnfold").then((m) => m.RouteBands), { ssr: false });
 
 interface Props {
   from: Place;
@@ -93,6 +99,8 @@ interface Props {
   onGoClosest: (p: Place) => void;
   /** Phones: Start sits in a bar pinned to the bottom of the screen, in reach at any sheet height. */
   pinActions?: boolean;
+  /** Open the sheet to 94% (design v3: the moment and the unfolded way). */
+  onSheetFull?: () => void;
 }
 
 const groundWord = (c: Conditions) => (c.ice ? "icy ground" : c.wet ? "wet ground" : "dry ground");
@@ -130,6 +138,11 @@ export function RoutePanel(props: Props) {
   useEffect(() => {
     if (ready && parseFloat(getComputedStyle(document.documentElement).fontSize) >= 20) card.current?.scrollIntoView({ block: "start" });
   }, [ready, to.id]);
+  // Design v3 (FEAT-68): read after mount, as the export never knows it (design-flag.ts). Phones (`pinActions`) get the
+  // moment and the unfolded way in place of the route card; the docked panel keeps its card, with the bands in it.
+  const [v3, setV3] = useState(false);
+  useEffect(() => setV3(designV3()), []);
+  const v3Route = v3 && !!props.pinActions && !props.locating && (result?.status === "none" || (result?.status === "ok" && !!sel));
   const { notes, author, builtAt } = props;
   const stretches = sel?.stretches ?? [];
   const unknownNames = new Set(sel?.unknowns.map((u) => u.name) ?? []);
@@ -216,6 +229,58 @@ export function RoutePanel(props: Props) {
 
   return (
     <div className="grid grid-cols-1 gap-[min(0.75rem,12px)] [&>*]:min-w-0">
+      {v3Route && result ? (
+        <RouteUnfold
+          result={result}
+          route={result.status === "ok" ? (sel ?? null) : result.closest}
+          to={to.name}
+          title={result.status === "ok" ? selTitle?.title || "Best for you" : ""}
+          unit={unit}
+          fromId={from.id}
+          toId={to.id}
+          planning={planning}
+          onStart={props.onStart}
+          onSheetFull={props.onSheetFull}
+          others={others.map((o) => ({ id: o.r.id, title: o.title || "Another way", minutes: Math.round(o.r.summary.minutes), meta: meta(o.r, unit), verdict: o.r.summary.verdict }))}
+          onSelect={onSelect}
+          lines={
+            result.status === "ok" && sel ? (
+              <>
+                {liveFailed ? <p className="m-0 text-sm text-caution">{liveFailed}</p> : null}
+                {cardLines.map((l) => (
+                  <p key={l} className="m-0 text-sm text-muted">
+                    {l}
+                  </p>
+                ))}
+                <ArrivalHours hours={to.hours} minutes={sel.summary.minutes} leave={conditions.leaveAt ?? null} />
+                {props.compare && props.compare.label !== props.forLabel ? (
+                  <p className={cn("m-0 font-bold", props.compare.minutes === null || Math.round(sel.summary.minutes) < props.compare.minutes ? "text-ok" : "text-ink")}>{compareLine(Math.round(sel.summary.minutes), props.compare)}</p>
+                ) : null}
+                {/* The best route's headline says what it goes round, as the note does; another way's trade-off says why it's there. */}
+                {why && sel.id !== result.routes[0]?.id ? <p className="m-0">{why}</p> : null}
+                {extras(sel, unit).length ? <p className="m-0 text-sm text-muted">{extras(sel, unit).join(" · ")}</p> : null}
+                {result.door ? (
+                  <p className="m-0 flex items-start gap-1.5 text-sm">
+                    <DoorOpen aria-hidden className="mt-0.5 size-4 shrink-0" />
+                    Ends at {result.door.name ? `the ${result.door.name} entrance` : "an entrance"} that fits you ({result.door.detail}).
+                  </p>
+                ) : null}
+                {result.gate ? (
+                  <p className="m-0 flex items-start gap-1.5 text-sm">
+                    <Trees aria-hidden className="mt-0.5 size-4 shrink-0" />
+                    Ends at a gate into {result.gate.park}, the nearest on your way (OS Open Greenspace).
+                  </p>
+                ) : null}
+              </>
+            ) : null
+          }
+          whatYouCanDo={
+            result.status === "none" ? (
+              <NoFit v3 unit={unit} result={result} to={to} forLabel={props.forLabel} alternatives={props.alternatives ?? []} onUseForTrip={props.onUseForTrip} onAllowOnce={props.onAllowOnce} onGoClosest={props.onGoClosest} onOpenMode={props.onOpenMode} />
+            ) : null
+          }
+        />
+      ) : null}
       {/* Journey: two rows, swap on the side. Tap either to change it. */}
       <section aria-label="Journey" className="flex items-stretch gap-1">
         <div className="grid min-w-0 flex-1">
@@ -279,12 +344,13 @@ export function RoutePanel(props: Props) {
         </p>
       ) : null}
 
-      {result?.status === "none" ? (
+      {result?.status === "none" && !v3Route ? (
         <NoFit unit={unit} result={result} to={to} forLabel={props.forLabel} alternatives={props.alternatives ?? []} onUseForTrip={props.onUseForTrip} onAllowOnce={props.onAllowOnce} onGoClosest={props.onGoClosest} onOpenMode={props.onOpenMode} />
       ) : null}
 
       {result?.status === "ok" && sel ? (
         <>
+          {v3Route ? null : (
           <section ref={card} aria-labelledby="route-h" aria-live="polite" className="grid gap-3 rounded-[20px] border-2 border-ink p-4" data-route-card>
             <h2 id="route-h" className="sr-only">
               {selTitle?.title || "Best for you"}
@@ -305,7 +371,7 @@ export function RoutePanel(props: Props) {
               </p>
             ) : null}
             <ArrivalHours hours={to.hours} minutes={sel.summary.minutes} leave={conditions.leaveAt ?? null} />
-            <RouteStrip strip={sel.strip} unit={unit} />
+            {v3 ? <RouteBands result={result} route={sel} unit={unit} /> : <RouteStrip strip={sel.strip} unit={unit} />}
             {props.compare && props.compare.label !== props.forLabel ? (
               <p className={cn("m-0 font-bold", props.compare.minutes === null || Math.round(sel.summary.minutes) < props.compare.minutes ? "text-ok" : "text-ink")}>{compareLine(Math.round(sel.summary.minutes), props.compare)}</p>
             ) : null}
@@ -331,8 +397,9 @@ export function RoutePanel(props: Props) {
             ))}
             {planning ? <p className="m-0 text-sm text-muted">Updating…</p> : null}
           </section>
+          )}
 
-          {others.length ? (
+          {others.length && !v3Route ? (
             <ul aria-label="Other ways" className="m-0 grid list-none gap-2 p-0">
               {others.map((o) => (
                 <li key={o.r.id}>
@@ -369,9 +436,12 @@ export function RoutePanel(props: Props) {
           {(() => {
             const actions = (
               <div className="flex gap-2 [&>*]:min-h-[min(3.5rem,64px)]">
+                {/* Design v3: GO, in the way's own bar at the bottom of the screen, starts the route. */}
+                {v3Route ? null : (
                 <Button variant="primary" size="lg" onClick={props.onStart} className="min-w-0 flex-1 rounded-2xl">
                   Start
                 </Button>
+                )}
                 <Button size="lg" onClick={() => props.onAddNote(choices)} disabled={!choices.length} aria-label="Add a note about this route" className="w-[56px] shrink-0 rounded-2xl px-0">
                   <MessageSquarePlus aria-hidden className="size-6" />
                 </Button>
@@ -379,7 +449,7 @@ export function RoutePanel(props: Props) {
               </div>
             );
             // The sheet is transformed while it snaps, so a fixed bar has to live outside it.
-            return props.pinActions && typeof document !== "undefined"
+            return props.pinActions && !v3Route && typeof document !== "undefined"
               ? createPortal(
                   <div className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-surface px-4 pt-[12px] pb-[calc(12px+env(safe-area-inset-bottom,0px))] shadow-[0_-4px_20px_rgb(0_0_0/0.08)]">{actions}</div>,
                   document.body,
@@ -540,13 +610,26 @@ export function RoutePanel(props: Props) {
  * Nothing fits. Say what's in the way, then what you can do: go as close as
  * you can, or stretch a limit for this journey only. Never a dead end (D-035).
  */
-function NoFit({ unit, result, to, forLabel, alternatives, onUseForTrip, onAllowOnce, onGoClosest, onOpenMode }: { unit: DistanceUnit; result: Extract<PlanResult, { status: "none" }>; to: Place; forLabel?: string; alternatives: NonNullable<Props["alternatives"]>; onUseForTrip?: (id: string) => void; onAllowOnce: Props["onAllowOnce"]; onGoClosest: Props["onGoClosest"]; onOpenMode: () => void }) {
+function NoFit({ unit, result, to, forLabel, alternatives, onUseForTrip, onAllowOnce, onGoClosest, onOpenMode, v3 = false }: { unit: DistanceUnit; result: Extract<PlanResult, { status: "none" }>; to: Place; forLabel?: string; alternatives: NonNullable<Props["alternatives"]>; onUseForTrip?: (id: string) => void; onAllowOnce: Props["onAllowOnce"]; onGoClosest: Props["onGoClosest"]; onOpenMode: () => void; v3?: boolean }) {
   const b = result.blockers;
   const dist = (m: number) => formatDistance(m, unit);
   const named = b.slice(0, 2).map((x) => `${x.detail} on ${x.name}`);
   const cl = result.closest;
   return (
-    <section aria-live="polite" aria-labelledby="nofit-h" className="grid gap-3">
+    <section aria-live="polite" aria-labelledby={v3 ? "nofit-what" : "nofit-h"} className="grid gap-3">
+      {/* Design v3: the word, the flag and the sentence above already say it doesn't fit; what's in the way stays. */}
+      {v3 ? (
+        <p className="m-0">
+          {named.length ? (
+            <>
+              In the way: <span className="font-bold">{named.join(", then ")}</span>
+              {b.length > 2 ? ` and ${b.length - 2} more` : ""}. Marked on the map.
+            </>
+          ) : (
+            <>Your start and {to.name} aren&apos;t joined up in our map data.</>
+          )}
+        </p>
+      ) : (
       <div className="grid gap-1 rounded-[20px] bg-stop-soft p-4">
         <h2 id="nofit-h" className="m-0 flex items-center gap-2 text-lg font-bold text-stop">
           <CircleX aria-hidden className="size-6 shrink-0" /> {forLabel ? `No route for ${forLabel}` : result.message}
@@ -560,7 +643,8 @@ function NoFit({ unit, result, to, forLabel, alternatives, onUseForTrip, onAllow
           <p className="m-0">Your start and {to.name} aren&apos;t joined up in our map data.</p>
         )}
       </div>
-      <h3 className="m-0 font-mono text-xs tracking-[0.08em] text-muted uppercase">What you can do</h3>
+      )}
+      <h3 id={v3 ? "nofit-what" : undefined} className={v3 ? "m-0 font-[family-name:var(--font-display)] text-lg font-bold" : "m-0 font-mono text-xs tracking-[0.08em] text-muted uppercase"}>What you can do</h3>
       {onUseForTrip
         ? alternatives.map((a) => (
             <button key={a.id} type="button" onClick={() => onUseForTrip(a.id)} className="grid gap-1 rounded-2xl border-2 border-line p-4 text-left hover:border-ink">
@@ -585,7 +669,7 @@ function NoFit({ unit, result, to, forLabel, alternatives, onUseForTrip, onAllow
           <span className="text-sm text-muted">
             {cl.name}, {dist(cl.leftM)} from {to.name}. {Math.round(cl.summary.minutes)} min.
           </span>
-          <RouteStrip strip={cl.strip} unit={unit} className="my-1" />
+          {v3 ? null : <RouteStrip strip={cl.strip} unit={unit} className="my-1" />}
           <span className="font-bold text-accent">Show this route</span>
         </button>
       ) : null}
