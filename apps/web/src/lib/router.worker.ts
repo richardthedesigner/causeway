@@ -32,6 +32,7 @@ import {
 } from "@causeway/router";
 import type { Check, Place, PlannedRoute, PlanResult, RouteStrip, WorkerRequest, WorkerResponse } from "./plan-types";
 import { parkGates, type GreenspaceFile } from "./greenspace";
+import { streetBands } from "./street-bands";
 import { doorFirst } from "./destination";
 import { osmNoteItems, type OsmNotesFile } from "./osm-notes";
 
@@ -253,6 +254,7 @@ function toPlanned(r: Route, start: Parameters<typeof elevationProfile>[1], id: 
     unknowns,
     busLegs,
     stretches: stretchesOf(r),
+    streetBands: streetBands(r),
     id,
     label,
     coords: toGeoJSON(r).geometry.coordinates,
@@ -394,7 +396,7 @@ function plan(req: Extract<WorkerRequest, { type: "plan" }>): PlanResult {
       // Only closures in the way: it's today, not the person's limits (D-061).
       message: d.blockers.length ? (d.blockers.every((x) => x.attr === "live") ? "No way there right now" : "No way there fits your limits") : "We couldn't find a way there",
       blockers: d.blockers,
-      closest: cl && planned ? { ...planned, name: cl.name, leftM: cl.leftM, end: planned.coords[planned.coords.length - 1]! } : null,
+      closest: cl && planned ? { ...planned, streetBands: streetBands(cl.route, d.blockers[0]), name: cl.name, leftM: cl.leftM, end: planned.coords[planned.coords.length - 1]! } : null,
       relax: d.relax ? { patch: d.relax.patch, what: d.relax.what, minutes: Math.round(d.relax.route.seconds / 60) } : null,
     };
   }

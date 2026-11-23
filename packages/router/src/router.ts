@@ -516,7 +516,7 @@ export function summarise(r: Route, now: Date = DRY.now): RouteSummary {
     }
     const surf = isKnown(a.surface) ? surfaceLabel(a.surface.value) : "unknown";
     surfaceMix[surf] = (surfaceMix[surf] ?? 0) + L;
-    if (s.eval.passable === "unknown" || s.nodeEval.passable === "unknown") unknownM += L;
+    if (hasCriticalUnknown(s)) unknownM += L;
     confSum += L * ((confidence(a.incline, now) + confidence(a.surface, now) + confidence(a.width, now)) / 3);
     if (s.edge.kind === "elevator" || s.node.kind === "elevator") lifts++;
     if (s.edge.kind === "steps") steps++;
@@ -565,6 +565,12 @@ export function elevationProfile(r: Route, start: GraphNode): { d: number; z: nu
 }
 
 const RAIL: ReadonlySet<string> = new Set(["transit", "board", "interchange"]);
+
+/** A ride (bus, tram, train): not ground you cover yourself, so it counts towards neither `walkM` nor `unknownM`. */
+export const isRideKind = (kind: string): boolean => RAIL.has(kind);
+
+/** The test behind `summary.unknownM`: the step's ground, or the node it ends at, has a critical unknown. Shared with the street bands (FEAT-66). */
+export const hasCriticalUnknown = (s: { eval: Pick<Evaluation, "passable">; nodeEval: Pick<Evaluation, "passable"> }): boolean => s.eval.passable === "unknown" || s.nodeEval.passable === "unknown";
 
 /** Train legs: board (forward), one or more rides, alight (backward). */
 function ridesOf(r: Route): { line: string; from: string; to: string; stops: number }[] {

@@ -1,0 +1,1337 @@
+{
+ "note": "Written by scripts/street-bands-fixture.ts from the real router. Do not edit by hand: run `pnpm tsx scripts/street-bands-fixture.ts`.",
+ "journey": {
+  "from": {
+   "name": "Warrender Park Road",
+   "lon": -3.2022101,
+   "lat": 55.9373203
+  },
+  "to": {
+   "name": "Grassmarket",
+   "lon": -3.196,
+   "lat": 55.9476
+  },
+  "preset": "manual-wheelchair",
+  "area": "edinburgh-central",
+  "now": "2026-10-05T12:00:00.000Z"
+ },
+ "summary": {
+  "minutes": 41.1,
+  "distanceM": 2441,
+  "ascentM": 5.3,
+  "descentM": 5,
+  "worstInclinePct": 7.1,
+  "worstInclineAt": "West Bow",
+  "surfaceMix": {
+   "tarmac": 308,
+   "paving slabs": 175,
+   "setts": 57
+  },
+  "kerbs": {
+   "lowered": 0,
+   "flush": 0,
+   "raised": 0,
+   "unknown": 0
+  },
+  "steps": 0,
+  "lifts": 0,
+  "unknownM": 175,
+  "confidence": 0.47,
+  "movableBridges": [],
+  "walkM": 540,
+  "rides": [
+   {
+    "line": "23 bus towards Lennox Row",
+    "from": "Viewforth",
+    "stops": 5,
+    "to": "Forrest Road"
+   },
+   {
+    "line": "2 bus towards Hermiston Gait Retail Park",
+    "from": "Forrest Road",
+    "stops": 1,
+    "to": "Grassmarket"
+   }
+  ],
+  "verdict": "passable-with-unknowns"
+ },
+ "steps": [
+  {
+   "edge": {
+    "id": 6245,
+    "name": "Whitehouse Loan",
+    "kind": "footway",
+    "lengthM": 6.410285260357459,
+    "attrs": {
+     "incline": {
+      "value": 2.3,
+      "state": "inferred",
+      "source": "lidar-scotland",
+      "observedAt": "2022-07-06T00:00:00Z"
+     },
+     "inclineMax": {
+      "value": 2.3,
+      "state": "inferred",
+      "source": "lidar-scotland",
+      "observedAt": "2022-07-06T00:00:00Z"
+     },
+     "surface": {
+      "value": "asphalt",
+      "state": "reported",
+      "source": "osm",
+      "observedAt": "2021-10-29T20:34:27Z"
+     }
+    }
+   },
+   "forward": false,
+   "eval": {
+    "passable": "yes"
+   },
+   "nodeEval": {
+    "passable": "yes"
+   }
+  },
+  {
+   "edge": {
+    "id": 1502,
+    "name": "Eric Liddell Way",
+    "kind": "footway",
+    "lengthM": 160.54867525897532,
+    "attrs": {
+     "incline": {
+      "value": -1.5,
+      "state": "inferred",
+      "source": "lidar-scotland",
+      "observedAt": "2022-07-06T00:00:00Z"
+     },
+     "inclineMax": {
+      "value": -3.1,
+      "state": "inferred",
+      "source": "lidar-scotland",
+      "observedAt": "2022-07-06T00:00:00Z"
+     },
+     "surface": {
+      "value": "asphalt",
+      "state": "reported",
+      "source": "osm",
+      "observedAt": "2024-04-29T10:50:11Z"
+     }
+    }
+   },
+   "forward": false,
+   "eval": {
+    "passable": "yes"
+   },
+   "nodeEval": {
+    "passable": "yes"
+   }
+  },
+  {
+   "edge": {
+    "id": 1501,
+    "name": "Eric Liddell Way",
+    "kind": "footway",
+    "lengthM": 5.13668690925353,
+    "attrs": {
+     "incline": {
+      "value": -1.4,
+      "state": "inferred",
+      "source": "lidar-scotland",
+      "observedAt": "2022-07-06T00:00:00Z"
+     },
+     "inclineMax": {
+      "value": -1.4,
+      "state": "inferred",
+      "source": "lidar-scotland",
+      "observedAt": "2022-07-06T00:00:00Z"
+     },
+     "surface": {
+      "value": "asphalt",
+      "state": "reported",
+      "source": "osm",
+      "observedAt": "2024-04-29T10:50:11Z"
+     }
+    }
+   },
+   "forward": false,
+   "eval": {
+    "passable": "yes"
+   },
+   "nodeEval": {
+    "passable": "yes"
+   }
+  },
+  {
+   "edge": {
+    "id": 1500,
+    "name": "Eric Liddell Way",
+    "kind": "footway",
+    "lengthM": 11.910155372498872,
+    "attrs": {
+     "incline": {
+      "value": 0.6,
+      "state": "inferred",
+      "source": "lidar-scotland",
+      "observedAt": "2022-07-06T00:00:00Z"
+     },
+     "inclineMax": {
+      "value": 0.8,
+      "state": "inferred",
+      "source": "lidar-scotland",
+      "observedAt": "2022-07-06T00:00:00Z"
+     },
+     "surface": {
+      "value": "asphalt",
+      "state": "reported",
+      "source": "osm",
+      "observedAt": "2024-04-29T10:50:11Z"
+     }
+    }
+   },
+   "forward": false,
+   "eval": {
+    "passable": "yes"
+   },
+   "nodeEval": {
+    "passable": "yes"
+   }
+  },
+  {
+   "edge": {
+    "id": 445,
+    "name": "Bruntsfield Terrace",
+    "kind": "street_proxy",
+    "lengthM": 62.82821602742793,
+    "attrs": {
+     "incline": {
+      "value": -0.1,
+      "state": "inferred",
+      "source": "lidar-scotland",
+      "observedAt": "2022-07-06T00:00:00Z"
+     },
+     "inclineMax": {
+      "value": -0.8,
+      "state": "inferred",
+      "source": "lidar-scotland",
+      "observedAt": "2022-07-06T00:00:00Z"
+     },
+     "surface": {
+      "value": "asphalt",
+      "state": "inferred",
+      "source": "council",
+      "observedAt": "2026-10-01"
+     }
+    }
+   },
+   "forward": true,
+   "eval": {
+    "passable": "unknown"
+   },
+   "nodeEval": {
+    "passable": "yes"
+   }
+  },
+  {
+   "edge": {
+    "id": 446,
+    "name": "Bruntsfield Terrace",
+    "kind": "street_proxy",
+    "lengthM": 42.198206914267274,
+    "attrs": {
+     "incline": {
+      "value": -0.8,
+      "state": "inferred",
+      "source": "lidar-scotland",
+      "observedAt": "2022-07-06T00:00:00Z"
+     },
+     "inclineMax": {
+      "value": -1.9,
+      "state": "inferred",
+      "source": "lidar-scotland",
+      "observedAt": "2022-07-06T00:00:00Z"
+     },
+     "surface": {
+      "value": "asphalt",
+      "state": "inferred",
+      "source": "council",
+      "observedAt": "2026-10-01"
+     }
+    }
+   },
+   "forward": true,
+   "eval": {
+    "passable": "unknown"
+   },
+   "nodeEval": {
+    "passable": "yes"
+   }
+  },
+  {
+   "edge": {
+    "id": 447,
+    "name": "Bruntsfield Terrace",
+    "kind": "street_proxy",
+    "lengthM": 8.674951011351551,
+    "attrs": {
+     "incline": {
+      "value": -1.2,
+      "state": "inferred",
+      "source": "lidar-scotland",
+      "observedAt": "2022-07-06T00:00:00Z"
+     },
+     "inclineMax": {
+      "value": -1.2,
+      "state": "inferred",
+      "source": "lidar-scotland",
+      "observedAt": "2022-07-06T00:00:00Z"
+     },
+     "surface": {
+      "value": "paving_stones",
+      "state": "inferred",
+      "source": "council",
+      "observedAt": "2026-10-01"
+     }
+    }
+   },
+   "forward": true,
+   "eval": {
+    "passable": "unknown"
+   },
+   "nodeEval": {
+    "passable": "yes"
+   }
+  },
+  {
+   "edge": {
+    "id": 34999,
+    "name": "Viewforth",
+    "kind": "station_link",
+    "lengthM": 19.17059892980187,
+    "attrs": {
+     "incline": {
+      "value": -1.2,
+      "state": "inferred",
+      "source": "lidar-scotland",
+      "observedAt": "2022-07-06T00:00:00Z"
+     },
+     "inclineMax": {
+      "value": -1.2,
+      "state": "inferred",
+      "source": "lidar-scotland",
+      "observedAt": "2022-07-06T00:00:00Z"
+     },
+     "surface": {
+      "value": "asphalt",
+      "state": "inferred",
+      "source": "osm",
+      "observedAt": "2024-08-04T12:10:32Z"
+     }
+    }
+   },
+   "forward": true,
+   "eval": {
+    "passable": "yes"
+   },
+   "nodeEval": {
+    "passable": "yes"
+   }
+  },
+  {
+   "edge": {
+    "id": 38139,
+    "name": "Viewforth, 23 bus towards Lennox Row",
+    "kind": "board",
+    "lengthM": 0,
+    "service": {
+     "mode": "bus",
+     "route": "23",
+     "headsign": "Lennox Row",
+     "operator": "Lothian Buses"
+    },
+    "attrs": {
+     "incline": {
+      "value": 0,
+      "state": "inferred",
+      "source": "derived",
+      "observedAt": null
+     },
+     "inclineMax": {
+      "value": 0,
+      "state": "inferred",
+      "source": "derived",
+      "observedAt": null
+     },
+     "surface": {
+      "value": "other",
+      "state": "inferred",
+      "source": "derived",
+      "observedAt": null
+     }
+    }
+   },
+   "forward": true,
+   "eval": {
+    "passable": "yes"
+   },
+   "nodeEval": {
+    "passable": "yes"
+   }
+  },
+  {
+   "edge": {
+    "id": 38142,
+    "name": "23 bus towards Lennox Row",
+    "kind": "transit",
+    "lengthM": 343.685275738124,
+    "service": {
+     "mode": "bus",
+     "route": "23",
+     "headsign": "Lennox Row",
+     "operator": "Lothian Buses"
+    },
+    "attrs": {
+     "incline": {
+      "value": 0,
+      "state": "inferred",
+      "source": "derived",
+      "observedAt": null
+     },
+     "inclineMax": {
+      "value": 0,
+      "state": "inferred",
+      "source": "derived",
+      "observedAt": null
+     },
+     "surface": {
+      "value": "other",
+      "state": "inferred",
+      "source": "derived",
+      "observedAt": null
+     }
+    }
+   },
+   "forward": true,
+   "eval": {
+    "passable": "yes"
+   },
+   "nodeEval": {
+    "passable": "yes"
+   }
+  },
+  {
+   "edge": {
+    "id": 38144,
+    "name": "23 bus towards Lennox Row",
+    "kind": "transit",
+    "lengthM": 352.5644741795715,
+    "service": {
+     "mode": "bus",
+     "route": "23",
+     "headsign": "Lennox Row",
+     "operator": "Lothian Buses"
+    },
+    "attrs": {
+     "incline": {
+      "value": 0,
+      "state": "inferred",
+      "source": "derived",
+      "observedAt": null
+     },
+     "inclineMax": {
+      "value": 0,
+      "state": "inferred",
+      "source": "derived",
+      "observedAt": null
+     },
+     "surface": {
+      "value": "other",
+      "state": "inferred",
+      "source": "derived",
+      "observedAt": null
+     }
+    }
+   },
+   "forward": true,
+   "eval": {
+    "passable": "yes"
+   },
+   "nodeEval": {
+    "passable": "yes"
+   }
+  },
+  {
+   "edge": {
+    "id": 38146,
+    "name": "23 bus towards Lennox Row",
+    "kind": "transit",
+    "lengthM": 181.8731971482005,
+    "service": {
+     "mode": "bus",
+     "route": "23",
+     "headsign": "Lennox Row",
+     "operator": "Lothian Buses"
+    },
+    "attrs": {
+     "incline": {
+      "value": 0,
+      "state": "inferred",
+      "source": "derived",
+      "observedAt": null
+     },
+     "inclineMax": {
+      "value": 0,
+      "state": "inferred",
+      "source": "derived",
+      "observedAt": null
+     },
+     "surface": {
+      "value": "other",
+      "state": "inferred",
+      "source": "derived",
+      "observedAt": null
+     }
+    }
+   },
+   "forward": true,
+   "eval": {
+    "passable": "yes"
+   },
+   "nodeEval": {
+    "passable": "yes"
+   }
+  },
+  {
+   "edge": {
+    "id": 38148,
+    "name": "23 bus towards Lennox Row",
+    "kind": "transit",
+    "lengthM": 371.7376868841915,
+    "service": {
+     "mode": "bus",
+     "route": "23",
+     "headsign": "Lennox Row",
+     "operator": "Lothian Buses"
+    },
+    "attrs": {
+     "incline": {
+      "value": 0,
+      "state": "inferred",
+      "source": "derived",
+      "observedAt": null
+     },
+     "inclineMax": {
+      "value": 0,
+      "state": "inferred",
+      "source": "derived",
+      "observedAt": null
+     },
+     "surface": {
+      "value": "other",
+      "state": "inferred",
+      "source": "derived",
+      "observedAt": null
+     }
+    }
+   },
+   "forward": true,
+   "eval": {
+    "passable": "yes"
+   },
+   "nodeEval": {
+    "passable": "yes"
+   }
+  },
+  {
+   "edge": {
+    "id": 38150,
+    "name": "23 bus towards Lennox Row",
+    "kind": "transit",
+    "lengthM": 364.2406099196007,
+    "service": {
+     "mode": "bus",
+     "route": "23",
+     "headsign": "Lennox Row",
+     "operator": "Lothian Buses"
+    },
+    "attrs": {
+     "incline": {
+      "value": 0,
+      "state": "inferred",
+      "source": "derived",
+      "observedAt": null
+     },
+     "inclineMax": {
+      "value": 0,
+      "state": "inferred",
+      "source": "derived",
+      "observedAt": null
+     },
+     "surface": {
+      "value": "other",
+      "state": "inferred",
+      "source": "derived",
+      "observedAt": null
+     }
+    }
+   },
+   "forward": true,
+   "eval": {
+    "passable": "yes"
+   },
+   "nodeEval": {
+    "passable": "yes"
+   }
+  },
+  {
+   "edge": {
+    "id": 38149,
+    "name": "Forrest Road, 23 bus towards Lennox Row",
+    "kind": "board",
+    "lengthM": 0,
+    "service": {
+     "mode": "bus",
+     "route": "23",
+     "headsign": "Lennox Row",
+     "operator": "Lothian Buses"
+    },
+    "attrs": {
+     "incline": {
+      "value": 0,
+      "state": "inferred",
+      "source": "derived",
+      "observedAt": null
+     },
+     "inclineMax": {
+      "value": 0,
+      "state": "inferred",
+      "source": "derived",
+      "observedAt": null
+     },
+     "surface": {
+      "value": "other",
+      "state": "inferred",
+      "source": "derived",
+      "observedAt": null
+     }
+    }
+   },
+   "forward": false,
+   "eval": {
+    "passable": "yes"
+   },
+   "nodeEval": {
+    "passable": "yes"
+   }
+  },
+  {
+   "edge": {
+    "id": 38417,
+    "name": "Forrest Road, 2 bus towards Hermiston Gait Retail Park",
+    "kind": "board",
+    "lengthM": 0,
+    "service": {
+     "mode": "bus",
+     "route": "2",
+     "headsign": "Hermiston Gait Retail Park",
+     "operator": "Lothian Buses"
+    },
+    "attrs": {
+     "incline": {
+      "value": 0,
+      "state": "inferred",
+      "source": "derived",
+      "observedAt": null
+     },
+     "inclineMax": {
+      "value": 0,
+      "state": "inferred",
+      "source": "derived",
+      "observedAt": null
+     },
+     "surface": {
+      "value": "other",
+      "state": "inferred",
+      "source": "derived",
+      "observedAt": null
+     }
+    }
+   },
+   "forward": true,
+   "eval": {
+    "passable": "yes"
+   },
+   "nodeEval": {
+    "passable": "yes"
+   }
+  },
+  {
+   "edge": {
+    "id": 38420,
+    "name": "2 bus towards Hermiston Gait Retail Park",
+    "kind": "transit",
+    "lengthM": 287.01601562035563,
+    "service": {
+     "mode": "bus",
+     "route": "2",
+     "headsign": "Hermiston Gait Retail Park",
+     "operator": "Lothian Buses"
+    },
+    "attrs": {
+     "incline": {
+      "value": 0,
+      "state": "inferred",
+      "source": "derived",
+      "observedAt": null
+     },
+     "inclineMax": {
+      "value": 0,
+      "state": "inferred",
+      "source": "derived",
+      "observedAt": null
+     },
+     "surface": {
+      "value": "other",
+      "state": "inferred",
+      "source": "derived",
+      "observedAt": null
+     }
+    }
+   },
+   "forward": true,
+   "eval": {
+    "passable": "yes"
+   },
+   "nodeEval": {
+    "passable": "yes"
+   }
+  },
+  {
+   "edge": {
+    "id": 38419,
+    "name": "Grassmarket, 2 bus towards Hermiston Gait Retail Park",
+    "kind": "board",
+    "lengthM": 0,
+    "service": {
+     "mode": "bus",
+     "route": "2",
+     "headsign": "Hermiston Gait Retail Park",
+     "operator": "Lothian Buses"
+    },
+    "attrs": {
+     "incline": {
+      "value": 0,
+      "state": "inferred",
+      "source": "derived",
+      "observedAt": null
+     },
+     "inclineMax": {
+      "value": 0,
+      "state": "inferred",
+      "source": "derived",
+      "observedAt": null
+     },
+     "surface": {
+      "value": "other",
+      "state": "inferred",
+      "source": "derived",
+      "observedAt": null
+     }
+    }
+   },
+   "forward": false,
+   "eval": {
+    "passable": "yes"
+   },
+   "nodeEval": {
+    "passable": "yes"
+   }
+  },
+  {
+   "edge": {
+    "id": 35025,
+    "name": "Grassmarket",
+    "kind": "station_link",
+    "lengthM": 3,
+    "attrs": {
+     "incline": {
+      "value": 0.6,
+      "state": "inferred",
+      "source": "lidar-scotland",
+      "observedAt": "2022-07-06T00:00:00Z"
+     },
+     "inclineMax": {
+      "value": 0.6,
+      "state": "inferred",
+      "source": "lidar-scotland",
+      "observedAt": "2022-07-06T00:00:00Z"
+     },
+     "surface": {
+      "value": "paving_stones",
+      "state": "reported",
+      "source": "osm",
+      "observedAt": "2024-06-30T14:02:56Z"
+     }
+    }
+   },
+   "forward": false,
+   "eval": {
+    "passable": "yes"
+   },
+   "nodeEval": {
+    "passable": "yes"
+   }
+  },
+  {
+   "edge": {
+    "id": 11700,
+    "name": "Gilmour's Close",
+    "kind": "footway",
+    "lengthM": 10.349001134022151,
+    "attrs": {
+     "incline": {
+      "value": 0.6,
+      "state": "inferred",
+      "source": "lidar-scotland",
+      "observedAt": "2022-07-06T00:00:00Z"
+     },
+     "inclineMax": {
+      "value": 0.6,
+      "state": "inferred",
+      "source": "lidar-scotland",
+      "observedAt": "2022-07-06T00:00:00Z"
+     },
+     "surface": {
+      "value": "paving_stones",
+      "state": "reported",
+      "source": "osm",
+      "observedAt": "2024-06-30T14:02:56Z"
+     }
+    }
+   },
+   "forward": false,
+   "eval": {
+    "passable": "yes"
+   },
+   "nodeEval": {
+    "passable": "yes"
+   }
+  },
+  {
+   "edge": {
+    "id": 49,
+    "name": "Grassmarket",
+    "kind": "street_proxy",
+    "lengthM": 44.572126410400756,
+    "attrs": {
+     "incline": {
+      "value": 2.6,
+      "state": "inferred",
+      "source": "lidar-scotland",
+      "observedAt": "2022-07-06T00:00:00Z"
+     },
+     "inclineMax": {
+      "value": 3,
+      "state": "inferred",
+      "source": "lidar-scotland",
+      "observedAt": "2022-07-06T00:00:00Z"
+     },
+     "surface": {
+      "value": "paving_stones",
+      "state": "inferred",
+      "source": "council",
+      "observedAt": "2026-10-01"
+     }
+    }
+   },
+   "forward": true,
+   "eval": {
+    "passable": "unknown"
+   },
+   "nodeEval": {
+    "passable": "yes"
+   }
+  },
+  {
+   "edge": {
+    "id": 50,
+    "name": "Grassmarket",
+    "kind": "street_proxy",
+    "lengthM": 16.388826831833967,
+    "attrs": {
+     "incline": {
+      "value": 2.1,
+      "state": "inferred",
+      "source": "lidar-scotland",
+      "observedAt": "2022-07-06T00:00:00Z"
+     },
+     "inclineMax": {
+      "value": 2.1,
+      "state": "inferred",
+      "source": "lidar-scotland",
+      "observedAt": "2022-07-06T00:00:00Z"
+     },
+     "surface": {
+      "value": "paving_stones",
+      "state": "inferred",
+      "source": "council",
+      "observedAt": "2026-10-01"
+     }
+    }
+   },
+   "forward": true,
+   "eval": {
+    "passable": "unknown"
+   },
+   "nodeEval": {
+    "passable": "yes"
+   }
+  },
+  {
+   "edge": {
+    "id": 27254,
+    "name": "West Bow",
+    "kind": "pedestrian",
+    "lengthM": 4.429463804958229,
+    "attrs": {
+     "incline": {
+      "value": 7.1,
+      "state": "inferred",
+      "source": "lidar-scotland",
+      "observedAt": "2022-07-06T00:00:00Z"
+     },
+     "inclineMax": {
+      "value": 7.1,
+      "state": "inferred",
+      "source": "lidar-scotland",
+      "observedAt": "2022-07-06T00:00:00Z"
+     },
+     "surface": {
+      "value": "sett",
+      "state": "reported",
+      "source": "osm",
+      "observedAt": "2024-11-04T19:44:51Z"
+     }
+    }
+   },
+   "forward": true,
+   "eval": {
+    "passable": "yes"
+   },
+   "nodeEval": {
+    "passable": "yes"
+   }
+  },
+  {
+   "edge": {
+    "id": 27255,
+    "name": "West Bow",
+    "kind": "pedestrian",
+    "lengthM": 8.237217876732265,
+    "attrs": {
+     "incline": {
+      "value": 6.6,
+      "state": "inferred",
+      "source": "lidar-scotland",
+      "observedAt": "2022-07-06T00:00:00Z"
+     },
+     "inclineMax": {
+      "value": 6.6,
+      "state": "inferred",
+      "source": "lidar-scotland",
+      "observedAt": "2022-07-06T00:00:00Z"
+     },
+     "surface": {
+      "value": "sett",
+      "state": "reported",
+      "source": "osm",
+      "observedAt": "2024-11-04T19:44:51Z"
+     }
+    }
+   },
+   "forward": true,
+   "eval": {
+    "passable": "yes"
+   },
+   "nodeEval": {
+    "passable": "yes"
+   }
+  },
+  {
+   "edge": {
+    "id": 175,
+    "name": "West Bow",
+    "kind": "pedestrian",
+    "lengthM": 5.9277667353891745,
+    "attrs": {
+     "incline": {
+      "value": 6.9,
+      "state": "inferred",
+      "source": "lidar-scotland",
+      "observedAt": "2022-07-06T00:00:00Z"
+     },
+     "inclineMax": {
+      "value": 6.9,
+      "state": "inferred",
+      "source": "lidar-scotland",
+      "observedAt": "2022-07-06T00:00:00Z"
+     },
+     "surface": {
+      "value": "sett",
+      "state": "reported",
+      "source": "osm",
+      "observedAt": "2025-08-10T22:03:47Z"
+     }
+    }
+   },
+   "forward": true,
+   "eval": {
+    "passable": "yes"
+   },
+   "nodeEval": {
+    "passable": "yes"
+   }
+  },
+  {
+   "edge": {
+    "id": 51,
+    "name": "Grassmarket",
+    "kind": "pedestrian",
+    "lengthM": 9.471223839753035,
+    "attrs": {
+     "incline": {
+      "value": -0.5,
+      "state": "inferred",
+      "source": "lidar-scotland",
+      "observedAt": "2022-07-06T00:00:00Z"
+     },
+     "inclineMax": {
+      "value": -0.5,
+      "state": "inferred",
+      "source": "lidar-scotland",
+      "observedAt": "2022-07-06T00:00:00Z"
+     },
+     "surface": {
+      "value": "sett",
+      "state": "reported",
+      "source": "osm",
+      "observedAt": "2025-08-10T22:09:34Z"
+     }
+    }
+   },
+   "forward": true,
+   "eval": {
+    "passable": "yes"
+   },
+   "nodeEval": {
+    "passable": "yes"
+   }
+  },
+  {
+   "edge": {
+    "id": 52,
+    "name": "Grassmarket",
+    "kind": "pedestrian",
+    "lengthM": 7.303575017733394,
+    "attrs": {
+     "incline": {
+      "value": -1.7,
+      "state": "inferred",
+      "source": "lidar-scotland",
+      "observedAt": "2022-07-06T00:00:00Z"
+     },
+     "inclineMax": {
+      "value": -1.7,
+      "state": "inferred",
+      "source": "lidar-scotland",
+      "observedAt": "2022-07-06T00:00:00Z"
+     },
+     "surface": {
+      "value": "sett",
+      "state": "reported",
+      "source": "osm",
+      "observedAt": "2025-08-10T22:09:34Z"
+     }
+    }
+   },
+   "forward": true,
+   "eval": {
+    "passable": "yes"
+   },
+   "nodeEval": {
+    "passable": "yes"
+   }
+  },
+  {
+   "edge": {
+    "id": 53,
+    "name": "Grassmarket",
+    "kind": "pedestrian",
+    "lengthM": 21.241657849612547,
+    "attrs": {
+     "incline": {
+      "value": -3.8,
+      "state": "inferred",
+      "source": "lidar-scotland",
+      "observedAt": "2022-07-06T00:00:00Z"
+     },
+     "inclineMax": {
+      "value": -4.4,
+      "state": "inferred",
+      "source": "lidar-scotland",
+      "observedAt": "2022-07-06T00:00:00Z"
+     },
+     "surface": {
+      "value": "sett",
+      "state": "reported",
+      "source": "osm",
+      "observedAt": "2025-08-10T22:09:34Z"
+     }
+    }
+   },
+   "forward": true,
+   "eval": {
+    "passable": "yes"
+   },
+   "nodeEval": {
+    "passable": "yes"
+   }
+  },
+  {
+   "edge": {
+    "id": 16459,
+    "name": "Currie's Close",
+    "kind": "footway",
+    "lengthM": 7.95680924191784,
+    "attrs": {
+     "incline": {
+      "value": -0.4,
+      "state": "inferred",
+      "source": "lidar-scotland",
+      "observedAt": "2022-07-06T00:00:00Z"
+     },
+     "inclineMax": {
+      "value": -0.4,
+      "state": "inferred",
+      "source": "lidar-scotland",
+      "observedAt": "2022-07-06T00:00:00Z"
+     },
+     "surface": {
+      "value": "paving_stones",
+      "state": "reported",
+      "source": "osm",
+      "observedAt": "2021-11-04T19:38:20Z"
+     }
+    }
+   },
+   "forward": true,
+   "eval": {
+    "passable": "yes"
+   },
+   "nodeEval": {
+    "passable": "yes"
+   }
+  },
+  {
+   "edge": {
+    "id": 13714,
+    "name": "Grassmarket",
+    "kind": "pedestrian",
+    "lengthM": 38.57110103226775,
+    "attrs": {
+     "incline": {
+      "value": 3.8,
+      "state": "inferred",
+      "source": "lidar-scotland",
+      "observedAt": "2022-07-06T00:00:00Z"
+     },
+     "inclineMax": {
+      "value": 4.4,
+      "state": "inferred",
+      "source": "lidar-scotland",
+      "observedAt": "2022-07-06T00:00:00Z"
+     },
+     "surface": {
+      "value": "paving_stones",
+      "state": "reported",
+      "source": "osm",
+      "observedAt": "2026-07-25T18:35:28Z"
+     }
+    }
+   },
+   "forward": false,
+   "eval": {
+    "passable": "yes"
+   },
+   "nodeEval": {
+    "passable": "yes"
+   }
+  },
+  {
+   "edge": {
+    "id": 13713,
+    "name": "Grassmarket",
+    "kind": "pedestrian",
+    "lengthM": 45.84789787150599,
+    "attrs": {
+     "incline": {
+      "value": 3.3,
+      "state": "inferred",
+      "source": "lidar-scotland",
+      "observedAt": "2022-07-06T00:00:00Z"
+     },
+     "inclineMax": {
+      "value": 4.6,
+      "state": "inferred",
+      "source": "lidar-scotland",
+      "observedAt": "2022-07-06T00:00:00Z"
+     },
+     "surface": {
+      "value": "paving_stones",
+      "state": "reported",
+      "source": "osm",
+      "observedAt": "2026-07-25T18:35:28Z"
+     }
+    }
+   },
+   "forward": false,
+   "eval": {
+    "passable": "yes"
+   },
+   "nodeEval": {
+    "passable": "yes"
+   }
+  }
+ ],
+ "bands": [
+  {
+   "name": "Whitehouse Loan",
+   "state": "measured",
+   "steepestPct": -2.3,
+   "condition": "Level",
+   "edgeIds": [
+    6245
+   ],
+   "m": 6
+  },
+  {
+   "name": "Eric Liddell Way",
+   "state": "measured",
+   "steepestPct": 3.1,
+   "condition": "About 3% up",
+   "edgeIds": [
+    1502,
+    1501,
+    1500
+   ],
+   "m": 178
+  },
+  {
+   "name": "Bruntsfield Terrace",
+   "state": "unknown",
+   "steepestPct": -1.9,
+   "condition": "Nobody has measured",
+   "edgeIds": [
+    445,
+    446,
+    447,
+    34999
+   ],
+   "m": 133
+  },
+  {
+   "name": "Bus 23 to Forrest Road",
+   "state": "ride",
+   "steepestPct": null,
+   "condition": "5 stops",
+   "edgeIds": [
+    38139,
+    38142,
+    38144,
+    38146,
+    38148,
+    38150,
+    38149
+   ],
+   "m": 1614
+  },
+  {
+   "name": "Bus 2 to Grassmarket",
+   "state": "ride",
+   "steepestPct": null,
+   "condition": "1 stop",
+   "edgeIds": [
+    38417,
+    38420,
+    38419
+   ],
+   "m": 287
+  },
+  {
+   "name": "Gilmour's Close",
+   "state": "measured",
+   "steepestPct": -0.6,
+   "condition": "Level",
+   "edgeIds": [
+    35025,
+    11700
+   ],
+   "m": 13
+  },
+  {
+   "name": "Grassmarket",
+   "state": "unknown",
+   "steepestPct": 3,
+   "condition": "Nobody has measured",
+   "edgeIds": [
+    49,
+    50
+   ],
+   "m": 61
+  },
+  {
+   "name": "West Bow",
+   "state": "measured",
+   "steepestPct": 7.1,
+   "condition": "Setts, about 7% up",
+   "edgeIds": [
+    27254,
+    27255,
+    175
+   ],
+   "m": 19
+  },
+  {
+   "name": "Grassmarket",
+   "state": "measured",
+   "steepestPct": -4.4,
+   "condition": "Setts, about 4% down",
+   "edgeIds": [
+    51,
+    52,
+    53
+   ],
+   "m": 38
+  },
+  {
+   "name": "Currie's Close",
+   "state": "measured",
+   "steepestPct": -0.4,
+   "condition": "Level",
+   "edgeIds": [
+    16459
+   ],
+   "m": 8
+  },
+  {
+   "name": "Grassmarket",
+   "state": "measured",
+   "steepestPct": -4.6,
+   "condition": "About 5% down",
+   "edgeIds": [
+    13714,
+    13713
+   ],
+   "m": 84
+  }
+ ]
+}
