@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Causewayside route, unfolding</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,600..800&family=Atkinson+Hyperlegible+Next:wght@400;700&display=swap">
+<style>
+/* VOICE: calm first, then the detail, one screen that opens like a hand.
+   IDEA: Object's moment unfolds into Drench's working view; the stone walks to the stretch it can't vouch for.
+   PICTURE: the stone render, then verdict-coloured street bands on a dark ground.
+   COLOUR and TYPE: dark #141210, saffron #FFB800, mint #3DD68C, tomato #FF4E2E; Bricolage display, Atkinson body.
+   LAYOUT: one 390x844 phone, centred; fills the screen on a phone. */
+:root{color-scheme:dark;--bg:#0B0A09;--d:#141210;--ink:#F5EFE4;--mut:#CFC6B6;--saff:#FFB800;--mint:#3DD68C;--tom:#FF4E2E;--fog:#2A2520;
+  --e:cubic-bezier(.2,.8,.2,1);--hop:cubic-bezier(.34,1.56,.64,1);--t:.7s}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0;height:100%;background:var(--bg)}
+body{display:grid;place-items:center;font:16px/1.45 "Atkinson Hyperlegible Next",system-ui,sans-serif;color:var(--ink);overflow:hidden}
+.g{font-family:"Bricolage Grotesque",system-ui,sans-serif}
+.phone{position:relative;width:390px;height:844px;background:var(--d);border-radius:44px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.5);touch-action:none;user-select:none}
+@media(max-width:430px),(max-height:860px) and (max-width:600px){.phone{width:100vw;height:100dvh;border-radius:0}}
+@media(max-height:860px) and (min-width:601px){.phone{transform:scale(calc(100vh / 900px * 1))}}
+.abs{position:absolute;margin:0}
+.btn{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:22px;background:rgba(255,255,255,.1);border:0;color:var(--ink);cursor:pointer}
+.btn:focus-visible,.go:focus-visible,.peek:focus-visible,.band:focus-visible{outline:3px solid var(--saff);outline-offset:3px}
+.top{left:16px;right:16px;top:54px;display:flex;justify-content:space-between;z-index:5}
+/* moment layer */
+.line{left:0;right:0;top:118px;text-align:center;font-weight:700;font-size:20px;color:var(--mut);transition:opacity .35s,transform var(--t) var(--e)}
+.word{left:0;right:0;top:440px;text-align:center;font-weight:800;font-stretch:75%;font-size:112px;line-height:.9;color:var(--saff);transform-origin:20px 0;transition:transform var(--t) var(--e),opacity .4s .15s}
+.flag{left:50%;top:560px;transform:translateX(-50%);white-space:nowrap;padding:10px 18px;border-radius:999px;background:var(--saff);color:#17130F;font-weight:800;font-size:17px;transition:opacity .3s,transform var(--t) var(--e)}
+.peek{left:50%;bottom:30px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;background:none;border:0;color:var(--ink);font:700 16px "Atkinson Hyperlegible Next",sans-serif;cursor:pointer;padding:10px 20px;transition:opacity .3s}
+.peek i{width:44px;height:5px;border-radius:3px;background:var(--mut)}
+/* the stone */
+.stone{width:290px;left:50px;top:168px;z-index:4;transition:left var(--t) var(--hop),top var(--t) var(--hop),width var(--t) var(--e);pointer-events:none}
+.stone img{width:100%;display:block;animation:bob 3.2s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-8px) rotate(-1.5deg)}}
+/* detail layer */
+.head{left:20px;right:20px;top:112px;opacity:0;transform:translateY(-12px);transition:opacity .4s,transform var(--t) var(--e)}
+.head .to{font-weight:700;font-size:20px;margin:0}
+.head .n{font-weight:800;font-size:104px;letter-spacing:-.06em;line-height:.95;margin:2px 0 0}
+.head .n small{font-size:26px;letter-spacing:0;margin-left:4px}
+.pill{display:inline-block;margin-top:8px;padding:5px 14px;border-radius:999px;background:var(--saff);color:#17130F;font-weight:800;font-size:17px}
+.head .say{margin:10px 0 0;font-weight:700;font-size:20px;line-height:1.3;max-width:330px}
+.bands{left:0;right:0;top:360px;margin:0;padding:0;list-style:none}
+.band{display:flex;align-items:center;gap:12px;min-height:58px;padding:8px 18px;margin:0 12px 6px;border-radius:16px;background:var(--mint);color:#17130F;opacity:0;transform:translateY(60px);transition:opacity .35s,transform .6s var(--e)}
+.band b{display:block;font:700 18px/1.1 "Bricolage Grotesque",sans-serif}.band span{flex:1}.band em{font-style:normal;font-size:14px}
+.band strong{font:800 24px "Bricolage Grotesque",sans-serif;letter-spacing:-.02em;font-variant-numeric:tabular-nums}.band strong small{font-size:14px;margin-left:2px}
+.band.unk{height:112px;flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:2px;background:transparent;color:var(--ink);box-shadow:inset 0 0 0 2px #80756A;background-image:repeating-linear-gradient(135deg,transparent 0 10px,rgba(255,255,255,.04) 10px 20px);padding-top:12px}
+.band.unk span{flex:none}.band.unk strong{font-size:34px;color:var(--saff);line-height:1}
+.band.unk em{color:var(--saff)}
+.foot{left:0;right:0;bottom:0;padding:14px 16px 30px;display:flex;gap:12px;align-items:center;opacity:0;transform:translateY(30px);transition:opacity .35s,transform .6s var(--e)}
+.foot p{flex:1;margin:0;font-size:14px;color:var(--mut)}
+.go{width:132px;height:60px;border-radius:18px;border:0;background:var(--saff);color:#17130F;font:800 28px "Bricolage Grotesque",sans-serif;cursor:pointer}
+/* open state */
+.open .line{opacity:0;transform:translateY(-20px);transition:opacity .18s,transform .4s var(--e)}
+.open .word{transform:translate(0,-150px) scale(.16);opacity:0;transition:transform var(--t) var(--e),opacity .25s}
+.open .flag,.open .peek{opacity:0;pointer-events:none}
+.open .flag{transform:translate(-50%,40px)}
+.open .head{opacity:1;transform:none;transition-delay:.26s}
+.open .band{opacity:1;transform:none}
+.open .band:nth-child(1){transition-delay:.18s}.open .band:nth-child(2){transition-delay:.24s}.open .band:nth-child(3){transition-delay:.3s}.open .band:nth-child(4){transition-delay:.36s}.open .band:nth-child(5){transition-delay:.42s}
+.open .foot{opacity:1;transform:none;transition-delay:.5s}
+.open .stone{width:124px;left:254px;top:568px;transition:width .35s var(--e),left .7s var(--hop) .2s,top .7s var(--hop) .2s}
+.mom .band{transition-delay:0s!important}
+.mom #detail{pointer-events:none}
+@media(prefers-reduced-motion:reduce){*{transition-duration:.01s!important;transition-delay:0s!important;animation:none!important}}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body>
+<main class="phone mom" id="ph" aria-label="Route to Grassmarket">
+  <div class="abs top">
+    <button class="btn" id="back" aria-label="Back"><svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M14 4.5 7.5 11l6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <button class="btn" aria-label="Read this out"><svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M3 8.5h3.5L11 5v12l-4.5-3.5H3z" fill="currentColor"/><path d="M14.5 8a4.2 4.2 0 0 1 0 6M17 5.5a7.8 7.8 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+  </div>
+
+  <p class="abs line g">Grassmarket, 34 min</p>
+  <div class="abs stone" id="stone"><img src="stone-unsure.png" alt=""></div>
+  <h1 class="abs word g" id="word">Unsure</h1>
+  <p class="abs flag g">990 m nobody has measured</p>
+  <button class="abs peek" id="peek" aria-expanded="false" aria-controls="detail"><i aria-hidden="true"></i>Pull up for the way</button>
+
+  <section id="detail" inert aria-label="The way, street by street">
+    <div class="abs head">
+      <p class="to g">Grassmarket</p>
+      <p class="n g">34<small>min</small></p>
+      <span class="pill g">Unsure</span>
+      <p class="say g">Fine most of the way. One stretch nobody’s measured yet.</p>
+    </div>
+    <ul class="abs bands">
+      <li class="band" tabindex="-1"><span><b>Warrender Park Road</b><em>Level</em></span><strong>97<small>m</small></strong></li>
+      <li class="band" tabindex="-1"><span><b>Marchmont Road</b><em>About 5% down</em></span><strong>204<small>m</small></strong></li>
+      <li class="band" tabindex="-1"><span><b>South Meadow Walk</b><em>Level</em></span><strong>250<small>m</small></strong></li>
+      <li class="band unk" tabindex="-1"><span><b>Nine streets</b><em>Nobody has measured</em></span><strong>990<small>m</small></strong></li>
+      <li class="band" tabindex="-1"><span><b>West Port to Grassmarket</b><em>Measured, inside 8%</em></span><strong>359<small>m</small></strong></li>
+    </ul>
+    <div class="abs foot"><p>Goes round Candlemaker Row, 8.1% down. Adds 9 min.</p><button class="go" id="go">GO</button></div>
+  </section>
+  <p class="sr" aria-live="polite" id="live"></p>
+</main>
+<script>
+{
+  const ph = document.getElementById('ph'), peek = document.getElementById('peek'), live = document.getElementById('live');
+  let open = false;
+  const set = v => {
+    open = v; ph.classList.toggle('open', v); ph.classList.toggle('mom', !v);
+    peek.setAttribute('aria-expanded', String(v)); document.getElementById('detail').inert = !v;
+    live.textContent = v ? 'Showing the way, street by street.' : 'Showing the verdict.';
+    if (v) document.getElementById('go').focus({preventScroll: true}); else peek.focus({preventScroll: true});
+  };
+  peek.addEventListener('click', () => set(true));
+  document.getElementById('back').addEventListener('click', () => { if (open) set(false); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && open) set(false); });
+  // swipe up to open, down to close
+  let y0 = null;
+  ph.addEventListener('pointerdown', e => { if (e.target.closest('button')) return; y0 = e.clientY; });
+  ph.addEventListener('pointerup', e => { if (y0 === null) return; const dy = e.clientY - y0; y0 = null;
+    if (dy < -40 && !open) set(true); else if (dy > 40 && open) set(false); });
+  // autoplay for recordings: ?play
+  if (location.search.includes('play')) setTimeout(() => set(true), 1600);
+}
+</script>
+</body>
+</html>
