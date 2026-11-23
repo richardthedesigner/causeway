@@ -178,11 +178,12 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | FEAT-63 | Design v3 handoff: route moment that unfolds into street bands, with the stone | S | next | done (2026-11-23) | Claude | PR #96. [DESIGN_V3_HANDOFF.md](handoff/DESIGN_V3_HANDOFF.md), screens and prototype in [ux/v3](ux/v3/). Proposal only: changes parts of D-035 once Richard decides |
 | FEAT-64 | Build design v3, coordinator: plan, delegate FEAT-65 to FEAT-69 to sub-agents, review, merge, design review with Richard | L | next | todo | Claude | [DESIGN_V3_HANDOFF.md](handoff/DESIGN_V3_HANDOFF.md), kick-off in [DESIGN_V3_PROMPT.md](handoff/DESIGN_V3_PROMPT.md). Behind the `v3` flag; Richard says yes before it defaults on |
 | FEAT-65 | Design v3: tokens, the `v3` flag and the stone assets | S | next | done (2026-11-23) | Claude | PR #98. Handoff: Tokens, Where it lives, The stone. [tokens.css](ux/v3/tokens.css). Tokens appended to `globals.css`; `lib/design-flag.ts` (`?v3` on, `?v3=0` off); stones in `public/stone/`. Bricolage is served from our own origin, not Google Fonts |
-| FEAT-66 | Design v3: `streetBands()` in the worker, with tests | M | next | todo | Claude | Handoff: Data. Bands' metres sum to `walkM`; unknown runs merge |
+| FEAT-66 | Design v3: `streetBands()` in the worker, with tests | M | next | done (2026-11-23) | Claude | PR #99. Handoff: Data. `apps/web/src/lib/street-bands.ts` and `route-verdict.ts`; each route carries `streetBands`. Walking bands' metres sum to `walkM`; unknown runs merge; rides are their own bands. The real Grassmarket journey is two buses and Unsure. Found FEAT-71, SMALL-26. Also met STAB-23 |
 | FEAT-67 | Design v3: `Stone`, `StreetBand`, and a fill variant of `VerdictPill` | M | next | todo | Claude | Handoff: Components. After FEAT-65 |
 | FEAT-68 | Design v3: `RouteMoment` and `RouteUnfold`, wired into `RoutePanel` behind the flag | L | next | todo | Claude | Handoff: Components, Motion, Every state. After FEAT-66 and FEAT-67. Records the v3 decisions as the next D-number |
 | FEAT-69 | Design v3: accessibility, visual checks and recordings, then phase 2 rows (map, device, saved, report) | M | next | todo | Claude | Handoff: Accessibility, Checks, Phase 2. The "tell me when it's measured" alert stays out until notifications exist |
 | FEAT-70 | Design v3: the private preview build (`scripts/build-preview.sh`) copies `public/stone/`, and the stones load from a relative path there | S | next | todo | Claude | Found doing FEAT-65. The script copies named folders only, so the stones are missing from the preview. Needed before v3 is shown in a preview. With FEAT-67 |
+| FEAT-71 | Design v3: put the minutes a route adds over the direct way in `PlanResult`, so the note under the bands can say "Adds n min" | S | next | todo | Claude | Found doing FEAT-66. The handoff takes it from `minutesExtra`, which is the gap to the best route, so it is 0 on the route the note describes. The figure exists as `explain().addedMinutes` and reaches the app only inside `headline`. `noteLine` leaves the minutes out until then |
 
 ## Small features
 
@@ -210,6 +211,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | SMALL-20 | A saved place's marker can sit under the half-open sheet, out of tap range. Pan the map to bring it into view when it opens, or list saved places on the home sheet | S | later | done (2026-10-07) | Claude | PR #71. D-081. On a phone the map frames every saved place above the half-open sheet, once when it loads and again when the base map swaps in. `pnpm e2e` checks that each marker's centre is tappable |
 | SMALL-21 | Save a chosen start as a place too ("Save this place" is on the destination only) | S | later | todo | Claude | Found doing SMALL-13 |
 | SMALL-22 | Answer buttons in the report sheets (`role="radio"`) move with Tab, not the arrow keys. Use a roving tab index so a group is one Tab stop | S | later | todo | Claude | Found doing FEAT-03. `ReportSheet.tsx` `Choices`, also the note sheet |
+| SMALL-26 | The worker keeps its own copies of two router tests: the critical-unknown test in `toPlanned` (dashed line, "What we don't know") and the ride kinds (`RIDE_KINDS`). Use the router's `hasCriticalUnknown` and `isRideKind` | S | later | todo | Claude | Found doing FEAT-66, which exported both. Left alone there to keep the worker's diff small while PR #81 is open |
 
 ## Security and privacy
 
@@ -369,6 +371,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 ## Log
 
 Newest first. One line per change: date, ID, what happened, link.
+- 2026-11-23: FEAT-66 done in PR #99: `streetBands()` and the route moment's words as pure, tested functions, attached to each route in the worker as `streetBands`. Fixture from the real router: Warrender Park Road to the Grassmarket by manual wheelchair is Unsure, 175 m unknown, two buses. Added FEAT-71 and SMALL-26; met STAB-23.
 - 2026-11-23: FEAT-65 done in PR #98: the v3 tokens are in `globals.css`, the `v3` flag reader is in `lib/design-flag.ts` (nothing reads it yet), and the four stones are WebP at 2x and 3x in `public/stone/`. Bricolage Grotesque is served from our own origin. Flag off, nothing changes. Added FEAT-70, STAB-23, STAB-24, SEC-27 and SPEED-17.
 - 2026-11-23: FEAT-63 done in PR #96: design v3 handoff from Jonny ([DESIGN_V3_HANDOFF.md](handoff/DESIGN_V3_HANDOFF.md)), a route moment that unfolds into street bands, with the stone. Added FEAT-64 (coordinator) and FEAT-65 to FEAT-69 (the build), with a kick-off prompt.
 - 2026-10-09: DEP-09 and SEC-26 done: a redeploy of an already-built commit now builds, so the Supabase variables reach production; migration 0010 pins `search_path` (community reports could not save on Supabase). SEC-09 unblocked with the Turnstile site key. Added FEAT-60 to FEAT-62 for more sign-in methods. The favicon 404 from the 2026-10-05 release check was already fixed by SMALL-12.
