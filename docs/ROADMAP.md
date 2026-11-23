@@ -4,7 +4,7 @@ The one list of work for Causewayside: what's next, in what order, how big it is
 
 This file is the master copy. A read-only copy for sharing and comments lives in Google Drive: [Causewayside roadmap](https://docs.google.com/document/d/1T-RPq188B09LBahJIWPg_Hapm6m_vYbHB88pUzxJXV4/edit). Change this file, then update the Doc to match. Edits made only in the Doc are lost.
 
-Last updated: 2026-10-09.
+Last updated: 2026-11-23.
 
 - What's waiting on Richard, blocked, or a guess: [OPEN_ITEMS.md](OPEN_ITEMS.md)
 - What shipped and when: [BUILD_LOG.md](BUILD_LOG.md) and the phase reports
@@ -176,7 +176,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | FEAT-47 | Partner lists in the layer: Rainbow Mark, Safe Spaces, Ask for Angela, weekend welfare points; removal on request; 12-month expiry | L | later | blocked | Richard, Claude | D-085. Plan phase 5. Waits on written agreements |
 | FEAT-48 | "Still there?" confirmations on safer-spaces items: fixed answers, pre-moderated, pseudonymous counts, stricter confidence class | M | later | blocked | Claude | D-085. Plan phase 6. Builds on community reports (FEAT-35, D-084, PR #78) |
 | FEAT-63 | Design v3 handoff: route moment that unfolds into street bands, with the stone | S | next | done (2026-11-23) | Claude | PR #96. [DESIGN_V3_HANDOFF.md](handoff/DESIGN_V3_HANDOFF.md), screens and prototype in [ux/v3](ux/v3/). Proposal only: changes parts of D-035 once Richard decides |
-| FEAT-64 | Build design v3, coordinator: plan, delegate FEAT-65 to FEAT-69 to sub-agents, review, merge, design review with Richard | L | next | todo | Claude | [DESIGN_V3_HANDOFF.md](handoff/DESIGN_V3_HANDOFF.md), kick-off in [DESIGN_V3_PROMPT.md](handoff/DESIGN_V3_PROMPT.md). Behind the `v3` flag; Richard says yes before it defaults on |
+| FEAT-64 | Build design v3, coordinator: plan, delegate FEAT-65 to FEAT-69 to sub-agents, review, merge, design review with Richard | L | next | doing | Claude | 2026-11-23, branch `claude/modest-albattani-fs9low`. [DESIGN_V3_HANDOFF.md](handoff/DESIGN_V3_HANDOFF.md), kick-off in [DESIGN_V3_PROMPT.md](handoff/DESIGN_V3_PROMPT.md). Behind the `v3` flag; Richard says yes before it defaults on |
 | FEAT-65 | Design v3: tokens, the `v3` flag and the stone assets | S | next | todo | Claude | Handoff: Tokens, Where it lives, The stone. [tokens.css](ux/v3/tokens.css) |
 | FEAT-66 | Design v3: `streetBands()` in the worker, with tests | M | next | todo | Claude | Handoff: Data. Bands' metres sum to `walkM`; unknown runs merge |
 | FEAT-67 | Design v3: `Stone`, `StreetBand`, and a fill variant of `VerdictPill` | M | next | todo | Claude | Handoff: Components. After FEAT-65 |
