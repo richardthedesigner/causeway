@@ -499,6 +499,96 @@ for (const [scheme, size, zoom] of [["light", { width: 390, height: 844 }, false
     await page.context().close();
   }
 }
+// The route moment and the unfolded way (FEAT-68), with the flag on: Warrender Park Road to the Grassmarket on the
+// first-visit device (manual wheelchair), on the Monday lunchtime the street bands fixture uses, so the buses run.
+// axe on both states, light and dark. Reading order in the moment: word, flag, line, button. Unfolding moves focus to
+// GO and Escape folds back to the button. At 320 px with 200% text nothing runs off the side in either state.
+// With the flag off the same route asks for no stone and no display face.
+{
+  const AXE_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
+  const route = async (options, search = "?v3") => {
+    const page = await (await browser.newContext({ viewport: { width: 390, height: 844 }, ...options })).newPage();
+    watchCsp(page, csp);
+    const asked = [];
+    page.on("request", (r) => asked.push(r.url()));
+    await page.addInitScript(() => localStorage.setItem("causewayside.city.v1", "edinburgh"));
+    await page.clock.setFixedTime(new Date("2026-10-05T12:00:00Z"));
+    await page.goto(`${url}${search}`);
+    if (options.zoom) await page.addStyleTag({ content: "html { font-size: 200% !important }" });
+    await page.getByPlaceholder("Where to?").waitFor({ timeout: 60_000 });
+    await page.waitForTimeout(800);
+    await page.getByPlaceholder("Where to?").fill("Grassmarket");
+    await page.getByRole("option").first().click();
+    await page.getByPlaceholder("Where are you starting from?").fill("Warrender Park Road");
+    await page.waitForTimeout(600);
+    await page.getByRole("option").first().click();
+    return { page, asked };
+  };
+  const axe = async (page, name) => {
+    await page.addScriptTag({ content: AXE });
+    const violations = await page.evaluate(async (tags) => (await window.axe.run(document, { runOnly: { type: "tag", values: tags } })).violations.map((v) => ({ id: v.id, impact: v.impact, help: v.help, targets: v.nodes.slice(0, 3).map((n) => n.target.join(" ")) })), AXE_TAGS);
+    console.log(`${name}: ${violations.length} violation${violations.length === 1 ? "" : "s"}`);
+    for (const v of violations) {
+      console.log(`  [${v.impact}] ${v.id}: ${v.help}\n    ${v.targets.join("\n    ")}`);
+      failures.push(`${name} / ${v.id}`);
+    }
+  };
+  const offSide = (page) => page.evaluate(() => [...document.querySelectorAll("body *")].filter((e) => e.checkVisibility() && e.getBoundingClientRect().width && e.getBoundingClientRect().right > innerWidth + 1 && !e.closest(".maplibregl-map")).length);
+  for (const scheme of ["light", "dark"]) {
+    const { page } = await route({ colorScheme: scheme });
+    const problems = [];
+    await page.getByRole("heading", { level: 1, name: "Unsure" }).waitFor({ timeout: 90_000 });
+    await page.waitForTimeout(1200);
+    await axe(page, `${scheme} / v3 route moment`);
+    if (scheme === "light") {
+      const order = await page.evaluate(() => [...document.querySelectorAll("[data-v3-layer] h1, [data-v3-layer] p, [data-v3-layer] button")].filter((e) => !e.closest("[inert]")).map((e) => e.tagName + ":" + e.textContent.trim()));
+      if (!/^H1:Unsure,P:.*nobody has measured,P:Grassmarket, \d+ min,BUTTON:Pull up for the way$/.test(order.join(","))) problems.push(`moment reads "${order.join(" / ")}"`);
+    }
+    await page.getByRole("button", { name: "Pull up for the way" }).click();
+    await page.waitForTimeout(1600);
+    if (!(await page.evaluate(() => document.activeElement?.textContent === "GO"))) problems.push("unfolding does not move focus to GO");
+    if (!(await page.getByRole("status").or(page.locator("[aria-live=polite]")).filter({ hasText: "Showing the way, street by street." }).count())) problems.push("unfolding is not announced");
+    await axe(page, `${scheme} / v3 route unfolded`);
+    if (!(await page.locator('#v3-unfold ol[aria-label="The way, street by street"] [data-stone-target]').count())) problems.push("no band holds the stone");
+    await page.keyboard.press("Escape");
+    await page.waitForTimeout(900);
+    if (!(await page.evaluate(() => document.activeElement?.textContent?.trim() === "Pull up for the way"))) problems.push("Escape does not fold back to the button");
+    console.log(`${scheme} / v3 route, order and focus: ${problems.length ? problems.join("; ") : "word first, GO on unfold, Escape folds"}`);
+    for (const p of problems) failures.push(`${scheme} / v3 route / ${p}`);
+    await page.context().close();
+  }
+  {
+    const { page } = await route({ viewport: { width: 320, height: 640 }, zoom: true });
+    const problems = [];
+    await page.getByRole("heading", { level: 1, name: "Unsure" }).waitFor({ timeout: 90_000 });
+    await page.waitForTimeout(1200);
+    const moment = await offSide(page);
+    if (moment) problems.push(`moment: ${moment} element(s) run off the side`);
+    const pull = await page.getByRole("button", { name: "Pull up for the way" }).boundingBox();
+    if (!pull || pull.y + pull.height > 640) problems.push("moment: the button is out of reach");
+    await page.getByRole("button", { name: "Pull up for the way" }).click();
+    await page.waitForTimeout(1600);
+    const open = await offSide(page);
+    if (open) problems.push(`unfolded: ${open} element(s) run off the side`);
+    const wrapped = await page.evaluate(() => [...document.querySelectorAll("#v3-unfold [data-band-distance]")].filter((e) => e.getClientRects().length > 1 || e.getBoundingClientRect().height > parseFloat(getComputedStyle(e).fontSize) * 1.6).length);
+    if (wrapped) problems.push(`unfolded: ${wrapped} distance(s) wrap`);
+    console.log(`v3 route, 320 px at 200% text: ${problems.length ? problems.join("; ") : "fits in both states, the button in reach"}`);
+    for (const p of problems) failures.push(`v3 route / ${p}`);
+    await page.context().close();
+  }
+  {
+    const { page, asked } = await route({}, "");
+    await page.getByText("Why this way?").waitFor({ timeout: 90_000 });
+    await page.waitForTimeout(1000);
+    const problems = [];
+    if (await page.locator("h1:not(.sr-only), #v3-unfold").count()) problems.push("the moment shows with the flag off");
+    const v3 = asked.filter((u) => /\/stone\/|bricolage/i.test(u));
+    if (v3.length) problems.push(`asked for ${v3.join(", ")}`);
+    console.log(`v3 route, flag off: ${problems.length ? problems.join("; ") : "today's route card, no stone or display face asked for"}`);
+    for (const p of problems) failures.push(`v3 route, flag off / ${p}`);
+    await page.context().close();
+  }
+}
 await browser.close();
 server.close();
 // axe fetches the page's stylesheets itself to check them; the app never fetches the font CSS, it links it.

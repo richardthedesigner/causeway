@@ -724,6 +724,7 @@ export default function Home() {
           onAllowOnce={(patch, what) => setOnce({ patch, what })}
           onUndoOnce={() => setOnce(null)}
           pinActions={!wide && !navigating}
+          onSheetFull={() => setSnap(SNAP.full)}
           onGoClosest={(p) => {
             setTo(p);
             setOnce(null);
