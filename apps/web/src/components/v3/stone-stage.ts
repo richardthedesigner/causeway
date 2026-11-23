@@ -13,6 +13,10 @@
  * - runs at 30 frames a second for idle loops and 60 while something moves on purpose
  *   (a change of state, a tap, a hop).
  * When the last stone goes, the renderer and everything on the GPU are disposed.
+ *
+ * It gives up, and every stone shows its still image, when WebGL is missing,
+ * when the browser says WebGL would be slow (software drawing, a blocked GPU),
+ * when the context is lost, or when frames keep taking too long.
  */
 import { Color } from "three";
 import type { StoneState } from "./Stone";
@@ -22,14 +26,20 @@ import { applyPose, createStoneScene, drawRig, frame, setColour, CROP, type Rig,
 /** Device pixels per CSS pixel, at most 2: a third more pixels than this costs more than it shows on a small stone. */
 const MAX_DPR = 2;
 const IDLE_FRAME_MS = 1000 / 30;
+/** Frames slower than this, several in a row, mean this phone can't draw the stone well: show the still image instead. */
+const SLOW_MS = 50;
+const SLOW_RUN = 4;
 /** The live canvas covers the box and HEADROOM above it. */
 const LIVE = { x: CROP.x, y: CROP.y - CROP.h * HEADROOM, w: CROP.w, h: CROP.h * (1 + HEADROOM) };
 
-/** What a stone needs from the stage when WebGL fails or comes back. */
-type Listener = (ok: boolean) => void;
+/** What the stage tells each stone: drawing, the context was lost, or it gave up for being slow. */
+export type StageStatus = "ok" | "lost" | "slow";
+type Listener = (status: StageStatus) => void;
 
 let stage: StoneScene | null = null;
 let failed = false;
+let software = false;
+let slowRun = 0;
 const views = new Set<StoneView>();
 const listeners = new Set<Listener>();
 let raf = 0;
@@ -40,7 +50,7 @@ function onLost(e: Event) {
   e.preventDefault();
   failed = true;
   stop();
-  for (const l of listeners) l(false);
+  for (const l of listeners) l("lost");
 }
 function onRestored() {
   // Start again from nothing: whatever was on the GPU is gone.
@@ -49,7 +59,7 @@ function onRestored() {
   try {
     ensure();
     for (const v of views) v.rebuild();
-    for (const l of listeners) l(true);
+    for (const l of listeners) l("ok");
     wake();
   } catch {
     failed = true;
@@ -64,7 +74,8 @@ function ensure(): StoneScene {
   canvas.addEventListener("webglcontextrestored", onRestored);
   try {
     // A smaller shadow map than the stills: the stone is small on a phone, and it is drawn every frame.
-    stage = createStoneScene({ canvas, shadowSize: 1024 });
+    // Software WebGL fails here (failIfMajorPerformanceCaveat): it would block the page for the sake of a decoration.
+    stage = createStoneScene({ canvas, shadowSize: 1024, failIfMajorPerformanceCaveat: !software });
   } catch (e) {
     failed = true;
     throw e;
@@ -100,7 +111,17 @@ function tick(now: number) {
   const busy = active.some((v) => v.busy(now));
   if (busy || now - last >= IDLE_FRAME_MS - 2) {
     last = now;
+    const first = active.some((v) => !v.drawn);
+    const t0 = performance.now();
     for (const v of active) v.draw(stage, now);
+    // The first frame compiles the shaders, so it is not counted.
+    if (!first && !software) slowRun = performance.now() - t0 > SLOW_MS ? slowRun + 1 : 0;
+    if (slowRun >= SLOW_RUN) {
+      failed = true;
+      for (const l of listeners) l("slow");
+      teardown();
+      return;
+    }
   }
   raf = requestAnimationFrame(tick);
 }
@@ -119,7 +140,16 @@ export function stageReady(): boolean {
   }
 }
 
-/** Hear when the shared context is lost (false) or comes back (true). */
+/**
+ * For scripts that record the stone in headless Chromium, whose WebGL is
+ * software: start the stage anyway, and never give up for slowness.
+ */
+export function allowSoftwareWebgl() {
+  software = true;
+  failed = false;
+}
+
+/** Hear when the shared context is lost, comes back, or the stage gives up for being slow. */
 export function onStage(l: Listener): () => void {
   listeners.add(l);
   return () => listeners.delete(l);
@@ -142,6 +172,8 @@ export class StoneView {
   private colour: Color;
   private dirty = true;
   private onFirstFrame: (() => void) | null;
+  /** Has it drawn a frame yet? */
+  drawn = false;
 
   constructor(
     private canvas: HTMLCanvasElement,
@@ -178,9 +210,8 @@ export class StoneView {
     wake();
   }
 
-  setState(state: StoneState) {
+  setState(state: StoneState, now = performance.now()) {
     if (state === this.state) return;
-    const now = performance.now();
     this.morph = { from: { ...this.pose }, fromColour: this.colour.clone(), at: now };
     this.state = state;
     wake();
@@ -201,14 +232,14 @@ export class StoneView {
   }
 
   /** A tap: a small answer in the current mood. */
-  react() {
-    this.reactAt = performance.now();
+  react(now = performance.now()) {
+    this.reactAt = now;
     wake();
   }
 
   /** The hop the unfold asks for, in place. */
-  hop() {
-    this.hopStart = performance.now();
+  hop(now = performance.now()) {
+    this.hopStart = now;
     wake();
   }
 
@@ -257,11 +288,17 @@ export class StoneView {
     this.ctx.clearRect(0, 0, w, hgt);
     this.ctx.drawImage(r3.domElement, 0, H - hgt, w, hgt, 0, 0, w, hgt);
     this.dirty = false;
+    this.drawn = true;
     if (this.onFirstFrame) {
       const f = this.onFirstFrame;
       this.onFirstFrame = null;
       f();
     }
+  }
+
+  /** Draw one frame at a given time, whatever the loop is doing: for recordings. */
+  frameAt(now: number) {
+    this.draw(ensure(), now);
   }
 
   dispose() {

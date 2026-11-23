@@ -14,9 +14,10 @@ const RATIO = 550 / 676;
  * - `starting`: the still image shows while three.js loads;
  * - `live`: the 3D stone is drawing;
  * - otherwise the still image, and why: reduced motion, no WebGL, Save-Data,
- *   the WebGL context was lost, the tab is hidden, or a preview asked for it.
+ *   WebGL would be slow here, the context was lost, frames kept taking too long,
+ *   the tab is hidden, or a preview asked for it.
  */
-export type StoneLiveMode = "starting" | "live" | "reduced-motion" | "no-webgl" | "save-data" | "lost" | "hidden" | "fallback";
+export type StoneLiveMode = "starting" | "live" | "reduced-motion" | "no-webgl" | "save-data" | "lost" | "slow" | "hidden" | "fallback";
 
 /** What a parent can ask of a live stone, through `ref`. Both do nothing while the still image shows. */
 export interface StoneLiveHandle {
@@ -58,8 +59,9 @@ function saveData(): boolean {
  * swipe that starts on the stone still reaches the page.
  *
  * It shows the still image (Stone, rendered from the same poses) first, and
- * whenever live drawing is wrong or impossible: reduced motion, no WebGL, a
- * lost context, Save-Data, or a hidden tab. three.js is fetched only when the
+ * whenever live drawing is wrong or impossible: reduced motion, no WebGL or
+ * only software WebGL, a lost context, frames that keep running slow,
+ * Save-Data, or a hidden tab. three.js is fetched only when the
  * live stone is wanted.
  */
 export function StoneLive({ state, size, idle = false, className, ref, force, onModeChange }: StoneLiveProps) {
@@ -72,7 +74,7 @@ export function StoneLive({ state, size, idle = false, className, ref, force, on
   const [env, setEnv] = useState<{ reduced: boolean; saveData: boolean } | null>(null);
   const [hidden, setHidden] = useState(false);
   const [noWebgl, setNoWebgl] = useState(false);
-  const [lost, setLost] = useState(false);
+  const [trouble, setTrouble] = useState<"lost" | "slow" | null>(null);
   const [drawn, setDrawn] = useState(false);
 
   useEffect(() => {
@@ -99,7 +101,7 @@ export function StoneLive({ state, size, idle = false, className, ref, force, on
       .then((m) => {
         if (gone || !canvas.current) return;
         if (!m.stageReady()) return setNoWebgl(true);
-        unhear = m.onStage((ok) => setLost(!ok));
+        unhear = m.onStage((s) => setTrouble(s === "ok" ? null : s));
         const { state: s, idle: i, size: z } = latest.current;
         view.current = new m.StoneView(canvas.current, { state: s, idle: i, size: z, onFirstFrame: () => setDrawn(true) });
       })
@@ -139,8 +141,8 @@ export function StoneLive({ state, size, idle = false, className, ref, force, on
           ? "save-data"
           : noWebgl
             ? "no-webgl"
-            : lost
-              ? "lost"
+            : trouble
+              ? trouble
               : hidden
                 ? "hidden"
                 : drawn
@@ -151,7 +153,7 @@ export function StoneLive({ state, size, idle = false, className, ref, force, on
   const live = mode === "live";
   const height = Math.round(size * RATIO);
   // The still image bobs only where it stands in for good (no WebGL, Save-Data, a lost context), never while the live stone loads.
-  const settled = mode === "no-webgl" || mode === "save-data" || mode === "lost" || mode === "fallback";
+  const settled = mode === "no-webgl" || mode === "save-data" || mode === "lost" || mode === "slow" || mode === "fallback";
 
   return (
     <span ref={box} aria-hidden className={cn(styles.box, className)} style={{ width: size, height }} onPointerDown={live ? () => view.current?.react() : undefined}>

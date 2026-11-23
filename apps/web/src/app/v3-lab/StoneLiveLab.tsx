@@ -12,9 +12,10 @@ const MODE: Record<StoneLiveMode, string> = {
   starting: "the still image, while the live stone loads",
   live: "the live 3D stone",
   "reduced-motion": "the still image: reduced motion is on",
-  "no-webgl": "the still image: this browser has no WebGL",
+  "no-webgl": "the still image: this browser has no WebGL, or only a slow software one",
   "save-data": "the still image: Save-Data is on",
   lost: "the still image: the WebGL context was lost",
+  slow: "the still image: frames were taking too long on this phone",
   hidden: "the still image: the tab is hidden",
   fallback: "the still image",
 };

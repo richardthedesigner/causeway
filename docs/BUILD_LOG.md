@@ -3,6 +3,18 @@
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
 
+## 2026-11-23 (design v3: the live stone, a draft)
+
+FEAT-73 phase 1, PR #102, for Jonny and Richard to review. Richard: the stone's states relied on colour alone. Each state now has a body language that reads in a greyscale still, and motion that adds feeling on top. The word and the icon still carry the verdict; the stone stays decorative. Nothing in the app uses it yet: with the flag off nothing changes.
+- `apps/web/src/components/v3/StoneLive.tsx`: the same props as `Stone`, so one replaces the other in a line, plus a `ref` with `hop()` (700 ms in place, for the unfold to play as it moves the stone's box) and `react()`. Hidden from screen readers, never focused. A tap gets a small answer in its mood; the tap is not stopped, so a swipe still works.
+- `stone-poses.ts`: the poses, idle loops, tap answers and hop as plain numbers, with tests that each still pose differs from the others in shape, and that no idle, tap or hop moment looks more like another state than its own. Fits: tall, upright, eyes forward and wide, smiling lower lids, a breath and now and then a small bounce. Unsure: tilted and turned, eyes to one side with one lid lower, glancing side to side, a shuffle and a shrug. Doesn't fit: squashed low, slumped forward, eyes down under heavy drooping lids, a slow sigh and rarely a slow small shake. Fog: pale, half asleep, small eyes, mist at its foot, drifting, slow heavy blinks.
+- `stone-scene.ts` rebuilds Jonny's sett from `docs/ux/v3/stone/render.html` (geometry, worn surface, materials, eyes, lights, camera) and adds lids and a rig. It is framed 10% wider than the first renders, so the stone is 9% smaller in its box and has room to tilt and stretch. `stone-stage.ts` shares one WebGL renderer between every live stone, draws only stones on screen in a visible tab, at 30 frames a second idle and 60 while moving on purpose, stops when nothing moves, and disposes everything when the last stone goes.
+- Still images instead, under reduced motion, with no WebGL or only software WebGL (`failIfMajorPerformanceCaveat`), on Save-Data, after a lost context, when four frames in a row take over 50 ms, and while the tab is hidden. The image shows first while three.js loads. The four WebPs in `public/stone/` are re-rendered from the new poses by `scripts/render-stones.mjs`, so `Stone` shows them too.
+- three.js 0.170.0, as Jonny's source: 122 KB gzipped in its own chunk, plus 5 KB for the stage, fetched only when a live stone mounts. No CSP change.
+- `/v3-lab`: a "Live stone" section beside the old one: the four states, changing state, Tap and Hop, a greyscale switch, and the reduced-motion and no-WebGL previews.
+- Review pack in `docs/ux/v3/stone-live/`, made by `scripts/record-stone.mjs`: a recording, greyscale stills of the poses and of before against after, and a reduced-motion still.
+- Found: the container's WebGL is software, so the live stone's speed on a phone is unmeasured (SPEED-19).
+
 ## 2026-11-23 (design v3: stone, bands, fill pill)
 
 FEAT-67 and FEAT-70, PR #100. The pieces the route moment is built from ([handoff](handoff/DESIGN_V3_HANDOFF.md)). Nothing in the app uses them yet: with the flag off every existing screen is the same as on `main` (48 of 48 screenshots match).

@@ -44,7 +44,7 @@ import { clamp01, type Pose } from "./stone-poses";
  * same box, so it is framed 10% wider, about the same foot: the stone is drawn 9%
  * smaller and sits where it did. Every image and the live stone use this one frame.
  */
-export const FULL = 800;
+const FULL = 800;
 export const CROP = { x: 46, y: 83, w: 744, h: 605 };
 
 const EYE_X = 0.36;
@@ -159,8 +159,15 @@ export interface StoneScene {
 }
 
 /** Build the scene. Throws if WebGL can't start. */
-export function createStoneScene(opts: { canvas?: HTMLCanvasElement; shadowSize?: number; preserveDrawingBuffer?: boolean } = {}): StoneScene {
-  const renderer = new WebGLRenderer({ canvas: opts.canvas, antialias: true, alpha: true, preserveDrawingBuffer: opts.preserveDrawingBuffer ?? false, powerPreference: "low-power" });
+export function createStoneScene(opts: { canvas?: HTMLCanvasElement; shadowSize?: number; preserveDrawingBuffer?: boolean; failIfMajorPerformanceCaveat?: boolean } = {}): StoneScene {
+  const renderer = new WebGLRenderer({
+    canvas: opts.canvas,
+    antialias: true,
+    alpha: true,
+    preserveDrawingBuffer: opts.preserveDrawingBuffer ?? false,
+    powerPreference: "low-power",
+    failIfMajorPerformanceCaveat: opts.failIfMajorPerformanceCaveat ?? false,
+  });
   renderer.setPixelRatio(1);
   renderer.setClearColor(0x000000, 0);
   renderer.shadowMap.enabled = true;
