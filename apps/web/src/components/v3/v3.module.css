@@ -1,0 +1,122 @@
+/*
+  Design v3 components (FEAT-67): what Tailwind utilities can't say. Loaded only
+  with a v3 surface, so nothing here reaches a page with the flag off.
+  Tokens are in app/globals.css (FEAT-65).
+*/
+
+/* The stone. A box of its own size, so swapping state never moves the layout. */
+.stone {
+  position: relative;
+  display: block;
+  flex: none;
+  pointer-events: none;
+  user-select: none;
+}
+.stone img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Idle bob: 3.2 s, 8 px, 1.5 degrees. Only when motion is allowed. */
+@media (prefers-reduced-motion: no-preference) {
+  .bob {
+    animation: stone-bob 3.2s ease-in-out infinite;
+  }
+}
+@keyframes stone-bob {
+  50% {
+    transform: translateY(-8px) rotate(-1.5deg);
+  }
+}
+
+/*
+  Swapping state: the old stone fades out as the new one fades in, 200 ms.
+  The old one rests at opacity 0, so if animations are off it is simply gone.
+  Under reduced motion the app's global rule shortens this to an instant swap.
+*/
+.in {
+  animation: stone-in 200ms linear;
+}
+.out {
+  opacity: 0;
+  animation: stone-out 200ms linear;
+}
+@keyframes stone-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes stone-out {
+  from {
+    opacity: 1;
+  }
+}
+
+/* A band. The transparent border becomes a real edge in forced colours, where fills are dropped. */
+.band {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.75rem;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: max(3.625rem, 48px);
+  margin: 0;
+  padding: 0.5rem 1rem;
+  border: 2px solid transparent;
+  border-radius: var(--band-radius);
+  font: inherit;
+  text-align: left;
+  color: var(--fill-ink);
+}
+.measured {
+  background: var(--ok-fill);
+}
+.blocked {
+  background: var(--stop-fill);
+}
+/* A ride: not ground you cover, so no verdict fill. A quiet lift off the ground. */
+.ride {
+  background: color-mix(in srgb, var(--moment-ink) 10%, transparent);
+  color: var(--moment-ink);
+}
+/* Nobody has measured: unlit, an edge and a hatch. */
+.unknown {
+  align-items: stretch;
+  flex-wrap: nowrap;
+  min-height: 7rem;
+  padding-block: 0.75rem;
+  border-color: var(--unknown-edge);
+  background: repeating-linear-gradient(135deg, transparent 0 10px, var(--unknown-hatch) 10px 20px);
+  color: var(--caution-fill);
+}
+/*
+  Room on the right of an unlit band for the stone. Up to 124 px and never more
+  than 36% of the band. It gives way as the text grows (4 px for every px the
+  root size is over 16), down to 56 px, so large text keeps its words whole.
+*/
+.slot {
+  flex: none;
+  align-self: stretch;
+  width: clamp(56px, calc(36% - (1rem - 16px) * 4), 124px);
+}
+
+/* A band that lights its stretch on the map is a button. */
+button.band {
+  cursor: pointer;
+  appearance: none;
+}
+/*
+  Focus: a ring in the ground's ink, off the band, with the ground's own colour
+  either side of it, so it reads the same on every fill and beside every neighbour.
+*/
+button.band:focus-visible {
+  z-index: 1;
+  outline: 3px solid var(--moment-ink);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 8px var(--moment-ground);
+}

@@ -3,6 +3,18 @@
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
 
+## 2026-11-23 (design v3: stone, bands, fill pill)
+
+FEAT-67 and FEAT-70, PR #100. The pieces the route moment is built from ([handoff](handoff/DESIGN_V3_HANDOFF.md)). Nothing in the app uses them yet: with the flag off every existing screen is the same as on `main` (48 of 48 screenshots match).
+- `apps/web/src/components/v3/Stone.tsx`: the stone as a decorative image (`alt=""`, `role="presentation"`), 2x and 3x through `srcset`. It bobs (3.2 s, 8 px, 1.5 degrees) only when `idle` and motion is allowed. Changing state cross-fades in 200 ms. Under reduced motion the app's global rule makes that an instant swap.
+- `VerdictPill` (in `RouteStrip.tsx`) takes `variant="fill"`: a solid `--ok-fill`, `--caution-fill` or `--stop-fill` with `--fill-ink` text, in the display face, with the same icon and word. Without the prop it renders exactly as before.
+- `apps/web/src/components/v3/StreetBand.tsx`: `StreetBand` (an `<li>`) and `StreetBandList` (`<ol aria-label="The way, street by street">`). A measured band is `--ok-fill` whatever the route's verdict; the route's doubt is in its unlit bands. Unknown is unlit: a 2 px `--unknown-edge` edge, a hatch, the name and "Nobody has measured" in `--caution-fill`, the distance large underneath, and room on the right for the stone (`data-stone-slot`, which gives way as text grows). Blocked is `--stop-fill` with the blocker as its condition. Neither a blocker nor a ride shows a distance: in its place a blocker says "Blocked" and a ride says "Ride", each with an icon. A ride has no verdict fill.
+- Distances follow the device's unit (D-074) through `formatDistance`, and never wrap: when the text needs the width, the distance drops to its own line. A screen reader hears one sentence a band, from `bandLabel` (FEAT-66). With `onFocusBand` a band with a stretch to light is a button of 48 px or more, with a focus ring that reads on every fill.
+- `/v3-lab`: every state of the three on made-up props, labelled as fixtures, including the shapes the router really gives (rides, bands of a few metres, a street twice, no slope data, a blocker of 0 m). With the flag off it shows "Nothing here" and asks for no v3 code, stone or display face. Nothing links to it. `pnpm a11y` checks it: axe in light and dark, 320 px at 200% text, one sentence a band, and the flag off.
+- No change to `globals.css`: the v3 tokens are used as `var(--…)` and the few rules Tailwind can't say are in `components/v3/v3.module.css`, which loads only with a v3 surface.
+- FEAT-70: `scripts/build-preview.sh` copies the stones, and `Stone` asks for them by a relative path. The script had stopped working on `main` (Next 16 picks Turbopack); it now passes `--webpack`. `scripts/serve-out.mjs` serves `.webp` and `.woff2` with their types.
+- Found: a merged unknown band has no way to show its street names to someone looking (FEAT-72); the lab is not in `pnpm screenshots` because the baselines are CI's (STAB-25).
+
 ## 2026-11-23 (design v3: street bands)
 
 FEAT-66, PR #99. The data for the route moment ([handoff](handoff/DESIGN_V3_HANDOFF.md)). Nothing on screen changes: no component reads it yet, and the router's results are the same.

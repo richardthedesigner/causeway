@@ -423,6 +423,82 @@ for (const [scheme, size, zoom] of [["light", { width: 390, height: 844 }, false
   console.log(`map controls: ${problems.length ? problems.join("; ") : "reachable, and every city name fits"}`);
   for (const p of problems) failures.push(`map controls / ${p}`);
 }
+// The v3 lab (FEAT-67): every state of Stone, StreetBand and the fill pill, on fixtures, with the flag on.
+// axe in light and dark; then at 320 px with 200% text nothing runs off the side and no distance wraps;
+// each band reads as one sentence; a band that lights the map is a button of 48 px or more.
+// With the flag off the page shows nothing and asks for no stone and no display face.
+{
+  const AXE_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
+  const lab = async (options, search = "?v3") => {
+    const page = await (await browser.newContext(options)).newPage();
+    watchCsp(page, csp);
+    const asked = [];
+    page.on("request", (r) => asked.push(r.url()));
+    await page.goto(`${url}v3-lab.html${search}`);
+    return { page, asked };
+  };
+  for (const scheme of ["light", "dark"]) {
+    const { page } = await lab({ viewport: { width: 390, height: 844 }, colorScheme: scheme });
+    await page.getByRole("heading", { name: "v3 lab" }).waitFor({ timeout: 60_000 });
+    await page.waitForTimeout(500);
+    await page.addScriptTag({ content: AXE });
+    const violations = await page.evaluate(async (tags) => (await window.axe.run(document, { runOnly: { type: "tag", values: tags } })).violations.map((v) => ({ id: v.id, impact: v.impact, help: v.help, targets: v.nodes.slice(0, 3).map((n) => n.target.join(" ")) })), AXE_TAGS);
+    console.log(`${scheme} / v3 lab: ${violations.length} violation${violations.length === 1 ? "" : "s"}`);
+    for (const v of violations) {
+      console.log(`  [${v.impact}] ${v.id}: ${v.help}\n    ${v.targets.join("\n    ")}`);
+      failures.push(`${scheme} / v3 lab / ${v.id}`);
+    }
+    await page.context().close();
+  }
+  {
+    const { page } = await lab({ viewport: { width: 320, height: 640 } });
+    await page.getByRole("heading", { name: "v3 lab" }).waitFor({ timeout: 60_000 });
+    await page.addStyleTag({ content: "html { font-size: 200% !important }" });
+    await page.waitForTimeout(500);
+    const problems = await page.evaluate(() => {
+      const out = [];
+      const main = document.querySelector("main");
+      if (main.scrollWidth > main.clientWidth + 1) out.push("the page scrolls sideways");
+      const wide = [...main.querySelectorAll("*")].filter((e) => e.getBoundingClientRect().right > innerWidth + 1).length;
+      if (wide) out.push(`${wide} element(s) run off the side`);
+      const wrapped = [...main.querySelectorAll("[data-band-distance]")].filter((e) => e.getClientRects().length > 1 || e.getBoundingClientRect().height > parseFloat(getComputedStyle(e).fontSize) * 1.6).length;
+      if (wrapped) out.push(`${wrapped} distance(s) wrap`);
+      const lists = [...main.querySelectorAll('ol[aria-label="The way, street by street"]')];
+      if (!lists.length) out.push("no list of bands");
+      for (const li of lists.flatMap((l) => [...l.children])) {
+        // One sentence for screen readers; everything else in the band is hidden from them.
+        const heard = [...li.querySelectorAll("*")].filter((e) => !e.closest("[aria-hidden]") && e.children.length === 0 && e.textContent.trim());
+        if (heard.length !== 1 || !/\.$/.test(heard[0].textContent)) out.push(`a band is not read as one sentence: "${li.textContent.slice(0, 40)}"`);
+      }
+      for (const b of main.querySelectorAll("ol button")) {
+        const r = b.getBoundingClientRect();
+        if (r.height < 48 || r.width < 48) out.push(`a band button is under 48 px: "${b.textContent.slice(0, 40)}"`);
+      }
+      for (const img of main.querySelectorAll("img")) if (img.getAttribute("alt") !== "" || !img.complete || !img.naturalWidth) out.push(`a stone has a name or did not load: ${img.getAttribute("src")}`);
+      return out;
+    });
+    // A band button takes focus, shows a ring, and hands back its stretch.
+    const first = page.locator("ol button").first();
+    await first.focus();
+    if (!(await first.evaluate((el) => el.matches(":focus-visible") && parseFloat(getComputedStyle(el).outlineWidth) >= 3))) problems.push("a focused band shows no ring");
+    if (!(await page.getByRole("status").filter({ hasText: /^Would light edges \d/ }).count())) problems.push("focusing a band lights nothing");
+    console.log(`v3 lab, 320 px at 200% text: ${problems.length ? problems.join("; ") : "fits, distances whole, each band one sentence"}`);
+    for (const p of problems) failures.push(`v3 lab / ${p}`);
+    await page.context().close();
+  }
+  {
+    const { page, asked } = await lab({ viewport: { width: 390, height: 844 } }, "");
+    await page.getByRole("heading", { name: "Nothing here" }).waitFor({ timeout: 60_000 });
+    await page.waitForTimeout(500);
+    const problems = [];
+    if (await page.locator("img, ol").count()) problems.push("the lab shows with the flag off");
+    const v3 = asked.filter((u) => /\/stone\/|bricolage/i.test(u));
+    if (v3.length) problems.push(`asked for ${v3.join(", ")}`);
+    console.log(`v3 lab, flag off: ${problems.length ? problems.join("; ") : "nothing shown, no stone or display face asked for"}`);
+    for (const p of problems) failures.push(`v3 lab, flag off / ${p}`);
+    await page.context().close();
+  }
+}
 await browser.close();
 server.close();
 // axe fetches the page's stylesheets itself to check them; the app never fetches the font CSS, it links it.
