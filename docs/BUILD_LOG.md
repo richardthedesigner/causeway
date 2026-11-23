@@ -3,6 +3,15 @@
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
 
+## 2026-11-23 (design v3: street bands)
+
+FEAT-66, PR #99. The data for the route moment ([handoff](handoff/DESIGN_V3_HANDOFF.md)). Nothing on screen changes: no component reads it yet, and the router's results are the same.
+- `streetBands()` in `apps/web/src/lib/street-bands.ts`: the route as one band per stretch, in travel order. Unnamed paths, the few metres to a stop and lifts join a street. A band is unknown when more than half its metres carry a critical unknown, by the router's own test (`hasCriticalUnknown`, now exported and used by `summarise`). Unknown bands next to each other merge ("Nine streets") and keep their names. A ride is its own band ("Bus 23 to Forrest Road"). Walking bands' metres add up to `walkM` exactly.
+- The worker attaches the bands to each route as `streetBands`, one optional field. On a "none" result the closest route ends with the blocker as a last band of 0 m: the closest route stops short of the blocker, so no stretch on it holds it.
+- `apps/web/src/lib/route-verdict.ts`: the verdict word, the flag, the unfolded sentence, the note line and a band read aloud. Distances follow the device's unit (D-074).
+- A fixture from the real router: Warrender Park Road to the Grassmarket by manual wheelchair. It is Unsure, 175 m unknown of 540 m, and takes the 23 and the 2. Regenerate with `pnpm tsx scripts/street-bands-fixture.ts`.
+- Found: the note's "Adds n min" has no figure in `PlanResult` (FEAT-70); the worker's own copies of two router tests (SMALL-26); `pnpm e2e` fails on `main` in London (STAB-23).
+
 ## 2026-10-09 (sharing on production)
 
 DEP-09 and SEC-26. Sharing is set up on Supabase (`rlcppigbsggjrhkvexmb`, London) and the Vercel variables are set.
