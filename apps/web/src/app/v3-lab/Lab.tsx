@@ -6,6 +6,7 @@ import { Stone, type StoneState } from "@/components/v3/Stone";
 import { StreetBandList, type BandVerdict } from "@/components/v3/StreetBand";
 import type { StreetBand } from "@/lib/street-bands";
 import { FITS_BANDS, LONG_BANDS, NOPE_BANDS, UNSURE_BANDS } from "./fixtures";
+import { StoneLiveLab } from "./StoneLiveLab";
 
 const STATES: StoneState[] = ["fits", "unsure", "nope", "fog"];
 const DISPLAY = "font-[family-name:var(--font-display)]";
@@ -100,6 +101,8 @@ export function Lab() {
             </div>
           </div>
         </Section>
+
+        <StoneLiveLab />
 
         <Section id="lab-pill" title="VerdictPill" note="The fill variant, then today's pill unchanged on today's surface.">
           <div className="flex flex-wrap gap-2 px-4">
