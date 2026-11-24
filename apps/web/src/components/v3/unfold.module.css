@@ -36,7 +36,12 @@
   grid-template-columns: minmax(0, 1fr);
   /* Visual order. The reading order is the DOM's: word, flag, line, button. */
   grid-template-areas: "line" "stone" "word" "flag" "." "pull";
-  grid-template-rows: auto auto auto auto 1fr auto;
+  /*
+    max-content, not auto: when large text overfills the screen, an auto row
+    shrinks to its item's min-height, and the button's text spilled over the
+    flag (FEAT-69). Rows keep their content's height and the moment scrolls.
+  */
+  grid-template-rows: max-content max-content max-content max-content 1fr max-content;
   justify-items: center;
   height: 100%;
   overflow-y: auto;
@@ -109,8 +114,9 @@
   min-width: 48px;
   min-height: 48px;
   margin-top: 1.5rem;
-  padding: 0.625rem 1.25rem;
-  border: 0;
+  padding: calc(0.625rem - 2px) calc(1.25rem - 2px);
+  /* Transparent, so it shows only in forced colours, where the fill is dropped and the edge is all a button has. */
+  border: 2px solid transparent;
   border-radius: 14px;
   background: color-mix(in srgb, var(--moment-ground) 92%, transparent);
   color: var(--moment-ink);
@@ -118,6 +124,10 @@
   font-weight: 700;
   cursor: pointer;
   transition: opacity 300ms ease;
+}
+/* When the moment scrolls, words pass under the held button: hide them fully so they never show through its text. */
+.scrolls .pull {
+  background: var(--moment-ground);
 }
 .pull i {
   width: 44px;
@@ -207,8 +217,9 @@
   line-height: 0.95;
   letter-spacing: -0.06em;
 }
+/* The space before "min" is in the text, so a screen reader says "41 min", not "41min". */
 .time small {
-  margin-left: 0.25rem;
+  margin-left: 0;
   font-size: 1.625rem;
   letter-spacing: 0;
 }
@@ -311,9 +322,13 @@
   display: grid;
   flex: none;
   place-items: center;
-  width: 56px;
-  height: 56px;
-  border: 0;
+  box-sizing: border-box;
+  /* 56 px, and more as the icon grows with the text, so it never spills over the edge. */
+  min-width: 56px;
+  min-height: 56px;
+  padding: 0.25rem;
+  /* An edge in forced colours only, as on the moment's button. */
+  border: 2px solid transparent;
   border-radius: var(--go-radius);
   background: color-mix(in srgb, var(--moment-ink) 12%, transparent);
   color: var(--moment-ink);
@@ -327,7 +342,7 @@
   flex: 1;
   min-width: 0;
   min-height: 56px;
-  border: 0;
+  border: 2px solid transparent;
   border-radius: var(--go-radius);
   color: var(--fill-ink);
   font-family: var(--font-display);

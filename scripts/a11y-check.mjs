@@ -589,6 +589,182 @@ for (const [scheme, size, zoom] of [["light", { width: 390, height: 844 }, false
     await page.context().close();
   }
 }
+// Design v3 for every verdict (FEAT-69), flag on, the manual wheelchair, Monday 5 October 2026 at 12:00 UTC so the buses
+// run: Unsure (Warrender Park Road to the Grassmarket), Fits (Middle Meadow Walk to the Breakfast Bothy on Melville
+// Drive) and Doesn't fit (St Andrew Square to Advocate's Close). For each, light and dark:
+// - axe on the moment and on the unfolded way.
+// - The moment reads word (h1), flag, destination and time, button. Unfolded, the destination heads the way, then the
+//   bands, one sentence each (a merged unknown names its streets), then the bar. The hidden state is inert.
+// - The button unfolds and focus goes to GO (the destination when nothing fits); Escape folds back to the button; the
+//   bar's Back folds; a swipe up and a swipe down do the same. Both changes are announced.
+// In dark, also with reduced motion (a 200 ms cross-fade: nothing moves, no bob, no flight) and in forced colours
+// (every band and every control in the bar keeps an edge). And at 320 px with 200% text: nothing runs off the side,
+// distances whole, every v3 control 48 px or more and GO 56 px or more, the moment's button whole and in reach, and the
+// end of the way scrolls above the bar.
+{
+  const AXE_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
+  const JOURNEYS = [
+    { word: "Unsure", from: "Warrender Park Road", to: "Grassmarket", go: true },
+    { word: "Fits", from: "Middle Meadow Walk", to: "Breakfast Bothy", go: true },
+    { word: "Doesn't fit", from: "St Andrew Square", to: "Advocate's Close", go: false },
+  ];
+  const open = async (j, options) => {
+    const { zoom, ...rest } = options;
+    const page = await (await browser.newContext({ viewport: { width: 390, height: 844 }, ...rest })).newPage();
+    watchCsp(page, csp);
+    await page.addInitScript(() => localStorage.setItem("causewayside.city.v1", "edinburgh"));
+    await page.clock.setFixedTime(new Date("2026-10-05T12:00:00Z"));
+    await page.goto(`${url}?v3`);
+    if (zoom) await page.addStyleTag({ content: "html { font-size: 200% !important }" });
+    await page.getByPlaceholder("Where to?").waitFor({ timeout: 60_000 });
+    await page.waitForTimeout(800);
+    await page.getByPlaceholder("Where to?").fill(j.to);
+    await page.waitForTimeout(600);
+    await page.getByRole("option").first().click();
+    await page.getByPlaceholder("Where are you starting from?").fill(j.from);
+    await page.waitForTimeout(600);
+    await page.getByRole("option").first().click();
+    await page.getByRole("heading", { level: 1, name: j.word }).waitFor({ timeout: 90_000 });
+    await page.waitForTimeout(1200);
+    return page;
+  };
+  const axe = async (page, name) => {
+    await page.addScriptTag({ content: AXE });
+    const violations = await page.evaluate(async (tags) => (await window.axe.run(document, { runOnly: { type: "tag", values: tags } })).violations.map((v) => ({ id: v.id, impact: v.impact, help: v.help, targets: v.nodes.slice(0, 3).map((n) => n.target.join(" ")) })), AXE_TAGS);
+    console.log(`${name}: ${violations.length} violation${violations.length === 1 ? "" : "s"}`);
+    for (const v of violations) {
+      console.log(`  [${v.impact}] ${v.id}: ${v.help}\n    ${v.targets.join("\n    ")}`);
+      failures.push(`${name} / ${v.id}`);
+    }
+  };
+  const state = (page) => page.evaluate(() => document.getElementById("v3-unfold")?.dataset.state);
+  const focused = (page) => page.evaluate(() => `${document.activeElement?.tagName}:${document.activeElement?.textContent?.trim()}`);
+  const said = (page, text) => page.locator("[data-v3-layer][aria-live=polite]").filter({ hasText: text }).count();
+  const swipe = async (page, x, y, dy) => {
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    await page.mouse.move(x, y + dy, { steps: 5 });
+    await page.mouse.up();
+    await page.waitForTimeout(1500);
+  };
+  for (const j of JOURNEYS) {
+    for (const scheme of ["light", "dark"]) {
+      const page = await open(j, { colorScheme: scheme });
+      const problems = [];
+      const name = `${scheme} / v3 ${j.word}`;
+      await axe(page, `${name}, moment`);
+      const order = await page.evaluate(() => [...document.querySelectorAll("[data-v3-layer] h1, [data-v3-layer] p:not([aria-live]), [data-v3-layer] button")].filter((e) => !e.closest("[inert]") && e.checkVisibility()).map((e) => `${e.tagName}:${e.textContent.trim()}`));
+      const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      if (!new RegExp(`^H1:${esc(j.word)}\\|(P:[^|]+\\|)?P:[^|]*${esc(j.to)}[^|]*\\|BUTTON:Pull up for the way$`).test(order.join("|"))) problems.push(`moment reads "${order.join(" / ")}"`);
+      if (!(await page.evaluate(() => !!document.getElementById("v3-unfold")?.closest("[inert]")))) problems.push("the way is not inert under the moment");
+      await page.getByRole("button", { name: "Pull up for the way" }).click();
+      await page.waitForTimeout(1600);
+      const want = j.go ? "BUTTON:GO" : `H2:${j.to}`;
+      if (!(await focused(page)).startsWith(want)) problems.push(`unfolding moves focus to ${await focused(page)}`);
+      if (!(await said(page, "Showing the way, street by street."))) problems.push("unfolding is not announced");
+      if (!(await page.evaluate(() => !!document.querySelector("[data-v3-layer][class*=moment]")?.inert))) problems.push("the moment is not inert once unfolded");
+      await axe(page, `${name}, unfolded`);
+      const way = await page.evaluate(() => {
+        const s = document.getElementById("v3-unfold");
+        const first = s.querySelector("h2, ol, p");
+        const items = [...s.querySelectorAll('ol[aria-label="The way, street by street"] > li')].map((li) => {
+          // What a screen reader hears: the text outside anything aria-hidden.
+          const walk = (n) => (n.nodeType === 3 ? n.textContent : n.nodeType === 1 && n.getAttribute("aria-hidden") !== "true" ? [...n.childNodes].map(walk).join("") : "");
+          return walk(li).trim();
+        });
+        return { first: first?.tagName, items };
+      });
+      if (way.first !== "H2") problems.push("the way does not start with the destination");
+      if (!way.items.length) problems.push("no bands");
+      for (const item of way.items) {
+        const ok = /^Bus .+, \d+ stops?\.$|^Blocked: .+\.$/.test(item) || /^[^,]+, [^,]+(, [^,]+)?, [\d.,]+ (metres|kilometres|yards|miles?)\.$/.test(item) || /^\w+ streets nobody has measured, [\d.,]+ (metres|kilometres|yards|miles?): .+\.$/.test(item);
+        if (!ok) problems.push(`band reads "${item}"`);
+      }
+      await page.keyboard.press("Escape");
+      await page.waitForTimeout(1000);
+      if ((await focused(page)) !== "BUTTON:Pull up for the way") problems.push(`Escape folds to ${await focused(page)}`);
+      if (!(await said(page, "Showing the verdict."))) problems.push("folding is not announced");
+      await page.keyboard.press("Enter");
+      await page.waitForTimeout(1500);
+      if ((await state(page)) !== "open") problems.push("Enter on the button does not unfold");
+      await page.getByRole("button", { name: "Back to the verdict" }).click();
+      await page.waitForTimeout(1000);
+      if ((await state(page)) !== "moment") problems.push("Back does not fold");
+      await swipe(page, 195, 420, -80);
+      if ((await state(page)) !== "open") problems.push("a swipe up does not unfold");
+      const head = await page.locator("#v3-unfold header").boundingBox();
+      if (head) await swipe(page, head.x + head.width / 2, head.y + 20, 100);
+      if ((await state(page)) !== "moment") problems.push("a swipe down does not fold");
+      if (scheme === "dark") {
+        // Reduced motion: a 200 ms cross-fade on both states, nothing moves, no bob, no stone in flight.
+        await page.emulateMedia({ reducedMotion: "reduce" });
+        const still = () =>
+          page.evaluate(() => {
+            const parts = [...document.querySelectorAll("[data-v3-layer] h1, [data-v3-layer] p:not([aria-live]), #v3-unfold header, #v3-unfold ol > li")];
+            const moving = parts.filter((e) => getComputedStyle(e).transform !== "none" || getComputedStyle(e).transitionDuration.split(",")[0].trim() !== "0.2s");
+            const bobbing = [...document.querySelectorAll("[data-v3-layer] [class*=bob]")].filter((e) => getComputedStyle(e).animationName !== "none");
+            return moving.length + bobbing.length;
+          });
+        if (await still()) problems.push(`reduced motion, moment: ${await still()} element(s) move or don't fade in 200 ms`);
+        await page.getByRole("button", { name: "Pull up for the way" }).click();
+        await page.waitForTimeout(100);
+        if (await page.locator("[data-v3-layer][class*=flyer]").count()) problems.push("reduced motion: the stone flies");
+        await page.waitForTimeout(800);
+        if (await still()) problems.push(`reduced motion, unfolded: ${await still()} element(s) move or don't fade in 200 ms`);
+        // Forced colours: fills are dropped, so every band and every control in the bar needs an edge of its own.
+        await page.emulateMedia({ reducedMotion: "reduce", forcedColors: "active" });
+        const edgeless = await page.evaluate(() =>
+          [...document.querySelectorAll("#v3-unfold ol > li > div, #v3-unfold ol > li > button, [data-v3-layer] button, #v3-unfold button")].filter((e) => e.checkVisibility() && !e.closest("[inert]")).filter((e) => {
+            const s = getComputedStyle(e);
+            return parseFloat(s.borderTopWidth) < 1 || s.borderTopStyle === "none" || s.borderTopColor === s.backgroundColor;
+          }).map((e) => e.getAttribute("aria-label") || e.textContent.trim().slice(0, 30)),
+        );
+        if (edgeless.length) problems.push(`forced colours: no edge on ${edgeless.join(", ")}`);
+      }
+      console.log(`${name}, reading order, focus and folding: ${problems.length ? problems.join("; ") : `as the handoff says${scheme === "dark" ? ", reduced motion still, edges in forced colours" : ""}`}`);
+      for (const p of problems) failures.push(`${name} / ${p}`);
+      await page.context().close();
+    }
+    {
+      const page = await open(j, { viewport: { width: 320, height: 640 }, zoom: true });
+      const problems = [];
+      const check = (where) =>
+        page.evaluate((where) => {
+          const out = [];
+          const shown = (e) => e.checkVisibility({ opacityProperty: true, visibilityProperty: true }) && !e.closest("[inert]");
+          const off = [...document.querySelectorAll("body *")].filter((e) => shown(e) && e.getBoundingClientRect().width && e.getBoundingClientRect().right > innerWidth + 1 && !e.closest(".maplibregl-map")).length;
+          if (off) out.push(`${where}: ${off} element(s) run off the side`);
+          for (const b of document.querySelectorAll("[data-v3-layer] button, #v3-unfold button")) {
+            if (!shown(b)) continue;
+            const r = b.getBoundingClientRect();
+            const min = b.textContent.trim() === "GO" ? 56 : 48;
+            if (r.width < 48 || r.height < min) out.push(`${where}: "${b.getAttribute("aria-label") || b.textContent.trim().slice(0, 20)}" is ${Math.round(r.width)} by ${Math.round(r.height)} px`);
+            if (b.scrollHeight > b.clientHeight + 1) out.push(`${where}: "${b.getAttribute("aria-label") || b.textContent.trim().slice(0, 20)}" spills out of its box`);
+          }
+          const wrapped = [...document.querySelectorAll("#v3-unfold [data-band-distance]")].filter((e) => shown(e) && (e.getClientRects().length > 1 || e.getBoundingClientRect().height > parseFloat(getComputedStyle(e).fontSize) * 1.6)).length;
+          if (wrapped) out.push(`${where}: ${wrapped} distance(s) wrap`);
+          return out;
+        }, where);
+      problems.push(...(await check("moment")));
+      const pull = await page.getByRole("button", { name: "Pull up for the way" }).boundingBox();
+      if (!pull || pull.y < 0 || pull.y + pull.height > 640) problems.push("moment: the button is out of reach");
+      await page.getByRole("button", { name: "Pull up for the way" }).click();
+      await page.waitForTimeout(1600);
+      problems.push(...(await check("unfolded")));
+      const end = await page.evaluate(() => {
+        const sc = document.querySelector("[data-route-panel]");
+        sc.scrollTop = sc.scrollHeight;
+        const bar = [...document.querySelectorAll("[data-v3-layer]")].find((e) => /bar/.test(e.className)).getBoundingClientRect();
+        const last = [...sc.querySelectorAll("p, li, button")].filter((e) => e.checkVisibility()).at(-1).getBoundingClientRect();
+        return last.bottom <= bar.top + 1;
+      });
+      if (!end) problems.push("unfolded: the end of the way stays under the bar");
+      console.log(`v3 ${j.word}, 320 px at 200% text: ${problems.length ? problems.join("; ") : "fits in both states, every control big enough, the end clear of the bar"}`);
+      for (const p of problems) failures.push(`v3 ${j.word}, 320 px at 200% text / ${p}`);
+      await page.context().close();
+    }
+  }
+}
 await browser.close();
 server.close();
 // axe fetches the page's stylesheets itself to check them; the app never fetches the font CSS, it links it.

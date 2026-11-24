@@ -273,6 +273,31 @@ export function RouteUnfold(p: Props) {
     };
   }, []);
 
+  // Unfolded, the bar sits over the end of the sheet. Pad the list by the bar's height while it shows, so the last
+  // lines (the map's credits among them) scroll up above it, by finger or by keyboard focus (FEAT-69).
+  const bar = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const scroller = section.current?.closest<HTMLElement>("[data-route-panel]");
+    const b = bar.current;
+    if (view !== "open" || !scroller || !b) return;
+    const pad = () => {
+      scroller.style.paddingBottom = "";
+      scroller.style.scrollPaddingBottom = "";
+      const cs = getComputedStyle(scroller);
+      const [padding, scrollPadding] = [parseFloat(cs.paddingBottom) || 0, parseFloat(cs.scrollPaddingBottom) || 0];
+      scroller.style.paddingBottom = `${padding + b.offsetHeight}px`;
+      scroller.style.scrollPaddingBottom = `${scrollPadding + b.offsetHeight}px`;
+    };
+    pad();
+    const seen = new ResizeObserver(pad);
+    seen.observe(b);
+    return () => {
+      seen.disconnect();
+      scroller.style.paddingBottom = "";
+      scroller.style.scrollPaddingBottom = "";
+    };
+  }, [view]);
+
   // In the moment, everything but the moment is out of reach: the map's buttons sit under the ground.
   useLayoutEffect(() => {
     if (view !== "moment") return;
@@ -447,7 +472,7 @@ export function RouteUnfold(p: Props) {
           {result.status === "ok" && route ? (
             <p className={cn(styles.time, "tabular")}>
               {Math.round(route.summary.minutes)}
-              <small>min</small>
+              <small> min</small>
             </p>
           ) : null}
           <span ref={pill} className={styles.pill}>
@@ -516,7 +541,7 @@ export function RouteUnfold(p: Props) {
 
       {layer
         ? createPortal(
-            <div data-v3-layer="" data-state={view} inert={!open} className={styles.bar}>
+            <div ref={bar} data-v3-layer="" data-state={view} inert={!open} className={styles.bar}>
               <button type="button" onClick={fold} aria-label="Back to the verdict" title="Back" className={styles.iconBtn}>
                 <ChevronLeft aria-hidden className="size-7" strokeWidth={2.6} />
               </button>
