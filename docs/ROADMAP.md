@@ -4,7 +4,7 @@ The one list of work for Causewayside: what's next, in what order, how big it is
 
 This file is the master copy. A read-only copy for sharing and comments lives in Google Drive: [Causewayside roadmap](https://docs.google.com/document/d/1T-RPq188B09LBahJIWPg_Hapm6m_vYbHB88pUzxJXV4/edit). Change this file, then update the Doc to match. Edits made only in the Doc are lost.
 
-Last updated: 2026-11-23.
+Last updated: 2026-11-24.
 
 - What's waiting on Richard, blocked, or a guess: [OPEN_ITEMS.md](OPEN_ITEMS.md)
 - What shipped and when: [BUILD_LOG.md](BUILD_LOG.md) and the phase reports
@@ -176,7 +176,7 @@ Routes are shaped by numbers we estimated. These need disabled testers in each c
 | FEAT-47 | Partner lists in the layer: Rainbow Mark, Safe Spaces, Ask for Angela, weekend welfare points; removal on request; 12-month expiry | L | later | blocked | Richard, Claude | D-085. Plan phase 5. Waits on written agreements |
 | FEAT-48 | "Still there?" confirmations on safer-spaces items: fixed answers, pre-moderated, pseudonymous counts, stricter confidence class | M | later | blocked | Claude | D-085. Plan phase 6. Builds on community reports (FEAT-35, D-084, PR #78) |
 | FEAT-63 | Design v3 handoff: route moment that unfolds into street bands, with the stone | S | next | done (2026-11-23) | Claude | PR #96. [DESIGN_V3_HANDOFF.md](handoff/DESIGN_V3_HANDOFF.md), screens and prototype in [ux/v3](ux/v3/). Proposal only: changes parts of D-035 once Richard decides |
-| FEAT-64 | Build design v3, coordinator: plan, delegate FEAT-65 to FEAT-69 to sub-agents, review, merge, design review with Richard | L | next | doing | Claude | 2026-11-23, branch `claude/modest-albattani-fs9low`. [DESIGN_V3_HANDOFF.md](handoff/DESIGN_V3_HANDOFF.md), kick-off in [DESIGN_V3_PROMPT.md](handoff/DESIGN_V3_PROMPT.md). Behind the `v3` flag; Richard says yes before it defaults on |
+| FEAT-64 | Build design v3, coordinator: plan, delegate FEAT-65 to FEAT-69 to sub-agents, review, merge, design review with Richard | L | next | done (2026-11-24) | Claude | PR #97. Delegated FEAT-65 to FEAT-69 and FEAT-73 to sub-agents; merged #98 to #101 and #103; decisions in D-088. Richard approved the route result as built on 2026-11-24. The flag stays off by default until the whole app is in v3 (FEAT-80) |
 | FEAT-65 | Design v3: tokens, the `v3` flag and the stone assets | S | next | done (2026-11-23) | Claude | PR #98. Handoff: Tokens, Where it lives, The stone. [tokens.css](ux/v3/tokens.css). Tokens appended to `globals.css`; `lib/design-flag.ts` (`?v3` on, `?v3=0` off); stones in `public/stone/`. Bricolage is served from our own origin, not Google Fonts |
 | FEAT-66 | Design v3: `streetBands()` in the worker, with tests | M | next | done (2026-11-23) | Claude | PR #99. Handoff: Data. `apps/web/src/lib/street-bands.ts` and `route-verdict.ts`; each route carries `streetBands`. Walking bands' metres sum to `walkM`; unknown runs merge; rides are their own bands. The real Grassmarket journey is two buses and Unsure. Found FEAT-71, SMALL-26. Also met STAB-23 |
 | FEAT-67 | Design v3: `Stone`, `StreetBand`, and a fill variant of `VerdictPill` | M | next | done (2026-11-23) | Claude | PR #100. Handoff: Components. `apps/web/src/components/v3/` (`Stone`, `StreetBand`, `StreetBandList`), `VerdictPill variant="fill"`, and a test page at `/v3-lab` that shows only with the flag on. A measured band is `--ok-fill` whatever the route's verdict. Distances follow the device's unit (D-074). Did FEAT-70. Found FEAT-72, STAB-25 |
@@ -383,6 +383,7 @@ Not now, on purpose, until Richard says otherwise. Each needs a decision from hi
 ## Log
 
 Newest first. One line per change: date, ID, what happened, link.
+- 2026-11-24: FEAT-64 done in PR #97: design v3's route result built (FEAT-65 to FEAT-69, D-088) and approved by Richard as built. The flag stays off by default until FEAT-80. FEAT-73 (the expressive stone) waits on Jonny.
 - 2026-11-23: Added FEAT-80: v3 only reaches the route result, so the rest of the app goes back to Jonny for a full redesign.
 - 2026-11-23: FEAT-64: removed duplicate DEF-04 to DEF-07 rows left by a merge; kept the newest of each.
 - 2026-11-24: FEAT-69 done in PR #103: design v3 audited in the real app on three journeys (Unsure, Fits, Doesn't fit). Fixed: the moment's button lost its height at large text and its words spilled over the flag; the bar hid the end of the unfolded way; the bar's controls had no edge in forced colours; the big time read "41min". `pnpm a11y` now covers every verdict in both states, light and dark, reduced motion, forced colours and 320 px at 200% text. Recordings and stills beside the prototype in `docs/ux/v3/review/`. Flag off, all 48 screens match `main`. Added FEAT-76 to FEAT-79 (phase 2), SMALL-28 to SMALL-30, STAB-27 (real-device screen readers, Richard) and STAB-28.
