@@ -3,6 +3,12 @@
 A running record of what was built, newest first. Each entry links the decision (DECISIONS.md) and any GitHub issue that follows it up. Commit messages carry the detail; this is the map. What's still outstanding is in [OPEN_ITEMS.md](OPEN_ITEMS.md).
 
 
+## 2026-11-24 (design v3: the route result, approved)
+
+FEAT-64, PR #97. The coordinator row for design v3. Sub-agents built FEAT-65 to FEAT-69 in that order (PRs #98 to #101 and #103); each PR was reviewed against the handoff and the rejection list before merging. The decisions are D-088. Richard approved the route result as built after the design review (recordings and stills in `docs/ux/v3/review/`). The flag stays off by default.
+- **Changed along the way.** Richard asked for a stone whose states read without colour: FEAT-73, a live 3D draft, waits on Jonny (PR #102). v3 reaches only the route result, so the rest of the app went back to Jonny: FEAT-80.
+- **Tidied.** Removed duplicate DEF-04 to DEF-07 rows left by an old merge; trimmed FEAT-70's stale note.
+
 ## 2026-11-24 (design v3: accessibility, checks and the review pack)
 
 FEAT-69, PR #103. The route moment and the unfolded way ([handoff](handoff/DESIGN_V3_HANDOFF.md), D-088) checked in the built app on a 390 by 844 phone, flag on, the manual wheelchair, Monday 5 October 2026 at 12:00 UTC, on three journeys: Warrender Park Road to the Grassmarket (Unsure), Middle Meadow Walk to the Breakfast Bothy on Melville Drive (Fits), St Andrew Square to Advocate's Close (Doesn't fit). With the flag off the app is as it was: all 48 screenshots match `main`'s, captured on the same machine.

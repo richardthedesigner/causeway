@@ -1069,4 +1069,6 @@ The trade: the layer will be thin until partners agree to share their lists, sin
 
 **Since the handoff (Richard, 2026-11-23).** The stone's states must read without colour. It becomes an expressive, live 3D stone whose posture, eyes and motion carry each state, drafted by Claude and reviewed by Jonny (FEAT-73). It stays decorative.
 
+**Approved** by Richard on 2026-11-24, as built, after the design review on PR #97 ("I'm happy, move forward"). The flag stays off by default until the rest of the app is in v3 (FEAT-80).
+
 **Rejected:** controls at the top as in the prototype (D-036); a new third-party font request; inventing "Adds n min" from other fields.

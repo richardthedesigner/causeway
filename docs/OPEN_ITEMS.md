@@ -9,7 +9,8 @@ Last updated: 2026-11-24.
 | What | Why it matters | Effort | Link |
 |---|---|---|---|
 | Overturn any of the design v3 defaults if you disagree: controls at the bottom, Bricolage for display, no mono section labels on v3, the moment for new results only, Undo in, measured-stretch alert out, mint measured bands, the blocked band last, no "Adds n min" ([D-088](DECISIONS.md#d-088-design-v3-the-route-moment-behind-a-flag-on-these-defaults)) | The build starts on these defaults behind a flag; changing one later is cheap | A decision, when you like | [DESIGN_V3_HANDOFF.md](handoff/DESIGN_V3_HANDOFF.md) |
-| Watch the v3 recording on FEAT-64's PR and say yes before the flag defaults on | Nobody sees v3 until you do | 5 minutes | [DESIGN_V3_HANDOFF.md](handoff/DESIGN_V3_HANDOFF.md) |
+| Say when design v3 should default on for everyone. Recommended: once the rest of the app is in v3 (FEAT-80), so the app has one look | Until then only people who open `?v3` see it | A word, later | [D-088](DECISIONS.md#d-088-design-v3-the-route-moment-behind-a-flag-on-these-defaults) |
+| Pass the whole-app v3 brief to Jonny, then bring his handoff back to the repo (FEAT-80) | v3 reaches only the route result; the rest of the app still has the old look | Paste one prompt; later, share his files | [ROADMAP](ROADMAP.md) FEAT-76 |
 | Try design v3 with VoiceOver (iPhone, Safari) and TalkBack (Android, Chrome): the moment and the unfolded way for a route that fits, one that's unsure and one that doesn't fit (STAB-27) | Only Chromium's accessibility tree and axe were checked (FEAT-69). A real screen reader is the test that counts, and it needs a phone | About 20 minutes | [ROADMAP](ROADMAP.md) STAB-27 |
 | Enable more sign-in methods in Supabase Auth: email with our own sender, passkeys, then Apple and Google (FEAT-60 to FEAT-62) | Accounts (FEAT-27, FEAT-28, FEAT-33) need them. Not before the go-ahead on accounts (FEAT-26) | About 15 minutes each, Apple needs a developer account | [ROADMAP](ROADMAP.md) FEAT-60 |
 | Name who checks flagged community reports and photos each week (SEC-11) | Photos stay hidden and flagged reports stay down until someone looks | A decision | [BACKEND.md](BACKEND.md) |
@@ -76,6 +77,7 @@ Not now, on purpose: a phone app, whole cities, app accounts. The reports backen
 
 ## Done
 
+- 2026-11-24: Richard watched the v3 design review on PR #97 and approved the route result as built. The flag stays off by default until the whole app is in v3 (FEAT-80).
 - 2026-10-09: the Causeway Supabase project exists (`rlcppigbsggjrhkvexmb`, London) with migrations 0001 to 0010, anonymous sign-ins and the two Vercel variables. The Turnstile site key is noted on SEC-09; CAPTCHA protection stays off until the app sends a token.
 - 2026-10-08: the community reports plan landed (FEAT-35, D-084) and meets the accounts plan's contract (D-083): the Supabase anonymous user id is the contributor id, it is never shown, votes are one per contributor per report (primary key), and every vote and report carries a weight the scoring multiplies by. The weight is 1 until `contributor_weight()` exists; then the public view returns it and the thresholds are recalibrated ([plan](plans/COMMUNITY_REPORTS.md#identity-working-now-accounts-later)).
 - 2026-10-08: Richard asked for community content: public reports by category with votes and decaying confidence (FEAT-35, [D-084](DECISIONS.md#d-084-community-reports-categories-votes-and-confidence-that-decays)). That takes the reports backend (DEF-04) and crowd verification (DEF-06) off the deferred list.
